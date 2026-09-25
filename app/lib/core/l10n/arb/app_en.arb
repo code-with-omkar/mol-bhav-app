@@ -1,0 +1,470 @@
+{
+  "@@locale": "en",
+  "appTitle": "MolBhav",
+  "retry": "Retry",
+  "back": "Back",
+  "loading": "Loading",
+  "errorNetwork": "No internet connection. Check your network and try again.",
+  "errorServer": "Something went wrong on our side. Please try again.",
+  "errorSession": "Your session has expired. Please log in again.",
+  "errorUnexpected": "Something went wrong. Please try again.",
+  "taglineTranslation": "Know the value. Compare the price. Buy better.",
+  "@taglineTranslation": {
+    "description": "Translation of the Hindi brand tagline, shown under it."
+  },
+  "loginTitle": "Log in with your mobile",
+  "loginSubtitle": "We'll send a 6-digit OTP to verify your number.",
+  "mobileNumberLabel": "Mobile number",
+  "mobileNumberHint": "98765 43210",
+  "@mobileNumberHint": {
+    "description": "Placeholder showing the 5+5 digit grouping."
+  },
+  "mobileNumberInvalid": "Enter a valid 10-digit mobile number.",
+  "sendOtp": "Send OTP",
+  "appLanguage": "App language",
+  "loginPrivacyNote": "Your number is only used to sign you in.",
+  "otpTitle": "Enter the OTP",
+  "otpSentTo": "Sent to {phone}",
+  "@otpSentTo": {
+    "placeholders": {
+      "phone": {
+        "type": "String",
+        "example": "+91 98765 43210"
+      }
+    }
+  },
+  "otpChangeNumber": "Change",
+  "otpResendIn": "Resend OTP in {time}",
+  "@otpResendIn": {
+    "placeholders": {
+      "time": {
+        "type": "String",
+        "example": "00:24"
+      }
+    }
+  },
+  "otpResend": "Resend OTP",
+  "otpResent": "A new OTP has been sent.",
+  "otpVerify": "Verify & Continue",
+  "otpInvalid": "The OTP is incorrect or has expired.",
+  "otpFieldLabel": "One-time password",
+  "profileTitle": "Your business",
+  "profileStep": "Step 1 of 2 · Helps us show prices from the markets you buy in.",
+  "businessTypeLabel": "Business type",
+  "stateLabel": "State",
+  "districtLabel": "District",
+  "selectPlaceholder": "Select",
+  "selectStateFirst": "Select a state first",
+  "preferredLanguageLabel": "Preferred language",
+  "preferredLanguageHelper": "Alerts, WhatsApp messages and reports use this language.",
+  "districtsLoadError": "Couldn't load districts.",
+  "continueAction": "Continue",
+  "selectCategoryTitle": "Select Category",
+  "selectCategorySubtitle": "Choose your procurement categories to get started. You can add more later.",
+  "continueSelected": "Continue ({count} selected)",
+  "@continueSelected": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "categoryComingSoon": "Coming soon",
+  "categoriesEmpty": "No categories are available right now.",
+  "navHome": "Home",
+  "navMarkets": "Markets",
+  "navWatchlist": "Watchlist",
+  "navOpportunities": "Opportunities",
+  "navMore": "More",
+  "priceUp": "Price up",
+  "priceDown": "Price down",
+  "priceFlat": "No change",
+  "timeToday": "Today, {time}",
+  "timeYesterday": "Yesterday, {time}",
+  "timeOnDate": "{date}, {time}",
+  "updatedAt": "Updated {when}",
+  "greetingMorning": "Good Morning,",
+  "greetingAfternoon": "Good Afternoon,",
+  "greetingEvening": "Good Evening,",
+  "homeSubtitle": "Find the best buying opportunity for your business today.",
+  "homeBuyingToday": "What are you buying today?",
+  "homeTopOpportunities": "Today's Top Opportunities",
+  "viewAll": "View All",
+  "homeMyWatchlist": "My Watchlist",
+  "compareMarkets": "Compare Markets",
+  "alertsLabel": "Alerts",
+  "bestPriceIn": "Best price in {market}",
+  "homeNoOpportunity": "No new opportunities right now.",
+  "watchlistEmpty": "Your watchlist is empty.",
+  "marketComparisonTitle": "Market Comparison",
+  "share": "Share",
+  "commodityLabel": "Commodity",
+  "marketsLabel": "Markets",
+  "columnMarket": "Market",
+  "columnPricePer": "Price (₹/{unit})",
+  "columnChange": "Change",
+  "arrivals": "Arrivals {quantity}",
+  "bestMarket": "Best Market · {market}",
+  "lowerThanYourMarket": "{amount} lower than {market} (your market)",
+  "comparisonEmpty": "No prices for these markets yet.",
+  "priceTrendsTitle": "Price Trends",
+  "createAlertAction": "Create alert",
+  "trendTitle": "{commodity} — {market} (₹/{unit})",
+  "statMin": "Min",
+  "statModal": "Modal",
+  "statMax": "Max",
+  "relatedMarkets": "Related Markets",
+  "trendsEmpty": "No price history for this range.",
+  "buyingOpportunityTitle": "Buying Opportunity",
+  "editRequirement": "Edit requirement",
+  "requirementLine": "Required quantity · {quantity} · Deliver to {place}",
+  "bestPriceBadge": "Best Price",
+  "potentialDifference": "Potential Difference",
+  "differenceCaption": "on {quantity} vs. buying in {market}",
+  "howCalculated": "How we calculated this",
+  "calculationLine": "({reference} − {best}) × {quantity} = {total}. Freight and handling are not included yet.",
+  "viewSuppliers": "View {market} Suppliers",
+  "watchlistTitle": "My Watchlist",
+  "search": "Search",
+  "addItem": "Add item",
+  "filterAll": "All",
+  "alertBelow": "alert below {price}",
+  "alertAbove": "alert above {price}",
+  "alertsTitle": "Alerts",
+  "alertSettings": "Alert settings",
+  "filterPriceSignals": "Price Signals",
+  "filterOpportunities": "Opportunities",
+  "kindSignal": "Price Signal",
+  "kindOpportunity": "Opportunity",
+  "kindSpike": "Price Spike",
+  "sentOnWhatsApp": "Sent on WhatsApp",
+  "sentAsPush": "Push notification",
+  "viewOpportunity": "View Opportunity",
+  "viewDetails": "View Details",
+  "alertsEmpty": "No alerts yet.",
+  "createAlertTitle": "Create Alert",
+  "productLabel": "Product",
+  "marketLabel": "Market",
+  "notifyWhen": "Notify me when price",
+  "conditionBelow": "Drops below",
+  "conditionAbove": "Rises above",
+  "conditionPercent": "Changes by %",
+  "priceLabel": "Price",
+  "changeLabel": "Change",
+  "currentPriceIn": "Current price in {market}: {price}",
+  "sendVia": "Send alert via",
+  "pushNotification": "Push notification",
+  "whatsapp": "WhatsApp",
+  "whatsappTarget": "{phone} · in {language}",
+  "saveAlert": "Save Alert",
+  "alertSaved": "Alert saved.",
+  "costEstimatorTitle": "Cost Estimator",
+  "materialLabel": "Material",
+  "quantityLabel": "Quantity",
+  "unitLabel": "Unit",
+  "deliverToLabel": "Deliver to",
+  "estimatedCost": "Estimated cost",
+  "estimateCaption": "{quantity} {unit} × {price} (lowest benchmark, {source})",
+  "estimateSavings": "Saves {amount} vs. district average {average}. Freight, handling and GST not included.",
+  "columnSource": "Source",
+  "columnRupeePer": "₹/{unit}",
+  "saveEstimate": "Save Estimate",
+  "estimateSaved": "Estimate saved.",
+  "estimatePrompt": "Enter a quantity to see the estimated cost.",
+  "reportsTitle": "Reports",
+  "thisWeek": "This week · {range}",
+  "potentialSavingsFound": "{amount} potential savings found",
+  "weekStats": "{items} watchlist items · {alerts} alerts · {opportunities} opportunities",
+  "downloadPdf": "Download PDF ({language})",
+  "weeklySummaries": "Weekly summaries",
+  "summaryTitle": "{range} summary",
+  "summaryMeta": "PDF · {language} · {pages} pages",
+  "exportsTitle": "Exports",
+  "proBadge": "Pro",
+  "download": "Download",
+  "reportsEmpty": "No reports yet.",
+  "moreTitle": "More",
+  "molbhavPro": "MolBhav Pro",
+  "proSubtitle": "Advanced alerts, exports, 1-year history",
+  "pricePerMonth": "{price}/mo",
+  "myCategories": "My categories",
+  "languageLabel": "Language",
+  "pushNotifications": "Push notifications",
+  "whatsappAlerts": "WhatsApp alerts",
+  "helpSupport": "Help & support",
+  "logOut": "Log out",
+  "placeLine": "{district}, {state}",
+  "choosePlanTitle": "Choose your plan",
+  "currentPlan": "Current plan",
+  "perMonth": "/ month",
+  "perYear": "/ year",
+  "upgradeTo": "Upgrade to {plan}",
+  "cancelAnytime": "Cancel anytime. Prices include GST.",
+  "@timeToday": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "@timeYesterday": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "@timeOnDate": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      },
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "@updatedAt": {
+    "placeholders": {
+      "when": {
+        "type": "String"
+      }
+    }
+  },
+  "@bestPriceIn": {
+    "placeholders": {
+      "market": {
+        "type": "String"
+      }
+    }
+  },
+  "@columnPricePer": {
+    "placeholders": {
+      "unit": {
+        "type": "String"
+      }
+    }
+  },
+  "@arrivals": {
+    "placeholders": {
+      "quantity": {
+        "type": "String"
+      }
+    }
+  },
+  "@bestMarket": {
+    "placeholders": {
+      "market": {
+        "type": "String"
+      }
+    }
+  },
+  "@lowerThanYourMarket": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      },
+      "market": {
+        "type": "String"
+      }
+    }
+  },
+  "@trendTitle": {
+    "placeholders": {
+      "commodity": {
+        "type": "String"
+      },
+      "market": {
+        "type": "String"
+      },
+      "unit": {
+        "type": "String"
+      }
+    }
+  },
+  "@requirementLine": {
+    "placeholders": {
+      "quantity": {
+        "type": "String"
+      },
+      "place": {
+        "type": "String"
+      }
+    }
+  },
+  "@differenceCaption": {
+    "placeholders": {
+      "quantity": {
+        "type": "String"
+      },
+      "market": {
+        "type": "String"
+      }
+    }
+  },
+  "@calculationLine": {
+    "placeholders": {
+      "reference": {
+        "type": "String"
+      },
+      "best": {
+        "type": "String"
+      },
+      "quantity": {
+        "type": "String"
+      },
+      "total": {
+        "type": "String"
+      }
+    }
+  },
+  "@viewSuppliers": {
+    "placeholders": {
+      "market": {
+        "type": "String"
+      }
+    }
+  },
+  "@alertBelow": {
+    "placeholders": {
+      "price": {
+        "type": "String"
+      }
+    }
+  },
+  "@alertAbove": {
+    "placeholders": {
+      "price": {
+        "type": "String"
+      }
+    }
+  },
+  "@currentPriceIn": {
+    "placeholders": {
+      "market": {
+        "type": "String"
+      },
+      "price": {
+        "type": "String"
+      }
+    }
+  },
+  "@whatsappTarget": {
+    "placeholders": {
+      "phone": {
+        "type": "String"
+      },
+      "language": {
+        "type": "String"
+      }
+    }
+  },
+  "@estimateCaption": {
+    "placeholders": {
+      "quantity": {
+        "type": "String"
+      },
+      "unit": {
+        "type": "String"
+      },
+      "price": {
+        "type": "String"
+      },
+      "source": {
+        "type": "String"
+      }
+    }
+  },
+  "@estimateSavings": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      },
+      "average": {
+        "type": "String"
+      }
+    }
+  },
+  "@columnRupeePer": {
+    "placeholders": {
+      "unit": {
+        "type": "String"
+      }
+    }
+  },
+  "@thisWeek": {
+    "placeholders": {
+      "range": {
+        "type": "String"
+      }
+    }
+  },
+  "@potentialSavingsFound": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "@weekStats": {
+    "placeholders": {
+      "items": {
+        "type": "String"
+      },
+      "alerts": {
+        "type": "String"
+      },
+      "opportunities": {
+        "type": "String"
+      }
+    }
+  },
+  "@downloadPdf": {
+    "placeholders": {
+      "language": {
+        "type": "String"
+      }
+    }
+  },
+  "@summaryTitle": {
+    "placeholders": {
+      "range": {
+        "type": "String"
+      }
+    }
+  },
+  "@summaryMeta": {
+    "placeholders": {
+      "language": {
+        "type": "String"
+      },
+      "pages": {
+        "type": "String"
+      }
+    }
+  },
+  "@pricePerMonth": {
+    "placeholders": {
+      "price": {
+        "type": "String"
+      }
+    }
+  },
+  "@placeLine": {
+    "placeholders": {
+      "district": {
+        "type": "String"
+      },
+      "state": {
+        "type": "String"
+      }
+    }
+  },
+  "@upgradeTo": {
+    "placeholders": {
+      "plan": {
+        "type": "String"
+      }
+    }
+  }
+}
