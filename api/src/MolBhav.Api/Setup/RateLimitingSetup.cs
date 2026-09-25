@@ -31,6 +31,11 @@ internal static class RateLimitingSetup
                     $"otp:{ClientIp(context)}",
                     _ => FixedWindow(settings.OtpPermitLimit, TimeSpan.FromSeconds(settings.OtpWindowSeconds))));
 
+            options.AddPolicy(RateLimitPolicies.OtpVerify, context =>
+                RateLimitPartition.GetFixedWindowLimiter(
+                    $"otp-verify:{ClientIp(context)}",
+                    _ => FixedWindow(settings.OtpVerifyPermitLimit, TimeSpan.FromSeconds(settings.OtpWindowSeconds))));
+
             options.OnRejected = async (context, cancellationToken) =>
             {
                 if (context.Lease.TryGetMetadata(MetadataName.RetryAfter, out var retryAfter))

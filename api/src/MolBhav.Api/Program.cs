@@ -21,7 +21,7 @@ try
 
     builder.Services
         .AddApplication()
-        .AddInfrastructure(builder.Configuration)
+        .AddInfrastructure(builder.Configuration, builder.Environment)
         .AddPresentation(builder.Configuration);
 
     var app = builder.Build();

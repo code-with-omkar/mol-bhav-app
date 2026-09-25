@@ -87,6 +87,10 @@ public sealed class MolBhavDbContext(DbContextOptions<MolBhavDbContext> options)
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.HasDefaultSchema(Schemas.Platform);
+
+        // Trigram matching for multilingual product search (ILIKE '%term%'); pg_trgm is a trusted extension (PG13+),
+        // so the database owner can create it without superuser rights.
+        modelBuilder.HasPostgresExtension("pg_trgm");
         modelBuilder.ApplyConfigurationsFromAssembly(typeof(MolBhavDbContext).Assembly);
 
         // Domain entities receive UUIDv7 ids in their factories; the database must never generate them.

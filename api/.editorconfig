@@ -397,3 +397,8 @@ dotnet_diagnostic.CA1000.severity = none
 # IDomainEventHandler<T> is a deliberate name, not a .NET event handler delegate.
 dotnet_diagnostic.CA1711.severity = none
 csharp_style_namespace_declarations = file_scoped:warning
+
+# EF Core migrations are scaffolded code: never hand-edited, so not analysed.
+[**/Persistence/Migrations/*.cs]
+generated_code = true
+dotnet_analyzer_diagnostic.severity = none

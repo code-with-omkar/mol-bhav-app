@@ -10,6 +10,8 @@ internal sealed class RequestLanguageContext(IOptions<LocalizationSettings> sett
 {
     public string DefaultLanguage => settings.Value.DefaultLanguage;
 
+    public IReadOnlyCollection<string> SupportedLanguages => settings.Value.GetSupportedLanguages();
+
     public string CurrentLanguage
     {
         get

@@ -5,16 +5,25 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
+using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using MolBhav.Application.Abstractions.Authentication;
+using MolBhav.Application.Abstractions.Catalog;
 using MolBhav.Application.Abstractions.Data;
+using MolBhav.Application.Abstractions.Identity;
+using MolBhav.Application.Abstractions.Notifications;
 using MolBhav.Infrastructure.Authentication;
 using MolBhav.Infrastructure.Messaging;
 using MolBhav.Infrastructure.Messaging.Outbox;
+using MolBhav.Infrastructure.Notifications;
 using MolBhav.Infrastructure.Persistence;
 using MolBhav.Infrastructure.Persistence.Interceptors;
 using MolBhav.Infrastructure.Persistence.Read;
+using MolBhav.Infrastructure.Persistence.Read.Catalog;
+using MolBhav.Infrastructure.Persistence.Read.Identity;
+using MolBhav.Infrastructure.Persistence.Repositories.Catalog;
+using MolBhav.Infrastructure.Persistence.Repositories.Identity;
 using Npgsql;
 
 namespace MolBhav.Infrastructure;
@@ -24,16 +33,67 @@ public static class DependencyInjection
     /// <summary>Health-check tag for dependencies that must be up before the instance receives traffic.</summary>
     public const string ReadinessTag = "ready";
 
-    public static IServiceCollection AddInfrastructure(this IServiceCollection services, IConfiguration configuration)
+    public static IServiceCollection AddInfrastructure(
+        this IServiceCollection services,
+        IConfiguration configuration,
+        IHostEnvironment environment)
     {
         ArgumentNullException.ThrowIfNull(configuration);
+        ArgumentNullException.ThrowIfNull(environment);
 
         services.TryAddSingleton(TimeProvider.System);
 
         services
             .AddPersistence(configuration)
             .AddOutbox(configuration)
-            .AddJwtAuthentication(configuration);
+            .AddJwtAuthentication(configuration)
+            .AddIdentityModule(configuration, environment)
+            .AddCatalogModule();
+
+        return services;
+    }
+
+    private static IServiceCollection AddCatalogModule(this IServiceCollection services)
+    {
+        services.AddScoped<IProcurementCategoryRepository, ProcurementCategoryRepository>();
+        services.AddScoped<IProductRepository, ProductRepository>();
+        services.AddScoped<IUnitOfMeasureRepository, UnitOfMeasureRepository>();
+        services.AddScoped<ICatalogReadService, CatalogReadService>();
+        services.AddScoped<IProcurementCategoryLookup, ProcurementCategoryLookup>();
+
+        return services;
+    }
+
+    private static IServiceCollection AddIdentityModule(
+        this IServiceCollection services,
+        IConfiguration configuration,
+        IHostEnvironment environment)
+    {
+        services.AddScoped<IUserRepository, UserRepository>();
+        services.AddScoped<IOtpChallengeRepository, OtpChallengeRepository>();
+        services.AddScoped<IRefreshTokenRepository, RefreshTokenRepository>();
+        services.AddScoped<IUserProfileReadService, UserProfileReadService>();
+
+        services.AddSingleton<IOtpCodeGenerator, OtpCodeGenerator>();
+
+        var otpDelivery = configuration.GetSection(OtpDeliveryOptions.SectionName).Get<OtpDeliveryOptions>() ?? new OtpDeliveryOptions();
+
+        switch (otpDelivery.Provider)
+        {
+            // Fail closed: the log sender prints live codes, so it must never be reachable outside a developer machine.
+            case OtpDeliveryProviders.Log when environment.IsDevelopment():
+                services.AddSingleton<IOtpSender, LoggingOtpSender>();
+                break;
+
+            case OtpDeliveryProviders.Log:
+                throw new InvalidOperationException(
+                    $"{OtpDeliveryOptions.SectionName}:Provider '{OtpDeliveryProviders.Log}' writes OTP codes to the log and is allowed only in " +
+                    $"Development (current environment: '{environment.EnvironmentName}'). Configure a real SMS/WhatsApp provider.");
+
+            default:
+                throw new InvalidOperationException(
+                    $"Unknown {OtpDeliveryOptions.SectionName}:Provider '{otpDelivery.Provider}'.");
+        }
 
         return services;
     }

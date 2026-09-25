@@ -21,7 +21,7 @@ internal sealed partial class RequestLoggingBehavior<TRequest, TResponse>(ILogge
         var requestName = typeof(TRequest).Name;
         var started = Stopwatch.GetTimestamp();
 
-        var response = await next();
+        var response = await next(cancellationToken);
 
         var elapsedMs = (long)Stopwatch.GetElapsedTime(started).TotalMilliseconds;
 

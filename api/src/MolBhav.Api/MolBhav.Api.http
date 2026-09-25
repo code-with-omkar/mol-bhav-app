@@ -1,4 +1,5 @@
 @host = https://localhost:7040
+@phone = 9876543210
 
 ### Connectivity + language negotiation (anonymous)
 GET {{host}}/api/v1/system/status
@@ -13,3 +14,168 @@ GET {{host}}/health/ready
 
 ### OpenAPI document (Development only) — import into Postman
 GET {{host}}/openapi/v1.json
+
+############################################################
+# Identity — login screen
+# In Development the code is written to the API console:  [DEV OTP] Code for ******3210: 123456
+############################################################
+
+### 1. Send code
+POST {{host}}/api/v1/auth/otp/request
+Content-Type: application/json
+
+{ "phoneNumber": "{{phone}}" }
+
+### 2. Verify code — paste the code from the console
+# @name login
+POST {{host}}/api/v1/auth/otp/verify
+Content-Type: application/json
+
+{ "phoneNumber": "{{phone}}", "code": "000000" }
+
+###
+@accessToken = {{login.response.body.$.data.session.accessToken}}
+@refreshToken = {{login.response.body.$.data.session.refreshToken}}
+
+############################################################
+# Identity — onboarding / profile screen
+############################################################
+
+### 3. Get my profile
+GET {{host}}/api/v1/profile
+Authorization: Bearer {{accessToken}}
+
+### 4. Complete onboarding / edit profile (full replacement)
+PUT {{host}}/api/v1/profile
+Authorization: Bearer {{accessToken}}
+Content-Type: application/json
+
+{
+  "businessType": "Cloud Kitchen",
+  "state": "Maharashtra",
+  "district": "Pune",
+  "preferredLanguage": "mr",
+  "categories": [ "agriculture" ]
+}
+
+############################################################
+# Identity — session
+############################################################
+
+### 5. Refresh (single use — the old refresh token is consumed)
+# @name refresh
+POST {{host}}/api/v1/auth/token/refresh
+Content-Type: application/json
+
+{ "refreshToken": "{{refreshToken}}" }
+
+### 6. Logout (revokes this device's refresh token)
+POST {{host}}/api/v1/auth/logout
+Authorization: Bearer {{accessToken}}
+Content-Type: application/json
+
+{ "refreshToken": "{{refresh.response.body.$.data.refreshToken}}" }
+
+############################################################
+# Catalog — mobile screens (any logged-in user)
+# Names follow Accept-Language (en, hi, mr, gu, ta, te, kn) → default → English.
+############################################################
+
+### 7. Select Category screen
+GET {{host}}/api/v1/catalog/categories
+Authorization: Bearer {{accessToken}}
+Accept-Language: mr
+
+### 8. Products in a category (optional: subCategoryId, search, page, pageSize)
+# @name products
+GET {{host}}/api/v1/catalog/categories/agriculture/products?page=1&pageSize=20
+Authorization: Bearer {{accessToken}}
+Accept-Language: mr
+
+### 9. Search across languages
+GET {{host}}/api/v1/catalog/categories/agriculture/products?search=कांदा
+Authorization: Bearer {{accessToken}}
+
+### 10. Product detail (first product from request 8)
+GET {{host}}/api/v1/catalog/products/{{products.response.body.$.data[0].id}}
+Authorization: Bearer {{accessToken}}
+Accept-Language: hi
+
+### 11. Units with conversion factors
+GET {{host}}/api/v1/catalog/units
+Authorization: Bearer {{accessToken}}
+
+############################################################
+# Catalog — admin (requires role Admin; see README "Granting admin",
+# then log in again so the token carries the role)
+############################################################
+
+### 12. Full category tree (inactive + all translations)
+# @name adminCategories
+GET {{host}}/api/v1/admin/catalog/categories
+Authorization: Bearer {{accessToken}}
+
+### 13. Create a category
+POST {{host}}/api/v1/admin/catalog/categories
+Authorization: Bearer {{accessToken}}
+Content-Type: application/json
+
+{
+  "code": "textiles",
+  "iconKey": "textiles",
+  "displayOrder": 3,
+  "translations": [
+    { "languageCode": "en", "name": "Textiles", "description": "Yarn and fabric" },
+    { "languageCode": "mr", "name": "वस्त्र" }
+  ]
+}
+
+### 14. Update a category (full replacement — isActive is required)
+PUT {{host}}/api/v1/admin/catalog/categories/{{adminCategories.response.body.$.data[0].id}}
+Authorization: Bearer {{accessToken}}
+Content-Type: application/json
+
+{
+  "iconKey": "agriculture",
+  "displayOrder": 1,
+  "isActive": true,
+  "translations": [
+    { "languageCode": "en", "name": "Agriculture", "description": "Vegetables, grains and pulses from APMC mandis" },
+    { "languageCode": "hi", "name": "कृषि" },
+    { "languageCode": "mr", "name": "शेती" }
+  ]
+}
+
+### 15. Add a sub-category
+POST {{host}}/api/v1/admin/catalog/categories/{{adminCategories.response.body.$.data[0].id}}/sub-categories
+Authorization: Bearer {{accessToken}}
+Content-Type: application/json
+
+{ "code": "fruits", "displayOrder": 4, "translations": [ { "languageCode": "en", "name": "Fruits" }, { "languageCode": "mr", "name": "फळे" } ] }
+
+### 16. Units (admin view)
+GET {{host}}/api/v1/admin/catalog/units
+Authorization: Bearer {{accessToken}}
+
+### 17. Create a unit (code, dimension and factor are immutable afterwards)
+POST {{host}}/api/v1/admin/catalog/units
+Authorization: Bearer {{accessToken}}
+Content-Type: application/json
+
+{ "code": "bag-25kg", "symbol": "bag", "dimension": "Mass", "toBaseFactor": 25, "translations": [ { "languageCode": "en", "name": "Bag (25 kg)" } ] }
+
+### 18. Admin product list (filters: categoryCode, subCategoryId, search, isActive)
+# @name adminProducts
+GET {{host}}/api/v1/admin/catalog/products?categoryCode=agriculture
+Authorization: Bearer {{accessToken}}
+
+### 19. Admin product detail (all translations + variants, incl. inactive)
+GET {{host}}/api/v1/admin/catalog/products/{{adminProducts.response.body.$.data[0].id}}
+Authorization: Bearer {{accessToken}}
+
+### 20. Add a variant
+POST {{host}}/api/v1/admin/catalog/products/{{adminProducts.response.body.$.data[0].id}}/variants
+Authorization: Bearer {{accessToken}}
+Content-Type: application/json
+
+{ "code": "pink", "displayOrder": 3, "translations": [ { "languageCode": "en", "name": "Pink" } ] }

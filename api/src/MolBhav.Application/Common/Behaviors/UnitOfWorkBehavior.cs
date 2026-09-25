@@ -19,7 +19,7 @@ internal sealed class UnitOfWorkBehavior<TRequest, TResponse>(IUnitOfWork unitOf
         unitOfWork.ExecuteInTransactionAsync(
             async token =>
             {
-                var response = await next();
+                var response = await next(token);
 
                 if (response.IsSuccess)
                 {

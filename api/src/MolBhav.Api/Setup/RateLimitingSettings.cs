@@ -14,4 +14,10 @@ public sealed class RateLimitingSettings
     public int OtpPermitLimit { get; set; } = 5;
 
     public int OtpWindowSeconds { get; set; } = 600;
+
+    /// <summary>
+    /// Verify gets its own per-IP budget so a few typos do not exhaust the send budget. Per-code brute force is already
+    /// capped by the domain (5 attempts per challenge); this bounds guessing across many phone numbers from one client.
+    /// </summary>
+    public int OtpVerifyPermitLimit { get; set; } = 15;
 }

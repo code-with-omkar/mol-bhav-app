@@ -9,4 +9,7 @@ public interface ILanguageContext
     string CurrentLanguage { get; }
 
     string DefaultLanguage { get; }
+
+    /// <summary>Languages the platform serves (configuration). Admin-entered translations are restricted to these.</summary>
+    IReadOnlyCollection<string> SupportedLanguages { get; }
 }

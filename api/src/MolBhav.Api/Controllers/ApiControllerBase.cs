@@ -3,6 +3,7 @@ using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using MolBhav.Api.Contracts;
 using MolBhav.Api.ErrorHandling;
+using MolBhav.Application.Common.Models;
 using MolBhav.Domain.Common.Results;
 
 namespace MolBhav.Api.Controllers;
@@ -27,6 +28,13 @@ public abstract class ApiControllerBase(ISender sender) : ControllerBase
         result.IsSuccess
             ? CreatedAtAction(actionName, routeValues(result.Value), ApiResponse.Ok(result.Value))
             : ToProblem(result.Error);
+
+    protected IActionResult PagedEnvelope<T>(Result<PagedResult<T>> result, string? message = null) =>
+        result.IsSuccess ? Ok(ApiResponse.Paged(result.Value, message)) : ToProblem(result.Error);
+
+    /// <summary>201 with a Location for resources that are read back through a collection (no single-item GET).</summary>
+    protected IActionResult CreatedEnvelope<T>(Result<T> result, string location) =>
+        result.IsSuccess ? Created(location, ApiResponse.Ok(result.Value)) : ToProblem(result.Error);
 
     protected IActionResult NoContentOrProblem(Result result) =>
         result.IsSuccess ? NoContent() : ToProblem(result.Error);

@@ -1,0 +1,15 @@
+namespace MolBhav.Api.Contracts.Identity;
+
+// Request bodies are nullable on purpose: a missing field reaches FluentValidation (stable messages, one error
+// shape) instead of being rejected earlier by MVC's implicit-required check on non-nullable reference types.
+
+/// <param name="PhoneNumber">10-digit Indian mobile; +91/0 prefixes, spaces and dashes are accepted.</param>
+public sealed record RequestOtpRequest(string? PhoneNumber);
+
+/// <param name="PhoneNumber">The same number the code was sent to.</param>
+/// <param name="Code">6-digit code.</param>
+public sealed record VerifyOtpRequest(string? PhoneNumber, string? Code);
+
+public sealed record RefreshTokenRequest(string? RefreshToken);
+
+public sealed record LogoutRequest(string? RefreshToken);

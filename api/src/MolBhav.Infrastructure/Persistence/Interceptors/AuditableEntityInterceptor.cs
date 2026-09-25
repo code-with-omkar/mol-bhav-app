@@ -33,6 +33,7 @@ internal sealed class AuditableEntityInterceptor(TimeProvider timeProvider, ICur
 
         var now = timeProvider.GetUtcNow();
         var userId = currentUser.UserId;
+        var ownersWithChangedOwnedData = context.ChangeTracker.OwnersWithChangedOwnedData();
 
         foreach (var entry in context.ChangeTracker.Entries<IAuditableEntity>())
         {
@@ -44,7 +45,7 @@ internal sealed class AuditableEntityInterceptor(TimeProvider timeProvider, ICur
                     break;
 
                 case EntityState.Modified:
-                case EntityState.Unchanged when entry.HasChangedOwnedEntities():
+                case EntityState.Unchanged when ownersWithChangedOwnedData.Contains(entry.Entity):
                     Set(entry, nameof(IAuditableEntity.UpdatedAtUtc), now);
                     Set(entry, nameof(IAuditableEntity.UpdatedBy), userId);
 
