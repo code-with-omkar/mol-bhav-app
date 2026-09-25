@@ -1,0 +1,24 @@
+# Local development dependencies only (the API itself runs from Visual Studio / dotnet run).
+# Usage: copy .env.example to .env, set POSTGRES_PASSWORD, then `docker compose up -d`.
+services:
+  postgres:
+    image: postgres:17-alpine
+    container_name: molbhav-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: molbhav
+      POSTGRES_USER: molbhav
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in .env}
+      TZ: UTC
+    ports:
+      - "5432:5432"
+    volumes:
+      - molbhav-pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U molbhav -d molbhav"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  molbhav-pgdata:

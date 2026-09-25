@@ -1,0 +1,8 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!-- Innermost layer: no project or package references. -->
+  <PropertyGroup>
+    <RootNamespace>MolBhav.Domain</RootNamespace>
+  </PropertyGroup>
+
+</Project>

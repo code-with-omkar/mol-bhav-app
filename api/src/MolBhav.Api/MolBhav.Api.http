@@ -1,0 +1,15 @@
+@host = https://localhost:7040
+
+### Connectivity + language negotiation (anonymous)
+GET {{host}}/api/v1/system/status
+Accept: application/json
+Accept-Language: mr
+
+### Liveness
+GET {{host}}/health/live
+
+### Readiness (PostgreSQL)
+GET {{host}}/health/ready
+
+### OpenAPI document (Development only) — import into Postman
+GET {{host}}/openapi/v1.json
