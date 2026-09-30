@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<!--
+	Universal Links for shared price cards: https://<host>/p/<productId>.
+	Replace molbhav.in with the real host, and keep it in step with
+	deep_link_host (Android) and DEEP_LINK_BASE (Dart).
+
+	This file is not yet referenced by Runner.xcodeproj: attach it once in
+	Xcode under Runner → Signing & Capabilities → Associated Domains, which
+	also adds CODE_SIGN_ENTITLEMENTS to the build settings. Until then iOS
+	ignores it and links open in Safari — see docs/deep-links/README notes.
+	-->
+	<key>com.apple.developer.associated-domains</key>
+	<array>
+		<string>applinks:molbhav.in</string>
+	</array>
+</dict>
+</plist>

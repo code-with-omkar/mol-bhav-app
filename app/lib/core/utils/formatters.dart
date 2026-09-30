@@ -13,9 +13,21 @@ String formatIndian(num value) {
 /// ₹ with Indian grouping: 58200 → `₹58,200`.
 String formatInr(num value) => '₹${formatIndian(value)}';
 
+final _paise = NumberFormat.currency(locale: 'en_IN', symbol: '₹');
+
+/// Money kept as integer paise, shown in rupees: 49900 → `₹499.00`.
+String formatPaise(int paise) => _paise.format(paise / 100);
+
+/// One decimal place, for a percent move: 8.24 → `8.2`.
+String formatPercent(num value) => value.toDouble().toStringAsFixed(1);
+
 /// `09:45 AM` in the given locale.
 String formatClock(DateTime time, String locale) =>
     DateFormat('hh:mm a', locale).format(time);
+
+/// `27 Sep 2026, 10:42 AM` in the given locale, in the device's timezone.
+String formatDateTime(DateTime time, String locale) =>
+    DateFormat.yMMMd(locale).add_jm().format(time.toLocal());
 
 /// `16 Sep` in the given locale.
 String formatDayMonth(DateTime date, String locale) =>

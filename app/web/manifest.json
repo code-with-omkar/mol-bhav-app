@@ -1,11 +1,11 @@
 {
-    "name": "mol_bhav",
-    "short_name": "mol_bhav",
+    "name": "MolBhav — Market & Procurement Intelligence",
+    "short_name": "MolBhav",
     "start_url": ".",
     "display": "standalone",
-    "background_color": "#0175C2",
-    "theme_color": "#0175C2",
-    "description": "A new Flutter project.",
+    "background_color": "#F7F8F5",
+    "theme_color": "#168447",
+    "description": "Market and procurement price intelligence for Indian buyers.",
     "orientation": "portrait-primary",
     "prefer_related_applications": false,
     "icons": [

@@ -49,7 +49,7 @@ internal sealed class UpdateProfileCommandHandler(
             return Error.Validation("ProcurementCategory.NotFound", $"Category '{unknown}' does not exist or is not available.");
         }
 
-        user.UpdateProfile(request.BusinessType, request.State, request.District, languageResult.Value, categories);
+        user.UpdateProfile(request.DisplayName, request.BusinessType, request.State, request.District, languageResult.Value, categories);
 
         return new UpdateProfileResponse(
             user.Id,

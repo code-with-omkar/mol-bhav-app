@@ -5,6 +5,7 @@ import '../../core/theme/app_theme.dart';
 import '../../core/theme/mb_dimens.dart';
 import '../../core/utils/formatters.dart';
 import 'mb_icon.dart';
+import 'mb_icon_button.dart';
 
 /// Tint for thumbs, icon discs and panels.
 enum MbTone { neutral, green, amber, navy }
@@ -247,6 +248,8 @@ class MbPriceRow extends StatelessWidget {
     this.trend,
     this.stacked = false,
     this.onTap,
+    this.onShare,
+    this.shareLabel,
   });
 
   final String name;
@@ -267,6 +270,11 @@ class MbPriceRow extends StatelessWidget {
   /// Stack price above change (narrow rows with a sparkline).
   final bool stacked;
   final VoidCallback? onTap;
+
+  /// Adds a share affordance at the end of the row. [shareLabel] is its
+  /// accessible name, so it must be given whenever [onShare] is.
+  final VoidCallback? onShare;
+  final String? shareLabel;
 
   bool get _hasChange => change != null || percent != null;
 
@@ -332,6 +340,14 @@ class MbPriceRow extends StatelessWidget {
                 ),
               ),
             ],
+          ],
+          if (onShare != null) ...[
+            const SizedBox(width: MbSpacing.s1),
+            MbIconButton(
+              icon: MbIcons.share,
+              label: shareLabel!,
+              onPressed: onShare,
+            ),
           ],
         ],
       ),

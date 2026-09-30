@@ -32,6 +32,50 @@ class MbLoadingView extends StatelessWidget {
   }
 }
 
+/// Thin progress line shown over cached content while fresh data loads.
+/// Keeps its 2px height when idle so content doesn't shift.
+class MbRevalidatingBar extends StatelessWidget {
+  const MbRevalidatingBar({super.key, required this.active});
+
+  final bool active;
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      height: 2,
+      child: active
+          ? LinearProgressIndicator(
+              minHeight: 2,
+              semanticsLabel: context.l10n.loading,
+            )
+          : null,
+    );
+  }
+}
+
+/// Places [MbRevalidatingBar] over the top edge of [child].
+class MbRevalidating extends StatelessWidget {
+  const MbRevalidating({super.key, required this.active, required this.child});
+
+  final bool active;
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    return Stack(
+      children: [
+        Positioned.fill(child: child),
+        Positioned(
+          top: 0,
+          left: 0,
+          right: 0,
+          child: MbRevalidatingBar(active: active),
+        ),
+      ],
+    );
+  }
+}
+
 /// Full-area error with a retry action.
 class MbErrorView extends StatelessWidget {
   const MbErrorView({super.key, required this.failure, required this.onRetry});
@@ -88,7 +132,7 @@ class _MessageView extends StatelessWidget {
   Widget build(BuildContext context) {
     final c = context.mbColors;
     return Center(
-      child: Padding(
+      child: SingleChildScrollView(
         padding: const EdgeInsets.all(MbSpacing.s6),
         child: Column(
           mainAxisSize: MainAxisSize.min,

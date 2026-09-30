@@ -1,11 +1,8 @@
 import '../../domain/entities/onboarding_entities.dart';
 
-/// `{ "id": "cloud-kitchen", "name": "Cloud Kitchen" }`
+/// Hardcoded business type (API has no `/reference/business-types` endpoint).
 class BusinessTypeModel {
   const BusinessTypeModel({required this.id, required this.name});
-
-  factory BusinessTypeModel.fromJson(Map<String, dynamic> json) =>
-      BusinessTypeModel(id: json['id'] as String, name: json['name'] as String);
 
   final String id;
   final String name;
@@ -13,38 +10,86 @@ class BusinessTypeModel {
   BusinessType toEntity() => BusinessType(id: id, name: name);
 }
 
-/// `{ "code": "MH", "name": "Maharashtra" }` (states and districts alike).
+/// `GET /market/states` → `{ "id": "uuid", "name": "Maharashtra", "code": "MH" }`.
 class RegionModel {
-  const RegionModel({required this.code, required this.name});
+  const RegionModel({required this.code, required this.name, this.id});
 
-  factory RegionModel.fromJson(Map<String, dynamic> json) =>
-      RegionModel(code: json['code'] as String, name: json['name'] as String);
+  factory RegionModel.fromStateJson(Map<String, dynamic> json) => RegionModel(
+    id: json['id'] as String,
+    code: json['code'] as String,
+    name: json['name'] as String,
+  );
 
+  /// `GET /market/states/{id}/districts` → `{ "id": "uuid", "name": "Nashik" }`.
+  /// District has no code — use name as a human-readable code stored in profile.
+  factory RegionModel.fromDistrictJson(Map<String, dynamic> json) =>
+      RegionModel(
+        id: json['id'] as String,
+        code: json['name'] as String,
+        name: json['name'] as String,
+      );
+
+  /// Guid of this region, used for district-lookup by parent state.
+  final String? id;
   final String code;
   final String name;
 
   Region toEntity() => Region(code: code, name: name);
 }
 
-/// Body of `PUT /me/business-profile`.
+/// `GET /profile` → picker keys (state code, district name, business type).
+class SavedProfileModel {
+  const SavedProfileModel(this.entity);
+
+  factory SavedProfileModel.fromJson(Map<String, dynamic> json) {
+    String? str(String key) {
+      final value = json[key];
+      return value is String && value.isNotEmpty ? value : null;
+    }
+
+    return SavedProfileModel(
+      SavedProfile(
+        displayName: str('displayName'),
+        businessTypeId: str('businessTypeCode') ?? str('businessType'),
+        stateCode: str('stateCode') ?? str('state'),
+        districtCode: str('districtName') ?? str('district'),
+        preferredLanguage: str('preferredLanguage'),
+        categoryCodes: {
+          for (final c in (json['categories'] as List<dynamic>? ?? const []))
+            c as String,
+        },
+      ),
+    );
+  }
+
+  final SavedProfile entity;
+
+  Map<String, dynamic> toRequestJson() => {
+    'displayName': entity.displayName,
+    'businessType': entity.businessTypeId,
+    'state': entity.stateCode,
+    'district': entity.districtCode,
+    'preferredLanguage': ?entity.preferredLanguage,
+  };
+}
+
+/// Body sent to `PUT /profile` (matches `UpdateProfileRequest`).
 class BusinessProfileRequest {
   const BusinessProfileRequest(this.profile);
 
   final BusinessProfile profile;
 
   Map<String, dynamic> toJson() => {
-    'businessTypeId': profile.businessTypeId,
-    'stateCode': profile.stateCode,
-    'districtCode': profile.districtCode,
+    'displayName': profile.displayName,
+    'businessType': profile.businessTypeId,
+    'state': profile.stateCode,
+    'district': profile.districtCode,
     'preferredLanguage': profile.preferredLanguage,
+    'categories': const <String>[],
   };
 }
 
-/// ```json
-/// { "id": "1", "code": "agriculture", "name": "Agriculture",
-///   "highlights": ["Commodities", "Mandis", "Market Prices"],
-///   "isAvailable": true }
-/// ```
+/// `GET /catalog/categories` → `{ "id": "…", "code": "agriculture", "name": "Agriculture", … }`.
 class CategoryModel {
   const CategoryModel({
     required this.id,
@@ -56,14 +101,11 @@ class CategoryModel {
 
   factory CategoryModel.fromJson(Map<String, dynamic> json) {
     return CategoryModel(
-      id: json['id'] as String,
+      id: json['code'] as String,
       code: json['code'] as String,
       name: json['name'] as String,
-      highlights: [
-        for (final item in (json['highlights'] as List<dynamic>? ?? const []))
-          item as String,
-      ],
-      isAvailable: json['isAvailable'] as bool,
+      highlights: const [],
+      isAvailable: true,
     );
   }
 

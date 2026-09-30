@@ -4,21 +4,28 @@ import 'package:injectable/injectable.dart';
 import '../../../core/cache/cached_api_call.dart';
 import '../../../core/cache/response_cache.dart';
 import '../../../core/error/result.dart';
+import '../../../core/network/api_call.dart';
 import '../../../core/network/json.dart';
 import '../domain/watchlist.dart';
 
 /// `GET /watchlist`:
+/// After envelope unwrap → `[WatchlistItemResponse]`:
 /// ```json
-/// { "updatedAt": "ISO-8601",
-///   "categories": [{ "code": "agriculture", "name": "Agriculture" }],
-///   "items": [{ "id": "…", "commodityId": "…", "marketId": "…",
-///     "name": "Onion", "categoryCode": "agriculture", "variety": null,
-///     "marketName": "Pune", "price": 2150, "unit": "q", "percent": -7.7,
-///     "trend": [2330, 2150],
-///     "alert": { "condition": "below", "value": 2000 } | null }] }
+/// [{ "id": "…",
+///    "product": { "id": "…", "code": "onion", "name": "Onion",
+///                 "defaultUnit": { "symbol": "q" } },
+///    "variantId": null, "variantName": null,
+///    "addedAtUtc": "…",
+///    "latestPrice": 2150.0, "priceUnitSymbol": "q", "percentChange": -7.7 }]
 /// ```
+/// `POST /watchlist` `{ productId, variantId? }` → 201, 409 when already watched.
+/// `DELETE /watchlist/{id}` → 204.
 abstract interface class WatchlistRemoteDataSource {
-  Future<Map<String, dynamic>> getWatchlist();
+  Future<List<dynamic>> getWatchlist();
+
+  Future<void> add(String productId, String? variantId);
+
+  Future<void> remove(String itemId);
 }
 
 @LazySingleton(as: WatchlistRemoteDataSource)
@@ -28,8 +35,18 @@ class DioWatchlistRemoteDataSource implements WatchlistRemoteDataSource {
   final Dio _dio;
 
   @override
-  Future<Map<String, dynamic>> getWatchlist() async =>
-      (await _dio.get<Map<String, dynamic>>('/watchlist')).data!;
+  Future<List<dynamic>> getWatchlist() async =>
+      (await _dio.get<List<dynamic>>('/watchlist')).data!;
+
+  @override
+  Future<void> add(String productId, String? variantId) => _dio.post<void>(
+    '/watchlist',
+    data: {'productId': productId, 'variantId': variantId},
+  );
+
+  @override
+  Future<void> remove(String itemId) =>
+      _dio.delete<void>('/watchlist/${Uri.encodeComponent(itemId)}');
 }
 
 @LazySingleton(as: WatchlistRepository)
@@ -39,43 +56,57 @@ class WatchlistRepositoryImpl implements WatchlistRepository {
   final WatchlistRemoteDataSource _remote;
   final ResponseCache _cache;
 
+  static const _key = 'watchlist';
+
   @override
-  Future<Result<Watchlist>> getWatchlist() => runCachedApiCall(
+  Stream<Result<Watchlist>> watchWatchlist() => watchCachedApiCall(
     cache: _cache,
-    key: 'watchlist',
+    key: _key,
     fetch: _remote.getWatchlist,
-    parse: (json) => _watchlist(json as Map<String, dynamic>),
+    parse: (json) => _watchlist(json as List<dynamic>),
   );
 
-  static Watchlist _watchlist(Map<String, dynamic> j) {
-    return Watchlist(
-      updatedAt: j['updatedAt'] == null ? null : j.date('updatedAt'),
-      categories: j.list(
-        'categories',
-        (c) => WatchlistCategory(code: c.str('code'), name: c.str('name')),
-      ),
-      items: j.list('items', _item),
+  @override
+  Future<Result<void>> add(String productId, {String? variantId}) async {
+    final result = await runApiCall(
+      () => _remote.add(productId, variantId),
+      mapError: (e) =>
+          e.response?.statusCode == 409 ? const AlreadyWatchedFailure() : null,
     );
+    await _cache.invalidate(const [_key]);
+    return result;
+  }
+
+  @override
+  Future<Result<void>> remove(String itemId) async {
+    final result = await runApiCall(() => _remote.remove(itemId));
+    await _cache.invalidate(const [_key]);
+    return result;
+  }
+
+  static Watchlist _watchlist(List<dynamic> items) {
+    final parsed = items.map((e) => _item(e as Map<String, dynamic>)).toList();
+    return Watchlist(updatedAt: null, categories: const [], items: parsed);
   }
 
   static WatchlistItem _item(Map<String, dynamic> i) {
-    final alert = i.objOrNull('alert');
+    final product = i.obj('product');
+    final unit = product.obj('defaultUnit');
     return WatchlistItem(
       id: i.str('id'),
-      commodityId: i.str('commodityId'),
-      marketId: i.str('marketId'),
-      name: i.str('name'),
-      categoryCode: i.str('categoryCode'),
-      variety: i.strOrNull('variety'),
-      marketName: i.strOrNull('marketName'),
-      price: i.number('price'),
-      unit: i.str('unit'),
-      percent: i.decimalOrNull('percent'),
-      trend: i.numbers('trend'),
-      alertCondition: alert == null
-          ? null
-          : AlertCondition.values.byName(alert.str('condition')),
-      alertValue: alert?.numberOrNull('value'),
+      commodityId: product.str('id'),
+      variantId: i.strOrNull('variantId'),
+      marketId: '',
+      name: product.str('name'),
+      categoryCode: '',
+      price: i.numberOrNull('latestPrice') ?? 0,
+      unit: i.strOrNull('priceUnitSymbol') ?? unit.str('symbol'),
+      percent: i.decimalOrNull('percentChange'),
+      trend: const [],
+      variety: i.strOrNull('variantName'),
+      marketName: null,
+      alertCondition: null,
+      alertValue: null,
     );
   }
 }

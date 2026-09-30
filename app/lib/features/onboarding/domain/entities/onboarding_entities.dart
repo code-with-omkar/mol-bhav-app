@@ -34,14 +34,70 @@ class ProfileOptions extends Equatable {
   List<Object?> get props => [businessTypes, states];
 }
 
+/// What `GET /profile` holds, keyed like the form's pickers.
+class SavedProfile extends Equatable {
+  const SavedProfile({
+    this.displayName,
+    this.businessTypeId,
+    this.stateCode,
+    this.districtCode,
+    this.preferredLanguage,
+    this.categoryCodes = const {},
+  });
+
+  final String? displayName;
+  final String? businessTypeId;
+  final String? stateCode;
+  final String? districtCode;
+  final String? preferredLanguage;
+  final Set<String> categoryCodes;
+
+  @override
+  List<Object?> get props => [
+    displayName,
+    businessTypeId,
+    stateCode,
+    districtCode,
+    preferredLanguage,
+    categoryCodes,
+  ];
+}
+
+enum DisplayNameError { required, length, characters }
+
+/// The user's name as the API accepts it: 2–60 characters of letters in any
+/// script (with their vowel signs), spaces and `. ' -`, starting with a letter.
+abstract final class DisplayName {
+  static const minLength = 2;
+  static const maxLength = 60;
+
+  static final _pattern = RegExp(r"^\p{L}[\p{L}\p{M} .'\-]*$", unicode: true);
+
+  /// Trimmed, with inner whitespace runs collapsed to one space.
+  static String normalise(String value) =>
+      value.trim().split(RegExp(r'\s+')).where((s) => s.isNotEmpty).join(' ');
+
+  static DisplayNameError? validate(String value) {
+    final name = normalise(value);
+    if (name.isEmpty) return DisplayNameError.required;
+    // UTF-16 length, as the API counts it.
+    if (name.length < minLength || name.length > maxLength) {
+      return DisplayNameError.length;
+    }
+    return _pattern.hasMatch(name) ? null : DisplayNameError.characters;
+  }
+}
+
 class BusinessProfile extends Equatable {
   const BusinessProfile({
+    required this.displayName,
     required this.businessTypeId,
     required this.stateCode,
     required this.districtCode,
     required this.preferredLanguage,
   });
 
+  final String displayName;
   final String businessTypeId;
   final String stateCode;
   final String districtCode;
@@ -51,6 +107,7 @@ class BusinessProfile extends Equatable {
 
   @override
   List<Object?> get props => [
+    displayName,
     businessTypeId,
     stateCode,
     districtCode,

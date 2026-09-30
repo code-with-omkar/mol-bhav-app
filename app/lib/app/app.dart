@@ -11,6 +11,8 @@ import '../core/locale/locale_cubit.dart';
 import '../core/router/app_router.dart';
 import '../core/session/session_manager.dart';
 import '../core/theme/app_theme.dart';
+import '../features/account/presentation/profile_cubit.dart';
+import '../features/watchlist/presentation/watchlist_cubit.dart';
 
 class MolBhavApp extends StatefulWidget {
   const MolBhavApp({super.key});
@@ -30,8 +32,14 @@ class _MolBhavAppState extends State<MolBhavApp> {
 
   @override
   Widget build(BuildContext context) {
-    return BlocProvider.value(
-      value: getIt<LocaleCubit>(),
+    // App-wide cubits: every screen sees the same language, profile and
+    // watchlist, so a change on one screen shows on all.
+    return MultiBlocProvider(
+      providers: [
+        BlocProvider.value(value: getIt<LocaleCubit>()),
+        BlocProvider.value(value: getIt<ProfileCubit>()),
+        BlocProvider.value(value: getIt<WatchlistCubit>()),
+      ],
       child: BlocBuilder<LocaleCubit, AppLanguage>(
         builder: (context, language) => MaterialApp.router(
           title: Brand.name,

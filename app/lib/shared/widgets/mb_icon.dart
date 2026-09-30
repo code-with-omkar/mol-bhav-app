@@ -14,6 +14,7 @@ class MbIcon extends StatelessWidget {
     this.size = 24,
     this.color,
     this.strokeWidth = 2,
+    this.filled = false,
     this.semanticLabel,
   });
 
@@ -21,13 +22,17 @@ class MbIcon extends StatelessWidget {
   final double size;
   final Color? color;
   final double strokeWidth;
+
+  /// Fills closed shapes too, for an "on" state (a watched star).
+  final bool filled;
   final String? semanticLabel;
 
   @override
   Widget build(BuildContext context) {
     final resolved = color ?? IconTheme.of(context).color!;
     return SvgPicture.string(
-      '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" '
+      '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" '
+      'fill="${filled ? 'currentColor' : 'none'}" '
       'stroke="currentColor" stroke-width="$strokeWidth" '
       'stroke-linecap="round" stroke-linejoin="round">${icon.svgBody}</svg>',
       width: size,

@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import '../../../core/l10n/l10n.dart';
 import '../../../core/router/app_routes.dart';
 import '../../../core/theme/mb_dimens.dart';
+import '../../../core/utils/formatters.dart';
 import '../../../core/utils/statuses.dart';
 import '../../../core/utils/timestamps.dart';
 import '../../../shared/widgets/mb_app_bar.dart';
@@ -26,6 +27,11 @@ class AlertsPage extends StatelessWidget {
       appBar: MbAppBar(
         title: l10n.alertsTitle,
         actions: [
+          MbAppBarAction(
+            icon: MbIcons.alert,
+            label: l10n.myRulesAction,
+            onPressed: () => context.push(AppRoutes.alertRules),
+          ),
           // Alert settings have no screen in the design yet.
           MbAppBarAction(
             icon: MbIcons.settings,
@@ -88,6 +94,9 @@ class _AlertTile extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = context.l10n;
     final opportunityId = alert.opportunityId;
+    final percent = formatPercent(alert.percentChange.abs());
+    final location = alert.locationName;
+    final rose = alert.percentChange >= 0;
     return MbAlertCard(
       variant: switch (alert.kind) {
         AlertKind.signal => MbAlertVariant.signal,
@@ -101,8 +110,17 @@ class _AlertTile extends StatelessWidget {
       },
       unread: alert.isUnread,
       time: context.timestamp(alert.createdAt),
-      title: alert.title,
-      details: alert.details,
+      title: location == null
+          ? (rose
+                ? l10n.alertRose(alert.productName, percent)
+                : l10n.alertDropped(alert.productName, percent))
+          : rose
+          ? l10n.alertRoseIn(alert.productName, percent, location)
+          : l10n.alertDroppedIn(alert.productName, percent, location),
+      details: [
+        l10n.alertPreviousPrice(formatInr(alert.previousPrice)),
+        l10n.alertCurrentPrice(formatInr(alert.newPrice)),
+      ],
       channel: switch (alert.channel) {
         AlertChannel.whatsapp => l10n.sentOnWhatsApp,
         AlertChannel.push => l10n.sentAsPush,

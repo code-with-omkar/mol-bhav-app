@@ -1,30 +1,24 @@
-/// Response of `POST /auth/otp/request`.
-///
-/// ```json
-/// { "otpLength": 6, "resendAfterSeconds": 30 }
-/// ```
+/// `POST /auth/otp/request` → after envelope unwrap:
+/// `{ expiresAtUtc, resendCooldownSeconds }`
 class OtpRequestResponse {
   const OtpRequestResponse({
-    required this.otpLength,
-    required this.resendAfterSeconds,
+    required this.expiresAtUtc,
+    required this.resendCooldownSeconds,
   });
 
   factory OtpRequestResponse.fromJson(Map<String, dynamic> json) {
     return OtpRequestResponse(
-      otpLength: json['otpLength'] as int,
-      resendAfterSeconds: json['resendAfterSeconds'] as int,
+      expiresAtUtc: DateTime.parse(json['expiresAtUtc'] as String),
+      resendCooldownSeconds: json['resendCooldownSeconds'] as int,
     );
   }
 
-  final int otpLength;
-  final int resendAfterSeconds;
+  final DateTime expiresAtUtc;
+  final int resendCooldownSeconds;
 }
 
-/// Response of `POST /auth/otp/verify`.
-///
-/// ```json
-/// { "accessToken": "…", "refreshToken": "…", "isOnboarded": false }
-/// ```
+/// `POST /auth/otp/verify` → after envelope unwrap:
+/// `{ session: { userId, accessToken, ..., refreshToken, ... }, isNewUser, isOnboarded }`
 class OtpVerifyResponse {
   const OtpVerifyResponse({
     required this.accessToken,
@@ -33,9 +27,10 @@ class OtpVerifyResponse {
   });
 
   factory OtpVerifyResponse.fromJson(Map<String, dynamic> json) {
+    final session = json['session'] as Map<String, dynamic>;
     return OtpVerifyResponse(
-      accessToken: json['accessToken'] as String,
-      refreshToken: json['refreshToken'] as String,
+      accessToken: session['accessToken'] as String,
+      refreshToken: session['refreshToken'] as String,
       isOnboarded: json['isOnboarded'] as bool,
     );
   }

@@ -6,6 +6,7 @@ import 'package:injectable/injectable.dart';
 import '../../../core/error/failure.dart';
 import '../../../core/utils/data_state.dart';
 import '../../../core/utils/statuses.dart';
+import '../../account/presentation/profile_cubit.dart';
 import '../domain/alerts.dart';
 
 class AlertsState extends Equatable {
@@ -50,6 +51,9 @@ class AlertsCubit extends Cubit<AlertsState> {
 class CreateAlertState extends Equatable {
   const CreateAlertState({
     this.options = const DataState(),
+    this.categoryCodes = const [],
+    this.homeStateName,
+    this.allStates = false,
     this.productId,
     this.marketId,
     this.condition = PriceCondition.below,
@@ -62,6 +66,15 @@ class CreateAlertState extends Equatable {
   });
 
   final DataState<AlertOptions> options;
+
+  /// The user's procurement categories; empty shows every product.
+  final List<String> categoryCodes;
+
+  /// The user's own state, when the profile names one.
+  final String? homeStateName;
+
+  /// Lifts the mandi list out of [homeStateName].
+  final bool allStates;
   final String? productId;
   final String? marketId;
   final PriceCondition condition;
@@ -77,6 +90,35 @@ class CreateAlertState extends Equatable {
     return parsed != null && parsed > 0 ? parsed : null;
   }
 
+  /// Products of the user's categories, or all of them when they have none.
+  List<AlertProduct> get products {
+    final all = options.data?.products ?? const <AlertProduct>[];
+    if (categoryCodes.isEmpty) return all;
+    final mine = [
+      for (final p in all)
+        if (categoryCodes.contains(p.categoryCode)) p,
+    ];
+    return mine.isEmpty ? all : mine;
+  }
+
+  /// Mandis in the user's state, unless they asked for all of them — or their
+  /// state has none, in which case hiding every mandi would be worse.
+  List<AlertMarket> get markets {
+    final all = options.data?.markets ?? const <AlertMarket>[];
+    final home = homeStateName;
+    if (allStates || home == null) return all;
+    final mine = [
+      for (final m in all)
+        if (m.stateName == home) m,
+    ];
+    return mine.isEmpty ? all : mine;
+  }
+
+  /// Whether an "all states" toggle is worth showing at all.
+  bool get canWidenStates =>
+      homeStateName != null &&
+      markets.length != (options.data?.markets.length ?? 0);
+
   AlertProduct? get product =>
       options.data?.products.where((p) => p.id == productId).firstOrNull;
 
@@ -89,6 +131,9 @@ class CreateAlertState extends Equatable {
 
   CreateAlertState copyWith({
     DataState<AlertOptions>? options,
+    List<String>? categoryCodes,
+    ValueGetter<String?>? homeStateName,
+    bool? allStates,
     String? productId,
     String? marketId,
     PriceCondition? condition,
@@ -100,6 +145,9 @@ class CreateAlertState extends Equatable {
     Failure? submitFailure,
   }) => CreateAlertState(
     options: options ?? this.options,
+    categoryCodes: categoryCodes ?? this.categoryCodes,
+    homeStateName: homeStateName != null ? homeStateName() : this.homeStateName,
+    allStates: allStates ?? this.allStates,
     productId: productId ?? this.productId,
     marketId: marketId ?? this.marketId,
     condition: condition ?? this.condition,
@@ -114,6 +162,9 @@ class CreateAlertState extends Equatable {
   @override
   List<Object?> get props => [
     options,
+    categoryCodes,
+    homeStateName,
+    allStates,
     productId,
     marketId,
     condition,
@@ -128,28 +179,49 @@ class CreateAlertState extends Equatable {
 
 @injectable
 class CreateAlertCubit extends Cubit<CreateAlertState> {
-  CreateAlertCubit(this._getOptions, this._getCurrentPrice, this._createAlert)
-    : super(const CreateAlertState());
+  CreateAlertCubit(
+    this._getOptions,
+    this._getCurrentPrice,
+    this._createAlert,
+    this._profile,
+  ) : super(const CreateAlertState());
 
   final GetAlertOptions _getOptions;
   final GetCurrentPrice _getCurrentPrice;
   final CreateAlert _createAlert;
+  final ProfileCubit _profile;
 
-  /// Loads the form, preselecting [commodityId] / [marketId] when given.
+  /// Loads the form, preselecting [commodityId] / [marketId] when given —
+  /// they come from the comparison, trends and watchlist rows.
   Future<void> load({String? commodityId, String? marketId}) async {
     emit(state.copyWith(options: const DataState.loading()));
+    await _profile.ensureLoaded();
     final result = await _getOptions();
-    final options = DataState.fromResult(result);
-    final data = options.data;
+    if (isClosed) return;
+    final profile = _profile.state.data;
+    final narrowed = state.copyWith(
+      options: DataState.fromResult(result),
+      categoryCodes: profile?.categoryCodes ?? const [],
+      homeStateName: () =>
+          profile?.stateName.isNotEmpty ?? false ? profile!.stateName : null,
+    );
+    // A mandi passed in may sit outside the user's state — widen rather than
+    // drop the preselection they navigated in with.
+    final market = narrowed.options.data?.markets
+        .where((m) => m.id == marketId)
+        .firstOrNull;
+    final widened = market != null && !narrowed.markets.contains(market)
+        ? narrowed.copyWith(allStates: true)
+        : narrowed;
     emit(
-      state.copyWith(
-        options: options,
+      widened.copyWith(
         productId:
-            data?.products.where((p) => p.id == commodityId).firstOrNull?.id ??
-            data?.products.firstOrNull?.id,
-        marketId:
-            data?.markets.where((m) => m.id == marketId).firstOrNull?.id ??
-            data?.markets.firstOrNull?.id,
+            widened.products
+                .where((p) => p.id == commodityId)
+                .firstOrNull
+                ?.id ??
+            widened.products.firstOrNull?.id,
+        marketId: market?.id ?? widened.markets.firstOrNull?.id,
       ),
     );
     await _refreshPrice();
@@ -162,6 +234,22 @@ class CreateAlertCubit extends Cubit<CreateAlertState> {
 
   Future<void> selectMarket(String id) async {
     emit(state.copyWith(marketId: id, currentPrice: () => null));
+    await _refreshPrice();
+  }
+
+  /// Shows mandis outside the user's own state; the current pick survives.
+  Future<void> toggleAllStates(bool on) async {
+    final next = state.copyWith(allStates: on);
+    if (next.markets.any((m) => m.id == next.marketId)) {
+      emit(next);
+      return;
+    }
+    emit(
+      next.copyWith(
+        marketId: next.markets.firstOrNull?.id,
+        currentPrice: () => null,
+      ),
+    );
     await _refreshPrice();
   }
 

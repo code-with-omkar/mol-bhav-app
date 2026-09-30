@@ -75,6 +75,7 @@
   "navMarkets": "Markets",
   "navWatchlist": "Watchlist",
   "navOpportunities": "Opportunities",
+  "navAlerts": "Alerts",
   "navMore": "More",
   "priceUp": "Price up",
   "priceDown": "Price down",
@@ -107,6 +108,13 @@
   "bestMarket": "Best Market · {market}",
   "lowerThanYourMarket": "{amount} lower than {market} (your market)",
   "comparisonEmpty": "No prices for these markets yet.",
+  "browseByMandi": "Browse by mandi",
+  "browseByCommodity": "Browse by commodity",
+  "mandiLabel": "Mandi",
+  "mandiPricesHint": "Pick a state, district and mandi to see its latest prices.",
+  "mandiPricesEmpty": "No recent prices at this mandi.",
+  "mandisEmpty": "No mandis in this district yet.",
+  "priceDate": "Price date: {date}",
   "priceTrendsTitle": "Price Trends",
   "createAlertAction": "Create alert",
   "trendTitle": "{commodity} — {market} (₹/{unit})",
@@ -220,6 +228,13 @@
         "type": "String"
       },
       "time": {
+        "type": "String"
+      }
+    }
+  },
+  "@priceDate": {
+    "placeholders": {
+      "date": {
         "type": "String"
       }
     }
@@ -466,5 +481,398 @@
         "type": "String"
       }
     }
-  }
+  },
+  "yourNameLabel": "Your name",
+  "yourNameHint": "e.g. Ramesh Patil",
+  "nameErrorLength": "Enter 2–60 characters.",
+  "nameErrorCharacters": "Use letters, spaces and . ' - only.",
+  "addYourName": "Add your name",
+  "addToWatchlist": "Add to watchlist",
+  "addToWatchlistTitle": "Add to watchlist",
+  "removeFromWatchlist": "Remove from watchlist",
+  "addedToWatchlist": "Added to watchlist.",
+  "alreadyInWatchlist": "Already in watchlist.",
+  "removedFromWatchlist": "{name} removed from watchlist.",
+  "@removedFromWatchlist": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "undo": "Undo",
+  "searchWatchlistHint": "Search your watchlist",
+  "searchProductsHint": "Search products",
+  "noMatches": "Nothing matches your search.",
+  "categoryLabel": "Category",
+  "allVarieties": "All varieties",
+  "quickCostEstimate": "Cost Estimate",
+  "estimateSavedLabel": "Saved",
+  "unitLockedHelper": "Prices are quoted in this unit.",
+  "anyDistrict": "Any district",
+  "estimateNoPrices": "No recent prices for this material here. Try another district or material.",
+  "estimateSavingsVsAverage": "Saves {amount} vs. the average of compared locations ({average}). Includes applicable charges.",
+  "@estimateSavingsVsAverage": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      },
+      "average": {
+        "type": "String"
+      }
+    }
+  },
+  "savedEstimates": "Saved estimates",
+  "savedEstimatesEmpty": "No saved estimates yet.",
+  "deleteEstimate": "Delete estimate",
+  "generateReport": "Generate a report",
+  "reportTypeLabel": "Report type",
+  "reportWeeklySummaryPdf": "Weekly summary (PDF)",
+  "reportPriceHistoryCsv": "Price history (CSV)",
+  "reportWeeklySummary": "Weekly summary",
+  "reportPriceHistory": "Price history",
+  "reportPeriodLabel": "Period",
+  "lastDays": "Last {days} days",
+  "@lastDays": {
+    "placeholders": {
+      "days": {
+        "type": "int"
+      }
+    }
+  },
+  "customRange": "Custom",
+  "reportLanguageLabel": "Report language",
+  "generate": "Generate",
+  "reportGenerating": "Generating…",
+  "reportFailed": "Failed",
+  "reportReady": "Your report is ready. Tap it to download.",
+  "reportNeedsPro": "Price history exports need MolBhav Pro.",
+  "yourReports": "Your reports",
+  "optionalAllMandis": "All mandis (optional)",
+  "allMandis": "All mandis",
+  "csvProNote": "Daily prices for one product, ready for Excel.",
+  "fileSavedNoViewer": "Saved {name}, but no app here can open it.",
+  "@fileSavedNoViewer": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "alertRose": "{product} rose {percent}%",
+  "@alertRose": {
+    "placeholders": {
+      "product": {
+        "type": "String"
+      },
+      "percent": {
+        "type": "String"
+      }
+    }
+  },
+  "alertDropped": "{product} dropped {percent}%",
+  "@alertDropped": {
+    "placeholders": {
+      "product": {
+        "type": "String"
+      },
+      "percent": {
+        "type": "String"
+      }
+    }
+  },
+  "alertRoseIn": "{product} rose {percent}% in {market}",
+  "@alertRoseIn": {
+    "placeholders": {
+      "product": {
+        "type": "String"
+      },
+      "percent": {
+        "type": "String"
+      },
+      "market": {
+        "type": "String"
+      }
+    }
+  },
+  "alertDroppedIn": "{product} dropped {percent}% in {market}",
+  "@alertDroppedIn": {
+    "placeholders": {
+      "product": {
+        "type": "String"
+      },
+      "percent": {
+        "type": "String"
+      },
+      "market": {
+        "type": "String"
+      }
+    }
+  },
+  "alertPreviousPrice": "Previous: {price}",
+  "@alertPreviousPrice": {
+    "placeholders": {
+      "price": {
+        "type": "String"
+      }
+    }
+  },
+  "alertCurrentPrice": "Current: {price}",
+  "@alertCurrentPrice": {
+    "placeholders": {
+      "price": {
+        "type": "String"
+      }
+    }
+  },
+  "showAllStates": "Show mandis from all states",
+  "reportRequestedAt": "Requested {dateTime}",
+  "@reportRequestedAt": {
+    "placeholders": {
+      "dateTime": {
+        "type": "String"
+      }
+    }
+  },
+  "reportGeneratedAt": "Generated {dateTime}",
+  "@reportGeneratedAt": {
+    "placeholders": {
+      "dateTime": {
+        "type": "String"
+      }
+    }
+  },
+  "reportDownloadedAt": "Downloaded {dateTime}",
+  "@reportDownloadedAt": {
+    "placeholders": {
+      "dateTime": {
+        "type": "String"
+      }
+    }
+  },
+  "reportReadyLabel": "Ready",
+  "contactUs": "Contact us",
+  "contactWhatsApp": "WhatsApp us",
+  "contactCall": "Call us",
+  "contactEmail": "Email us",
+  "cannotOpenLink": "No app on this device can open that.",
+  "supportWhatsAppPrefill": "Hello MolBhav, I need help with",
+  "supportEmailSubject": "MolBhav support request",
+  "supportEmailIntro": "Please describe what you need help with:",
+  "appVersionLabel": "App version",
+  "accountLabel": "Account",
+  "faqTitle": "Common questions",
+  "faqEmpty": "No questions are available right now.",
+  "raiseTicket": "Raise a ticket",
+  "myTickets": "My tickets",
+  "ticketsEmpty": "You have not raised a ticket yet.",
+  "ticketTitle": "Ticket",
+  "ticketRaised": "Ticket raised. We will reply here.",
+  "submitTicket": "Submit ticket",
+  "ticketCategoryLabel": "What is it about?",
+  "ticketCategoryAccount": "Account",
+  "ticketCategoryPayment": "Payment",
+  "ticketCategoryData": "Prices & data",
+  "ticketCategoryOther": "Something else",
+  "ticketSubjectLabel": "Subject",
+  "ticketSubjectHint": "Onion price for APMC Pune looks wrong",
+  "ticketSubjectHelper": "At least {count} characters.",
+  "@ticketSubjectHelper": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "ticketMessageLabel": "Message",
+  "ticketMessageHint": "Tell us what happened, and what you expected instead.",
+  "ticketStatusOpen": "Open",
+  "ticketStatusInProgress": "In progress",
+  "ticketStatusResolved": "Resolved",
+  "ticketStatusClosed": "Closed",
+  "ticketUpdatedAt": "Updated {dateTime}",
+  "@ticketUpdatedAt": {
+    "placeholders": {
+      "dateTime": {
+        "type": "String"
+      }
+    }
+  },
+  "ticketAuthorYou": "You",
+  "ticketAuthorSupport": "Support",
+  "ticketReplyHint": "Write a reply",
+  "sendReply": "Send reply",
+  "ticketClosedNotice": "This ticket is closed. Raise a new one if you still need help.",
+  "sharePrice": "Share price",
+  "shareModalLabel": "Modal price",
+  "shareModalLine": "Modal: {price}",
+  "@shareModalLine": {
+    "placeholders": {
+      "price": {
+        "type": "String"
+      }
+    }
+  },
+  "sharePriceHeadline": "{product} at {market}",
+  "@sharePriceHeadline": {
+    "placeholders": {
+      "product": {
+        "type": "String"
+      },
+      "market": {
+        "type": "String"
+      }
+    }
+  },
+  "shareRange": "Range: {min} – {max}",
+  "@shareRange": {
+    "placeholders": {
+      "min": {
+        "type": "String"
+      },
+      "max": {
+        "type": "String"
+      }
+    }
+  },
+  "sourceLine": "Source: {source}",
+  "@sourceLine": {
+    "placeholders": {
+      "source": {
+        "type": "String"
+      }
+    }
+  },
+  "shareImageSaved": "Price card saved to your downloads.",
+  "fromLink": "Shared",
+  "inviteFriend": "Invite a friend",
+  "inviteFriendSubtitle": "Share MolBhav with other buyers",
+  "inviteMessage": "I use MolBhav to check daily mandi and material prices before I buy. Try it:",
+  "myRulesAction": "My Rules",
+  "alertRulesTitle": "My Alert Rules",
+  "alertRulesEmpty": "No alert rules yet. Create one from any commodity page.",
+  "alertRuleDeleted": "Alert rule deleted.",
+  "alertRuleActiveLabel": "Active",
+  "alertRuleInactiveLabel": "Paused",
+  "alertRuleConditionBelow": "Price below {price}",
+  "@alertRuleConditionBelow": {
+    "placeholders": {
+      "price": {
+        "type": "String"
+      }
+    }
+  },
+  "alertRuleConditionAbove": "Price above {price}",
+  "@alertRuleConditionAbove": {
+    "placeholders": {
+      "price": {
+        "type": "String"
+      }
+    }
+  },
+  "alertRuleConditionDrop": "Drops by {percent}%",
+  "@alertRuleConditionDrop": {
+    "placeholders": {
+      "percent": {
+        "type": "String"
+      }
+    }
+  },
+  "alertRuleConditionSpike": "Spikes by {percent}%",
+  "@alertRuleConditionSpike": {
+    "placeholders": {
+      "percent": {
+        "type": "String"
+      }
+    }
+  },
+  "alertRulesEditTitle": "Edit Alert Rule",
+  "alertRulesThresholdPercentLabel": "Threshold (%)",
+  "alertRulesThresholdPriceLabel": "Threshold (₹/{unit})",
+  "@alertRulesThresholdPriceLabel": {
+    "placeholders": {
+      "unit": {
+        "type": "String"
+      }
+    }
+  },
+  "alertRulesActiveLabel": "Active",
+  "alertRulesCancel": "Cancel",
+  "alertRulesSave": "Save",
+  "changeNumberAction": "Change number",
+  "@changeNumberAction": {},
+  "resendOtpIn": "Resend OTP in {seconds}s",
+  "@resendOtpIn": {
+    "placeholders": {
+      "seconds": {
+        "type": "int"
+      }
+    }
+  },
+  "resendOtpAction": "Resend OTP",
+  "@resendOtpAction": {},
+  "otpAutoFillHint": "Enter OTP sent to {phone}",
+  "@otpAutoFillHint": {
+    "placeholders": {
+      "phone": {
+        "type": "String"
+      }
+    }
+  },
+  "notificationSettingsTitle": "Notification Settings",
+  "@notificationSettingsTitle": {},
+  "pushNotificationsLabel": "Push notifications",
+  "@pushNotificationsLabel": {},
+  "alertPushLabel": "Price alert push",
+  "@alertPushLabel": {},
+  "priceUpdatePushLabel": "Daily price update push",
+  "@priceUpdatePushLabel": {},
+  "whatsappNotificationsLabel": "WhatsApp notifications",
+  "@whatsappNotificationsLabel": {},
+  "alertWhatsappLabel": "Price alert on WhatsApp",
+  "@alertWhatsappLabel": {},
+  "notificationSettingsAction": "Notification settings",
+  "@notificationSettingsAction": {},
+  "monthlyBilling": "Monthly",
+  "yearlyBillingPlain": "Yearly",
+  "yearlyBilling": "Yearly (Save {percent}%)",
+  "@yearlyBilling": { "placeholders": { "percent": { "type": "int" } } },
+  "upgradeToPro": "Upgrade to Pro",
+  "renewPro": "Renew Pro",
+  "mySubscription": "My Subscription",
+  "subscriptionActive": "Active — renews {date}",
+  "@subscriptionActive": { "placeholders": { "date": { "type": "String" } } },
+  "subscriptionExpired": "Expired",
+  "subscriptionCancelled": "Cancelled",
+  "subscriptionPending": "Payment pending",
+  "subscriptionFree": "Free Plan",
+  "cancelSubscription": "Cancel Subscription",
+  "cancelSubscriptionConfirm": "Cancel your Pro subscription? Pro features stop right away and the rest of the period is not refunded.",
+  "keepSubscription": "Keep Pro",
+  "checkoutTitle": "Checkout",
+  "summaryPlan": "Plan",
+  "summaryDiscount": "Coupon discount",
+  "summaryTotal": "Total",
+  "couponCode": "Coupon Code",
+  "couponApplied": "Coupon applied! You save {amount}",
+  "@couponApplied": { "placeholders": { "amount": { "type": "String" } } },
+  "couponInvalid": "Invalid or expired coupon",
+  "proceedToPay": "Pay {amount}",
+  "@proceedToPay": { "placeholders": { "amount": { "type": "String" } } },
+  "confirmingPayment": "Confirming payment…",
+  "paymentSuccess": "Payment Successful!",
+  "paymentSuccessMessage": "You are now a Pro subscriber. Enjoy all premium features.",
+  "exploreProFeatures": "Explore Pro Features",
+  "paymentFailed": "Payment Failed",
+  "paymentsMobileOnly": "Payments are available in the mobile app",
+  "paymentActivationPending": "Payment received — activation pending. Pull to refresh in a minute.",
+  "externalWalletUnsupported": "External wallets are not supported. Choose another payment method.",
+  "upgradeToUnlock": "Upgrade to Pro to unlock this feature",
+  "seePlans": "See Plans",
+  "proFeatureReports": "Unlimited price reports (PDF + CSV)",
+  "proFeatureAlerts": "Advanced price alert rules",
+  "proFeatureProcurement": "Procurement cost estimator",
+  "proFeatureComparison": "Mandi price comparison (all markets)",
+  "freeFeatureBasicPrices": "Basic daily prices",
+  "freeFeatureWatchlist": "Watchlist (up to 5 items)"
 }

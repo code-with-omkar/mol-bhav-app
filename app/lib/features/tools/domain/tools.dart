@@ -1,6 +1,8 @@
-import 'package:equatable/equatable.dart';
-import 'package:injectable/injectable.dart';
+import 'dart:typed_data';
 
+import 'package:equatable/equatable.dart';
+
+import '../../../core/error/failure.dart';
 import '../../../core/error/result.dart';
 
 class NamedOption extends Equatable {
@@ -18,34 +20,19 @@ class EstimatorMaterial extends Equatable {
     required this.id,
     required this.name,
     required this.categoryCode,
-    required this.units,
+    required this.unit,
   });
 
   final String id;
   final String name;
   final String categoryCode;
 
-  /// Units the material can be ordered in, e.g. Bags, Tonnes.
-  final List<NamedOption> units;
+  /// The product's default unit. The API prices requirements only in it, so
+  /// the unit picker is locked to it.
+  final NamedOption unit;
 
   @override
-  List<Object?> get props => [id, name, categoryCode, units];
-}
-
-class EstimatorOptions extends Equatable {
-  const EstimatorOptions({
-    required this.categories,
-    required this.materials,
-    required this.locations,
-  });
-
-  /// `id` is the category code.
-  final List<NamedOption> categories;
-  final List<EstimatorMaterial> materials;
-  final List<NamedOption> locations;
-
-  @override
-  List<Object?> get props => [categories, materials, locations];
+  List<Object?> get props => [id, name, categoryCode, unit];
 }
 
 class EstimateRequest extends Equatable {
@@ -53,61 +40,62 @@ class EstimateRequest extends Equatable {
     required this.materialId,
     required this.quantity,
     required this.unitId,
-    required this.locationId,
+    this.districtId,
   });
 
   final String materialId;
   final num quantity;
   final String unitId;
-  final String locationId;
+
+  /// Delivery district; `null` compares every location with prices.
+  final String? districtId;
 
   @override
-  List<Object?> get props => [materialId, quantity, unitId, locationId];
+  List<Object?> get props => [materialId, quantity, unitId, districtId];
 }
 
+/// A priced requirement: the saved (or about-to-be-saved) estimate.
 class Estimate extends Equatable {
   const Estimate({
+    required this.requirementId,
     required this.estimatedCost,
     required this.quantity,
-    required this.unitName,
-    required this.priceUnit,
     required this.lowestPrice,
     required this.lowestSourceName,
     required this.averagePrice,
     required this.savings,
     required this.benchmarks,
-    required this.source,
     required this.updatedAt,
   });
 
+  final String requirementId;
+
+  /// Cheapest location's total, including the platform's cost components.
   final num estimatedCost;
   final num quantity;
-
-  /// Quantity unit as entered, e.g. "bags".
-  final String unitName;
-
-  /// Benchmark price unit, e.g. "bag".
-  final String priceUnit;
   final num lowestPrice;
   final String lowestSourceName;
+
+  /// Mean unit price across the compared locations: the reference.
   final num averagePrice;
+
+  /// What buying at the cheapest location saves against [averagePrice].
   final num savings;
   final List<Benchmark> benchmarks;
-  final String source;
+
+  /// Date of the price the cheapest option is based on (data freshness).
   final DateTime updatedAt;
 
   @override
   List<Object?> get props => [
+    requirementId,
     estimatedCost,
     quantity,
-    unitName,
-    priceUnit,
     lowestPrice,
     lowestSourceName,
     averagePrice,
     savings,
     benchmarks,
-    source,
     updatedAt,
   ];
 }
@@ -117,150 +105,159 @@ class Benchmark extends Equatable {
     required this.name,
     required this.price,
     required this.isLowest,
-    this.meta,
+    required this.recordDate,
   });
 
   final String name;
-  final String? meta;
   final num price;
   final bool isLowest;
 
-  @override
-  List<Object?> get props => [name, meta, price, isLowest];
-}
-
-class ReportsOverview extends Equatable {
-  const ReportsOverview({
-    required this.currentWeek,
-    required this.weekly,
-    required this.exports,
-  });
-
-  final WeekSummary? currentWeek;
-  final List<WeeklyReport> weekly;
-  final List<ExportItem> exports;
-
-  bool get isEmpty => currentWeek == null && weekly.isEmpty && exports.isEmpty;
+  /// Date of the price this location is compared on.
+  final DateTime recordDate;
 
   @override
-  List<Object?> get props => [currentWeek, weekly, exports];
+  List<Object?> get props => [name, price, isLowest, recordDate];
 }
 
-class WeekSummary extends Equatable {
-  const WeekSummary({
-    required this.start,
-    required this.end,
-    required this.potentialSavings,
-    required this.watchlistCount,
-    required this.alertCount,
-    required this.opportunityCount,
-    required this.language,
+class SavedEstimate extends Equatable {
+  const SavedEstimate({
+    required this.id,
+    required this.productId,
+    required this.productName,
+    required this.quantity,
+    required this.unitSymbol,
+    required this.districtName,
+    required this.createdAt,
   });
 
-  final DateTime start;
-  final DateTime end;
-  final num potentialSavings;
-  final int watchlistCount;
-  final int alertCount;
-  final int opportunityCount;
-
-  /// Language code of the PDF.
-  final String language;
+  final String id;
+  final String productId;
+  final String productName;
+  final num quantity;
+  final String unitSymbol;
+  final String? districtName;
+  final DateTime createdAt;
 
   @override
   List<Object?> get props => [
-    start,
-    end,
-    potentialSavings,
-    watchlistCount,
-    alertCount,
-    opportunityCount,
-    language,
+    id,
+    productId,
+    productName,
+    quantity,
+    unitSymbol,
+    districtName,
+    createdAt,
   ];
 }
 
-class WeeklyReport extends Equatable {
-  const WeeklyReport({
-    required this.id,
-    required this.start,
-    required this.end,
-    required this.language,
-    required this.pages,
-  });
-
-  final String id;
-  final DateTime start;
-  final DateTime end;
-  final String language;
-  final int pages;
-
-  @override
-  List<Object?> get props => [id, start, end, language, pages];
+/// No location has a recent price for the product.
+final class NoPricesFailure extends Failure {
+  const NoPricesFailure();
 }
 
-class ExportItem extends Equatable {
-  const ExportItem({
-    required this.id,
-    required this.title,
-    required this.subtitle,
-    required this.isLocked,
-  });
-
-  final String id;
-  final String title;
-  final String? subtitle;
-
-  /// Pro-only for the current plan.
-  final bool isLocked;
-
-  @override
-  List<Object?> get props => [id, title, subtitle, isLocked];
-}
-
-abstract interface class ToolsRepository {
-  Future<Result<EstimatorOptions>> getEstimatorOptions();
-
+abstract interface class EstimatorRepository {
+  /// Creates a requirement and prices it (`POST /procurement/requirements`,
+  /// then `POST …/{id}/opportunities`).
   Future<Result<Estimate>> estimate(EstimateRequest request);
 
-  Future<Result<void>> saveEstimate(EstimateRequest request);
+  /// Re-prices a saved requirement.
+  Future<Result<Estimate>> reprice(SavedEstimate saved);
 
-  Future<Result<ReportsOverview>> getReports();
+  Future<Result<List<SavedEstimate>>> getSaved();
+
+  Future<Result<void>> delete(String requirementId);
 }
 
-@injectable
-class GetEstimatorOptions {
-  const GetEstimatorOptions(this._repository);
+// --- Reports ---------------------------------------------------------------
 
-  final ToolsRepository _repository;
+enum ReportKind { weeklySummary, priceHistoryCsv }
 
-  Future<Result<EstimatorOptions>> call() => _repository.getEstimatorOptions();
+enum ReportStatus { pending, ready, failed }
+
+class ReportRequest extends Equatable {
+  const ReportRequest({
+    required this.kind,
+    required this.from,
+    required this.to,
+    required this.language,
+    this.productId,
+    this.mandiId,
+  });
+
+  final ReportKind kind;
+  final DateTime from;
+  final DateTime to;
+  final String language;
+
+  /// Price history CSV only.
+  final String? productId;
+  final String? mandiId;
+
+  @override
+  List<Object?> get props => [kind, from, to, language, productId, mandiId];
 }
 
-@injectable
-class CalculateEstimate {
-  const CalculateEstimate(this._repository);
+class GeneratedReport extends Equatable {
+  const GeneratedReport({
+    required this.id,
+    required this.kind,
+    required this.status,
+    required this.requestedAt,
+    this.completedAt,
+    this.lastDownloadedAt,
+    this.failureReason,
+  });
 
-  final ToolsRepository _repository;
+  final String id;
 
-  Future<Result<Estimate>> call(EstimateRequest request) =>
-      _repository.estimate(request);
+  /// `null` for report types this app version doesn't request.
+  final ReportKind? kind;
+  final ReportStatus status;
+  final DateTime requestedAt;
+
+  /// When generation finished — null while still pending.
+  final DateTime? completedAt;
+
+  /// When this device's user last downloaded the file — null until they do.
+  final DateTime? lastDownloadedAt;
+  final String? failureReason;
+
+  @override
+  List<Object?> get props => [
+    id,
+    kind,
+    status,
+    requestedAt,
+    completedAt,
+    lastDownloadedAt,
+    failureReason,
+  ];
 }
 
-@injectable
-class SaveEstimate {
-  const SaveEstimate(this._repository);
+class DownloadedFile {
+  const DownloadedFile({
+    required this.name,
+    required this.mimeType,
+    required this.bytes,
+  });
 
-  final ToolsRepository _repository;
-
-  Future<Result<void>> call(EstimateRequest request) =>
-      _repository.saveEstimate(request);
+  final String name;
+  final String mimeType;
+  final Uint8List bytes;
 }
 
-@injectable
-class GetReports {
-  const GetReports(this._repository);
+/// The report needs a Pro plan (API 403).
+final class ProRequiredFailure extends Failure {
+  const ProRequiredFailure();
+}
 
-  final ToolsRepository _repository;
+abstract interface class ReportsRepository {
+  Future<Result<List<GeneratedReport>>> getReports();
 
-  Future<Result<ReportsOverview>> call() => _repository.getReports();
+  /// Returns the new report's id.
+  Future<Result<String>> request(ReportRequest request);
+
+  Future<Result<GeneratedReport>> getReport(String id);
+
+  Future<Result<DownloadedFile>> download(String id);
 }

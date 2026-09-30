@@ -15,4 +15,9 @@ internal sealed class ProductRepository(MolBhavDbContext dbContext)
 
     public Task<bool> CodeExistsAsync(CatalogCode code, CancellationToken cancellationToken = default) =>
         Set.AnyAsync(p => p.Code == code, cancellationToken);
+
+    public Task<Product?> GetByCodeAsync(CatalogCode code, CancellationToken cancellationToken = default) =>
+        Set.Include(p => p.Variants)
+            .AsSplitQuery()
+            .SingleOrDefaultAsync(p => p.Code == code && p.IsActive, cancellationToken);
 }

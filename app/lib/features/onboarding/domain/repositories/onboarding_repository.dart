@@ -11,4 +11,6 @@ abstract interface class OnboardingRepository {
   Future<Result<List<ProcurementCategory>>> getCategories();
 
   Future<Result<void>> saveCategories(Set<String> categoryIds);
+
+  Future<Result<SavedProfile>> getSavedProfile();
 }

@@ -29,6 +29,41 @@ class MbCard extends StatelessWidget {
   }
 }
 
+/// Auth-style form centred on every screen size, max 420 wide, scrollable
+/// above the keyboard.
+class MbCenteredForm extends StatelessWidget {
+  const MbCenteredForm({super.key, required this.children});
+
+  static const maxWidth = 420.0;
+
+  final List<Widget> children;
+
+  @override
+  Widget build(BuildContext context) {
+    return LayoutBuilder(
+      builder: (context, constraints) => SingleChildScrollView(
+        keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
+        padding: const EdgeInsets.all(MbSpacing.s4),
+        child: ConstrainedBox(
+          constraints: BoxConstraints(
+            minHeight: constraints.maxHeight - MbSpacing.s4 * 2,
+          ),
+          child: Center(
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: maxWidth),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: children,
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
 /// Sticky bottom CTA area (`.mb-footer`).
 class MbFooter extends StatelessWidget {
   const MbFooter({super.key, required this.child});

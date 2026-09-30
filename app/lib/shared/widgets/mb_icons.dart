@@ -86,6 +86,9 @@ enum MbIcons {
   message(
     '<path d="M4 20l1.5-4A8 8 0 1 1 8 19z"/><path d="M9 11h.01"/><path d="M12 11h.01"/><path d="M15 11h.01"/>',
   ),
+  email(
+    '<rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3.5 6.5l8.5 6 8.5-6"/>',
+  ),
   language(
     '<circle cx="12" cy="12" r="9"/><path d="M3 12h18"/><path d="M12 3a14 14 0 0 1 0 18"/><path d="M12 3a14 14 0 0 0 0 18"/>',
   ),

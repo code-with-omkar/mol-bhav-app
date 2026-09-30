@@ -11,7 +11,7 @@ namespace MolBhav.Api;
 
 public static class DependencyInjection
 {
-    public static IServiceCollection AddPresentation(this IServiceCollection services, IConfiguration configuration)
+    public static IServiceCollection AddPresentation(this IServiceCollection services, IConfiguration configuration, IHostEnvironment environment)
     {
         services
             .AddControllers()
@@ -39,7 +39,7 @@ public static class DependencyInjection
             .AddUrlSegmentVersioning()
             .AddApiAuthorization()
             .AddApiRateLimiting(configuration)
-            .AddScopedCors(configuration)
+            .AddScopedCors(configuration, environment)
             .AddRequestLanguageNegotiation(configuration)
             .AddReverseProxySupport(configuration)
             .AddVersionedOpenApi();

@@ -57,6 +57,12 @@ class OnboardingRepositoryImpl implements OnboardingRepository {
   }
 
   @override
+  Future<Result<SavedProfile>> getSavedProfile() => runApiCall(
+    () async =>
+        SavedProfileModel.fromJson(await _remote.getSavedProfile()).entity,
+  );
+
+  @override
   Future<Result<void>> saveCategories(Set<String> categoryIds) {
     // Choosing categories is the last onboarding step.
     return runApiCall(() async {

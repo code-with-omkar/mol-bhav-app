@@ -27,6 +27,14 @@ android {
         // flag during build.
         versionCode = flutter.versionCode
         versionName = flutter.versionName
+
+        // Host for the App Links intent-filter. A manifest cannot read a Dart
+        // define, so the host is a build property: pass it alongside
+        // --dart-define=DEEP_LINK_BASE (e.g. -Pdeep_link_host=molbhav.in).
+        // The placeholder default is a host nobody owns, so an unconfigured
+        // build verifies nothing and claims no links.
+        manifestPlaceholders["deepLinkHost"] =
+            (project.findProperty("deep_link_host") as String?) ?: "invalid.example"
     }
 
     buildTypes {

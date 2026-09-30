@@ -6,8 +6,9 @@ import 'markets_entities.dart';
 abstract interface class MarketsRepository {
   Future<Result<List<Commodity>>> getCommodities();
 
-  /// [marketIds] `null` lets the API choose the user's default markets.
-  Future<Result<MarketComparison>> getComparison(
+  /// Cached comparison first, then the live one. [marketIds] `null` lets
+  /// the API choose the user's default markets.
+  Stream<Result<MarketComparison>> watchComparison(
     String commodityId, {
     List<String>? marketIds,
   });
@@ -36,10 +37,10 @@ class GetMarketComparison {
 
   final MarketsRepository _repository;
 
-  Future<Result<MarketComparison>> call(
+  Stream<Result<MarketComparison>> call(
     String commodityId, {
     List<String>? marketIds,
-  }) => _repository.getComparison(commodityId, marketIds: marketIds);
+  }) => _repository.watchComparison(commodityId, marketIds: marketIds);
 }
 
 @injectable

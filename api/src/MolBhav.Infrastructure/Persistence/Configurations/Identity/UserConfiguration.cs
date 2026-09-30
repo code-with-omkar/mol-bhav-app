@@ -35,6 +35,8 @@ internal sealed class UserConfiguration : IEntityTypeConfiguration<User>
             .IsFixedLength()
             .IsRequired();
 
+        builder.Property(u => u.DisplayName).HasMaxLength(User.DisplayNameMaxLength);
+
         builder.Property(u => u.Status).IsRequired();
         builder.Property(u => u.SubscriptionTier).IsRequired();
         builder.Property(u => u.Role).IsRequired();

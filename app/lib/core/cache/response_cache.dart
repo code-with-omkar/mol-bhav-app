@@ -13,7 +13,8 @@ class CachedResponse {
   final DateTime savedAt;
 }
 
-/// Last successful API responses, for offline use. Bodies are stored raw so
+/// Last successful API responses, shown instantly on the next launch and used
+/// offline. Bodies are stored raw so
 /// the repository's normal parsing applies to cached and live data alike.
 ///
 /// Keyed by UI language too, because the API localises names.
@@ -46,6 +47,16 @@ class ResponseCache {
       return null;
     } on TypeError {
       return null;
+    }
+  }
+
+  /// Drops [keys] in every language, so the next read goes to the API.
+  Future<void> invalidate(Iterable<String> keys) async {
+    final suffixes = {for (final k in keys) '.$k'};
+    for (final key in _prefs.getKeys().where(
+      (k) => k.startsWith(_prefix) && suffixes.any(k.endsWith),
+    )) {
+      await _prefs.remove(key);
     }
   }
 

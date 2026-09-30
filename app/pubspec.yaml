@@ -7,6 +7,7 @@ environment:
   sdk: ^3.13.2
 
 dependencies:
+  crypto: ^3.0.6
   dio: ^5.11.1
   equatable: ^3.0.0
   flutter:
@@ -21,7 +22,17 @@ dependencies:
   google_fonts: ^8.2.1
   injectable: ^3.0.0
   intl: ^0.20.3
+  open_filex: ^4.7.0
+  path_provider: ^2.1.6
+  package_info_plus: ^10.2.1
+  share_plus: ^13.3.0
   shared_preferences: ^2.5.5
+  firebase_core: ^3.0.0
+  firebase_messaging: ^15.0.0
+  sms_autofill: ^2.4.0
+  url_launcher: ^6.3.2
+  web: ^1.1.1
+  razorpay_flutter: ^1.3.7
 
 dev_dependencies:
   flutter_test:
@@ -31,9 +42,35 @@ dev_dependencies:
   injectable_generator: ^3.1.3
   bloc_test: ^10.0.0
   mocktail: ^1.0.5
+  flutter_launcher_icons: ^0.14.4
+  flutter_native_splash: ^2.4.8
 
 flutter:
   uses-material-design: true
   generate: true
   assets:
     - assets/images/
+    - assets/branding/
+
+flutter_launcher_icons:
+  image_path: assets/branding/molbhav_mark.png
+  android: true
+  ios: true
+  remove_alpha_ios: true
+  background_color_ios: "#FFFFFF"
+  adaptive_icon_background: "#FFFFFF"
+  adaptive_icon_foreground: assets/branding/molbhav_mark.png
+  adaptive_icon_foreground_inset: 22
+  web:
+    generate: true
+    image_path: assets/branding/molbhav_mark.png
+    background_color: "#F7F8F5"
+    theme_color: "#168447"
+
+flutter_native_splash:
+  color: "#F7F8F5"
+  image: assets/branding/molbhav_splash.png
+  android_12:
+    color: "#F7F8F5"
+    image: assets/branding/molbhav_splash.png
+  web: true

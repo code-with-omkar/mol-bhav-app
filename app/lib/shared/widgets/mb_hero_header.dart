@@ -18,16 +18,21 @@ class MbHeroHeader extends StatelessWidget {
     required this.greeting,
     required this.alertsLabel,
     this.subtitle,
+    this.chip,
     this.unread = false,
     this.onAlerts,
   });
 
   static const overlap = MbSpacing.s6;
 
+  /// May be empty: the greeting then stands alone.
   final String name;
   final String greeting;
   final String alertsLabel;
   final String? subtitle;
+
+  /// Short profile line in a pill, e.g. `Caterer · Pune, Maharashtra`.
+  final String? chip;
   final bool unread;
   final VoidCallback? onAlerts;
 
@@ -62,11 +67,7 @@ class MbHeroHeader extends StatelessWidget {
                       constraints: const BoxConstraints(minHeight: 48),
                       child: Row(
                         children: [
-                          const MbWordmark(
-                            size: 22,
-                            descriptor: false,
-                            onHero: true,
-                          ),
+                          const MbWordmark(size: 22, onHero: true),
                           const Spacer(),
                           _Bell(
                             label: alertsLabel,
@@ -96,7 +97,36 @@ class MbHeroHeader extends StatelessWidget {
                         color: onHero.withValues(alpha: 0.9),
                       ),
                     ),
-                    Text(name, style: t.valueMd.copyWith(color: onHero)),
+                    if (name.isNotEmpty)
+                      Text(name, style: t.valueMd.copyWith(color: onHero)),
+                    if (chip != null) ...[
+                      const SizedBox(height: MbSpacing.s2),
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 10,
+                          vertical: 4,
+                        ),
+                        decoration: BoxDecoration(
+                          color: onHero.withValues(alpha: 0.14),
+                          borderRadius: BorderRadius.circular(MbRadius.pill),
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            MbIcon(MbIcons.market, size: 14, color: onHero),
+                            const SizedBox(width: 6),
+                            Flexible(
+                              child: Text(
+                                chip!,
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: t.caption.copyWith(color: onHero),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
                     if (subtitle != null) ...[
                       const SizedBox(height: 4),
                       ConstrainedBox(

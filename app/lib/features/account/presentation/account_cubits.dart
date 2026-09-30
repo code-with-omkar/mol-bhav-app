@@ -1,10 +1,14 @@
+import 'dart:async';
+
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:injectable/injectable.dart';
 
 import '../../../core/error/failure.dart';
+import '../../../core/notifications/notification_service.dart';
 import '../../../core/utils/data_state.dart';
 import '../domain/account.dart';
+import 'profile_cubit.dart';
 
 class MoreState extends Equatable {
   const MoreState({
@@ -23,56 +27,33 @@ class MoreState extends Equatable {
   List<Object?> get props => [profile, actionFailure, signedOut];
 }
 
+/// Shows the shared [ProfileCubit] state, which the edit screens refresh.
 @injectable
 class MoreCubit extends Cubit<MoreState> {
-  MoreCubit(this._getProfile, this._updateNotifications, this._signOut)
-    : super(const MoreState());
-
-  final GetAccountProfile _getProfile;
-  final UpdateNotifications _updateNotifications;
-  final SignOut _signOut;
-
-  Future<void> load() async {
-    emit(MoreState(profile: DataState.loading(data: state.profile.data)));
-    emit(MoreState(profile: DataState.fromResult(await _getProfile())));
+  MoreCubit(this._profile, this._signOut, this._notificationService)
+    : super(MoreState(profile: _profile.state)) {
+    _sub = _profile.stream.listen((p) => emit(MoreState(profile: p)));
   }
 
-  Future<void> setPush(bool on) => _setNotifications(push: on);
+  final ProfileCubit _profile;
+  final SignOut _signOut;
+  final NotificationService _notificationService;
+  late final StreamSubscription<DataState<AccountProfile>> _sub;
 
-  Future<void> setWhatsapp(bool on) => _setNotifications(whatsapp: on);
+  Future<void> load() => _profile.ensureLoaded();
 
-  /// Optimistic: flips the switch, reverts if the save fails.
-  Future<void> _setNotifications({bool? push, bool? whatsapp}) async {
-    final before = state.profile.data;
-    if (before == null) return;
-    final after = before.withNotifications(push: push, whatsapp: whatsapp);
-    emit(MoreState(profile: DataState.ready(after)));
-    final result = await _updateNotifications(
-      push: after.pushEnabled,
-      whatsapp: after.whatsappEnabled,
-    );
-    result.fold(
-      (failure) => emit(
-        MoreState(profile: DataState.ready(before), actionFailure: failure),
-      ),
-      (_) {},
-    );
+  Future<void> retry() => _profile.load();
+
+  @override
+  Future<void> close() {
+    _sub.cancel();
+    return super.close();
   }
 
   Future<void> signOut() async {
+    // Unregister the device token before clearing the session.
+    await _notificationService.dispose();
     await _signOut();
     emit(MoreState(profile: state.profile, signedOut: true));
-  }
-}
-
-@injectable
-class SubscriptionCubit extends Cubit<DataState<List<SubscriptionPlan>>> {
-  SubscriptionCubit(this._getPlans) : super(const DataState());
-
-  final GetPlans _getPlans;
-
-  Future<void> load() async {
-    emit(const DataState.loading());
-    emit(DataState.fromResult(await _getPlans()));
   }
 }

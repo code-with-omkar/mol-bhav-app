@@ -161,6 +161,9 @@ class AppLocalizationsTa extends AppLocalizations {
   String get navOpportunities => 'Opportunities';
 
   @override
+  String get navAlerts => 'Alerts';
+
+  @override
   String get navMore => 'More';
 
   @override
@@ -274,6 +277,30 @@ class AppLocalizationsTa extends AppLocalizations {
 
   @override
   String get comparisonEmpty => 'No prices for these markets yet.';
+
+  @override
+  String get browseByMandi => 'Browse by mandi';
+
+  @override
+  String get browseByCommodity => 'Browse by commodity';
+
+  @override
+  String get mandiLabel => 'Mandi';
+
+  @override
+  String get mandiPricesHint =>
+      'Pick a state, district and mandi to see its latest prices.';
+
+  @override
+  String get mandiPricesEmpty => 'No recent prices at this mandi.';
+
+  @override
+  String get mandisEmpty => 'No mandis in this district yet.';
+
+  @override
+  String priceDate(String date) {
+    return 'Price date: $date';
+  }
 
   @override
   String get priceTrendsTitle => 'Price Trends';
@@ -605,4 +632,586 @@ class AppLocalizationsTa extends AppLocalizations {
 
   @override
   String get cancelAnytime => 'Cancel anytime. Prices include GST.';
+
+  @override
+  String get yourNameLabel => 'Your name';
+
+  @override
+  String get yourNameHint => 'e.g. Ramesh Patil';
+
+  @override
+  String get nameErrorLength => 'Enter 2–60 characters.';
+
+  @override
+  String get nameErrorCharacters => 'Use letters, spaces and . \' - only.';
+
+  @override
+  String get addYourName => 'Add your name';
+
+  @override
+  String get addToWatchlist => 'Add to watchlist';
+
+  @override
+  String get addToWatchlistTitle => 'Add to watchlist';
+
+  @override
+  String get removeFromWatchlist => 'Remove from watchlist';
+
+  @override
+  String get addedToWatchlist => 'Added to watchlist.';
+
+  @override
+  String get alreadyInWatchlist => 'Already in watchlist.';
+
+  @override
+  String removedFromWatchlist(String name) {
+    return '$name removed from watchlist.';
+  }
+
+  @override
+  String get undo => 'Undo';
+
+  @override
+  String get searchWatchlistHint => 'Search your watchlist';
+
+  @override
+  String get searchProductsHint => 'Search products';
+
+  @override
+  String get noMatches => 'Nothing matches your search.';
+
+  @override
+  String get categoryLabel => 'Category';
+
+  @override
+  String get allVarieties => 'All varieties';
+
+  @override
+  String get quickCostEstimate => 'Cost Estimate';
+
+  @override
+  String get estimateSavedLabel => 'Saved';
+
+  @override
+  String get unitLockedHelper => 'Prices are quoted in this unit.';
+
+  @override
+  String get anyDistrict => 'Any district';
+
+  @override
+  String get estimateNoPrices =>
+      'No recent prices for this material here. Try another district or material.';
+
+  @override
+  String estimateSavingsVsAverage(String amount, String average) {
+    return 'Saves $amount vs. the average of compared locations ($average). Includes applicable charges.';
+  }
+
+  @override
+  String get savedEstimates => 'Saved estimates';
+
+  @override
+  String get savedEstimatesEmpty => 'No saved estimates yet.';
+
+  @override
+  String get deleteEstimate => 'Delete estimate';
+
+  @override
+  String get generateReport => 'Generate a report';
+
+  @override
+  String get reportTypeLabel => 'Report type';
+
+  @override
+  String get reportWeeklySummaryPdf => 'Weekly summary (PDF)';
+
+  @override
+  String get reportPriceHistoryCsv => 'Price history (CSV)';
+
+  @override
+  String get reportWeeklySummary => 'Weekly summary';
+
+  @override
+  String get reportPriceHistory => 'Price history';
+
+  @override
+  String get reportPeriodLabel => 'Period';
+
+  @override
+  String lastDays(int days) {
+    return 'Last $days days';
+  }
+
+  @override
+  String get customRange => 'Custom';
+
+  @override
+  String get reportLanguageLabel => 'Report language';
+
+  @override
+  String get generate => 'Generate';
+
+  @override
+  String get reportGenerating => 'Generating…';
+
+  @override
+  String get reportFailed => 'Failed';
+
+  @override
+  String get reportReady => 'Your report is ready. Tap it to download.';
+
+  @override
+  String get reportNeedsPro => 'Price history exports need MolBhav Pro.';
+
+  @override
+  String get yourReports => 'Your reports';
+
+  @override
+  String get optionalAllMandis => 'All mandis (optional)';
+
+  @override
+  String get allMandis => 'All mandis';
+
+  @override
+  String get csvProNote => 'Daily prices for one product, ready for Excel.';
+
+  @override
+  String fileSavedNoViewer(String name) {
+    return 'Saved $name, but no app here can open it.';
+  }
+
+  @override
+  String alertRose(String product, String percent) {
+    return '$product rose $percent%';
+  }
+
+  @override
+  String alertDropped(String product, String percent) {
+    return '$product dropped $percent%';
+  }
+
+  @override
+  String alertRoseIn(String product, String percent, String market) {
+    return '$product rose $percent% in $market';
+  }
+
+  @override
+  String alertDroppedIn(String product, String percent, String market) {
+    return '$product dropped $percent% in $market';
+  }
+
+  @override
+  String alertPreviousPrice(String price) {
+    return 'Previous: $price';
+  }
+
+  @override
+  String alertCurrentPrice(String price) {
+    return 'Current: $price';
+  }
+
+  @override
+  String get showAllStates => 'Show mandis from all states';
+
+  @override
+  String reportRequestedAt(String dateTime) {
+    return 'Requested $dateTime';
+  }
+
+  @override
+  String reportGeneratedAt(String dateTime) {
+    return 'Generated $dateTime';
+  }
+
+  @override
+  String reportDownloadedAt(String dateTime) {
+    return 'Downloaded $dateTime';
+  }
+
+  @override
+  String get reportReadyLabel => 'Ready';
+
+  @override
+  String get contactUs => 'Contact us';
+
+  @override
+  String get contactWhatsApp => 'WhatsApp us';
+
+  @override
+  String get contactCall => 'Call us';
+
+  @override
+  String get contactEmail => 'Email us';
+
+  @override
+  String get cannotOpenLink => 'No app on this device can open that.';
+
+  @override
+  String get supportWhatsAppPrefill => 'Hello MolBhav, I need help with';
+
+  @override
+  String get supportEmailSubject => 'MolBhav support request';
+
+  @override
+  String get supportEmailIntro => 'Please describe what you need help with:';
+
+  @override
+  String get appVersionLabel => 'App version';
+
+  @override
+  String get accountLabel => 'Account';
+
+  @override
+  String get faqTitle => 'Common questions';
+
+  @override
+  String get faqEmpty => 'No questions are available right now.';
+
+  @override
+  String get raiseTicket => 'Raise a ticket';
+
+  @override
+  String get myTickets => 'My tickets';
+
+  @override
+  String get ticketsEmpty => 'You have not raised a ticket yet.';
+
+  @override
+  String get ticketTitle => 'Ticket';
+
+  @override
+  String get ticketRaised => 'Ticket raised. We will reply here.';
+
+  @override
+  String get submitTicket => 'Submit ticket';
+
+  @override
+  String get ticketCategoryLabel => 'What is it about?';
+
+  @override
+  String get ticketCategoryAccount => 'Account';
+
+  @override
+  String get ticketCategoryPayment => 'Payment';
+
+  @override
+  String get ticketCategoryData => 'Prices & data';
+
+  @override
+  String get ticketCategoryOther => 'Something else';
+
+  @override
+  String get ticketSubjectLabel => 'Subject';
+
+  @override
+  String get ticketSubjectHint => 'Onion price for APMC Pune looks wrong';
+
+  @override
+  String ticketSubjectHelper(int count) {
+    return 'At least $count characters.';
+  }
+
+  @override
+  String get ticketMessageLabel => 'Message';
+
+  @override
+  String get ticketMessageHint =>
+      'Tell us what happened, and what you expected instead.';
+
+  @override
+  String get ticketStatusOpen => 'Open';
+
+  @override
+  String get ticketStatusInProgress => 'In progress';
+
+  @override
+  String get ticketStatusResolved => 'Resolved';
+
+  @override
+  String get ticketStatusClosed => 'Closed';
+
+  @override
+  String ticketUpdatedAt(String dateTime) {
+    return 'Updated $dateTime';
+  }
+
+  @override
+  String get ticketAuthorYou => 'You';
+
+  @override
+  String get ticketAuthorSupport => 'Support';
+
+  @override
+  String get ticketReplyHint => 'Write a reply';
+
+  @override
+  String get sendReply => 'Send reply';
+
+  @override
+  String get ticketClosedNotice =>
+      'This ticket is closed. Raise a new one if you still need help.';
+
+  @override
+  String get sharePrice => 'Share price';
+
+  @override
+  String get shareModalLabel => 'Modal price';
+
+  @override
+  String shareModalLine(String price) {
+    return 'Modal: $price';
+  }
+
+  @override
+  String sharePriceHeadline(String product, String market) {
+    return '$product at $market';
+  }
+
+  @override
+  String shareRange(String min, String max) {
+    return 'Range: $min – $max';
+  }
+
+  @override
+  String sourceLine(String source) {
+    return 'Source: $source';
+  }
+
+  @override
+  String get shareImageSaved => 'Price card saved to your downloads.';
+
+  @override
+  String get fromLink => 'Shared';
+
+  @override
+  String get inviteFriend => 'Invite a friend';
+
+  @override
+  String get inviteFriendSubtitle => 'Share MolBhav with other buyers';
+
+  @override
+  String get inviteMessage =>
+      'I use MolBhav to check daily mandi and material prices before I buy. Try it:';
+
+  @override
+  String get myRulesAction => 'My Rules';
+
+  @override
+  String get alertRulesTitle => 'My Alert Rules';
+
+  @override
+  String get alertRulesEmpty =>
+      'No alert rules yet. Create one from any commodity page.';
+
+  @override
+  String get alertRuleDeleted => 'Alert rule deleted.';
+
+  @override
+  String get alertRuleActiveLabel => 'Active';
+
+  @override
+  String get alertRuleInactiveLabel => 'Paused';
+
+  @override
+  String alertRuleConditionBelow(String price) {
+    return 'Price below $price';
+  }
+
+  @override
+  String alertRuleConditionAbove(String price) {
+    return 'Price above $price';
+  }
+
+  @override
+  String alertRuleConditionDrop(String percent) {
+    return 'Drops by $percent%';
+  }
+
+  @override
+  String alertRuleConditionSpike(String percent) {
+    return 'Spikes by $percent%';
+  }
+
+  @override
+  String get alertRulesEditTitle => 'Edit Alert Rule';
+
+  @override
+  String get alertRulesThresholdPercentLabel => 'Threshold (%)';
+
+  @override
+  String alertRulesThresholdPriceLabel(String unit) {
+    return 'Threshold (₹/$unit)';
+  }
+
+  @override
+  String get alertRulesActiveLabel => 'Active';
+
+  @override
+  String get alertRulesCancel => 'Cancel';
+
+  @override
+  String get alertRulesSave => 'Save';
+
+  @override
+  String get changeNumberAction => 'Change number';
+
+  @override
+  String resendOtpIn(int seconds) {
+    return 'Resend OTP in ${seconds}s';
+  }
+
+  @override
+  String get resendOtpAction => 'Resend OTP';
+
+  @override
+  String otpAutoFillHint(String phone) {
+    return 'Enter OTP sent to $phone';
+  }
+
+  @override
+  String get notificationSettingsTitle => 'Notification Settings';
+
+  @override
+  String get pushNotificationsLabel => 'Push notifications';
+
+  @override
+  String get alertPushLabel => 'Price alert push';
+
+  @override
+  String get priceUpdatePushLabel => 'Daily price update push';
+
+  @override
+  String get whatsappNotificationsLabel => 'WhatsApp notifications';
+
+  @override
+  String get alertWhatsappLabel => 'Price alert on WhatsApp';
+
+  @override
+  String get notificationSettingsAction => 'Notification settings';
+
+  @override
+  String get monthlyBilling => 'Monthly';
+
+  @override
+  String get yearlyBillingPlain => 'Yearly';
+
+  @override
+  String yearlyBilling(int percent) {
+    return 'Yearly (Save $percent%)';
+  }
+
+  @override
+  String get upgradeToPro => 'Upgrade to Pro';
+
+  @override
+  String get renewPro => 'Renew Pro';
+
+  @override
+  String get mySubscription => 'My Subscription';
+
+  @override
+  String subscriptionActive(String date) {
+    return 'Active — renews $date';
+  }
+
+  @override
+  String get subscriptionExpired => 'Expired';
+
+  @override
+  String get subscriptionCancelled => 'Cancelled';
+
+  @override
+  String get subscriptionPending => 'Payment pending';
+
+  @override
+  String get subscriptionFree => 'Free Plan';
+
+  @override
+  String get cancelSubscription => 'Cancel Subscription';
+
+  @override
+  String get cancelSubscriptionConfirm =>
+      'Cancel your Pro subscription? Pro features stop right away and the rest of the period is not refunded.';
+
+  @override
+  String get keepSubscription => 'Keep Pro';
+
+  @override
+  String get checkoutTitle => 'Checkout';
+
+  @override
+  String get summaryPlan => 'Plan';
+
+  @override
+  String get summaryDiscount => 'Coupon discount';
+
+  @override
+  String get summaryTotal => 'Total';
+
+  @override
+  String get couponCode => 'Coupon Code';
+
+  @override
+  String couponApplied(String amount) {
+    return 'Coupon applied! You save $amount';
+  }
+
+  @override
+  String get couponInvalid => 'Invalid or expired coupon';
+
+  @override
+  String proceedToPay(String amount) {
+    return 'Pay $amount';
+  }
+
+  @override
+  String get confirmingPayment => 'Confirming payment…';
+
+  @override
+  String get paymentSuccess => 'Payment Successful!';
+
+  @override
+  String get paymentSuccessMessage =>
+      'You are now a Pro subscriber. Enjoy all premium features.';
+
+  @override
+  String get exploreProFeatures => 'Explore Pro Features';
+
+  @override
+  String get paymentFailed => 'Payment Failed';
+
+  @override
+  String get paymentsMobileOnly => 'Payments are available in the mobile app';
+
+  @override
+  String get paymentActivationPending =>
+      'Payment received — activation pending. Pull to refresh in a minute.';
+
+  @override
+  String get externalWalletUnsupported =>
+      'External wallets are not supported. Choose another payment method.';
+
+  @override
+  String get upgradeToUnlock => 'Upgrade to Pro to unlock this feature';
+
+  @override
+  String get seePlans => 'See Plans';
+
+  @override
+  String get proFeatureReports => 'Unlimited price reports (PDF + CSV)';
+
+  @override
+  String get proFeatureAlerts => 'Advanced price alert rules';
+
+  @override
+  String get proFeatureProcurement => 'Procurement cost estimator';
+
+  @override
+  String get proFeatureComparison => 'Mandi price comparison (all markets)';
+
+  @override
+  String get freeFeatureBasicPrices => 'Basic daily prices';
+
+  @override
+  String get freeFeatureWatchlist => 'Watchlist (up to 5 items)';
 }

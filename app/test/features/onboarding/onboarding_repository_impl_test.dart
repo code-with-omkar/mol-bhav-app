@@ -20,6 +20,7 @@ void main() {
     registerFallbackValue(
       const BusinessProfileRequest(
         BusinessProfile(
+          displayName: '',
           businessTypeId: '',
           stateCode: '',
           districtCode: '',
@@ -70,6 +71,7 @@ void main() {
   test('saveBusinessProfile sends the documented body', () async {
     when(() => remote.saveBusinessProfile(any())).thenAnswer((_) async {});
     const profile = BusinessProfile(
+      displayName: 'Ramesh Patil',
       businessTypeId: 't1',
       stateCode: 's1',
       districtCode: 'd1',
@@ -82,10 +84,12 @@ void main() {
         verify(() => remote.saveBusinessProfile(captureAny())).captured.single
             as BusinessProfileRequest;
     expect(sent.toJson(), {
-      'businessTypeId': 't1',
-      'stateCode': 's1',
-      'districtCode': 'd1',
+      'displayName': 'Ramesh Patil',
+      'businessType': 't1',
+      'state': 's1',
+      'district': 'd1',
       'preferredLanguage': 'mr',
+      'categories': <String>[],
     });
   });
 

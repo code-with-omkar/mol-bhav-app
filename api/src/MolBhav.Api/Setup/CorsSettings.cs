@@ -10,4 +10,7 @@ public sealed class CorsSettings
     public const string PolicyName = "MolBhavCors";
 
     public string[] AllowedOrigins { get; set; } = [];
+
+    /// <summary>Development only: allow any <c>http(s)://localhost:*</c> origin (Flutter web picks a random port per run).</summary>
+    public bool AllowAnyLocalhostPort { get; set; }
 }

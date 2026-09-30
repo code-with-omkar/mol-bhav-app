@@ -26,6 +26,8 @@ class MbTextField extends StatefulWidget {
     this.onChanged,
     this.onSubmitted,
     this.enabled = true,
+    this.minLines,
+    this.maxLines = 1,
   });
 
   final TextEditingController? controller;
@@ -43,6 +45,11 @@ class MbTextField extends StatefulWidget {
   final ValueChanged<String>? onChanged;
   final ValueChanged<String>? onSubmitted;
   final bool enabled;
+
+  /// Multi-line input (a ticket message, a note): set both to let the field
+  /// grow. Defaults keep every existing field single-line.
+  final int? minLines;
+  final int? maxLines;
 
   @override
   State<MbTextField> createState() => _MbTextFieldState();
@@ -98,6 +105,8 @@ class _MbTextFieldState extends State<MbTextField> {
                 textInputAction: widget.textInputAction,
                 onChanged: widget.onChanged,
                 onSubmitted: widget.onSubmitted,
+                minLines: widget.minLines,
+                maxLines: widget.maxLines,
                 style: t.fieldInput.copyWith(color: c.ink),
                 cursorColor: c.primary,
                 decoration: InputDecoration(

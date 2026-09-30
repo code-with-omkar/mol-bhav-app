@@ -18,6 +18,8 @@ class _MockSaveBusinessProfile extends Mock implements SaveBusinessProfile {}
 
 class _MockLocaleRepository extends Mock implements LocaleRepository {}
 
+class _MockGetSavedProfile extends Mock implements GetSavedProfile {}
+
 void main() {
   late _MockGetProfileOptions getOptions;
   late _MockGetDistricts getDistricts;
@@ -33,6 +35,7 @@ void main() {
   setUpAll(() {
     registerFallbackValue(
       const BusinessProfile(
+        displayName: '',
         businessTypeId: '',
         stateCode: '',
         districtCode: '',
@@ -49,8 +52,13 @@ void main() {
     when(() => locale.current).thenReturn(AppLanguage.marathi);
   });
 
-  BusinessProfileCubit build() =>
-      BusinessProfileCubit(getOptions, getDistricts, save, locale);
+  BusinessProfileCubit build() => BusinessProfileCubit(
+    getOptions,
+    getDistricts,
+    save,
+    _MockGetSavedProfile(),
+    locale,
+  );
 
   test('defaults the preferred language to the app language', () {
     expect(build().state.language, AppLanguage.marathi);
@@ -163,6 +171,7 @@ void main() {
     expect(
       const BusinessProfileState(
         language: AppLanguage.english,
+        displayName: 'Ramesh Patil',
         businessTypeId: 't1',
         stateCode: 's1',
         districtCode: 'd1',
@@ -178,6 +187,7 @@ void main() {
     build: build,
     seed: () => const BusinessProfileState(
       language: AppLanguage.hindi,
+      displayName: 'Ramesh Patil',
       businessTypeId: 't1',
       stateCode: 's1',
       districtCode: 'd1',
@@ -186,6 +196,7 @@ void main() {
     expect: () => const [
       BusinessProfileState(
         language: AppLanguage.hindi,
+        displayName: 'Ramesh Patil',
         businessTypeId: 't1',
         stateCode: 's1',
         districtCode: 'd1',
@@ -193,6 +204,7 @@ void main() {
       ),
       BusinessProfileState(
         language: AppLanguage.hindi,
+        displayName: 'Ramesh Patil',
         businessTypeId: 't1',
         stateCode: 's1',
         districtCode: 'd1',
@@ -202,6 +214,7 @@ void main() {
     verify: (_) => verify(
       () => save(
         const BusinessProfile(
+          displayName: 'Ramesh Patil',
           businessTypeId: 't1',
           stateCode: 's1',
           districtCode: 'd1',

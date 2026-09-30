@@ -17,6 +17,11 @@ extension JsonRead on Map<String, dynamic> {
 
   DateTime date(String key) => DateTime.parse(this[key] as String).toLocal();
 
+  DateTime? dateOrNull(String key) {
+    final value = this[key] as String?;
+    return value == null ? null : DateTime.parse(value).toLocal();
+  }
+
   Map<String, dynamic> obj(String key) => this[key] as Map<String, dynamic>;
 
   Map<String, dynamic>? objOrNull(String key) =>

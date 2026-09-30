@@ -4,13 +4,20 @@ import 'package:equatable/equatable.dart';
 class HomeDashboard extends Equatable {
   const HomeDashboard({
     required this.userName,
+    required this.businessType,
+    required this.districtName,
+    required this.stateName,
     required this.hasUnreadAlerts,
     required this.categories,
     required this.topOpportunity,
     required this.watchlist,
   });
 
+  /// Empty until the user enters a name.
   final String userName;
+  final String businessType;
+  final String districtName;
+  final String stateName;
   final bool hasUnreadAlerts;
 
   /// The user's selected procurement categories.
@@ -23,6 +30,9 @@ class HomeDashboard extends Equatable {
   @override
   List<Object?> get props => [
     userName,
+    businessType,
+    districtName,
+    stateName,
     hasUnreadAlerts,
     categories,
     topOpportunity,

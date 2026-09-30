@@ -4,6 +4,7 @@ namespace MolBhav.Application.Features.Identity.UpdateProfile;
 
 /// <summary>Onboarding / edit-profile screen (BRD §7). Requires authentication.</summary>
 public sealed record UpdateProfileCommand(
+    string? DisplayName,
     string? BusinessType,
     string? State,
     string? District,

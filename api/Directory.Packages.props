@@ -22,7 +22,11 @@
     <PackageVersion Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="10.0.0" />
     <PackageVersion Include="Npgsql.DependencyInjection" Version="10.0.0" />
     <PackageVersion Include="Dapper" Version="2.1.66" />
+    <!-- Community licence (free under USD 1M annual revenue); set in code via QuestPDF.Settings.License. -->
+    <PackageVersion Include="QuestPDF" Version="2026.9.1" />
     <PackageVersion Include="Microsoft.Extensions.Diagnostics.HealthChecks.EntityFrameworkCore" Version="$(MicrosoftPackagesVersion)" />
+    <PackageVersion Include="FirebaseAdmin" Version="3.1.0" />
+    <PackageVersion Include="Microsoft.Extensions.Http.Resilience" Version="10.10.0" />
   </ItemGroup>
 
   <ItemGroup Label="API">
@@ -31,6 +35,13 @@
     <PackageVersion Include="Asp.Versioning.Mvc" Version="8.1.0" />
     <PackageVersion Include="Asp.Versioning.Mvc.ApiExplorer" Version="8.1.0" />
     <PackageVersion Include="Serilog.AspNetCore" Version="10.0.0" />
+  </ItemGroup>
+
+  <ItemGroup Label="Tests">
+    <PackageVersion Include="Microsoft.NET.Test.Sdk" Version="18.10.1" />
+    <PackageVersion Include="xunit" Version="2.9.3" />
+    <PackageVersion Include="xunit.runner.visualstudio" Version="4.0.0" />
+    <PackageVersion Include="NSubstitute" Version="6.2.0" />
   </ItemGroup>
 
 </Project>

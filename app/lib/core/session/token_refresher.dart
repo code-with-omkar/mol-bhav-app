@@ -1,4 +1,7 @@
+import 'package:dio/dio.dart';
 import 'package:injectable/injectable.dart';
+
+import '../network/api_config.dart';
 
 class TokenPair {
   const TokenPair({required this.accessToken, required this.refreshToken});
@@ -16,14 +19,45 @@ abstract interface class TokenRefresher {
   Future<TokenPair?> refresh(String refreshToken);
 }
 
-/// PENDING: the backend's refresh-token contract has not been shared.
-///
-/// Until it is, no refresh is attempted, so an expired access token ends the
-/// session and returns the user to Login. When the contract is known, add a
-/// Dio-backed implementation (using a Dio instance *without* the auth
-/// interceptor) and bind it here instead.
+/// Calls `POST /auth/token/refresh` on a dedicated Dio instance (no auth
+/// interceptors) to avoid infinite 401 loops. Parses the `ApiResponse<SessionResponse>`
+/// envelope manually since `EnvelopeInterceptor` is not on this Dio.
 @LazySingleton(as: TokenRefresher)
-class PendingTokenRefresher implements TokenRefresher {
+class DioTokenRefresher implements TokenRefresher {
+  late final Dio _dio = Dio(
+    BaseOptions(
+      baseUrl: ApiConfig.baseUrl,
+      connectTimeout: ApiConfig.connectTimeout,
+      receiveTimeout: ApiConfig.receiveTimeout,
+      contentType: Headers.jsonContentType,
+      responseType: ResponseType.json,
+    ),
+  );
+
   @override
-  Future<TokenPair?> refresh(String refreshToken) async => null;
+  Future<TokenPair?> refresh(String refreshToken) async {
+    try {
+      final response = await _dio.post<Map<String, dynamic>>(
+        '/auth/token/refresh',
+        data: {'refreshToken': refreshToken},
+      );
+      final body = response.data;
+      if (body == null) return null;
+      final data = (body['data'] ?? body) as Map<String, dynamic>?;
+      if (data == null) return null;
+      final accessToken = data['accessToken'] as String?;
+      final newRefresh = data['refreshToken'] as String?;
+      if (accessToken == null || newRefresh == null) return null;
+      return TokenPair(accessToken: accessToken, refreshToken: newRefresh);
+    } on DioException catch (e) {
+      // Rejected token (400 malformed, 401 invalid/expired/reused, 403
+      // account blocked): end the session. Anything else — offline, timeout,
+      // 5xx, 409 "rotated by a parallel refresh" — is transient: rethrow so
+      // the session survives and the next 401 tries again.
+      if (_rejected.contains(e.response?.statusCode)) return null;
+      rethrow;
+    }
+  }
+
+  static const _rejected = {400, 401, 403};
 }

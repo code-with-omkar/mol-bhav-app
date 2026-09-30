@@ -14,6 +14,8 @@ namespace MolBhav.Domain.Identity;
 public sealed class User : AggregateRoot<Guid>, IAuditableEntity, ISoftDeletable
 {
     public const int MaxCategories = 10;
+    public const int DisplayNameMinLength = 2;
+    public const int DisplayNameMaxLength = 60;
 
     private readonly List<UserProfileCategory> _categories = [];
 
@@ -37,6 +39,9 @@ public sealed class User : AggregateRoot<Guid>, IAuditableEntity, ISoftDeletable
     }
 
     public PhoneNumber PhoneNumber { get; private set; }
+
+    /// <summary>The name the user gave during onboarding; null until set. Shown in greetings, never used for identity.</summary>
+    public string? DisplayName { get; private set; }
 
     public LanguageCode PreferredLanguage { get; private set; }
 
@@ -82,8 +87,11 @@ public sealed class User : AggregateRoot<Guid>, IAuditableEntity, ISoftDeletable
 
     public void RecordLogin(DateTimeOffset nowUtc) => LastLoginAtUtc = nowUtc;
 
+    public void SetSubscriptionTier(SubscriptionTier tier) => SubscriptionTier = tier;
+
     /// <summary>Replaces the profile and category selection in one step (the onboarding/edit-profile screen submits all fields together).</summary>
     public void UpdateProfile(
+        string? displayName,
         string? businessType,
         string? state,
         string? district,
@@ -101,6 +109,15 @@ public sealed class User : AggregateRoot<Guid>, IAuditableEntity, ISoftDeletable
                 $"A user can operate in at most {MaxCategories} procurement categories.");
         }
 
+        var name = NormaliseDisplayName(displayName);
+        if (name is not null && name.Length is < DisplayNameMinLength or > DisplayNameMaxLength)
+        {
+            throw new DomainException(
+                "User.DisplayNameLength",
+                $"A display name must be {DisplayNameMinLength}–{DisplayNameMaxLength} characters.");
+        }
+
+        DisplayName = name;
         PreferredLanguage = preferredLanguage;
         Profile.Update(businessType, state, district);
 
@@ -114,4 +131,10 @@ public sealed class User : AggregateRoot<Guid>, IAuditableEntity, ISoftDeletable
             .Where(code => !existingCodes.Contains(code.Value))
             .Select(UserProfileCategory.For));
     }
+
+    /// <summary>Trims and collapses inner whitespace runs; blank becomes null.</summary>
+    public static string? NormaliseDisplayName(string? value) =>
+        string.IsNullOrWhiteSpace(value)
+            ? null
+            : string.Join(' ', value.Split((char[]?)null, StringSplitOptions.RemoveEmptyEntries));
 }

@@ -93,6 +93,19 @@ class AuthInterceptor extends Interceptor {
   }
 }
 
+/// Unwraps `ApiResponse<T> { success, data, message, pagination }` so data
+/// sources receive the inner `data` value directly in `response.data`.
+class EnvelopeInterceptor extends Interceptor {
+  @override
+  void onResponse(Response response, ResponseInterceptorHandler handler) {
+    final body = response.data;
+    if (body is Map<String, dynamic> && body.containsKey('data')) {
+      response.data = body['data'];
+    }
+    handler.next(response);
+  }
+}
+
 /// Sends the UI language so the API returns localised names and messages.
 class LanguageInterceptor extends Interceptor {
   LanguageInterceptor(this._locale);

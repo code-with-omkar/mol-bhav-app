@@ -11,11 +11,15 @@ class MbAppBarAction {
     required this.icon,
     required this.label,
     required this.onPressed,
+    this.selected = false,
   });
 
   final MbIcons icon;
   final String label;
   final VoidCallback? onPressed;
+
+  /// Filled in the accent colour (e.g. a watched star).
+  final bool selected;
 }
 
 /// Top bar for inner screens: back arrow, title, up to two icon actions.
@@ -78,6 +82,8 @@ class MbAppBar extends StatelessWidget implements PreferredSizeWidget {
                     icon: action.icon,
                     label: action.label,
                     onPressed: action.onPressed,
+                    filled: action.selected,
+                    color: action.selected ? c.bhavAmber : null,
                   ),
               ],
             ),

@@ -38,7 +38,12 @@ class LoginPage extends StatelessWidget {
       listener: (context, state) {
         switch (state.status) {
           case LoginStatus.codeSent:
-            context.push(AppRoutes.verifyOtp, extra: state.challenge);
+            context.push(
+              AppRoutes.verifyOtpFrom(
+                GoRouterState.of(context).uri.queryParameters['from'],
+              ),
+              extra: state.challenge,
+            );
           case LoginStatus.failure:
             showFailureSnackBar(context, state.failure!);
           case LoginStatus.editing:
@@ -47,65 +52,46 @@ class LoginPage extends StatelessWidget {
         }
       },
       child: Scaffold(
+        resizeToAvoidBottomInset: true,
         body: SafeArea(
-          child: CustomScrollView(
-            slivers: [
-              SliverPadding(
-                padding: const EdgeInsets.fromLTRB(
-                  MbSpacing.s4,
-                  48,
-                  MbSpacing.s4,
-                  MbSpacing.s4,
+          child: MbCenteredForm(
+            children: [
+              const MbWordmark(size: 34, alignment: Alignment.center),
+              const SizedBox(height: MbSpacing.s4),
+              Text(
+                Brand.taglineHi,
+                textAlign: TextAlign.center,
+                style: t.taglineHi.copyWith(
+                  fontSize: 20,
+                  height: 30 / 20,
+                  color: c.primaryText,
                 ),
-                sliver: SliverFillRemaining(
-                  hasScrollBody: false,
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          const MbWordmark(size: 34),
-                          const SizedBox(height: MbSpacing.s4),
-                          Text(
-                            Brand.taglineHi,
-                            style: t.taglineHi.copyWith(
-                              fontSize: 20,
-                              height: 30 / 20,
-                              color: c.primaryText,
-                            ),
-                          ),
-                          const SizedBox(height: 4),
-                          Text(
-                            l10n.taglineTranslation,
-                            style: t.body.copyWith(color: c.inkMuted),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: MbSpacing.s6),
-                      const _MobileCard(),
-                      const SizedBox(height: MbSpacing.s6),
-                      const _LanguagePicker(),
-                      _ExpiredNotice(show: sessionExpired),
-                      const SizedBox(height: MbSpacing.s6),
-                      const Spacer(),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          MbIcon(MbIcons.shield, size: 14, color: c.inkMuted),
-                          const SizedBox(width: 6),
-                          Flexible(
-                            child: Text(
-                              l10n.loginPrivacyNote,
-                              textAlign: TextAlign.center,
-                              style: t.caption.copyWith(color: c.inkMuted),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ],
+              ),
+              const SizedBox(height: 4),
+              Text(
+                l10n.taglineTranslation,
+                textAlign: TextAlign.center,
+                style: t.body.copyWith(color: c.inkMuted),
+              ),
+              const SizedBox(height: MbSpacing.s6),
+              const _MobileCard(),
+              const SizedBox(height: MbSpacing.s6),
+              const _LanguagePicker(),
+              _ExpiredNotice(show: sessionExpired),
+              const SizedBox(height: MbSpacing.s6),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  MbIcon(MbIcons.shield, size: 14, color: c.inkMuted),
+                  const SizedBox(width: 6),
+                  Flexible(
+                    child: Text(
+                      l10n.loginPrivacyNote,
+                      textAlign: TextAlign.center,
+                      style: t.caption.copyWith(color: c.inkMuted),
+                    ),
                   ),
-                ),
+                ],
               ),
             ],
           ),
@@ -147,7 +133,7 @@ class _MobileCard extends StatelessWidget {
             builder: (context, state) => MbTextField(
               label: l10n.mobileNumberLabel,
               prefix: '+91',
-              hint: l10n.mobileNumberHint,
+              hint: '',
               keyboardType: TextInputType.phone,
               autofillHints: const [AutofillHints.telephoneNumberNational],
               inputFormatters: const [MobileNumberFormatter()],

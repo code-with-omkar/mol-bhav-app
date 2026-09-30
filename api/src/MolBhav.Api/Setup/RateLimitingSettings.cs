@@ -20,4 +20,7 @@ public sealed class RateLimitingSettings
     /// capped by the domain (5 attempts per challenge); this bounds guessing across many phone numbers from one client.
     /// </summary>
     public int OtpVerifyPermitLimit { get; set; } = 15;
+
+    /// <summary>Coupon checks per user per <see cref="WindowSeconds"/>; the checkout screen debounces, so real users need few.</summary>
+    public int CouponValidatePermitLimit { get; set; } = 10;
 }

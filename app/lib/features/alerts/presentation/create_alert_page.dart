@@ -100,7 +100,7 @@ class _Form extends StatelessWidget {
           value: state.productId,
           onChanged: cubit.selectProduct,
           items: [
-            for (final p in options.products)
+            for (final p in state.products)
               MbSelectItem(value: p.id, label: p.name),
           ],
         ),
@@ -111,10 +111,27 @@ class _Form extends StatelessWidget {
           value: state.marketId,
           onChanged: cubit.selectMarket,
           items: [
-            for (final m in options.markets)
+            for (final m in state.markets)
               MbSelectItem(value: m.id, label: m.name),
           ],
         ),
+        if (state.canWidenStates) ...[
+          const SizedBox(height: MbSpacing.s2),
+          MbGroup(
+            children: [
+              MbListItem(
+                icon: MbIcons.market,
+                title: l10n.showAllStates,
+                subtitle: state.homeStateName,
+                trailing: MbToggle(
+                  value: state.allStates,
+                  onChanged: cubit.toggleAllStates,
+                  semanticLabel: l10n.showAllStates,
+                ),
+              ),
+            ],
+          ),
+        ],
         gap,
         Text(l10n.notifyWhen, style: t.fieldLabel.copyWith(color: c.ink)),
         const SizedBox(height: MbSpacing.s2),

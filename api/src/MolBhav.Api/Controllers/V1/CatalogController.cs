@@ -1,6 +1,7 @@
 using System.Net.Mime;
 using Asp.Versioning;
 using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using MolBhav.Api.Contracts;
 using MolBhav.Application.Common.Models;
@@ -18,6 +19,7 @@ namespace MolBhav.Api.Controllers.V1;
 /// </summary>
 [ApiVersion("1.0")]
 [Route("api/v{version:apiVersion}/catalog")]
+[AllowAnonymous]
 public sealed class CatalogController(ISender sender) : ApiControllerBase(sender)
 {
     /// <summary>Select Category screen: categories with their sub-categories.</summary>

@@ -46,6 +46,9 @@ public static class Schemas
     /// <summary>Localized texts for data-driven terminology.</summary>
     public const string Localization = "localization";
 
+    /// <summary>Support tickets and their message threads.</summary>
+    public const string Support = "support";
+
     /// <summary>Transactional outbox.</summary>
     public const string Messaging = "messaging";
 }

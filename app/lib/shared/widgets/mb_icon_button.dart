@@ -11,6 +11,7 @@ class MbIconButton extends StatelessWidget {
     required this.label,
     required this.onPressed,
     this.color,
+    this.filled = false,
   });
 
   final MbIcons icon;
@@ -20,13 +21,16 @@ class MbIconButton extends StatelessWidget {
   final VoidCallback? onPressed;
   final Color? color;
 
+  /// Draws the icon filled, for an "on" state.
+  final bool filled;
+
   @override
   Widget build(BuildContext context) {
     final c = context.mbColors;
     return IconButton(
       onPressed: onPressed,
       tooltip: label,
-      icon: MbIcon(icon, size: 22, color: color ?? c.ink),
+      icon: MbIcon(icon, size: 22, color: color ?? c.ink, filled: filled),
       style: IconButton.styleFrom(
         fixedSize: const Size.square(40),
         minimumSize: const Size.square(40),

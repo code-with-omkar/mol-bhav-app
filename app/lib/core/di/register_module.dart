@@ -36,6 +36,7 @@ abstract class RegisterModule {
     );
     return dio
       ..interceptors.addAll([
+        EnvelopeInterceptor(),
         LanguageInterceptor(locale),
         AuthInterceptor(tokens, refresher, session, dio),
       ]);

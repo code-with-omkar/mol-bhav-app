@@ -16,9 +16,12 @@ class AlertItem extends Equatable {
     required this.id,
     required this.kind,
     required this.isUnread,
-    required this.title,
-    required this.details,
+    required this.productName,
+    required this.percentChange,
+    required this.previousPrice,
+    required this.newPrice,
     required this.createdAt,
+    this.locationName,
     this.channel,
     this.opportunityId,
   });
@@ -27,9 +30,17 @@ class AlertItem extends Equatable {
   final AlertKind kind;
   final bool isUnread;
 
-  /// Server-written, localised text: "Onion price dropped 8.2% in Nashik".
-  final String title;
-  final List<String> details;
+  /// The parts the alert's line is built from — the wording itself is
+  /// localised on the page, not written here.
+  final String productName;
+
+  /// Signed: negative for a drop, positive for a rise.
+  final num percentChange;
+  final num previousPrice;
+  final num newPrice;
+
+  /// Empty when the API sent no mandi/supplier name for the alert.
+  final String? locationName;
   final DateTime createdAt;
   final AlertChannel? channel;
 
@@ -41,8 +52,11 @@ class AlertItem extends Equatable {
     id,
     kind,
     isUnread,
-    title,
-    details,
+    productName,
+    percentChange,
+    previousPrice,
+    newPrice,
+    locationName,
     createdAt,
     channel,
     opportunityId,
@@ -67,13 +81,20 @@ class AlertProduct extends Equatable {
 }
 
 class AlertMarket extends Equatable {
-  const AlertMarket({required this.id, required this.name});
+  const AlertMarket({
+    required this.id,
+    required this.name,
+    required this.stateName,
+  });
 
   final String id;
   final String name;
 
+  /// The mandi's state, so the form can show the user's own state first.
+  final String stateName;
+
   @override
-  List<Object?> get props => [id, name];
+  List<Object?> get props => [id, name, stateName];
 }
 
 /// Reference data for the Create Alert form.
@@ -146,6 +167,62 @@ class NewAlert extends Equatable {
   ];
 }
 
+enum AlertThresholdType { priceDrop, priceSpike, priceBelow, priceAbove }
+
+class AlertRule extends Equatable {
+  const AlertRule({
+    required this.id,
+    required this.productName,
+    this.variantName,
+    this.locationName,
+    required this.thresholdType,
+    this.thresholdPercent,
+    this.thresholdPrice,
+    required this.unit,
+    required this.isActive,
+    required this.createdAtUtc,
+  });
+
+  final String id;
+  final String productName;
+  final String? variantName;
+  final String? locationName;
+  final AlertThresholdType thresholdType;
+  final num? thresholdPercent;
+  final num? thresholdPrice;
+  final String unit;
+  final bool isActive;
+  final DateTime createdAtUtc;
+
+  @override
+  List<Object?> get props => [
+    id,
+    productName,
+    variantName,
+    locationName,
+    thresholdType,
+    thresholdPercent,
+    thresholdPrice,
+    unit,
+    isActive,
+    createdAtUtc,
+  ];
+}
+
+class UpdateAlertRuleRequest {
+  const UpdateAlertRuleRequest({
+    required this.thresholdType,
+    this.thresholdPercent,
+    this.thresholdPrice,
+    required this.isActive,
+  });
+
+  final AlertThresholdType thresholdType;
+  final num? thresholdPercent;
+  final num? thresholdPrice;
+  final bool isActive;
+}
+
 abstract interface class AlertsRepository {
   Future<Result<List<AlertItem>>> getAlerts(AlertFilter filter);
 
@@ -157,6 +234,12 @@ abstract interface class AlertsRepository {
   );
 
   Future<Result<void>> create(NewAlert alert);
+
+  Future<Result<List<AlertRule>>> getAlertRules();
+
+  Future<Result<void>> updateAlertRule(String id, UpdateAlertRuleRequest req);
+
+  Future<Result<void>> deleteAlertRule(String id);
 }
 
 @injectable

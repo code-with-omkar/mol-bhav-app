@@ -5,6 +5,7 @@ import 'package:intl/intl.dart';
 
 import '../../../core/l10n/l10n.dart';
 import '../../../core/router/app_routes.dart';
+import '../../../core/share/deep_link_config.dart';
 import '../../../core/theme/mb_dimens.dart';
 import '../../../core/utils/formatters.dart';
 import '../../../core/utils/statuses.dart';
@@ -16,7 +17,11 @@ import '../../../shared/widgets/mb_price.dart';
 import '../../../shared/widgets/mb_state_views.dart';
 import '../../../shared/widgets/mb_trend_chart.dart';
 import '../domain/markets_entities.dart';
+import '../../watchlist/presentation/watch_star.dart';
+import '../../watchlist/presentation/watchlist_cubit.dart';
 import 'markets_cubits.dart';
+import 'share/price_share.dart';
+import 'share/price_share_data.dart';
 
 /// Historical prices for one commodity in one market.
 class PriceTrendsPage extends StatelessWidget {
@@ -29,13 +34,55 @@ class PriceTrendsPage extends StatelessWidget {
   final String commodityId;
   final String marketId;
 
+  /// The newest point in the loaded range — a trend has no single price, so
+  /// the shared card is about the latest day it covers.
+  PriceShareData? _shareData(BuildContext context) {
+    final trend = context.read<PriceTrendsCubit>().state.data.data;
+    final latest = trend?.latest;
+    if (trend == null || latest == null) return null;
+    return PriceShareData(
+      productName: trend.commodityName,
+      mandiName: trend.marketName,
+      minPrice: latest.min,
+      maxPrice: latest.max,
+      modalPrice: latest.value,
+      unitSymbol: trend.unit,
+      recordDate: latest.date,
+      source: trend.source,
+      link: DeepLinkConfig.productLink(commodityId, mandiId: marketId),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
+    final watched = context.select<WatchlistCubit, bool>(
+      (c) => c.state.itemFor(commodityId) != null,
+    );
+    // Nothing to share until the range has loaded at least one price.
+    final canShare = context.select<PriceTrendsCubit, bool>(
+      (c) => c.state.data.data?.latest != null,
+    );
     return Scaffold(
       appBar: MbAppBar(
         title: l10n.priceTrendsTitle,
         actions: [
+          MbAppBarAction(
+            icon: MbIcons.share,
+            label: l10n.sharePrice,
+            onPressed: !canShare
+                ? null
+                : () {
+                    final data = _shareData(context);
+                    if (data != null) sharePriceCard(context, data);
+                  },
+          ),
+          MbAppBarAction(
+            icon: MbIcons.watchlist,
+            label: watched ? l10n.removeFromWatchlist : l10n.addToWatchlist,
+            selected: watched,
+            onPressed: () => toggleWatch(context, commodityId),
+          ),
           MbAppBarAction(
             icon: MbIcons.alert,
             label: l10n.createAlertAction,

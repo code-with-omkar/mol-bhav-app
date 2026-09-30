@@ -384,6 +384,12 @@ abstract class AppLocalizations {
   /// **'Opportunities'**
   String get navOpportunities;
 
+  /// No description provided for @navAlerts.
+  ///
+  /// In en, this message translates to:
+  /// **'Alerts'**
+  String get navAlerts;
+
   /// No description provided for @navMore.
   ///
   /// In en, this message translates to:
@@ -575,6 +581,48 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'No prices for these markets yet.'**
   String get comparisonEmpty;
+
+  /// No description provided for @browseByMandi.
+  ///
+  /// In en, this message translates to:
+  /// **'Browse by mandi'**
+  String get browseByMandi;
+
+  /// No description provided for @browseByCommodity.
+  ///
+  /// In en, this message translates to:
+  /// **'Browse by commodity'**
+  String get browseByCommodity;
+
+  /// No description provided for @mandiLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Mandi'**
+  String get mandiLabel;
+
+  /// No description provided for @mandiPricesHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Pick a state, district and mandi to see its latest prices.'**
+  String get mandiPricesHint;
+
+  /// No description provided for @mandiPricesEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No recent prices at this mandi.'**
+  String get mandiPricesEmpty;
+
+  /// No description provided for @mandisEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No mandis in this district yet.'**
+  String get mandisEmpty;
+
+  /// No description provided for @priceDate.
+  ///
+  /// In en, this message translates to:
+  /// **'Price date: {date}'**
+  String priceDate(String date);
 
   /// No description provided for @priceTrendsTitle.
   ///
@@ -1143,6 +1191,1032 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Cancel anytime. Prices include GST.'**
   String get cancelAnytime;
+
+  /// No description provided for @yourNameLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Your name'**
+  String get yourNameLabel;
+
+  /// No description provided for @yourNameHint.
+  ///
+  /// In en, this message translates to:
+  /// **'e.g. Ramesh Patil'**
+  String get yourNameHint;
+
+  /// No description provided for @nameErrorLength.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter 2–60 characters.'**
+  String get nameErrorLength;
+
+  /// No description provided for @nameErrorCharacters.
+  ///
+  /// In en, this message translates to:
+  /// **'Use letters, spaces and . \' - only.'**
+  String get nameErrorCharacters;
+
+  /// No description provided for @addYourName.
+  ///
+  /// In en, this message translates to:
+  /// **'Add your name'**
+  String get addYourName;
+
+  /// No description provided for @addToWatchlist.
+  ///
+  /// In en, this message translates to:
+  /// **'Add to watchlist'**
+  String get addToWatchlist;
+
+  /// No description provided for @addToWatchlistTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Add to watchlist'**
+  String get addToWatchlistTitle;
+
+  /// No description provided for @removeFromWatchlist.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove from watchlist'**
+  String get removeFromWatchlist;
+
+  /// No description provided for @addedToWatchlist.
+  ///
+  /// In en, this message translates to:
+  /// **'Added to watchlist.'**
+  String get addedToWatchlist;
+
+  /// No description provided for @alreadyInWatchlist.
+  ///
+  /// In en, this message translates to:
+  /// **'Already in watchlist.'**
+  String get alreadyInWatchlist;
+
+  /// No description provided for @removedFromWatchlist.
+  ///
+  /// In en, this message translates to:
+  /// **'{name} removed from watchlist.'**
+  String removedFromWatchlist(String name);
+
+  /// No description provided for @undo.
+  ///
+  /// In en, this message translates to:
+  /// **'Undo'**
+  String get undo;
+
+  /// No description provided for @searchWatchlistHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Search your watchlist'**
+  String get searchWatchlistHint;
+
+  /// No description provided for @searchProductsHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Search products'**
+  String get searchProductsHint;
+
+  /// No description provided for @noMatches.
+  ///
+  /// In en, this message translates to:
+  /// **'Nothing matches your search.'**
+  String get noMatches;
+
+  /// No description provided for @categoryLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Category'**
+  String get categoryLabel;
+
+  /// No description provided for @allVarieties.
+  ///
+  /// In en, this message translates to:
+  /// **'All varieties'**
+  String get allVarieties;
+
+  /// No description provided for @quickCostEstimate.
+  ///
+  /// In en, this message translates to:
+  /// **'Cost Estimate'**
+  String get quickCostEstimate;
+
+  /// No description provided for @estimateSavedLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Saved'**
+  String get estimateSavedLabel;
+
+  /// No description provided for @unitLockedHelper.
+  ///
+  /// In en, this message translates to:
+  /// **'Prices are quoted in this unit.'**
+  String get unitLockedHelper;
+
+  /// No description provided for @anyDistrict.
+  ///
+  /// In en, this message translates to:
+  /// **'Any district'**
+  String get anyDistrict;
+
+  /// No description provided for @estimateNoPrices.
+  ///
+  /// In en, this message translates to:
+  /// **'No recent prices for this material here. Try another district or material.'**
+  String get estimateNoPrices;
+
+  /// No description provided for @estimateSavingsVsAverage.
+  ///
+  /// In en, this message translates to:
+  /// **'Saves {amount} vs. the average of compared locations ({average}). Includes applicable charges.'**
+  String estimateSavingsVsAverage(String amount, String average);
+
+  /// No description provided for @savedEstimates.
+  ///
+  /// In en, this message translates to:
+  /// **'Saved estimates'**
+  String get savedEstimates;
+
+  /// No description provided for @savedEstimatesEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No saved estimates yet.'**
+  String get savedEstimatesEmpty;
+
+  /// No description provided for @deleteEstimate.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete estimate'**
+  String get deleteEstimate;
+
+  /// No description provided for @generateReport.
+  ///
+  /// In en, this message translates to:
+  /// **'Generate a report'**
+  String get generateReport;
+
+  /// No description provided for @reportTypeLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Report type'**
+  String get reportTypeLabel;
+
+  /// No description provided for @reportWeeklySummaryPdf.
+  ///
+  /// In en, this message translates to:
+  /// **'Weekly summary (PDF)'**
+  String get reportWeeklySummaryPdf;
+
+  /// No description provided for @reportPriceHistoryCsv.
+  ///
+  /// In en, this message translates to:
+  /// **'Price history (CSV)'**
+  String get reportPriceHistoryCsv;
+
+  /// No description provided for @reportWeeklySummary.
+  ///
+  /// In en, this message translates to:
+  /// **'Weekly summary'**
+  String get reportWeeklySummary;
+
+  /// No description provided for @reportPriceHistory.
+  ///
+  /// In en, this message translates to:
+  /// **'Price history'**
+  String get reportPriceHistory;
+
+  /// No description provided for @reportPeriodLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Period'**
+  String get reportPeriodLabel;
+
+  /// No description provided for @lastDays.
+  ///
+  /// In en, this message translates to:
+  /// **'Last {days} days'**
+  String lastDays(int days);
+
+  /// No description provided for @customRange.
+  ///
+  /// In en, this message translates to:
+  /// **'Custom'**
+  String get customRange;
+
+  /// No description provided for @reportLanguageLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Report language'**
+  String get reportLanguageLabel;
+
+  /// No description provided for @generate.
+  ///
+  /// In en, this message translates to:
+  /// **'Generate'**
+  String get generate;
+
+  /// No description provided for @reportGenerating.
+  ///
+  /// In en, this message translates to:
+  /// **'Generating…'**
+  String get reportGenerating;
+
+  /// No description provided for @reportFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed'**
+  String get reportFailed;
+
+  /// No description provided for @reportReady.
+  ///
+  /// In en, this message translates to:
+  /// **'Your report is ready. Tap it to download.'**
+  String get reportReady;
+
+  /// No description provided for @reportNeedsPro.
+  ///
+  /// In en, this message translates to:
+  /// **'Price history exports need MolBhav Pro.'**
+  String get reportNeedsPro;
+
+  /// No description provided for @yourReports.
+  ///
+  /// In en, this message translates to:
+  /// **'Your reports'**
+  String get yourReports;
+
+  /// No description provided for @optionalAllMandis.
+  ///
+  /// In en, this message translates to:
+  /// **'All mandis (optional)'**
+  String get optionalAllMandis;
+
+  /// No description provided for @allMandis.
+  ///
+  /// In en, this message translates to:
+  /// **'All mandis'**
+  String get allMandis;
+
+  /// No description provided for @csvProNote.
+  ///
+  /// In en, this message translates to:
+  /// **'Daily prices for one product, ready for Excel.'**
+  String get csvProNote;
+
+  /// No description provided for @fileSavedNoViewer.
+  ///
+  /// In en, this message translates to:
+  /// **'Saved {name}, but no app here can open it.'**
+  String fileSavedNoViewer(String name);
+
+  /// No description provided for @alertRose.
+  ///
+  /// In en, this message translates to:
+  /// **'{product} rose {percent}%'**
+  String alertRose(String product, String percent);
+
+  /// No description provided for @alertDropped.
+  ///
+  /// In en, this message translates to:
+  /// **'{product} dropped {percent}%'**
+  String alertDropped(String product, String percent);
+
+  /// No description provided for @alertRoseIn.
+  ///
+  /// In en, this message translates to:
+  /// **'{product} rose {percent}% in {market}'**
+  String alertRoseIn(String product, String percent, String market);
+
+  /// No description provided for @alertDroppedIn.
+  ///
+  /// In en, this message translates to:
+  /// **'{product} dropped {percent}% in {market}'**
+  String alertDroppedIn(String product, String percent, String market);
+
+  /// No description provided for @alertPreviousPrice.
+  ///
+  /// In en, this message translates to:
+  /// **'Previous: {price}'**
+  String alertPreviousPrice(String price);
+
+  /// No description provided for @alertCurrentPrice.
+  ///
+  /// In en, this message translates to:
+  /// **'Current: {price}'**
+  String alertCurrentPrice(String price);
+
+  /// No description provided for @showAllStates.
+  ///
+  /// In en, this message translates to:
+  /// **'Show mandis from all states'**
+  String get showAllStates;
+
+  /// No description provided for @reportRequestedAt.
+  ///
+  /// In en, this message translates to:
+  /// **'Requested {dateTime}'**
+  String reportRequestedAt(String dateTime);
+
+  /// No description provided for @reportGeneratedAt.
+  ///
+  /// In en, this message translates to:
+  /// **'Generated {dateTime}'**
+  String reportGeneratedAt(String dateTime);
+
+  /// No description provided for @reportDownloadedAt.
+  ///
+  /// In en, this message translates to:
+  /// **'Downloaded {dateTime}'**
+  String reportDownloadedAt(String dateTime);
+
+  /// No description provided for @reportReadyLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Ready'**
+  String get reportReadyLabel;
+
+  /// No description provided for @contactUs.
+  ///
+  /// In en, this message translates to:
+  /// **'Contact us'**
+  String get contactUs;
+
+  /// No description provided for @contactWhatsApp.
+  ///
+  /// In en, this message translates to:
+  /// **'WhatsApp us'**
+  String get contactWhatsApp;
+
+  /// No description provided for @contactCall.
+  ///
+  /// In en, this message translates to:
+  /// **'Call us'**
+  String get contactCall;
+
+  /// No description provided for @contactEmail.
+  ///
+  /// In en, this message translates to:
+  /// **'Email us'**
+  String get contactEmail;
+
+  /// No description provided for @cannotOpenLink.
+  ///
+  /// In en, this message translates to:
+  /// **'No app on this device can open that.'**
+  String get cannotOpenLink;
+
+  /// No description provided for @supportWhatsAppPrefill.
+  ///
+  /// In en, this message translates to:
+  /// **'Hello MolBhav, I need help with'**
+  String get supportWhatsAppPrefill;
+
+  /// No description provided for @supportEmailSubject.
+  ///
+  /// In en, this message translates to:
+  /// **'MolBhav support request'**
+  String get supportEmailSubject;
+
+  /// No description provided for @supportEmailIntro.
+  ///
+  /// In en, this message translates to:
+  /// **'Please describe what you need help with:'**
+  String get supportEmailIntro;
+
+  /// No description provided for @appVersionLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'App version'**
+  String get appVersionLabel;
+
+  /// No description provided for @accountLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Account'**
+  String get accountLabel;
+
+  /// No description provided for @faqTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Common questions'**
+  String get faqTitle;
+
+  /// No description provided for @faqEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No questions are available right now.'**
+  String get faqEmpty;
+
+  /// No description provided for @raiseTicket.
+  ///
+  /// In en, this message translates to:
+  /// **'Raise a ticket'**
+  String get raiseTicket;
+
+  /// No description provided for @myTickets.
+  ///
+  /// In en, this message translates to:
+  /// **'My tickets'**
+  String get myTickets;
+
+  /// No description provided for @ticketsEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'You have not raised a ticket yet.'**
+  String get ticketsEmpty;
+
+  /// No description provided for @ticketTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Ticket'**
+  String get ticketTitle;
+
+  /// No description provided for @ticketRaised.
+  ///
+  /// In en, this message translates to:
+  /// **'Ticket raised. We will reply here.'**
+  String get ticketRaised;
+
+  /// No description provided for @submitTicket.
+  ///
+  /// In en, this message translates to:
+  /// **'Submit ticket'**
+  String get submitTicket;
+
+  /// No description provided for @ticketCategoryLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'What is it about?'**
+  String get ticketCategoryLabel;
+
+  /// No description provided for @ticketCategoryAccount.
+  ///
+  /// In en, this message translates to:
+  /// **'Account'**
+  String get ticketCategoryAccount;
+
+  /// No description provided for @ticketCategoryPayment.
+  ///
+  /// In en, this message translates to:
+  /// **'Payment'**
+  String get ticketCategoryPayment;
+
+  /// No description provided for @ticketCategoryData.
+  ///
+  /// In en, this message translates to:
+  /// **'Prices & data'**
+  String get ticketCategoryData;
+
+  /// No description provided for @ticketCategoryOther.
+  ///
+  /// In en, this message translates to:
+  /// **'Something else'**
+  String get ticketCategoryOther;
+
+  /// No description provided for @ticketSubjectLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Subject'**
+  String get ticketSubjectLabel;
+
+  /// No description provided for @ticketSubjectHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Onion price for APMC Pune looks wrong'**
+  String get ticketSubjectHint;
+
+  /// No description provided for @ticketSubjectHelper.
+  ///
+  /// In en, this message translates to:
+  /// **'At least {count} characters.'**
+  String ticketSubjectHelper(int count);
+
+  /// No description provided for @ticketMessageLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Message'**
+  String get ticketMessageLabel;
+
+  /// No description provided for @ticketMessageHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Tell us what happened, and what you expected instead.'**
+  String get ticketMessageHint;
+
+  /// No description provided for @ticketStatusOpen.
+  ///
+  /// In en, this message translates to:
+  /// **'Open'**
+  String get ticketStatusOpen;
+
+  /// No description provided for @ticketStatusInProgress.
+  ///
+  /// In en, this message translates to:
+  /// **'In progress'**
+  String get ticketStatusInProgress;
+
+  /// No description provided for @ticketStatusResolved.
+  ///
+  /// In en, this message translates to:
+  /// **'Resolved'**
+  String get ticketStatusResolved;
+
+  /// No description provided for @ticketStatusClosed.
+  ///
+  /// In en, this message translates to:
+  /// **'Closed'**
+  String get ticketStatusClosed;
+
+  /// No description provided for @ticketUpdatedAt.
+  ///
+  /// In en, this message translates to:
+  /// **'Updated {dateTime}'**
+  String ticketUpdatedAt(String dateTime);
+
+  /// No description provided for @ticketAuthorYou.
+  ///
+  /// In en, this message translates to:
+  /// **'You'**
+  String get ticketAuthorYou;
+
+  /// No description provided for @ticketAuthorSupport.
+  ///
+  /// In en, this message translates to:
+  /// **'Support'**
+  String get ticketAuthorSupport;
+
+  /// No description provided for @ticketReplyHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Write a reply'**
+  String get ticketReplyHint;
+
+  /// No description provided for @sendReply.
+  ///
+  /// In en, this message translates to:
+  /// **'Send reply'**
+  String get sendReply;
+
+  /// No description provided for @ticketClosedNotice.
+  ///
+  /// In en, this message translates to:
+  /// **'This ticket is closed. Raise a new one if you still need help.'**
+  String get ticketClosedNotice;
+
+  /// No description provided for @sharePrice.
+  ///
+  /// In en, this message translates to:
+  /// **'Share price'**
+  String get sharePrice;
+
+  /// No description provided for @shareModalLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Modal price'**
+  String get shareModalLabel;
+
+  /// No description provided for @shareModalLine.
+  ///
+  /// In en, this message translates to:
+  /// **'Modal: {price}'**
+  String shareModalLine(String price);
+
+  /// No description provided for @sharePriceHeadline.
+  ///
+  /// In en, this message translates to:
+  /// **'{product} at {market}'**
+  String sharePriceHeadline(String product, String market);
+
+  /// No description provided for @shareRange.
+  ///
+  /// In en, this message translates to:
+  /// **'Range: {min} – {max}'**
+  String shareRange(String min, String max);
+
+  /// No description provided for @sourceLine.
+  ///
+  /// In en, this message translates to:
+  /// **'Source: {source}'**
+  String sourceLine(String source);
+
+  /// No description provided for @shareImageSaved.
+  ///
+  /// In en, this message translates to:
+  /// **'Price card saved to your downloads.'**
+  String get shareImageSaved;
+
+  /// No description provided for @fromLink.
+  ///
+  /// In en, this message translates to:
+  /// **'Shared'**
+  String get fromLink;
+
+  /// No description provided for @inviteFriend.
+  ///
+  /// In en, this message translates to:
+  /// **'Invite a friend'**
+  String get inviteFriend;
+
+  /// No description provided for @inviteFriendSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Share MolBhav with other buyers'**
+  String get inviteFriendSubtitle;
+
+  /// No description provided for @inviteMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'I use MolBhav to check daily mandi and material prices before I buy. Try it:'**
+  String get inviteMessage;
+
+  /// No description provided for @myRulesAction.
+  ///
+  /// In en, this message translates to:
+  /// **'My Rules'**
+  String get myRulesAction;
+
+  /// No description provided for @alertRulesTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'My Alert Rules'**
+  String get alertRulesTitle;
+
+  /// No description provided for @alertRulesEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No alert rules yet. Create one from any commodity page.'**
+  String get alertRulesEmpty;
+
+  /// No description provided for @alertRuleDeleted.
+  ///
+  /// In en, this message translates to:
+  /// **'Alert rule deleted.'**
+  String get alertRuleDeleted;
+
+  /// No description provided for @alertRuleActiveLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Active'**
+  String get alertRuleActiveLabel;
+
+  /// No description provided for @alertRuleInactiveLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Paused'**
+  String get alertRuleInactiveLabel;
+
+  /// No description provided for @alertRuleConditionBelow.
+  ///
+  /// In en, this message translates to:
+  /// **'Price below {price}'**
+  String alertRuleConditionBelow(String price);
+
+  /// No description provided for @alertRuleConditionAbove.
+  ///
+  /// In en, this message translates to:
+  /// **'Price above {price}'**
+  String alertRuleConditionAbove(String price);
+
+  /// No description provided for @alertRuleConditionDrop.
+  ///
+  /// In en, this message translates to:
+  /// **'Drops by {percent}%'**
+  String alertRuleConditionDrop(String percent);
+
+  /// No description provided for @alertRuleConditionSpike.
+  ///
+  /// In en, this message translates to:
+  /// **'Spikes by {percent}%'**
+  String alertRuleConditionSpike(String percent);
+
+  /// No description provided for @alertRulesEditTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit Alert Rule'**
+  String get alertRulesEditTitle;
+
+  /// No description provided for @alertRulesThresholdPercentLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Threshold (%)'**
+  String get alertRulesThresholdPercentLabel;
+
+  /// No description provided for @alertRulesThresholdPriceLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Threshold (₹/{unit})'**
+  String alertRulesThresholdPriceLabel(String unit);
+
+  /// No description provided for @alertRulesActiveLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Active'**
+  String get alertRulesActiveLabel;
+
+  /// No description provided for @alertRulesCancel.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel'**
+  String get alertRulesCancel;
+
+  /// No description provided for @alertRulesSave.
+  ///
+  /// In en, this message translates to:
+  /// **'Save'**
+  String get alertRulesSave;
+
+  /// No description provided for @changeNumberAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Change number'**
+  String get changeNumberAction;
+
+  /// No description provided for @resendOtpIn.
+  ///
+  /// In en, this message translates to:
+  /// **'Resend OTP in {seconds}s'**
+  String resendOtpIn(int seconds);
+
+  /// No description provided for @resendOtpAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Resend OTP'**
+  String get resendOtpAction;
+
+  /// No description provided for @otpAutoFillHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter OTP sent to {phone}'**
+  String otpAutoFillHint(String phone);
+
+  /// No description provided for @notificationSettingsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Notification Settings'**
+  String get notificationSettingsTitle;
+
+  /// No description provided for @pushNotificationsLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Push notifications'**
+  String get pushNotificationsLabel;
+
+  /// No description provided for @alertPushLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Price alert push'**
+  String get alertPushLabel;
+
+  /// No description provided for @priceUpdatePushLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Daily price update push'**
+  String get priceUpdatePushLabel;
+
+  /// No description provided for @whatsappNotificationsLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'WhatsApp notifications'**
+  String get whatsappNotificationsLabel;
+
+  /// No description provided for @alertWhatsappLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Price alert on WhatsApp'**
+  String get alertWhatsappLabel;
+
+  /// No description provided for @notificationSettingsAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Notification settings'**
+  String get notificationSettingsAction;
+
+  /// No description provided for @monthlyBilling.
+  ///
+  /// In en, this message translates to:
+  /// **'Monthly'**
+  String get monthlyBilling;
+
+  /// No description provided for @yearlyBillingPlain.
+  ///
+  /// In en, this message translates to:
+  /// **'Yearly'**
+  String get yearlyBillingPlain;
+
+  /// No description provided for @yearlyBilling.
+  ///
+  /// In en, this message translates to:
+  /// **'Yearly (Save {percent}%)'**
+  String yearlyBilling(int percent);
+
+  /// No description provided for @upgradeToPro.
+  ///
+  /// In en, this message translates to:
+  /// **'Upgrade to Pro'**
+  String get upgradeToPro;
+
+  /// No description provided for @renewPro.
+  ///
+  /// In en, this message translates to:
+  /// **'Renew Pro'**
+  String get renewPro;
+
+  /// No description provided for @mySubscription.
+  ///
+  /// In en, this message translates to:
+  /// **'My Subscription'**
+  String get mySubscription;
+
+  /// No description provided for @subscriptionActive.
+  ///
+  /// In en, this message translates to:
+  /// **'Active — renews {date}'**
+  String subscriptionActive(String date);
+
+  /// No description provided for @subscriptionExpired.
+  ///
+  /// In en, this message translates to:
+  /// **'Expired'**
+  String get subscriptionExpired;
+
+  /// No description provided for @subscriptionCancelled.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancelled'**
+  String get subscriptionCancelled;
+
+  /// No description provided for @subscriptionPending.
+  ///
+  /// In en, this message translates to:
+  /// **'Payment pending'**
+  String get subscriptionPending;
+
+  /// No description provided for @subscriptionFree.
+  ///
+  /// In en, this message translates to:
+  /// **'Free Plan'**
+  String get subscriptionFree;
+
+  /// No description provided for @cancelSubscription.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel Subscription'**
+  String get cancelSubscription;
+
+  /// No description provided for @cancelSubscriptionConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel your Pro subscription? Pro features stop right away and the rest of the period is not refunded.'**
+  String get cancelSubscriptionConfirm;
+
+  /// No description provided for @keepSubscription.
+  ///
+  /// In en, this message translates to:
+  /// **'Keep Pro'**
+  String get keepSubscription;
+
+  /// No description provided for @checkoutTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Checkout'**
+  String get checkoutTitle;
+
+  /// No description provided for @summaryPlan.
+  ///
+  /// In en, this message translates to:
+  /// **'Plan'**
+  String get summaryPlan;
+
+  /// No description provided for @summaryDiscount.
+  ///
+  /// In en, this message translates to:
+  /// **'Coupon discount'**
+  String get summaryDiscount;
+
+  /// No description provided for @summaryTotal.
+  ///
+  /// In en, this message translates to:
+  /// **'Total'**
+  String get summaryTotal;
+
+  /// No description provided for @couponCode.
+  ///
+  /// In en, this message translates to:
+  /// **'Coupon Code'**
+  String get couponCode;
+
+  /// No description provided for @couponApplied.
+  ///
+  /// In en, this message translates to:
+  /// **'Coupon applied! You save {amount}'**
+  String couponApplied(String amount);
+
+  /// No description provided for @couponInvalid.
+  ///
+  /// In en, this message translates to:
+  /// **'Invalid or expired coupon'**
+  String get couponInvalid;
+
+  /// No description provided for @proceedToPay.
+  ///
+  /// In en, this message translates to:
+  /// **'Pay {amount}'**
+  String proceedToPay(String amount);
+
+  /// No description provided for @confirmingPayment.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirming payment…'**
+  String get confirmingPayment;
+
+  /// No description provided for @paymentSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Payment Successful!'**
+  String get paymentSuccess;
+
+  /// No description provided for @paymentSuccessMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'You are now a Pro subscriber. Enjoy all premium features.'**
+  String get paymentSuccessMessage;
+
+  /// No description provided for @exploreProFeatures.
+  ///
+  /// In en, this message translates to:
+  /// **'Explore Pro Features'**
+  String get exploreProFeatures;
+
+  /// No description provided for @paymentFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Payment Failed'**
+  String get paymentFailed;
+
+  /// No description provided for @paymentsMobileOnly.
+  ///
+  /// In en, this message translates to:
+  /// **'Payments are available in the mobile app'**
+  String get paymentsMobileOnly;
+
+  /// No description provided for @paymentActivationPending.
+  ///
+  /// In en, this message translates to:
+  /// **'Payment received — activation pending. Pull to refresh in a minute.'**
+  String get paymentActivationPending;
+
+  /// No description provided for @externalWalletUnsupported.
+  ///
+  /// In en, this message translates to:
+  /// **'External wallets are not supported. Choose another payment method.'**
+  String get externalWalletUnsupported;
+
+  /// No description provided for @upgradeToUnlock.
+  ///
+  /// In en, this message translates to:
+  /// **'Upgrade to Pro to unlock this feature'**
+  String get upgradeToUnlock;
+
+  /// No description provided for @seePlans.
+  ///
+  /// In en, this message translates to:
+  /// **'See Plans'**
+  String get seePlans;
+
+  /// No description provided for @proFeatureReports.
+  ///
+  /// In en, this message translates to:
+  /// **'Unlimited price reports (PDF + CSV)'**
+  String get proFeatureReports;
+
+  /// No description provided for @proFeatureAlerts.
+  ///
+  /// In en, this message translates to:
+  /// **'Advanced price alert rules'**
+  String get proFeatureAlerts;
+
+  /// No description provided for @proFeatureProcurement.
+  ///
+  /// In en, this message translates to:
+  /// **'Procurement cost estimator'**
+  String get proFeatureProcurement;
+
+  /// No description provided for @proFeatureComparison.
+  ///
+  /// In en, this message translates to:
+  /// **'Mandi price comparison (all markets)'**
+  String get proFeatureComparison;
+
+  /// No description provided for @freeFeatureBasicPrices.
+  ///
+  /// In en, this message translates to:
+  /// **'Basic daily prices'**
+  String get freeFeatureBasicPrices;
+
+  /// No description provided for @freeFeatureWatchlist.
+  ///
+  /// In en, this message translates to:
+  /// **'Watchlist (up to 5 items)'**
+  String get freeFeatureWatchlist;
 }
 
 class _AppLocalizationsDelegate

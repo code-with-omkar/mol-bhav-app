@@ -15,4 +15,5 @@ public sealed class OtpDeliveryOptions
 public static class OtpDeliveryProviders
 {
     public const string Log = "Log";
+    public const string Msg91 = "Msg91";
 }

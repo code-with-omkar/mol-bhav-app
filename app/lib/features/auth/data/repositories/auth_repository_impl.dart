@@ -23,8 +23,8 @@ class AuthRepositoryImpl implements AuthRepository {
       final response = await _remote.requestOtp(mobile.e164);
       return OtpChallenge(
         mobile: mobile,
-        codeLength: response.otpLength,
-        resendAfter: Duration(seconds: response.resendAfterSeconds),
+        codeLength: 6,
+        resendAfter: Duration(seconds: response.resendCooldownSeconds),
       );
     });
   }

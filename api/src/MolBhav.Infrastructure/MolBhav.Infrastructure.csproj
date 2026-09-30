@@ -10,17 +10,29 @@
   </ItemGroup>
 
   <ItemGroup>
+    <!-- Noto Sans (SIL OFL 1.1) for Latin + Indic scripts in PDF reports, loaded from the assembly at startup. -->
+    <EmbeddedResource Include="Reporting\Fonts\*.ttf" LogicalName="MolBhav.Fonts.%(Filename)%(Extension)" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\MolBhav.Application\MolBhav.Application.csproj" />
   </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="Microsoft.EntityFrameworkCore" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Relational" />
+    <PackageReference Include="Microsoft.Extensions.Http.Resilience" />
     <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" />
     <PackageReference Include="Npgsql.DependencyInjection" />
     <PackageReference Include="Dapper" />
+    <PackageReference Include="QuestPDF" />
     <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" />
     <PackageReference Include="Microsoft.Extensions.Diagnostics.HealthChecks.EntityFrameworkCore" />
+    <PackageReference Include="FirebaseAdmin" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <InternalsVisibleTo Include="MolBhav.UnitTests" />
   </ItemGroup>
 
 </Project>

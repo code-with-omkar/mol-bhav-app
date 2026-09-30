@@ -1,8 +1,13 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+import 'package:sms_autofill/sms_autofill.dart';
 
+import '../../../../core/di/injection.dart';
 import '../../../../core/l10n/l10n.dart';
+import '../../../../core/notifications/notification_service.dart';
 import '../../../../core/router/app_routes.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../../../../core/theme/mb_dimens.dart';
@@ -12,6 +17,7 @@ import '../../../../shared/widgets/mb_icon.dart';
 import '../../../../shared/widgets/mb_layout.dart';
 import '../../../../shared/widgets/mb_otp_input.dart';
 import '../../../../shared/widgets/mb_state_views.dart';
+import '../../../../shared/widgets/mb_wordmark.dart';
 import '../cubit/otp_cubit.dart';
 
 /// Second sign-in step: the OTP boxes, a resend countdown and verify.
@@ -22,11 +28,28 @@ class OtpPage extends StatefulWidget {
   State<OtpPage> createState() => _OtpPageState();
 }
 
-class _OtpPageState extends State<OtpPage> {
+class _OtpPageState extends State<OtpPage> with CodeAutoFill {
   final _code = TextEditingController();
+
+  /// Called by [CodeAutoFill] when the SMS listener delivers a code.
+  @override
+  void codeUpdated() {
+    final received = code;
+    if (received != null && mounted) {
+      _code.text = received;
+      context.read<OtpCubit>().codeChanged(received);
+    }
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    listenForCode();
+  }
 
   @override
   void dispose() {
+    cancel();
     _code.dispose();
     super.dispose();
   }
@@ -34,6 +57,8 @@ class _OtpPageState extends State<OtpPage> {
   void _onStatus(BuildContext context, OtpState state) {
     switch (state.status) {
       case OtpStatus.verified:
+        // Fire-and-forget: token registration is a side effect that must not block navigation.
+        unawaited(getIt<NotificationService>().initialize());
         context.go(
           state.session!.isOnboarded
               ? AppRoutes.home
@@ -64,11 +89,12 @@ class _OtpPageState extends State<OtpPage> {
       listener: _onStatus,
       builder: (context, state) => Scaffold(
         appBar: const MbAppBar(),
-        body: SingleChildScrollView(
-          padding: MbSpacing.screenPadding,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
+        resizeToAvoidBottomInset: true,
+        body: SafeArea(
+          child: MbCenteredForm(
             children: [
+              const MbWordmark(size: 28, alignment: Alignment.center),
+              const SizedBox(height: MbSpacing.s6),
               MbPageHeading(
                 title: l10n.otpTitle,
                 lead: Text.rich(

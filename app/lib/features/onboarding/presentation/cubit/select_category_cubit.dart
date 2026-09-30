@@ -58,21 +58,38 @@ class SelectCategoryState extends Equatable {
 
 @injectable
 class SelectCategoryCubit extends Cubit<SelectCategoryState> {
-  SelectCategoryCubit(this._getCategories, this._saveCategories)
-    : super(const SelectCategoryState());
+  SelectCategoryCubit(
+    this._getCategories,
+    this._saveCategories,
+    this._getSavedProfile,
+  ) : super(const SelectCategoryState());
 
   final GetCategories _getCategories;
   final SaveCategories _saveCategories;
+  final GetSavedProfile _getSavedProfile;
 
-  Future<void> load() async {
+  /// With [prefill] the saved categories start selected.
+  Future<void> load({bool prefill = false}) async {
     emit(state.copyWith(status: LoadStatus.loading));
-    final result = await _getCategories();
+    final (result, saved) = await (
+      _getCategories(),
+      prefill ? _getSavedProfile() : Future.value(null),
+    ).wait;
+    final savedCodes = saved?.fold((_) => null, (p) => p.categoryCodes);
     emit(
       result.fold(
         (failure) =>
             state.copyWith(status: LoadStatus.failure, failure: failure),
-        (categories) =>
-            state.copyWith(status: LoadStatus.ready, categories: categories),
+        (categories) => state.copyWith(
+          status: LoadStatus.ready,
+          categories: categories,
+          selected: savedCodes == null
+              ? null
+              : {
+                  for (final c in categories)
+                    if (c.isAvailable && savedCodes.contains(c.code)) c.id,
+                },
+        ),
       ),
     );
   }

@@ -13,11 +13,16 @@ import '../../../../shared/widgets/mb_category_card.dart';
 import '../../../../shared/widgets/mb_layout.dart';
 import '../../../../shared/widgets/mb_state_views.dart';
 import '../../../../shared/widgets/category_visuals.dart';
+import '../../../account/presentation/profile_cubit.dart';
 import '../cubit/select_category_cubit.dart';
 
 /// Onboarding step 2: pick one or more procurement categories.
 class SelectCategoryPage extends StatelessWidget {
-  const SelectCategoryPage({super.key});
+  const SelectCategoryPage({super.key, this.editing = false});
+
+  /// Saved categories start selected; saving pops `true` instead of going
+  /// home.
+  final bool editing;
 
   @override
   Widget build(BuildContext context) {
@@ -28,7 +33,9 @@ class SelectCategoryPage extends StatelessWidget {
       listenWhen: (p, n) => p.submitStatus != n.submitStatus,
       listener: (context, state) {
         if (state.submitStatus == SubmitStatus.success) {
-          context.go(AppRoutes.home);
+          // Home and More show the saved name, place and categories.
+          context.read<ProfileCubit>().refresh();
+          editing ? context.pop(true) : context.go(AppRoutes.home);
         } else if (state.submitStatus == SubmitStatus.failure) {
           showFailureSnackBar(context, state.submitFailure!);
         }

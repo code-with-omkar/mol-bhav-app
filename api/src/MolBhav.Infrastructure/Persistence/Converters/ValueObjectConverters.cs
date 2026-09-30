@@ -1,6 +1,8 @@
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using MolBhav.Domain.Catalog;
 using MolBhav.Domain.Common.Results;
+using MolBhav.Domain.Localization;
+using MolBhav.Domain.Market;
 using MolBhav.Domain.SharedKernel;
 
 namespace MolBhav.Infrastructure.Persistence.Converters;
@@ -28,6 +30,14 @@ internal static class ValueObjectConverters
     public static readonly ValueConverter<CatalogCode, string> CatalogCodeConverter = new(
         code => code.Value,
         value => Rehydrate(CatalogCode.Create(value), value));
+
+    public static readonly ValueConverter<MarketCode, string> MarketCodeConverter = new(
+        code => code.Value,
+        value => Rehydrate(MarketCode.Create(value), value));
+
+    public static readonly ValueConverter<LocalizationKey, string> LocalizationKeyConverter = new(
+        key => key.Value,
+        value => Rehydrate(LocalizationKey.Create(value), value));
 
     private static T Rehydrate<T>(Result<T> result, string storedValue) =>
         result.IsSuccess

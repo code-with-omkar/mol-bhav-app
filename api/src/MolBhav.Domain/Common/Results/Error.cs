@@ -37,6 +37,8 @@ public sealed record Error
 
     public static Error BusinessRule(string code, string description) => Create(code, description, ErrorType.BusinessRule);
 
+    public static Error Unavailable(string code, string description) => Create(code, description, ErrorType.Unavailable);
+
     private static Error Create(string code, string description, ErrorType type)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(code);

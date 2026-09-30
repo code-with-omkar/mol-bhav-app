@@ -28,7 +28,7 @@ void main() {
   late _MockRemote remote;
   late _MockSession tokens;
   late AuthRepositoryImpl repository;
-  final mobile = MobileNumber.tryParse('9876543210')!;
+  final mobile = MobileNumber.tryParse('9503119207')!;
 
   setUp(() {
     remote = _MockRemote();
@@ -38,13 +38,15 @@ void main() {
 
   test('requestOtp sends E.164 and returns the challenge', () async {
     when(() => remote.requestOtp(any())).thenAnswer(
-      (_) async =>
-          const OtpRequestResponse(otpLength: 6, resendAfterSeconds: 30),
+      (_) async => OtpRequestResponse(
+        expiresAtUtc: DateTime.now().add(const Duration(minutes: 5)),
+        resendCooldownSeconds: 30,
+      ),
     );
 
     final result = await repository.requestOtp(mobile);
 
-    verify(() => remote.requestOtp('+919876543210')).called(1);
+    verify(() => remote.requestOtp('+919503119207')).called(1);
     expect(
       result.fold((_) => null, (c) => c),
       OtpChallenge(
@@ -113,16 +115,14 @@ void main() {
 
   test('models parse the documented payloads', () {
     final request = OtpRequestResponse.fromJson({
-      'otpLength': 6,
-      'resendAfterSeconds': 30,
+      'expiresAtUtc': '2030-01-01T00:05:00Z',
+      'resendCooldownSeconds': 30,
     });
     final verified = OtpVerifyResponse.fromJson({
-      'accessToken': 'a',
-      'refreshToken': 'r',
+      'session': {'accessToken': 'a', 'refreshToken': 'r'},
       'isOnboarded': false,
     });
-    expect(request.otpLength, 6);
-    expect(request.resendAfterSeconds, 30);
+    expect(request.resendCooldownSeconds, 30);
     expect(verified.isOnboarded, isFalse);
   });
 }

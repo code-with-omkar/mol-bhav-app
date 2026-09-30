@@ -78,13 +78,28 @@ class MarketPrice extends Equatable {
     required this.marketId,
     required this.marketName,
     required this.price,
+    required this.recordDate,
+    required this.source,
+    this.minPrice,
+    this.maxPrice,
     this.change,
     this.arrivals,
   });
 
   final String marketId;
   final String marketName;
+
+  /// Modal price — the one the table shows.
   final num price;
+
+  /// The day's band, when the source reported one. Shown on a shared card.
+  final num? minPrice;
+  final num? maxPrice;
+
+  /// The date this row's price is for, per market: rows in one comparison can
+  /// be from different days when a mandi has not reported yet.
+  final DateTime recordDate;
+  final String source;
 
   /// Day-on-day change in rupees.
   final num? change;
@@ -93,7 +108,17 @@ class MarketPrice extends Equatable {
   final String? arrivals;
 
   @override
-  List<Object?> get props => [marketId, marketName, price, change, arrivals];
+  List<Object?> get props => [
+    marketId,
+    marketName,
+    price,
+    minPrice,
+    maxPrice,
+    recordDate,
+    source,
+    change,
+    arrivals,
+  ];
 }
 
 enum TrendRange {
@@ -113,6 +138,7 @@ class PriceTrend extends Equatable {
     required this.commodityName,
     required this.marketName,
     required this.unit,
+    required this.source,
     required this.points,
     required this.min,
     required this.modal,
@@ -123,17 +149,24 @@ class PriceTrend extends Equatable {
   final String commodityName;
   final String marketName;
   final String unit;
+  final String source;
   final List<TrendSample> points;
+
+  /// Range statistics across [points], not one day's band.
   final num min;
   final num modal;
   final num max;
   final List<RelatedMarketPrice> related;
+
+  /// Newest point — what a shared card from this screen is about.
+  TrendSample? get latest => points.isEmpty ? null : points.last;
 
   @override
   List<Object?> get props => [
     commodityName,
     marketName,
     unit,
+    source,
     points,
     min,
     modal,
@@ -143,13 +176,24 @@ class PriceTrend extends Equatable {
 }
 
 class TrendSample extends Equatable {
-  const TrendSample({required this.date, required this.value});
+  const TrendSample({
+    required this.date,
+    required this.value,
+    this.min,
+    this.max,
+  });
 
   final DateTime date;
+
+  /// Modal price on [date].
   final num value;
 
+  /// That day's band, when the source reported one.
+  final num? min;
+  final num? max;
+
   @override
-  List<Object?> get props => [date, value];
+  List<Object?> get props => [date, value, min, max];
 }
 
 class RelatedMarketPrice extends Equatable {

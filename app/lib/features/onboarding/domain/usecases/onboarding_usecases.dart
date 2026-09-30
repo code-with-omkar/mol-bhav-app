@@ -44,6 +44,15 @@ class GetCategories {
 }
 
 @injectable
+class GetSavedProfile {
+  const GetSavedProfile(this._repository);
+
+  final OnboardingRepository _repository;
+
+  Future<Result<SavedProfile>> call() => _repository.getSavedProfile();
+}
+
+@injectable
 class SaveCategories {
   const SaveCategories(this._repository);
 

@@ -93,3 +93,41 @@ enhancement.
 are stored (per language) and served when the network fails. Used by Home,
 commodities, market comparison, price trends and watchlist. Cached data keeps
 its original "Updated …" timestamp. The cache is cleared on sign-out/expiry.
+
+## Sharing and deep links
+
+Price rows on market comparison and browse-by-mandi, and the trends app bar,
+share a price as a PNG plus a text message (`share_plus`). The image is
+`SharePriceCard` mounted off-screen in an overlay and captured through a
+`RepaintBoundary` at `pixelRatio: 3`, so it inherits the live theme, the
+active locale and the already-loaded Noto faces — which is what makes Indic
+scripts render as text rather than boxes. On the web there is no dependable
+file share, so the text is shared and the PNG is handed to the browser as a
+download.
+
+Links are built by `lib/core/share/deep_link_config.dart` from a build-time
+define:
+
+```sh
+flutter run \
+  --dart-define=API_BASE_URL=https://<backend> \
+  --dart-define=DEEP_LINK_BASE=https://<host> \
+  -Pdeep_link_host=<host>
+```
+
+`{DEEP_LINK_BASE}/p/{productId}?mandi={mandiId}` opens the comparison screen
+for that product with the mandi badged; opened while logged out, the router
+carries `?from=` through Login and returns there afterwards. With
+`DEEP_LINK_BASE` unset (the default) shares carry the Play Store link instead
+and the `/p/` route is not registered.
+
+**Both association files must be served from the site root over HTTPS with
+`Content-Type: application/json`** — `assetlinks.json` at
+`https://<host>/.well-known/assetlinks.json` and `apple-app-site-association`
+(no extension) at `https://<host>/.well-known/apple-app-site-association`.
+The files, the Nginx `location` blocks and the remaining key-fingerprint and
+Team ID TODOs are in [`../docs/deep-links/`](../docs/deep-links/README.md).
+
+"Invite a friend" on More shares the Play Store link tagged with
+`?ref=<12 hex chars of SHA-256(userId)>` — enough to group installs later
+without putting a user id in a forwarded message.

@@ -313,6 +313,7 @@ class MbAvatar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final c = context.mbColors;
+    final initials = initialsOf(name);
     return Semantics(
       label: name,
       excludeSemantics: true,
@@ -321,14 +322,16 @@ class MbAvatar extends StatelessWidget {
         height: size,
         alignment: Alignment.center,
         decoration: BoxDecoration(color: c.bhavAmber, shape: BoxShape.circle),
-        child: Text(
-          initialsOf(name),
-          style: context.mbText.stat.copyWith(
-            fontSize: 13,
-            height: 1,
-            color: c.marketNavy,
-          ),
-        ),
+        child: initials.isEmpty
+            ? MbIcon(MbIcons.user, size: size * 0.5, color: c.marketNavy)
+            : Text(
+                initials,
+                style: context.mbText.stat.copyWith(
+                  fontSize: 13,
+                  height: 1,
+                  color: c.marketNavy,
+                ),
+              ),
       ),
     );
   }

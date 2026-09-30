@@ -41,9 +41,10 @@ Content-Type: application/json
 # Identity — onboarding / profile screen
 ############################################################
 
-### 3. Get my profile
+### 3. Get my profile — stateId/districtId/categoryDetails preselect the edit form
 GET {{host}}/api/v1/profile
 Authorization: Bearer {{accessToken}}
+Accept-Language: hi
 
 ### 4. Complete onboarding / edit profile (full replacement)
 PUT {{host}}/api/v1/profile
@@ -51,6 +52,7 @@ Authorization: Bearer {{accessToken}}
 Content-Type: application/json
 
 {
+  "displayName": "Ramesh Patil",
   "businessType": "Cloud Kitchen",
   "state": "Maharashtra",
   "district": "Pune",
@@ -179,3 +181,448 @@ Authorization: Bearer {{accessToken}}
 Content-Type: application/json
 
 { "code": "pink", "displayOrder": 3, "translations": [ { "languageCode": "en", "name": "Pink" } ] }
+
+### 21. States (mobile)
+GET {{host}}/api/v1/market/states
+Authorization: Bearer {{accessToken}}
+
+### 22. Create a state (admin)
+# @name adminStates
+POST {{host}}/api/v1/admin/market/states
+Authorization: Bearer {{accessToken}}
+Content-Type: application/json
+
+{ "name": "Maharashtra", "code": "MH" }
+
+### 23. Add a district (admin)
+# @name adminDistrict
+POST {{host}}/api/v1/admin/market/states/{{adminStates.response.body.$.data.id}}/districts
+Authorization: Bearer {{accessToken}}
+Content-Type: application/json
+
+{ "name": "Pune" }
+
+### 24. Districts of a state (mobile)
+GET {{host}}/api/v1/market/states/{{adminStates.response.body.$.data.id}}/districts
+Authorization: Bearer {{accessToken}}
+
+### 25. Create a mandi (admin) — code is immutable afterwards
+# @name adminMandi
+POST {{host}}/api/v1/admin/market/mandis
+Authorization: Bearer {{accessToken}}
+Content-Type: application/json
+
+{ "code": "apmc-pune", "districtId": "{{adminDistrict.response.body.$.data.id}}", "name": "APMC Pune" }
+
+### 26. Create a supplier/hub (admin)
+# @name adminSupplier
+POST {{host}}/api/v1/admin/market/suppliers
+Authorization: Bearer {{accessToken}}
+Content-Type: application/json
+
+{ "code": "hub-pune-01", "districtId": "{{adminDistrict.response.body.$.data.id}}", "name": "Pune Steel Hub", "contactPhone": "9988776655" }
+
+### 27. Mandis (mobile) — optional districtId/search/page/pageSize
+GET {{host}}/api/v1/market/mandis?search=apmc
+Authorization: Bearer {{accessToken}}
+
+### 28. Suppliers (mobile) — optional districtId/search/page/pageSize
+GET {{host}}/api/v1/market/suppliers
+Authorization: Bearer {{accessToken}}
+
+### 29. Admin mandi list — filters: districtId, search, isActive
+GET {{host}}/api/v1/admin/market/mandis
+Authorization: Bearer {{accessToken}}
+
+### 30. Create a price source (admin) — code is immutable afterwards
+# @name adminPriceSource
+POST {{host}}/api/v1/admin/pricing/sources
+Authorization: Bearer {{accessToken}}
+Content-Type: application/json
+
+{ "code": "agmarknet", "name": "Agmarknet" }
+
+### 31. Record a mandi price (admin) — the path the future Ingestion module will also call
+# @name recordPrice
+POST {{host}}/api/v1/admin/pricing/records
+Authorization: Bearer {{accessToken}}
+Content-Type: application/json
+
+{
+  "productId": "{{products.response.body.$.data[0].id}}",
+  "unitId": "{{products.response.body.$.data[0].defaultUnit.id}}",
+  "locationKind": "Mandi",
+  "mandiId": "{{adminMandi.response.body.$.data.id}}",
+  "priceSourceId": "{{adminPriceSource.response.body.$.data.id}}",
+  "minPrice": 1000,
+  "maxPrice": 1500,
+  "modalPrice": 1250,
+  "arrivalQuantity": 50,
+  "recordDate": "2026-09-25"
+}
+
+### 32. Comparison matrix (mobile) — latest non-voided price per mandi/supplier for a product
+GET {{host}}/api/v1/pricing/latest?productId={{products.response.body.$.data[0].id}}
+Authorization: Bearer {{accessToken}}
+
+### 33. Trend sparkline (mobile)
+GET {{host}}/api/v1/pricing/history?productId={{products.response.body.$.data[0].id}}&locationKind=Mandi&locationId={{adminMandi.response.body.$.data.id}}&fromDate=2026-09-01&toDate=2026-09-26
+Authorization: Bearer {{accessToken}}
+
+### 33a. Browse by mandi (mobile) — latest price per product/variant at one mandi, last 30 days
+GET {{host}}/api/v1/pricing/latest-by-location?locationKind=Mandi&locationId={{adminMandi.response.body.$.data.id}}
+Authorization: Bearer {{accessToken}}
+Accept-Language: mr
+
+### 34. Admin price record list — filters: productId, locationKind, locationId, fromDate, toDate, isVoided
+GET {{host}}/api/v1/admin/pricing/records
+Authorization: Bearer {{accessToken}}
+
+### 35. Void a price record — never deleted, disappears from mobile reads only
+POST {{host}}/api/v1/admin/pricing/records/{{recordPrice.response.body.$.data.id}}/void
+Authorization: Bearer {{accessToken}}
+
+### 36. Add a product to the watchlist
+# @name addToWatchlist
+POST {{host}}/api/v1/watchlist
+Authorization: Bearer {{accessToken}}
+Content-Type: application/json
+
+{ "productId": "{{products.response.body.$.data[0].id}}" }
+
+### 37. My watchlist — localized like the catalog product list
+GET {{host}}/api/v1/watchlist
+Authorization: Bearer {{accessToken}}
+Accept-Language: hi
+
+### 38. Remove from watchlist
+DELETE {{host}}/api/v1/watchlist/{{addToWatchlist.response.body.$.data.id}}
+Authorization: Bearer {{accessToken}}
+
+### --- Alerting ---
+
+### 39. Create an alert rule — fires on a 5% drop for this product at this mandi
+# @name createAlertRule
+POST {{host}}/api/v1/alert-rules
+Authorization: Bearer {{accessToken}}
+Content-Type: application/json
+
+{
+  "productId": "{{products.response.body.$.data[0].id}}",
+  "locationKind": "Mandi",
+  "mandiId": "{{adminMandi.response.body.$.data.id}}",
+  "thresholdType": "PriceDrop",
+  "thresholdPercent": 5
+}
+
+### 39b. Create a price-level alert rule — fires when the modal price crosses below ₹2,400 at this mandi
+# @name createPriceBelowRule
+POST {{host}}/api/v1/alert-rules
+Authorization: Bearer {{accessToken}}
+Content-Type: application/json
+
+{
+  "productId": "{{products.response.body.$.data[0].id}}",
+  "locationKind": "Mandi",
+  "mandiId": "{{adminMandi.response.body.$.data.id}}",
+  "thresholdType": "PriceBelow",
+  "thresholdPrice": 2400
+}
+
+### 39c. Raise the level on that rule (PriceAbove/PriceBelow rules update thresholdPrice, never thresholdPercent)
+PUT {{host}}/api/v1/alert-rules/{{createPriceBelowRule.response.body.$.data.id}}
+Authorization: Bearer {{accessToken}}
+Content-Type: application/json
+
+{
+  "thresholdPrice": 2500,
+  "isActive": true
+}
+
+### 40. My alert rules
+GET {{host}}/api/v1/alert-rules
+Authorization: Bearer {{accessToken}}
+
+### 41. My triggered alerts — populated by EvaluateAlertRulesHandler when a matching price is recorded (see request 31)
+GET {{host}}/api/v1/alerts
+Authorization: Bearer {{accessToken}}
+
+### 42. Mark an alert read
+POST {{host}}/api/v1/alerts/{{createAlertRule.response.body.$.data.id}}/read
+Authorization: Bearer {{accessToken}}
+
+### 43. Delete an alert rule
+DELETE {{host}}/api/v1/alert-rules/{{createAlertRule.response.body.$.data.id}}
+Authorization: Bearer {{accessToken}}
+
+### 43b. Delete the price-level alert rule
+DELETE {{host}}/api/v1/alert-rules/{{createPriceBelowRule.response.body.$.data.id}}
+Authorization: Bearer {{accessToken}}
+
+### --- Procurement ---
+
+### 44. Create a procurement requirement — unit must equal the product's default unit
+# @name createRequirement
+POST {{host}}/api/v1/procurement/requirements
+Authorization: Bearer {{accessToken}}
+Content-Type: application/json
+
+{
+  "productId": "{{products.response.body.$.data[0].id}}",
+  "unitId": "{{products.response.body.$.data[0].defaultUnit.id}}",
+  "quantity": 50,
+  "targetPrice": 1900
+}
+
+### 45. Create a cost component (admin) — applied on top of the raw price when computing opportunities
+# @name createCostComponent
+POST {{host}}/api/v1/admin/procurement/cost-components
+Authorization: Bearer {{accessToken}}
+Content-Type: application/json
+
+{ "code": "freight", "name": "Freight", "componentType": "Percentage", "value": 2.5 }
+
+### 46. Compute opportunities — reuses the pricing comparison query, applies active cost components, persists top 10 cheapest
+POST {{host}}/api/v1/procurement/requirements/{{createRequirement.response.body.$.data.id}}/opportunities
+Authorization: Bearer {{accessToken}}
+
+### 47. Get the persisted opportunity snapshot
+GET {{host}}/api/v1/procurement/requirements/{{createRequirement.response.body.$.data.id}}/opportunities
+Authorization: Bearer {{accessToken}}
+
+### 48. My requirements
+GET {{host}}/api/v1/procurement/requirements
+Authorization: Bearer {{accessToken}}
+
+### 49. Delete a requirement — cascades its opportunities
+DELETE {{host}}/api/v1/procurement/requirements/{{createRequirement.response.body.$.data.id}}
+Authorization: Bearer {{accessToken}}
+
+### --- Notification ---
+### Notifications are created by domain-event handlers only (welcome on register, alert on trigger) — there is no create endpoint.
+
+### 50. My notifications
+GET {{host}}/api/v1/notifications
+Authorization: Bearer {{accessToken}}
+
+### 51. Admin — all notifications, optionally filtered
+GET {{host}}/api/v1/admin/notifications
+Authorization: Bearer {{accessToken}}
+
+### --- Reporting ---
+
+### 52. Request the weekly summary PDF — dates default to the last 7 days, language to Accept-Language
+# @name requestReport
+POST {{host}}/api/v1/reports
+Authorization: Bearer {{accessToken}}
+Content-Type: application/json
+Accept-Language: hi
+
+{
+  "reportType": "WeeklySummary",
+  "format": "Pdf",
+  "parameters": { "fromDate": "2026-09-20", "toDate": "2026-09-26", "language": "hi" }
+}
+
+### 52b. Request a price history CSV — Pro only (403 Report.ProRequired otherwise); mandiId optional
+POST {{host}}/api/v1/reports
+Authorization: Bearer {{accessToken}}
+Content-Type: application/json
+
+{
+  "reportType": "PriceHistory",
+  "format": "Csv",
+  "parameters": {
+    "productId": "{{products.response.body.$.data[0].id}}",
+    "fromDate": "2026-08-27",
+    "toDate": "2026-09-26"
+  }
+}
+
+### 53. Report status — Pending until the outbox dispatches GenerateReportHandler, then Ready/Failed
+GET {{host}}/api/v1/reports/{{requestReport.response.body.$.data.id}}
+Authorization: Bearer {{accessToken}}
+
+### 53b. Download — the file once Ready; 409 Report.NotReady before that
+GET {{host}}/api/v1/reports/{{requestReport.response.body.$.data.id}}/download
+Authorization: Bearer {{accessToken}}
+
+### 54. My reports — after 53b the downloaded report carries a lastDownloadedAtUtc
+GET {{host}}/api/v1/reports
+Authorization: Bearer {{accessToken}}
+
+### 55. Admin — all reports, optionally filtered
+GET {{host}}/api/v1/admin/reports
+Authorization: Bearer {{accessToken}}
+
+### --- Billing ---
+
+### 56. Create a plan (admin)
+# @name createPlan
+POST {{host}}/api/v1/admin/billing/plans
+Authorization: Bearer {{accessToken}}
+Content-Type: application/json
+
+{ "code": "pro-monthly", "name": "Pro Monthly", "price": 499, "currency": "INR", "billingPeriod": "Monthly" }
+
+### 57. Active plans (mobile)
+GET {{host}}/api/v1/billing/plans
+Authorization: Bearer {{accessToken}}
+
+### 58. Subscribe — charges via the stubbed payment gateway (always succeeds), creates the Subscription, flips SubscriptionTier to Pro
+# @name subscribe
+POST {{host}}/api/v1/billing/subscribe
+Authorization: Bearer {{accessToken}}
+Content-Type: application/json
+
+{ "planId": "{{createPlan.response.body.$.data.id}}" }
+
+### 59. My subscription
+GET {{host}}/api/v1/billing/subscription
+Authorization: Bearer {{accessToken}}
+
+### 60. Cancel my subscription
+POST {{host}}/api/v1/billing/subscription/cancel
+Authorization: Bearer {{accessToken}}
+
+### 61. Admin — all subscriptions, optionally filtered
+GET {{host}}/api/v1/admin/billing/subscriptions
+Authorization: Bearer {{accessToken}}
+
+### 62. Admin — force-expire a subscription
+POST {{host}}/api/v1/admin/billing/subscriptions/{{subscribe.response.body.$.data.id}}/expire
+Authorization: Bearer {{accessToken}}
+
+### --- Ingestion ---
+
+### 63. Manually trigger an ingestion run — source code `agmarknet` pulls live data.gov.in prices (needs Agmarknet:ApiKey); other codes hit the stub and end Failed
+# @name runIngestionJob
+POST {{host}}/api/v1/admin/ingestion/sources/{{adminPriceSource.response.body.$.data.id}}/run
+Authorization: Bearer {{accessToken}}
+
+### 64. Job history — filters: priceSourceId, status
+GET {{host}}/api/v1/admin/ingestion/jobs
+Authorization: Bearer {{accessToken}}
+
+### 65. One job's outcome
+GET {{host}}/api/v1/admin/ingestion/jobs/{{runIngestionJob.response.body.$.data.id}}
+Authorization: Bearer {{accessToken}}
+
+### 66. Per-record failures for a job (empty until a real adapter returns rows that fail to resolve)
+GET {{host}}/api/v1/admin/ingestion/jobs/{{runIngestionJob.response.body.$.data.id}}/errors
+Authorization: Bearer {{accessToken}}
+
+### --- Localization ---
+
+### 67. Create a key with its translations (admin) — English required
+# @name createLocalizedText
+POST {{host}}/api/v1/admin/localization/texts
+Authorization: Bearer {{accessToken}}
+Content-Type: application/json
+
+{
+  "key": "alerts.price_drop.title",
+  "description": "Push notification title for a price-drop alert",
+  "translations": [
+    { "languageCode": "en", "text": "Price drop alert" },
+    { "languageCode": "mr", "text": "किंमत घसरण सूचना" }
+  ]
+}
+
+### 68. Admin — list keys, optionally filtered by namespace prefix
+GET {{host}}/api/v1/admin/localization/texts?keyPrefix=alerts.
+Authorization: Bearer {{accessToken}}
+
+### 69. Admin — one key with every translation
+GET {{host}}/api/v1/admin/localization/texts/{{createLocalizedText.response.body.$.data.id}}
+Authorization: Bearer {{accessToken}}
+
+### 70. Admin — edit translations/description (full replacement)
+PUT {{host}}/api/v1/admin/localization/texts/{{createLocalizedText.response.body.$.data.id}}
+Authorization: Bearer {{accessToken}}
+Content-Type: application/json
+
+{
+  "description": "Push notification title for a price-drop alert",
+  "translations": [
+    { "languageCode": "en", "text": "Price drop alert!" },
+    { "languageCode": "mr", "text": "किंमत घसरण सूचना" },
+    { "languageCode": "gu", "text": "ભાવ ઘટાડો ચેતવણી" }
+  ]
+}
+
+### 71. Mobile app — every key resolved for Accept-Language, falling back to English
+GET {{host}}/api/v1/localization/texts?keyPrefix=alerts.
+Authorization: Bearer {{accessToken}}
+Accept-Language: mr
+
+### --- Support (help & support) ---
+
+### 72. FAQ for the Help & Support screen — seeded by SeedSupportFaq, resolved for Accept-Language
+GET {{host}}/api/v1/localization/texts?keyPrefix=support.faq.
+Authorization: Bearer {{accessToken}}
+Accept-Language: hi
+
+### 73. Contact channels — from the Support config section (validated at startup)
+GET {{host}}/api/v1/support/contact
+Authorization: Bearer {{accessToken}}
+
+### 74. Raise a ticket — the ticket and its first message are written together
+# @name createTicket
+POST {{host}}/api/v1/support/tickets
+Authorization: Bearer {{accessToken}}
+Content-Type: application/json
+
+{
+  "category": "Data",
+  "subject": "Onion price for APMC Pune looks wrong",
+  "message": "Yesterday's modal price shows 1250 but the mandi board said 1400. Can you check the source?"
+}
+
+### 75. My tickets — last activity first
+GET {{host}}/api/v1/support/tickets
+Authorization: Bearer {{accessToken}}
+
+### 76. One ticket with its full thread (owner only — someone else's id is a 404)
+GET {{host}}/api/v1/support/tickets/{{createTicket.response.body.$.data.id}}
+Authorization: Bearer {{accessToken}}
+
+### 77. Admin queue — filters: status, category, search (subject, case-insensitive)
+GET {{host}}/api/v1/admin/support/tickets?status=Open
+Authorization: Bearer {{accessToken}}
+
+### 78. Admin — one ticket with its thread (no owner filter)
+GET {{host}}/api/v1/admin/support/tickets/{{createTicket.response.body.$.data.id}}
+Authorization: Bearer {{accessToken}}
+
+### 79. Admin reply — moves Open → InProgress and notifies the owner through the outbox
+POST {{host}}/api/v1/admin/support/tickets/{{createTicket.response.body.$.data.id}}/messages
+Authorization: Bearer {{accessToken}}
+Content-Type: application/json
+
+{ "message": "Thanks for flagging it. We re-checked Agmarknet and corrected yesterday's record." }
+
+### 80. The notification the reply produced (support.reply.* copy, in the user's language)
+GET {{host}}/api/v1/notifications
+Authorization: Bearer {{accessToken}}
+
+### 81. User reply — allowed while not Closed; on a Resolved ticket it reopens to Open
+POST {{host}}/api/v1/support/tickets/{{createTicket.response.body.$.data.id}}/messages
+Authorization: Bearer {{accessToken}}
+Content-Type: application/json
+
+{ "message": "Confirmed, the corrected price matches the board now. Thank you." }
+
+### 82. Admin — resolve the ticket
+PUT {{host}}/api/v1/admin/support/tickets/{{createTicket.response.body.$.data.id}}/status
+Authorization: Bearer {{accessToken}}
+Content-Type: application/json
+
+{ "status": "Resolved" }
+
+### 83. Admin — close it; Closed is terminal, so 79/81/82 all return 400 afterwards
+PUT {{host}}/api/v1/admin/support/tickets/{{createTicket.response.body.$.data.id}}/status
+Authorization: Bearer {{accessToken}}
+Content-Type: application/json
+
+{ "status": "Closed" }

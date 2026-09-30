@@ -2,6 +2,7 @@ using FluentValidation;
 using Microsoft.Extensions.DependencyInjection;
 using MolBhav.Application.Abstractions.Events;
 using MolBhav.Application.Common.Behaviors;
+using MolBhav.Application.Features.Billing.Activation;
 
 namespace MolBhav.Application;
 
@@ -24,6 +25,8 @@ public static class DependencyInjection
         services.AddValidatorsFromAssembly(assembly, ServiceLifetime.Scoped, includeInternalTypes: true);
 
         services.AddDomainEventHandlers(assembly);
+
+        services.AddScoped<SubscriptionActivationService>();
 
         return services;
     }

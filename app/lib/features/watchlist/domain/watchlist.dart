@@ -1,6 +1,7 @@
 import 'package:equatable/equatable.dart';
 import 'package:injectable/injectable.dart';
 
+import '../../../core/error/failure.dart';
 import '../../../core/error/result.dart';
 
 class Watchlist extends Equatable {
@@ -35,6 +36,7 @@ class WatchlistItem extends Equatable {
   const WatchlistItem({
     required this.id,
     required this.commodityId,
+    this.variantId,
     required this.marketId,
     required this.name,
     required this.categoryCode,
@@ -49,7 +51,12 @@ class WatchlistItem extends Equatable {
   });
 
   final String id;
+
+  /// The watched product.
   final String commodityId;
+
+  /// Set when a single variant is watched instead of the whole product.
+  final String? variantId;
   final String marketId;
   final String name;
   final String categoryCode;
@@ -68,6 +75,7 @@ class WatchlistItem extends Equatable {
   List<Object?> get props => [
     id,
     commodityId,
+    variantId,
     marketId,
     name,
     categoryCode,
@@ -82,15 +90,45 @@ class WatchlistItem extends Equatable {
   ];
 }
 
+/// The item is on the watchlist already (API 409).
+final class AlreadyWatchedFailure extends Failure {
+  const AlreadyWatchedFailure();
+}
+
 abstract interface class WatchlistRepository {
-  Future<Result<Watchlist>> getWatchlist();
+  /// Cached watchlist first, then the live one.
+  Stream<Result<Watchlist>> watchWatchlist();
+
+  /// Fails with [AlreadyWatchedFailure] for a duplicate.
+  Future<Result<void>> add(String productId, {String? variantId});
+
+  Future<Result<void>> remove(String itemId);
 }
 
 @injectable
-class GetWatchlist {
-  const GetWatchlist(this._repository);
+class WatchWatchlist {
+  const WatchWatchlist(this._repository);
 
   final WatchlistRepository _repository;
 
-  Future<Result<Watchlist>> call() => _repository.getWatchlist();
+  Stream<Result<Watchlist>> call() => _repository.watchWatchlist();
+}
+
+@injectable
+class AddToWatchlist {
+  const AddToWatchlist(this._repository);
+
+  final WatchlistRepository _repository;
+
+  Future<Result<void>> call(String productId, {String? variantId}) =>
+      _repository.add(productId, variantId: variantId);
+}
+
+@injectable
+class RemoveFromWatchlist {
+  const RemoveFromWatchlist(this._repository);
+
+  final WatchlistRepository _repository;
+
+  Future<Result<void>> call(String itemId) => _repository.remove(itemId);
 }

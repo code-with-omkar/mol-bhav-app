@@ -36,6 +36,7 @@ public sealed class ProfileController(ISender sender) : ApiControllerBase(sender
     public async Task<IActionResult> Update([FromBody] UpdateProfileRequest request, CancellationToken cancellationToken)
     {
         var command = new UpdateProfileCommand(
+            request.DisplayName,
             request.BusinessType,
             request.State,
             request.District,

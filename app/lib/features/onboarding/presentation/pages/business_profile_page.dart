@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../core/l10n/l10n.dart';
 import '../../../../core/locale/app_language.dart';
+import '../../../../core/locale/locale_cubit.dart';
 import '../../../../core/router/app_routes.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../../../../core/theme/mb_dimens.dart';
@@ -15,12 +17,31 @@ import '../../../../shared/widgets/mb_icon.dart';
 import '../../../../shared/widgets/mb_layout.dart';
 import '../../../../shared/widgets/mb_select_field.dart';
 import '../../../../shared/widgets/mb_state_views.dart';
+import '../../../../shared/widgets/mb_text_field.dart';
 import '../../domain/entities/onboarding_entities.dart';
 import '../cubit/business_profile_cubit.dart';
 
-/// Onboarding step 1: business type, state, district, preferred language.
+/// Onboarding step 1: name, business type, state, district, preferred language.
 class BusinessProfilePage extends StatelessWidget {
-  const BusinessProfilePage({super.key});
+  const BusinessProfilePage({super.key, this.editing = false});
+
+  /// Opened from the profile screen: fields are prefilled and the flow
+  /// returns there (popping `true`) once categories are saved.
+  final bool editing;
+
+  Future<void> _onSaved(
+    BuildContext context,
+    BusinessProfileState state,
+  ) async {
+    await context.read<LocaleCubit>().select(state.language);
+    if (!context.mounted) return;
+    if (!editing) {
+      context.push(AppRoutes.selectCategory);
+      return;
+    }
+    final saved = await context.push<bool>(AppRoutes.editCategories);
+    if (saved == true && context.mounted) context.pop(true);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -31,7 +52,7 @@ class BusinessProfilePage extends StatelessWidget {
       listenWhen: (p, n) => p.submitStatus != n.submitStatus,
       listener: (context, state) {
         if (state.submitStatus == SubmitStatus.success) {
-          context.push(AppRoutes.selectCategory);
+          _onSaved(context, state);
         } else if (state.submitStatus == SubmitStatus.failure) {
           showFailureSnackBar(context, state.submitFailure!);
         }
@@ -84,6 +105,8 @@ class _Form extends StatelessWidget {
       children: [
         Text(l10n.profileStep, style: t.caption.copyWith(color: c.inkMuted)),
         gap,
+        _NameField(state: state),
+        gap,
         Text(
           l10n.businessTypeLabel,
           style: t.fieldLabel.copyWith(color: c.ink),
@@ -125,6 +148,53 @@ class _Form extends StatelessWidget {
           ],
         ),
       ],
+    );
+  }
+}
+
+class _NameField extends StatefulWidget {
+  const _NameField({required this.state});
+
+  final BusinessProfileState state;
+
+  @override
+  State<_NameField> createState() => _NameFieldState();
+}
+
+class _NameFieldState extends State<_NameField> {
+  late final _controller = TextEditingController(
+    text: widget.state.displayName,
+  );
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = context.l10n;
+    final name = widget.state.displayName;
+    // "Required" only nags once something was typed and cleared.
+    final error = name.isEmpty ? null : widget.state.displayNameError;
+    return MbTextField(
+      controller: _controller,
+      label: l10n.yourNameLabel,
+      hint: l10n.yourNameHint,
+      icon: MbIcons.user,
+      keyboardType: TextInputType.name,
+      textInputAction: TextInputAction.next,
+      autofillHints: const [AutofillHints.name],
+      inputFormatters: [
+        LengthLimitingTextInputFormatter(DisplayName.maxLength + 10),
+      ],
+      error: switch (error) {
+        DisplayNameError.length => l10n.nameErrorLength,
+        DisplayNameError.characters => l10n.nameErrorCharacters,
+        _ => null,
+      },
+      onChanged: context.read<BusinessProfileCubit>().nameChanged,
     );
   }
 }

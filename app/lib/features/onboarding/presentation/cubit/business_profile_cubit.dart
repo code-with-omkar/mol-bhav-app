@@ -16,6 +16,7 @@ class BusinessProfileState extends Equatable {
     this.optionsStatus = LoadStatus.initial,
     this.options,
     this.optionsFailure,
+    this.displayName = '',
     this.businessTypeId,
     this.stateCode,
     this.districtCode,
@@ -29,6 +30,7 @@ class BusinessProfileState extends Equatable {
   final LoadStatus optionsStatus;
   final ProfileOptions? options;
   final Failure? optionsFailure;
+  final String displayName;
   final String? businessTypeId;
   final String? stateCode;
   final String? districtCode;
@@ -37,7 +39,10 @@ class BusinessProfileState extends Equatable {
   final SubmitStatus submitStatus;
   final Failure? submitFailure;
 
+  DisplayNameError? get displayNameError => DisplayName.validate(displayName);
+
   bool get canSubmit =>
+      displayNameError == null &&
       businessTypeId != null &&
       stateCode != null &&
       districtCode != null &&
@@ -48,6 +53,7 @@ class BusinessProfileState extends Equatable {
     LoadStatus? optionsStatus,
     ValueGetter<ProfileOptions?>? options,
     ValueGetter<Failure?>? optionsFailure,
+    String? displayName,
     ValueGetter<String?>? businessTypeId,
     ValueGetter<String?>? stateCode,
     ValueGetter<String?>? districtCode,
@@ -63,6 +69,7 @@ class BusinessProfileState extends Equatable {
       optionsFailure: optionsFailure != null
           ? optionsFailure()
           : this.optionsFailure,
+      displayName: displayName ?? this.displayName,
       businessTypeId: businessTypeId != null
           ? businessTypeId()
           : this.businessTypeId,
@@ -83,6 +90,7 @@ class BusinessProfileState extends Equatable {
     optionsStatus,
     options,
     optionsFailure,
+    displayName,
     businessTypeId,
     stateCode,
     districtCode,
@@ -99,30 +107,54 @@ class BusinessProfileCubit extends Cubit<BusinessProfileState> {
     this._getProfileOptions,
     this._getDistricts,
     this._saveBusinessProfile,
+    this._getSavedProfile,
     LocaleRepository locale,
   ) : super(BusinessProfileState(language: locale.current));
 
   final GetProfileOptions _getProfileOptions;
   final GetDistricts _getDistricts;
   final SaveBusinessProfile _saveBusinessProfile;
+  final GetSavedProfile _getSavedProfile;
 
-  Future<void> load() async {
+  /// Loads the pickers; with [prefill] the saved profile preselects them.
+  Future<void> load({bool prefill = false}) async {
     emit(state.copyWith(optionsStatus: LoadStatus.loading));
-    final result = await _getProfileOptions();
-    emit(
-      result.fold(
-        (failure) => state.copyWith(
+    final (result, saved) = await (
+      _getProfileOptions(),
+      prefill ? _getSavedProfile() : Future.value(null),
+    ).wait;
+    final failure = result.fold((f) => f, (_) => null);
+    if (failure != null) {
+      emit(
+        state.copyWith(
           optionsStatus: LoadStatus.failure,
           optionsFailure: () => failure,
         ),
-        (options) => state.copyWith(
-          optionsStatus: LoadStatus.ready,
-          options: () => options,
-          optionsFailure: () => null,
-        ),
+      );
+      return;
+    }
+    final options = result.fold((_) => null, (o) => o)!;
+    final profile = saved?.fold((_) => null, (p) => p);
+    final stateCode = profile?.stateCode;
+    final knownState = options.states.any((s) => s.code == stateCode);
+    emit(
+      state.copyWith(
+        optionsStatus: LoadStatus.ready,
+        options: () => options,
+        optionsFailure: () => null,
+        displayName: profile?.displayName,
+        businessTypeId: profile?.businessTypeId == null
+            ? null
+            : () => profile!.businessTypeId,
+        stateCode: knownState ? () => stateCode : null,
+        districtCode: knownState ? () => profile!.districtCode : null,
+        language: AppLanguage.fromCode(profile?.preferredLanguage),
       ),
     );
+    if (knownState) await _loadDistricts();
   }
+
+  void nameChanged(String value) => emit(state.copyWith(displayName: value));
 
   void selectBusinessType(String id) =>
       emit(state.copyWith(businessTypeId: () => id));
@@ -152,6 +184,7 @@ class BusinessProfileCubit extends Cubit<BusinessProfileState> {
     emit(state.copyWith(submitStatus: SubmitStatus.submitting));
     final result = await _saveBusinessProfile(
       BusinessProfile(
+        displayName: DisplayName.normalise(state.displayName),
         businessTypeId: state.businessTypeId!,
         stateCode: state.stateCode!,
         districtCode: state.districtCode!,
@@ -185,6 +218,10 @@ class BusinessProfileCubit extends Cubit<BusinessProfileState> {
         (districts) => state.copyWith(
           districtsStatus: LoadStatus.ready,
           districts: districts,
+          // Drop a prefilled district that is not in this state's list.
+          districtCode: districts.any((d) => d.code == state.districtCode)
+              ? null
+              : () => null,
         ),
       ),
     );

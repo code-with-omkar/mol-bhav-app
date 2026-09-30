@@ -12,6 +12,8 @@ class _MockGetCategories extends Mock implements GetCategories {}
 
 class _MockSaveCategories extends Mock implements SaveCategories {}
 
+class _MockGetSavedProfile extends Mock implements GetSavedProfile {}
+
 const _available = ProcurementCategory(
   id: '1',
   code: 'agriculture',
@@ -39,8 +41,11 @@ void main() {
     saveCategories = _MockSaveCategories();
   });
 
-  SelectCategoryCubit build() =>
-      SelectCategoryCubit(getCategories, saveCategories);
+  SelectCategoryCubit build() => SelectCategoryCubit(
+    getCategories,
+    saveCategories,
+    _MockGetSavedProfile(),
+  );
 
   blocTest<SelectCategoryCubit, SelectCategoryState>(
     'load emits ready with categories',

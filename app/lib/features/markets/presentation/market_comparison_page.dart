@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../../core/l10n/l10n.dart';
 import '../../../core/router/app_routes.dart';
+import '../../../core/share/deep_link_config.dart';
 import '../../../core/theme/mb_dimens.dart';
 import '../../../core/utils/formatters.dart';
 import '../../../core/utils/statuses.dart';
@@ -17,7 +18,11 @@ import '../../../shared/widgets/mb_price.dart';
 import '../../../shared/widgets/mb_select_field.dart';
 import '../../../shared/widgets/mb_state_views.dart';
 import '../domain/markets_entities.dart';
+import '../../watchlist/presentation/watch_star.dart';
+import '../../watchlist/presentation/watchlist_cubit.dart';
 import 'markets_cubits.dart';
+import 'share/price_share.dart';
+import 'share/price_share_data.dart';
 
 /// Mandi / supplier comparison matrix with the best market called out.
 class MarketComparisonPage extends StatelessWidget {
@@ -26,15 +31,28 @@ class MarketComparisonPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
+    final commodityId = context.select<MarketComparisonCubit, String?>(
+      (c) => c.state.commodityId,
+    );
+    final watched = context.select<WatchlistCubit, bool>(
+      (c) => commodityId != null && c.state.itemFor(commodityId) != null,
+    );
     return Scaffold(
       appBar: MbAppBar(
         title: l10n.marketComparisonTitle,
         actions: [
-          // Sharing needs a share-sheet package; not wired yet.
           MbAppBarAction(
-            icon: MbIcons.share,
-            label: l10n.share,
-            onPressed: null,
+            icon: MbIcons.market,
+            label: l10n.browseByMandi,
+            onPressed: () => context.push(AppRoutes.mandiPrices),
+          ),
+          MbAppBarAction(
+            icon: MbIcons.watchlist,
+            label: watched ? l10n.removeFromWatchlist : l10n.addToWatchlist,
+            selected: watched,
+            onPressed: commodityId == null
+                ? null
+                : () => toggleWatch(context, commodityId),
           ),
         ],
       ),
@@ -82,13 +100,27 @@ class _Content extends StatelessWidget {
         ListView(
           padding: MbSpacing.screenPadding,
           children: [
+            if (state.categories.isNotEmpty) ...[
+              MbChipGroup<String>.single(
+                semanticLabel: l10n.categoryLabel,
+                value: state.categoryCode ?? '',
+                onChanged: (code) =>
+                    cubit.selectCategory(code.isEmpty ? null : code),
+                options: [
+                  for (final category in state.categories)
+                    MbChipOption(value: category.code, label: category.name),
+                  MbChipOption(value: '', label: l10n.filterAll),
+                ],
+              ),
+              gap,
+            ],
             MbSelectField<String>(
-              icon: categoryIcon(comparison.categoryCode),
+              icon: categoryIcon(state.commodity?.categoryCode ?? ''),
               hint: l10n.commodityLabel,
               value: state.commodityId,
               onChanged: cubit.selectCommodity,
               items: [
-                for (final c in state.commodities)
+                for (final c in state.visibleCommodities)
                   MbSelectItem(value: c.id, label: c.name),
               ],
             ),
@@ -121,6 +153,30 @@ class _Content extends StatelessWidget {
                       change: row.change,
                       changeCurrency: false,
                       best: row.marketId == comparison.bestMarketId,
+                      badge: row.marketId == state.highlightMarketId
+                          ? MbBadge(
+                              label: l10n.fromLink,
+                              tone: MbBadgeTone.opportunity,
+                            )
+                          : null,
+                      onShare: () => sharePriceCard(
+                        context,
+                        PriceShareData(
+                          productName: state.commodity?.name ?? '',
+                          mandiName: row.marketName,
+                          minPrice: row.minPrice,
+                          maxPrice: row.maxPrice,
+                          modalPrice: row.price,
+                          unitSymbol: comparison.unit,
+                          recordDate: row.recordDate,
+                          source: row.source,
+                          link: DeepLinkConfig.productLink(
+                            comparison.commodityId,
+                            mandiId: row.marketId,
+                          ),
+                        ),
+                      ),
+                      shareLabel: l10n.sharePrice,
                       onTap: () => context.go(
                         AppRoutes.trendsFor(
                           comparison.commodityId,

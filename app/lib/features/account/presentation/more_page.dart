@@ -1,12 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+import 'package:share_plus/share_plus.dart';
 
 import '../../../core/l10n/l10n.dart';
 import '../../../core/locale/locale_cubit.dart';
 import '../../../core/router/app_routes.dart';
+import '../../../core/share/deep_link_config.dart';
 import '../../../core/theme/mb_dimens.dart';
-import '../../../core/utils/formatters.dart';
 import '../../../core/utils/statuses.dart';
 import '../../../shared/widgets/mb_app_bar.dart';
 import '../../../shared/widgets/mb_icons.dart';
@@ -15,6 +16,8 @@ import '../../../shared/widgets/mb_price.dart';
 import '../../../shared/widgets/mb_state_views.dart';
 import '../domain/account.dart';
 import 'account_cubits.dart';
+import '../../billing/presentation/widgets/subscription_badge.dart';
+import 'profile_text.dart';
 
 /// Account hub: profile, plan, categories, language, notifications, help.
 class MorePage extends StatelessWidget {
@@ -40,7 +43,7 @@ class MorePage extends StatelessWidget {
             _ when profile != null => _Content(profile: profile),
             LoadStatus.failure => MbErrorView(
               failure: state.profile.failure!,
-              onRetry: cubit.load,
+              onRetry: cubit.retry,
             ),
             _ => const MbLoadingView(),
           },
@@ -60,7 +63,6 @@ class _Content extends StatelessWidget {
     final l10n = context.l10n;
     final cubit = context.read<MoreCubit>();
     final language = context.watch<LocaleCubit>().state;
-    final proPrice = profile.proMonthlyPrice;
     const gap = SizedBox(height: 14);
 
     return ListView(
@@ -70,11 +72,10 @@ class _Content extends StatelessWidget {
           children: [
             MbListItem(
               leading: MbAvatar(name: profile.name),
-              title: profile.name,
-              subtitle:
-                  '${profile.businessTypeName} · '
-                  '${l10n.placeLine(profile.districtName, profile.stateName)}',
-              onTap: () => context.push(AppRoutes.businessProfile),
+              title: profile.name.isEmpty ? l10n.addYourName : profile.name,
+              subtitle: profileSubtitle(context, profile),
+              // The edit flow refreshes the shared profile when it saves.
+              onTap: () => context.push<bool>(AppRoutes.editProfile),
             ),
           ],
         ),
@@ -84,15 +85,10 @@ class _Content extends StatelessWidget {
             MbListItem(
               icon: MbIcons.pro,
               iconTone: MbTone.navy,
-              title: l10n.molbhavPro,
+              title: l10n.mySubscription,
               subtitle: l10n.proSubtitle,
-              trailing: profile.isPro || proPrice == null
-                  ? null
-                  : MbBadge(
-                      label: l10n.pricePerMonth(formatInr(proPrice)),
-                      tone: MbBadgeTone.opportunity,
-                    ),
-              onTap: () => context.push(AppRoutes.subscription),
+              trailing: const SubscriptionBadge(),
+              onTap: () => context.push(AppRoutes.billingSubscription),
             ),
             MbListItem(
               icon: MbIcons.others,
@@ -100,7 +96,7 @@ class _Content extends StatelessWidget {
               subtitle: profile.categoryNames.isEmpty
                   ? null
                   : profile.categoryNames.join(', '),
-              onTap: () => context.push(AppRoutes.selectCategory),
+              onTap: () => context.push<bool>(AppRoutes.editCategories),
             ),
             // Changing language here has no screen in the design yet; the
             // picker is on Login.
@@ -128,30 +124,31 @@ class _Content extends StatelessWidget {
           children: [
             MbListItem(
               icon: MbIcons.alert,
-              title: l10n.pushNotifications,
-              trailing: MbToggle(
-                value: profile.pushEnabled,
-                onChanged: cubit.setPush,
-                semanticLabel: l10n.pushNotifications,
-              ),
-            ),
-            MbListItem(
-              icon: MbIcons.message,
-              iconTone: MbTone.green,
-              title: l10n.whatsappAlerts,
-              trailing: MbToggle(
-                value: profile.whatsappEnabled,
-                onChanged: cubit.setWhatsapp,
-                semanticLabel: l10n.whatsappAlerts,
-              ),
+              title: l10n.notificationSettingsAction,
+              onTap: () => context.push(AppRoutes.notificationPreferences),
             ),
           ],
         ),
         gap,
         MbGroup(
           children: [
-            // Help & support has no screen in the design yet.
-            MbListItem(icon: MbIcons.help, title: l10n.helpSupport),
+            MbListItem(
+              icon: MbIcons.share,
+              title: l10n.inviteFriend,
+              subtitle: l10n.inviteFriendSubtitle,
+              onTap: () => SharePlus.instance.share(
+                ShareParams(
+                  text:
+                      '${l10n.inviteMessage}\n\n'
+                      '${DeepLinkConfig.inviteLink(userId: profile.userId)}',
+                ),
+              ),
+            ),
+            MbListItem(
+              icon: MbIcons.help,
+              title: l10n.helpSupport,
+              onTap: () => context.go(AppRoutes.helpSupport),
+            ),
             MbListItem(
               icon: MbIcons.logout,
               title: l10n.logOut,
