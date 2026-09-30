@@ -3,7 +3,7 @@ import 'dart:convert';
 import 'package:crypto/crypto.dart';
 
 /// Link building for shares and invites, configured at build time:
-/// `flutter run --dart-define=DEEP_LINK_BASE=https://molbhav.in`.
+/// `flutter run --dart-define=DEEP_LINK_BASE=https://app.jagtech.in`.
 ///
 /// When [base] is empty — the default, until the domain and its
 /// `.well-known` files exist — nothing is broken: shares carry the Play Store

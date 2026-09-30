@@ -39,11 +39,20 @@ class PlansPage extends StatelessWidget {
   }
 }
 
-List<String> proFeatures(AppLocalizations l10n) => [
-  l10n.proFeatureReports,
+/// Only what the API actually enforces belongs here. Price-history export is
+/// the single `pro-subscriber` gate today; alerts, the cost estimator and
+/// mandi comparison are free and listed on the Free card instead.
+List<String> freeFeatures(AppLocalizations l10n) => [
+  l10n.freeFeatureBasicPrices,
+  l10n.freeFeatureWatchlist,
   l10n.proFeatureAlerts,
   l10n.proFeatureProcurement,
   l10n.proFeatureComparison,
+];
+
+List<String> proFeatures(AppLocalizations l10n) => [
+  l10n.proFeatureEverythingInFree,
+  l10n.proFeatureReports,
 ];
 
 class _Plans extends StatelessWidget {
@@ -62,7 +71,7 @@ class _Plans extends StatelessWidget {
     final free = MbPlanCard(
       name: l10n.subscriptionFree,
       price: formatPaise(0),
-      features: [l10n.freeFeatureBasicPrices, l10n.freeFeatureWatchlist],
+      features: freeFeatures(l10n),
       currentLabel: isPro ? null : l10n.currentPlan,
     );
     final paid = [

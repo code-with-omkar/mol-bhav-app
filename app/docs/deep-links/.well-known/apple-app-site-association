@@ -1,0 +1,12 @@
+{
+  "applinks": {
+    "details": [
+      {
+        "appIDs": ["REPLACE_WITH_TEAM_ID.com.molbhav.molBhav"],
+        "components": [
+          { "/": "/p/*", "comment": "Shared price card → product detail" }
+        ]
+      }
+    ]
+  }
+}

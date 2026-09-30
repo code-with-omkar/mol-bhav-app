@@ -1200,20 +1200,23 @@ class AppLocalizationsMr extends AppLocalizations {
   String get seePlans => 'See Plans';
 
   @override
-  String get proFeatureReports => 'Unlimited price reports (PDF + CSV)';
+  String get proFeatureReports => 'Price history export (CSV)';
 
   @override
-  String get proFeatureAlerts => 'Advanced price alert rules';
+  String get proFeatureAlerts => 'Price alert rules';
 
   @override
   String get proFeatureProcurement => 'Procurement cost estimator';
 
   @override
-  String get proFeatureComparison => 'Mandi price comparison (all markets)';
+  String get proFeatureComparison => 'Mandi price comparison';
 
   @override
   String get freeFeatureBasicPrices => 'Basic daily prices';
 
   @override
-  String get freeFeatureWatchlist => 'Watchlist (up to 5 items)';
+  String get freeFeatureWatchlist => 'Personal watchlist';
+
+  @override
+  String get proFeatureEverythingInFree => 'Everything in Free';
 }

@@ -30,7 +30,7 @@ android {
 
         // Host for the App Links intent-filter. A manifest cannot read a Dart
         // define, so the host is a build property: pass it alongside
-        // --dart-define=DEEP_LINK_BASE (e.g. -Pdeep_link_host=molbhav.in).
+        // --dart-define=DEEP_LINK_BASE (e.g. -Pdeep_link_host=app.jagtech.in).
         // The placeholder default is a host nobody owns, so an unconfigured
         // build verifies nothing and claims no links.
         manifestPlaceholders["deepLinkHost"] =

@@ -869,10 +869,11 @@
   "externalWalletUnsupported": "External wallets are not supported. Choose another payment method.",
   "upgradeToUnlock": "Upgrade to Pro to unlock this feature",
   "seePlans": "See Plans",
-  "proFeatureReports": "Unlimited price reports (PDF + CSV)",
-  "proFeatureAlerts": "Advanced price alert rules",
+  "proFeatureReports": "Price history export (CSV)",
+  "proFeatureAlerts": "Price alert rules",
   "proFeatureProcurement": "Procurement cost estimator",
-  "proFeatureComparison": "Mandi price comparison (all markets)",
+  "proFeatureComparison": "Mandi price comparison",
   "freeFeatureBasicPrices": "Basic daily prices",
-  "freeFeatureWatchlist": "Watchlist (up to 5 items)"
+  "freeFeatureWatchlist": "Personal watchlist",
+  "proFeatureEverythingInFree": "Everything in Free"
 }

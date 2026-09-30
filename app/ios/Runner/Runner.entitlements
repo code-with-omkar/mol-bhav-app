@@ -4,7 +4,7 @@
 <dict>
 	<!--
 	Universal Links for shared price cards: https://<host>/p/<productId>.
-	Replace molbhav.in with the real host, and keep it in step with
+	Host decided (D1): app.jagtech.in. Keep it in step with
 	deep_link_host (Android) and DEEP_LINK_BASE (Dart).
 
 	This file is not yet referenced by Runner.xcodeproj: attach it once in
@@ -14,7 +14,7 @@
 	-->
 	<key>com.apple.developer.associated-domains</key>
 	<array>
-		<string>applinks:molbhav.in</string>
+		<string>applinks:app.jagtech.in</string>
 	</array>
 </dict>
 </plist>

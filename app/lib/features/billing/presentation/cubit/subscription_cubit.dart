@@ -104,6 +104,11 @@ final class PaymentFailure extends SubscriptionState {
 ///
 /// After activation it refreshes the shared profile (Pro gates rebuild) and
 /// renews the access token (the API reads the tier from its claims).
+///
+/// TODO(phase-5e): expiry. `expiresAt` is shown but never acted on client-side;
+/// an expired Pro keeps the Pro JWT claim until the next token refresh. Add a
+/// server-side expiry sweep + `GET /billing/subscription` recheck on resume
+/// that downgrades the tier and refreshes the token.
 @injectable
 class SubscriptionCubit extends Cubit<SubscriptionState> {
   SubscriptionCubit(this._repository, this._profile, this._tokens)

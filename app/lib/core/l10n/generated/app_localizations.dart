@@ -2185,13 +2185,13 @@ abstract class AppLocalizations {
   /// No description provided for @proFeatureReports.
   ///
   /// In en, this message translates to:
-  /// **'Unlimited price reports (PDF + CSV)'**
+  /// **'Price history export (CSV)'**
   String get proFeatureReports;
 
   /// No description provided for @proFeatureAlerts.
   ///
   /// In en, this message translates to:
-  /// **'Advanced price alert rules'**
+  /// **'Price alert rules'**
   String get proFeatureAlerts;
 
   /// No description provided for @proFeatureProcurement.
@@ -2203,7 +2203,7 @@ abstract class AppLocalizations {
   /// No description provided for @proFeatureComparison.
   ///
   /// In en, this message translates to:
-  /// **'Mandi price comparison (all markets)'**
+  /// **'Mandi price comparison'**
   String get proFeatureComparison;
 
   /// No description provided for @freeFeatureBasicPrices.
@@ -2215,8 +2215,14 @@ abstract class AppLocalizations {
   /// No description provided for @freeFeatureWatchlist.
   ///
   /// In en, this message translates to:
-  /// **'Watchlist (up to 5 items)'**
+  /// **'Personal watchlist'**
   String get freeFeatureWatchlist;
+
+  /// No description provided for @proFeatureEverythingInFree.
+  ///
+  /// In en, this message translates to:
+  /// **'Everything in Free'**
+  String get proFeatureEverythingInFree;
 }
 
 class _AppLocalizationsDelegate
