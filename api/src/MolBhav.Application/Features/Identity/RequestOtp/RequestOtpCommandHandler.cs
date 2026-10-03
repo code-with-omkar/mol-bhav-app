@@ -9,6 +9,7 @@ using MolBhav.Domain.SharedKernel;
 namespace MolBhav.Application.Features.Identity.RequestOtp;
 
 internal sealed class RequestOtpCommandHandler(
+    ILoginMethods loginMethods,
     IOtpChallengeRepository otpChallenges,
     IOtpCodeGenerator otpCodeGenerator,
     IOtpSender otpSender,
@@ -17,6 +18,12 @@ internal sealed class RequestOtpCommandHandler(
 {
     public async Task<Result<RequestOtpResponse>> Handle(RequestOtpCommand request, CancellationToken cancellationToken)
     {
+        // OTP costs money per SMS; deployments without a DLT-registered sender switch it off (Authentication:LoginMethods:Otp).
+        if (!loginMethods.OtpEnabled)
+        {
+            return IdentityErrors.LoginMethodDisabled;
+        }
+
         var phoneResult = PhoneNumber.Create(request.PhoneNumber);
         if (phoneResult.IsFailure)
         {

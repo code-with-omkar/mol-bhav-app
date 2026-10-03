@@ -75,6 +75,7 @@ enum MbIcons {
   share(
     '<circle cx="18" cy="5" r="2.5"/><circle cx="6" cy="12" r="2.5"/><circle cx="18" cy="19" r="2.5"/><path d="M8.2 10.8l7.6-4.4"/><path d="M8.2 13.2l7.6 4.4"/>',
   ),
+  send('<path d="M21 3L10 14"/><path d="M21 3l-7 18-4-7-7-4z"/>'),
   edit('<path d="M4 20h4L19 9l-4-4L4 16z"/><path d="M13 7l4 4"/>'),
   minus('<path d="M5 12h14"/>'),
   plus('<path d="M12 5v14"/><path d="M5 12h14"/>'),

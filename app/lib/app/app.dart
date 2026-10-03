@@ -10,8 +10,10 @@ import '../core/locale/app_language.dart';
 import '../core/locale/locale_cubit.dart';
 import '../core/router/app_router.dart';
 import '../core/session/session_manager.dart';
+import '../core/session/token_renewal.dart';
 import '../core/theme/app_theme.dart';
 import '../features/account/presentation/profile_cubit.dart';
+import '../features/billing/presentation/subscription_tier_sync.dart';
 import '../features/watchlist/presentation/watchlist_cubit.dart';
 
 class MolBhavApp extends StatefulWidget {
@@ -21,11 +23,29 @@ class MolBhavApp extends StatefulWidget {
   State<MolBhavApp> createState() => _MolBhavAppState();
 }
 
-class _MolBhavAppState extends State<MolBhavApp> {
+class _MolBhavAppState extends State<MolBhavApp> with WidgetsBindingObserver {
   final GoRouter _router = createAppRouter(getIt<SessionManager>());
+  final SubscriptionTierSync _tierSync = SubscriptionTierSync(
+    getIt<ProfileCubit>(),
+    getIt<TokenRenewal>(),
+    getIt<SessionManager>(),
+  );
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addObserver(this);
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    // A Pro subscription may have lapsed while the app was in the background.
+    if (state == AppLifecycleState.resumed) _tierSync.recheck();
+  }
 
   @override
   void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
     _router.dispose();
     super.dispose();
   }

@@ -20,8 +20,10 @@ import 'share_price_card.dart';
 /// loaded fonts, which is what makes Devanagari and the other Indic scripts
 /// come out as text rather than boxes.
 ///
-/// The web has no share-sheet file support worth relying on, so there the text
-/// is shared and the picture is handed to the browser as a download instead.
+/// On the web the browser's share sheet (Web Share API) is tried first with the
+/// picture attached — Chrome on Android, Windows and macOS supports it. Only
+/// when the browser cannot share files is the text shared and the picture
+/// handed over as a download.
 Future<void> sharePriceCard(BuildContext context, PriceShareData data) async {
   final l10n = context.l10n;
   final text = priceShareText(context, data);
@@ -36,6 +38,7 @@ Future<void> sharePriceCard(BuildContext context, PriceShareData data) async {
   }
 
   if (kIsWeb) {
+    if (await _tryWebShare(text, png, fileName)) return;
     await SharePlus.instance.share(ShareParams(text: text));
     final saved = await saveAndOpenFile(
       name: fileName,
@@ -57,34 +60,56 @@ Future<void> sharePriceCard(BuildContext context, PriceShareData data) async {
   );
 }
 
-/// The message body: the same facts as the card, for apps that show only text.
+/// True when the browser's share sheet opened with the picture attached.
+///
+/// share_plus' own web fallbacks (download, mailto) are switched off here so a
+/// browser without file sharing throws instead, and the caller's text +
+/// download path runs exactly once. The web cannot report whether the user
+/// actually shared, so any non-throwing return counts as handled.
+Future<bool> _tryWebShare(String text, Uint8List png, String fileName) async {
+  try {
+    await SharePlus.instance.share(
+      ShareParams(
+        text: text,
+        files: [XFile.fromData(png, mimeType: 'image/png', name: fileName)],
+        fileNameOverrides: [fileName],
+        downloadFallbackEnabled: false,
+        mailToFallbackEnabled: false,
+      ),
+    );
+    return true;
+  } on Object {
+    return false;
+  }
+}
+
+/// The message that accompanies the picture (and stands alone when the picture
+/// cannot be produced).
 String priceShareText(BuildContext context, PriceShareData data) {
   final l10n = context.l10n;
   final locale = Localizations.localeOf(context).languageCode;
-  return [
+  final lines = <String>[
     l10n.sharePriceHeadline(data.title, data.mandiName),
     l10n.shareModalLine('${formatInr(data.modalPrice)}/${data.unitSymbol}'),
     if (data.hasRange)
       l10n.shareRange(formatInr(data.minPrice!), formatInr(data.maxPrice!)),
     l10n.priceDate(formatDayMonth(data.recordDate, locale)),
     l10n.sourceLine(data.source),
-    '',
     data.link,
-  ].join('\n');
+  ];
+  return lines.join('\n');
 }
 
 String _fileName(PriceShareData data) {
   final slug = data.title
       .toLowerCase()
-      .replaceAll(RegExp(r'[^a-z0-9]+'), '-')
+      .replaceAll(RegExp(r'[^\p{L}\p{N}]+', unicode: true), '-')
       .replaceAll(RegExp(r'^-+|-+$'), '');
-  final day = data.recordDate.toIso8601String().split('T').first;
-  return 'molbhav-${slug.isEmpty ? 'price' : slug}-$day.png';
+  return 'molbhav-${slug.isEmpty ? 'price' : slug}.png';
 }
 
-/// Mounts the card in an overlay, off-screen and non-interactive, long enough
-/// to paint one frame and copy it out. Returns null if anything goes wrong —
-/// the caller then shares text only.
+/// Mounts [SharePriceCard] off-screen, captures it and removes it again.
+/// Returns null when anything in the pipeline fails.
 Future<Uint8List?> _renderCard(
   BuildContext context,
   PriceShareData data,
@@ -92,64 +117,41 @@ Future<Uint8List?> _renderCard(
   final overlay = Overlay.maybeOf(context, rootOverlay: true);
   if (overlay == null) return null;
 
-  // google_fonts fetches on first use; capturing before they land would bake
-  // in the fallback face.
-  try {
-    await GoogleFonts.pendingFonts();
-  } on Object {
-    // A font that never arrives is not a reason to drop the share.
-  }
-  if (!context.mounted) return null;
-
-  final boundary = GlobalKey();
+  final boundaryKey = GlobalKey();
   final entry = OverlayEntry(
     builder: (_) => Positioned(
-      // Off-screen: laid out and painted, never seen and never tappable.
-      left: -SharePriceCard.width * 2,
+      left: -(SharePriceCard.width * 3),
       top: 0,
-      child: IgnorePointer(
+      child: Material(
+        type: MaterialType.transparency,
         child: RepaintBoundary(
-          key: boundary,
-          child: MediaQuery.removePadding(
-            context: context,
-            removeTop: true,
-            removeBottom: true,
-            child: DefaultTextStyle.merge(
-              style: const TextStyle(
-                decoration: TextDecoration.none,
-                decorationColor: null,
-              ),
-              child: SharePriceCard(data: data),
-            ),
-          ),
+          key: boundaryKey,
+          child: SharePriceCard(data: data),
         ),
       ),
     ),
   );
 
-  overlay.insert(entry);
   try {
-    // Two frames: one to lay the card out, one to be sure it has painted.
-    await _nextFrame();
-    await _nextFrame();
-    final render = boundary.currentContext?.findRenderObject();
-    if (render is! RenderRepaintBoundary) return null;
-    final image = await render.toImage(pixelRatio: 3);
-    try {
-      final bytes = await image.toByteData(format: ui.ImageByteFormat.png);
-      return bytes?.buffer.asUint8List();
-    } finally {
-      image.dispose();
-    }
+    overlay.insert(entry);
+    // Let the card lay out, then wait for any Google fonts still in flight so
+    // the capture does not fall back to boxes.
+    await WidgetsBinding.instance.endOfFrame;
+    await GoogleFonts.pendingFonts();
+    await WidgetsBinding.instance.endOfFrame;
+
+    final boundary =
+        boundaryKey.currentContext?.findRenderObject()
+            as RenderRepaintBoundary?;
+    if (boundary == null) return null;
+    final image = await boundary.toImage(pixelRatio: 3);
+    final bytes = await image.toByteData(format: ui.ImageByteFormat.png);
+    image.dispose();
+    return bytes?.buffer.asUint8List();
   } on Object {
     return null;
   } finally {
     entry.remove();
+    entry.dispose();
   }
-}
-
-Future<void> _nextFrame() {
-  final completer = Completer<void>();
-  WidgetsBinding.instance.addPostFrameCallback((_) => completer.complete());
-  return completer.future;
 }

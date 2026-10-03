@@ -213,7 +213,7 @@ class _ReplyBox extends StatelessWidget {
             ),
             const SizedBox(width: MbSpacing.s2),
             MbIconButton(
-              icon: MbIcons.share,
+              icon: MbIcons.send,
               label: l10n.sendReply,
               onPressed: state.canSend ? cubit.send : null,
             ),

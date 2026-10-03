@@ -12,6 +12,25 @@ class CatalogCategory extends Equatable {
   List<Object?> get props => [code, name];
 }
 
+/// The categories the user registered for, in catalog order.
+///
+/// Every category picker (watchlist, comparison, estimator) goes through this
+/// so a user who buys only agri produce never sees a Construction tab. Falls
+/// back to [all] when the profile names no category, or none of them is in
+/// the catalog any more, so a picker is never left empty.
+List<CatalogCategory> userCategories(
+  List<CatalogCategory> all,
+  Iterable<String> userCategoryCodes,
+) {
+  final codes = userCategoryCodes.toSet();
+  if (codes.isEmpty) return all;
+  final mine = [
+    for (final c in all)
+      if (codes.contains(c.code)) c,
+  ];
+  return mine.isEmpty ? all : mine;
+}
+
 class CatalogUnit extends Equatable {
   const CatalogUnit({
     required this.id,

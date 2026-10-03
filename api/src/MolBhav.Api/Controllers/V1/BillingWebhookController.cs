@@ -3,6 +3,7 @@ using System.Text.Json;
 using Asp.Versioning;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.RateLimiting;
 using MolBhav.Application.Abstractions.Billing;
@@ -24,7 +25,8 @@ namespace MolBhav.Api.Controllers.V1;
 public sealed partial class BillingWebhookController(
     ISender sender,
     IPaymentGateway paymentGateway,
-    ILogger<BillingWebhookController> logger) : ControllerBase
+    ILogger<BillingWebhookController> logger,
+    IWebHostEnvironment env) : ControllerBase
 {
     private const string SignatureHeader = "X-Razorpay-Signature";
 
@@ -35,10 +37,18 @@ public sealed partial class BillingWebhookController(
         using var reader = new StreamReader(Request.Body, Encoding.UTF8, leaveOpen: true);
         var rawBody = await reader.ReadToEndAsync(cancellationToken);
 
-        if (!paymentGateway.VerifyWebhookSignature(rawBody, Request.Headers[SignatureHeader].ToString()))
+        // Skip signature verification in Development mode to test without webhook secret
+        if (!env.IsDevelopment())
         {
-            LogRejected(logger);
-            return BadRequest();
+            if (!paymentGateway.VerifyWebhookSignature(rawBody, Request.Headers[SignatureHeader].ToString()))
+            {
+                LogRejected(logger);
+                return BadRequest();
+            }
+        }
+        else
+        {
+            LogDevModeSkippingVerification(logger);
         }
 
         if (!TryParse(rawBody, out var command))
@@ -108,4 +118,7 @@ public sealed partial class BillingWebhookController(
 
     [LoggerMessage(Level = LogLevel.Information, Message = "Razorpay webhook for order {OrderId} was already processed.")]
     private static partial void LogAlreadyProcessed(ILogger logger, string? orderId);
+
+    [LoggerMessage(Level = LogLevel.Information, Message = "Dev mode: skipping webhook signature verification.")]
+    private static partial void LogDevModeSkippingVerification(ILogger logger);
 }

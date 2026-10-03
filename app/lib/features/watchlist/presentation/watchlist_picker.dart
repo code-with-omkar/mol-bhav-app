@@ -18,6 +18,7 @@ import '../../../shared/widgets/mb_panels.dart';
 import '../../../shared/widgets/mb_price.dart';
 import '../../../shared/widgets/mb_state_views.dart';
 import '../../../shared/widgets/mb_text_field.dart';
+import '../../account/presentation/profile_cubit.dart';
 import '../../catalog/domain/catalog.dart';
 import 'watch_star.dart';
 import 'watchlist_cubit.dart';
@@ -54,14 +55,24 @@ class WatchlistPickerState extends Equatable {
 /// Category → product search for adding to the watchlist.
 @injectable
 class WatchlistPickerCubit extends Cubit<WatchlistPickerState> {
-  WatchlistPickerCubit(this._catalog) : super(const WatchlistPickerState());
+  WatchlistPickerCubit(this._catalog, this._profile)
+    : super(const WatchlistPickerState());
 
   final CatalogRepository _catalog;
+  final ProfileCubit _profile;
   Timer? _debounce;
 
+  /// Only the user's own procurement categories are offered.
   Future<void> load() async {
     emit(state.copyWith(categories: const DataState.loading()));
-    final categories = DataState.fromResult(await _catalog.getCategories());
+    await _profile.ensureLoaded();
+    final result = await _catalog.getCategories();
+    if (isClosed) return;
+    final mine = _profile.state.data?.categoryCodes ?? const <String>[];
+    final categories = result.fold<DataState<List<CatalogCategory>>>(
+      (failure) => DataState(status: LoadStatus.failure, failure: failure),
+      (all) => DataState.ready(userCategories(all, mine)),
+    );
     emit(state.copyWith(categories: categories));
     final first = categories.data?.firstOrNull;
     if (first != null) await selectCategory(first.code);

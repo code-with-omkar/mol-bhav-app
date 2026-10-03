@@ -115,7 +115,7 @@ class _Content extends StatelessWidget {
             MbListItem(
               icon: MbIcons.estimator,
               title: l10n.costEstimatorTitle,
-              onTap: () => context.push(AppRoutes.costEstimator),
+              onTap: () => context.go(AppRoutes.costEstimator),
             ),
           ],
         ),

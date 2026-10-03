@@ -11,6 +11,23 @@ namespace MolBhav.Application.Features.Identity;
 /// </summary>
 public static class IdentityErrors
 {
+    public static readonly Error LoginMethodDisabled =
+        Error.Forbidden("Auth.MethodDisabled", "This sign-in method is not available.");
+
+    public static readonly Error InvalidCredentials =
+        Error.Validation("Auth.InvalidCredentials", "Incorrect mobile number or password.");
+
+    public static readonly Error AccountAlreadyExists =
+        Error.Conflict("Auth.AccountExists", "An account with this mobile number already exists. Log in instead.");
+
+    public static Error LockedOut(DateTimeOffset? lockedUntilUtc, DateTimeOffset nowUtc)
+    {
+        var minutes = lockedUntilUtc is { } until ? Math.Max(1, (int)Math.Ceiling((until - nowUtc).TotalMinutes)) : 15;
+        return Error.BusinessRule(
+            "Auth.LockedOut",
+            $"Too many incorrect attempts. Try again in {minutes} minute{(minutes == 1 ? string.Empty : "s")}.");
+    }
+
     public static Error ForOtpOutcome(OtpVerificationOutcome outcome) => outcome switch
     {
         OtpVerificationOutcome.IncorrectCode =>

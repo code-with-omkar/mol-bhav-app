@@ -10,6 +10,10 @@ public sealed record RequestOtpRequest(string? PhoneNumber);
 /// <param name="Code">6-digit code.</param>
 public sealed record VerifyOtpRequest(string? PhoneNumber, string? Code);
 
+/// <param name="PhoneNumber">10-digit Indian mobile; +91/0 prefixes, spaces and dashes are accepted.</param>
+/// <param name="Password">The account password (login) or the new password (register: 8–128 chars, a letter and a digit).</param>
+public sealed record PasswordCredentialsRequest(string? PhoneNumber, string? Password);
+
 public sealed record RefreshTokenRequest(string? RefreshToken);
 
 public sealed record LogoutRequest(string? RefreshToken);

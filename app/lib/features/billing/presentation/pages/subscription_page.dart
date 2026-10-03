@@ -26,7 +26,13 @@ class SubscriptionPage extends StatelessWidget {
     final cubit = context.read<SubscriptionCubit>();
     return Scaffold(
       appBar: MbAppBar(title: context.l10n.mySubscription),
-      body: BlocBuilder<SubscriptionCubit, SubscriptionState>(
+      // Nothing bought yet: go straight to the plans. Replacing this page keeps
+      // Back returning to More rather than to an empty "Free" card.
+      body: BlocConsumer<SubscriptionCubit, SubscriptionState>(
+        listenWhen: (_, state) =>
+            state is SubscriptionLoaded && state.subscription == null,
+        listener: (context, _) =>
+            context.pushReplacement(AppRoutes.billingPlans),
         builder: (context, state) => switch (state) {
           SubscriptionLoaded(:final subscription) => RefreshIndicator(
             onRefresh: cubit.load,

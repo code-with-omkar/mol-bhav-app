@@ -140,9 +140,10 @@ class BillingRepositoryImpl implements BillingRepository {
         cache: _cache,
         key: subscriptionKey,
         // The cache stores JSON; an empty map stands for "no subscription".
-        fetch: () async => await _remote.getSubscription() ?? const {},
+        fetch: () async =>
+            await _remote.getSubscription() ?? const <String, dynamic>{},
         parse: (json) {
-          final j = json as Map<String, dynamic>;
+          final j = Map<String, dynamic>.from(json as Map);
           return j.isEmpty ? null : _subscription(j);
         },
       );

@@ -9,6 +9,9 @@ public static class RateLimitPolicies
     /// <summary>Verify-code endpoint — separate budget from <see cref="Otp"/>.</summary>
     public const string OtpVerify = "otp-verify";
 
+    /// <summary>Password login and registration, per IP — bounds credential stuffing across many numbers.</summary>
+    public const string PasswordLogin = "password-login";
+
     /// <summary>Coupon validation, per user — bounds brute-forcing coupon codes.</summary>
     public const string CouponValidate = "coupon-validate";
 }

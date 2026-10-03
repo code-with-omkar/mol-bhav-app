@@ -1,3 +1,4 @@
+import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:injectable/injectable.dart';
 
@@ -17,8 +18,11 @@ class NotificationService {
 
   String? _currentToken;
 
+  /// False on web and whenever Firebase was not configured at startup.
+  bool get _firebaseReady => !kIsWeb && Firebase.apps.isNotEmpty;
+
   Future<void> initialize() async {
-    if (kIsWeb) return;
+    if (!_firebaseReady) return;
     final messaging = FirebaseMessaging.instance;
 
     // Request permission (required on iOS and web; Android grants by default).
@@ -44,7 +48,13 @@ class NotificationService {
       await runApiCall(() => _deviceDataSource.unregisterToken(token));
     }
     _currentToken = null;
-    await FirebaseMessaging.instance.deleteToken();
+    if (!_firebaseReady) return;
+    try {
+      await FirebaseMessaging.instance.deleteToken();
+    } catch (e) {
+      // Never block sign-out on FCM.
+      debugPrint('FCM deleteToken failed: $e');
+    }
   }
 
   Future<void> _registerToken(String token) async {

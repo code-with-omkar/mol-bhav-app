@@ -642,6 +642,8 @@
       }
     }
   },
+  "reportNotDownloadedYet": "Not downloaded yet",
+  "@reportNotDownloadedYet": {},
   "reportDownloadedAt": "Downloaded {dateTime}",
   "@reportDownloadedAt": {
     "placeholders": {
@@ -750,7 +752,7 @@
   "inviteMessage": "I use MolBhav to check daily mandi and material prices before I buy. Try it:",
   "myRulesAction": "My Rules",
   "alertRulesTitle": "My Alert Rules",
-  "alertRulesEmpty": "No alert rules yet. Create one from any commodity page.",
+  "alertRulesEmpty": "No alert rules yet. Tap “Create alert” to add one.",
   "alertRuleDeleted": "Alert rule deleted.",
   "alertRuleActiveLabel": "Active",
   "alertRuleInactiveLabel": "Paused",
@@ -836,12 +838,24 @@
   "monthlyBilling": "Monthly",
   "yearlyBillingPlain": "Yearly",
   "yearlyBilling": "Yearly (Save {percent}%)",
-  "@yearlyBilling": { "placeholders": { "percent": { "type": "int" } } },
+  "@yearlyBilling": {
+    "placeholders": {
+      "percent": {
+        "type": "int"
+      }
+    }
+  },
   "upgradeToPro": "Upgrade to Pro",
   "renewPro": "Renew Pro",
   "mySubscription": "My Subscription",
   "subscriptionActive": "Active — renews {date}",
-  "@subscriptionActive": { "placeholders": { "date": { "type": "String" } } },
+  "@subscriptionActive": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
   "subscriptionExpired": "Expired",
   "subscriptionCancelled": "Cancelled",
   "subscriptionPending": "Payment pending",
@@ -855,10 +869,22 @@
   "summaryTotal": "Total",
   "couponCode": "Coupon Code",
   "couponApplied": "Coupon applied! You save {amount}",
-  "@couponApplied": { "placeholders": { "amount": { "type": "String" } } },
+  "@couponApplied": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
   "couponInvalid": "Invalid or expired coupon",
   "proceedToPay": "Pay {amount}",
-  "@proceedToPay": { "placeholders": { "amount": { "type": "String" } } },
+  "@proceedToPay": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
   "confirmingPayment": "Confirming payment…",
   "paymentSuccess": "Payment Successful!",
   "paymentSuccessMessage": "You are now a Pro subscriber. Enjoy all premium features.",
@@ -875,5 +901,41 @@
   "proFeatureComparison": "Mandi price comparison",
   "freeFeatureBasicPrices": "Basic daily prices",
   "freeFeatureWatchlist": "Personal watchlist",
-  "proFeatureEverythingInFree": "Everything in Free"
+  "proFeatureEverythingInFree": "Everything in Free",
+  "passwordLabel": "Password",
+  "@passwordLabel": {},
+  "confirmPasswordLabel": "Confirm password",
+  "@confirmPasswordLabel": {},
+  "passwordLoginSubtitle": "Enter your mobile number and password.",
+  "@passwordLoginSubtitle": {},
+  "registerTitle": "Create your account",
+  "@registerTitle": {},
+  "registerSubtitle": "Choose a password to log in with your mobile number.",
+  "@registerSubtitle": {},
+  "loginAction": "Log in",
+  "@loginAction": {},
+  "createAccountAction": "Create account",
+  "@createAccountAction": {},
+  "switchToRegister": "New to MolBhav? Create an account",
+  "@switchToRegister": {},
+  "switchToLogin": "Already have an account? Log in",
+  "@switchToLogin": {},
+  "passwordRequired": "Enter your password.",
+  "@passwordRequired": {},
+  "passwordTooWeak": "Use at least 8 characters with a letter and a number.",
+  "@passwordTooWeak": {},
+  "passwordsDoNotMatch": "Passwords do not match.",
+  "@passwordsDoNotMatch": {},
+  "invalidCredentials": "Incorrect mobile number or password.",
+  "@invalidCredentials": {},
+  "accountExists": "This number already has an account. Log in instead.",
+  "@accountExists": {},
+  "useOtpInstead": "Log in with OTP instead",
+  "@useOtpInstead": {},
+  "usePasswordInstead": "Log in with password instead",
+  "@usePasswordInstead": {},
+  "showPassword": "Show password",
+  "@showPassword": {},
+  "hidePassword": "Hide password",
+  "@hidePassword": {}
 }

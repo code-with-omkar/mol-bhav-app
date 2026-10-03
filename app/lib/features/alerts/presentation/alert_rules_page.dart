@@ -1,12 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../../core/l10n/l10n.dart';
+import '../../../core/router/app_routes.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/theme/mb_dimens.dart';
 import '../../../core/utils/formatters.dart';
 import '../../../shared/widgets/mb_app_bar.dart';
 import '../../../shared/widgets/mb_button.dart';
+import '../../../shared/widgets/mb_icons.dart';
 import '../../../shared/widgets/mb_state_views.dart';
 import '../domain/alerts.dart';
 import 'alert_rules_cubit.dart';
@@ -19,6 +22,15 @@ class AlertRulesPage extends StatelessWidget {
     final l10n = context.l10n;
     return Scaffold(
       appBar: MbAppBar(title: l10n.alertRulesTitle),
+      floatingActionButton: MbButton(
+        label: l10n.createAlertAction,
+        icon: MbIcons.plus,
+        onPressed: () async {
+          final cubit = context.read<AlertRulesCubit>();
+          await context.push(AppRoutes.createAlert);
+          if (context.mounted) await cubit.load();
+        },
+      ),
       body: BlocBuilder<AlertRulesCubit, AlertRulesState>(
         builder: (context, state) {
           final cubit = context.read<AlertRulesCubit>();
@@ -48,7 +60,8 @@ class _RulesList extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ListView.separated(
-      padding: MbSpacing.screenPadding,
+      // Extra bottom space keeps the last rule clear of "Create alert".
+      padding: MbSpacing.screenPadding.add(const EdgeInsets.only(bottom: 72)),
       itemCount: rules.length,
       separatorBuilder: (_, _) => const SizedBox(height: MbSpacing.s3),
       itemBuilder: (context, i) => _RuleTile(rule: rules[i], cubit: cubit),

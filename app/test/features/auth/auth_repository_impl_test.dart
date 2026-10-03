@@ -8,6 +8,7 @@ import 'package:mol_bhav/features/auth/data/models/auth_models.dart';
 import 'package:mol_bhav/features/auth/data/repositories/auth_repository_impl.dart';
 import 'package:mol_bhav/features/auth/domain/auth_failures.dart';
 import 'package:mol_bhav/features/auth/domain/entities/auth_session.dart';
+import 'package:mol_bhav/features/auth/domain/entities/login_methods.dart';
 import 'package:mol_bhav/features/auth/domain/entities/mobile_number.dart';
 import 'package:mol_bhav/features/auth/domain/entities/otp_challenge.dart';
 
@@ -124,5 +125,92 @@ void main() {
     });
     expect(request.resendCooldownSeconds, 30);
     expect(verified.isOnboarded, isFalse);
+  });
+
+  group('password login', () {
+    void stubSignIn() => when(
+      () => tokens.signIn(
+        accessToken: any(named: 'accessToken'),
+        refreshToken: any(named: 'refreshToken'),
+        onboarded: any(named: 'onboarded'),
+      ),
+    ).thenAnswer((_) async {});
+
+    test('getLoginMethods maps the server flags', () async {
+      when(() => remote.getLoginMethods()).thenAnswer(
+        (_) async => const LoginMethodsResponse(otp: false, password: true),
+      );
+
+      final result = await repository.getLoginMethods();
+
+      expect(
+        result.fold((_) => null, (m) => m),
+        const LoginMethods(otp: false, password: true),
+      );
+    });
+
+    test('loginWithPassword sends E.164 and stores the session', () async {
+      when(() => remote.loginWithPassword(any(), any())).thenAnswer(
+        (_) async => const OtpVerifyResponse(
+          accessToken: 'a',
+          refreshToken: 'r',
+          isOnboarded: false,
+        ),
+      );
+      stubSignIn();
+
+      final result = await repository.loginWithPassword(
+        mobile: mobile,
+        password: 'kanda2026',
+      );
+
+      expect(
+        result.fold((_) => null, (s) => s),
+        const AuthSession(isOnboarded: false),
+      );
+      verify(() => remote.loginWithPassword('+919503119207', 'kanda2026'))
+          .called(1);
+      verify(
+        () => tokens.signIn(
+          accessToken: 'a',
+          refreshToken: 'r',
+          onboarded: false,
+        ),
+      ).called(1);
+    });
+
+    test('loginWithPassword maps 400 to InvalidCredentialsFailure', () async {
+      when(() => remote.loginWithPassword(any(), any()))
+          .thenThrow(_badResponse(400));
+
+      final result = await repository.loginWithPassword(
+        mobile: mobile,
+        password: 'wrong',
+      );
+
+      expect(
+        result.fold((f) => f, (_) => null),
+        const InvalidCredentialsFailure(),
+      );
+    });
+
+    test('registerWithPassword maps 409 to AccountExistsFailure', () async {
+      when(() => remote.registerWithPassword(any(), any()))
+          .thenThrow(_badResponse(409));
+
+      final result = await repository.registerWithPassword(
+        mobile: mobile,
+        password: 'kanda2026',
+      );
+
+      expect(result.fold((f) => f, (_) => null), const AccountExistsFailure());
+      verifyNever(
+        () => tokens.signIn(
+          accessToken: any(named: 'accessToken'),
+          refreshToken: any(named: 'refreshToken'),
+          onboarded: any(named: 'onboarded'),
+        ),
+      );
+    });
   });
 }

@@ -17,7 +17,8 @@ class OtpRequestResponse {
   final int resendCooldownSeconds;
 }
 
-/// `POST /auth/otp/verify` → after envelope unwrap:
+/// `POST /auth/otp/verify`, `/auth/password/login` and `/auth/password/register`
+/// all return the same login shape → after envelope unwrap:
 /// `{ session: { userId, accessToken, ..., refreshToken, ... }, isNewUser, isOnboarded }`
 class OtpVerifyResponse {
   const OtpVerifyResponse({
@@ -38,4 +39,19 @@ class OtpVerifyResponse {
   final String accessToken;
   final String refreshToken;
   final bool isOnboarded;
+}
+
+/// `GET /auth/methods` → after envelope unwrap: `{ otp, password }`
+class LoginMethodsResponse {
+  const LoginMethodsResponse({required this.otp, required this.password});
+
+  factory LoginMethodsResponse.fromJson(Map<String, dynamic> json) {
+    return LoginMethodsResponse(
+      otp: json['otp'] as bool? ?? false,
+      password: json['password'] as bool? ?? false,
+    );
+  }
+
+  final bool otp;
+  final bool password;
 }

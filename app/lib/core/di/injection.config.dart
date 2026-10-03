@@ -45,6 +45,8 @@ import 'package:mol_bhav/features/auth/domain/entities/otp_challenge.dart'
     as _i769;
 import 'package:mol_bhav/features/auth/domain/repositories/auth_repository.dart'
     as _i696;
+import 'package:mol_bhav/features/auth/domain/usecases/password_auth.dart'
+    as _i1050;
 import 'package:mol_bhav/features/auth/domain/usecases/request_otp.dart'
     as _i969;
 import 'package:mol_bhav/features/auth/domain/usecases/verify_otp.dart'
@@ -193,9 +195,6 @@ extension GetItInjectableX on _i174.GetIt {
     gh.factory<_i995.GetMandiPrices>(
       () => _i995.GetMandiPrices(gh<_i995.MandiPricesRepository>()),
     );
-    gh.factory<_i692.WatchlistPickerCubit>(
-      () => _i692.WatchlistPickerCubit(gh<_i169.CatalogRepository>()),
-    );
     gh.lazySingleton<_i17.EstimatorRepository>(
       () => _i844.EstimatorRepositoryImpl(gh<_i361.Dio>()),
     );
@@ -303,6 +302,15 @@ extension GetItInjectableX on _i174.GetIt {
     );
     gh.factory<_i333.BuyingOpportunityCubit>(
       () => _i333.BuyingOpportunityCubit(gh<_i806.GetBuyingOpportunity>()),
+    );
+    gh.factory<_i1050.GetLoginMethods>(
+      () => _i1050.GetLoginMethods(gh<_i696.AuthRepository>()),
+    );
+    gh.factory<_i1050.LoginWithPassword>(
+      () => _i1050.LoginWithPassword(gh<_i696.AuthRepository>()),
+    );
+    gh.factory<_i1050.RegisterWithPassword>(
+      () => _i1050.RegisterWithPassword(gh<_i696.AuthRepository>()),
     );
     gh.factory<_i969.RequestOtp>(
       () => _i969.RequestOtp(gh<_i696.AuthRepository>()),
@@ -485,6 +493,12 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i1045.GetAlertOptions>(),
         gh<_i1045.GetCurrentPrice>(),
         gh<_i1045.CreateAlert>(),
+        gh<_i736.ProfileCubit>(),
+      ),
+    );
+    gh.factory<_i692.WatchlistPickerCubit>(
+      () => _i692.WatchlistPickerCubit(
+        gh<_i169.CatalogRepository>(),
         gh<_i736.ProfileCubit>(),
       ),
     );

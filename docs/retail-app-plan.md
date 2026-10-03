@@ -7,7 +7,7 @@
 - Note: current DB is SQL Server; may need to migrate/support a different DB (e.g. PostgreSQL) for free hosting options. Not needed for the design phase.
 
 ## Target audience
-- Rural areas in Maharashtra.
+- Rural areas in Maharashtra.   
 - Budget Android phones, possibly unreliable internet.
 - Prefer visual, simple navigation with large tap targets.
 - May prefer calling/WhatsApp ordering alongside in-app cart.

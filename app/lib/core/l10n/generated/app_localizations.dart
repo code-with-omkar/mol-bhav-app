@@ -1522,6 +1522,12 @@ abstract class AppLocalizations {
   /// **'Generated {dateTime}'**
   String reportGeneratedAt(String dateTime);
 
+  /// No description provided for @reportNotDownloadedYet.
+  ///
+  /// In en, this message translates to:
+  /// **'Not downloaded yet'**
+  String get reportNotDownloadedYet;
+
   /// No description provided for @reportDownloadedAt.
   ///
   /// In en, this message translates to:
@@ -1843,7 +1849,7 @@ abstract class AppLocalizations {
   /// No description provided for @alertRulesEmpty.
   ///
   /// In en, this message translates to:
-  /// **'No alert rules yet. Create one from any commodity page.'**
+  /// **'No alert rules yet. Tap “Create alert” to add one.'**
   String get alertRulesEmpty;
 
   /// No description provided for @alertRuleDeleted.
@@ -2223,6 +2229,114 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Everything in Free'**
   String get proFeatureEverythingInFree;
+
+  /// No description provided for @passwordLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Password'**
+  String get passwordLabel;
+
+  /// No description provided for @confirmPasswordLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm password'**
+  String get confirmPasswordLabel;
+
+  /// No description provided for @passwordLoginSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter your mobile number and password.'**
+  String get passwordLoginSubtitle;
+
+  /// No description provided for @registerTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Create your account'**
+  String get registerTitle;
+
+  /// No description provided for @registerSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose a password to log in with your mobile number.'**
+  String get registerSubtitle;
+
+  /// No description provided for @loginAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Log in'**
+  String get loginAction;
+
+  /// No description provided for @createAccountAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Create account'**
+  String get createAccountAction;
+
+  /// No description provided for @switchToRegister.
+  ///
+  /// In en, this message translates to:
+  /// **'New to MolBhav? Create an account'**
+  String get switchToRegister;
+
+  /// No description provided for @switchToLogin.
+  ///
+  /// In en, this message translates to:
+  /// **'Already have an account? Log in'**
+  String get switchToLogin;
+
+  /// No description provided for @passwordRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter your password.'**
+  String get passwordRequired;
+
+  /// No description provided for @passwordTooWeak.
+  ///
+  /// In en, this message translates to:
+  /// **'Use at least 8 characters with a letter and a number.'**
+  String get passwordTooWeak;
+
+  /// No description provided for @passwordsDoNotMatch.
+  ///
+  /// In en, this message translates to:
+  /// **'Passwords do not match.'**
+  String get passwordsDoNotMatch;
+
+  /// No description provided for @invalidCredentials.
+  ///
+  /// In en, this message translates to:
+  /// **'Incorrect mobile number or password.'**
+  String get invalidCredentials;
+
+  /// No description provided for @accountExists.
+  ///
+  /// In en, this message translates to:
+  /// **'This number already has an account. Log in instead.'**
+  String get accountExists;
+
+  /// No description provided for @useOtpInstead.
+  ///
+  /// In en, this message translates to:
+  /// **'Log in with OTP instead'**
+  String get useOtpInstead;
+
+  /// No description provided for @usePasswordInstead.
+  ///
+  /// In en, this message translates to:
+  /// **'Log in with password instead'**
+  String get usePasswordInstead;
+
+  /// No description provided for @showPassword.
+  ///
+  /// In en, this message translates to:
+  /// **'Show password'**
+  String get showPassword;
+
+  /// No description provided for @hidePassword.
+  ///
+  /// In en, this message translates to:
+  /// **'Hide password'**
+  String get hidePassword;
 }
 
 class _AppLocalizationsDelegate

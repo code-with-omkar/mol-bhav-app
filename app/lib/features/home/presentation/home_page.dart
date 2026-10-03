@@ -93,8 +93,8 @@ class _Dashboard extends StatelessWidget {
           MbHeroHeader(
             name: data.userName,
             greeting: _greeting(context),
-            subtitle: l10n.homeSubtitle,
             chip: _chip(context),
+            subtitle: l10n.homeSubtitle,
             alertsLabel: l10n.alertsLabel,
             unread: data.hasUnreadAlerts,
             onAlerts: () => context.go(AppRoutes.alerts),
@@ -117,6 +117,21 @@ class _Dashboard extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
+                  // Accounts created without a name (e.g. before the name
+                  // field, or claimed with a password) get a way to add one.
+                  if (data.userName.isEmpty) ...[
+                    MbGroup(
+                      children: [
+                        MbListItem(
+                          icon: MbIcons.user,
+                          title: l10n.addYourName,
+                          onTap: () =>
+                              context.push<bool>(AppRoutes.editProfile),
+                        ),
+                      ],
+                    ),
+                    gap,
+                  ],
                   const _QuickActions(),
                   gap,
                   MbSectionHeader(title: l10n.homeBuyingToday),
@@ -257,7 +272,7 @@ class _QuickActions extends StatelessWidget {
       (
         MbIcons.estimator,
         l10n.quickCostEstimate,
-        () => context.push(AppRoutes.costEstimator),
+        () => context.go(AppRoutes.costEstimator),
       ),
       (MbIcons.report, l10n.reportsTitle, () => context.go(AppRoutes.reports)),
       (

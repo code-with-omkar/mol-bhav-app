@@ -1,0 +1,32 @@
+import 'package:injectable/injectable.dart';
+
+import 'alerts_repository.dart';
+import '../domain/alerts.dart';
+
+@module
+abstract class AlertsModule {
+  @lazySingleton
+  Future<Result<List<AlertItem>>> Function(AlertFilter) getAlerts(
+    AlertsRepository repository,
+  ) =>
+      (filter) => repository.getAlerts(filter);
+
+  @lazySingleton
+  Future<Result<AlertOptions>> Function() getAlertOptions(
+    AlertsRepository repository,
+  ) =>
+      () => repository.getAlertOptions();
+
+  @lazySingleton
+  Future<Result<CurrentPrice>> Function(String, String) getCurrentPrice(
+    AlertsRepository repository,
+  ) =>
+      (productId, marketId) =>
+          repository.getCurrentPrice(productId, marketId);
+
+  @lazySingleton
+  Future<Result<void>> Function(NewAlert) createAlert(
+    AlertsRepository repository,
+  ) =>
+      (alert) => repository.createAlert(alert);
+}

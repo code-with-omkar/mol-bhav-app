@@ -3,63 +3,94 @@ import 'package:injectable/injectable.dart';
 
 import '../../../core/error/result.dart';
 
-enum AlertKind { signal, opportunity, spike }
-
+/// Tabs on the alerts feed.
 enum AlertFilter { all, signals, opportunities }
 
+/// What raised an alert: a price drop/below-threshold signal, a spike, or a
+/// procurement opportunity.
+enum AlertKind { signal, spike, opportunity }
+
+/// The channel an alert was delivered on, when known.
 enum AlertChannel { whatsapp, push }
 
+/// The Create Alert form's condition. Rupee conditions are price-level rules;
+/// [percent] is a "changes by %" rule.
 enum PriceCondition { below, above, percent }
+
+/// Server-side rule threshold, mirrored 1:1 from the API's `thresholdType`.
+enum AlertThresholdType { priceDrop, priceSpike, priceBelow, priceAbove }
 
 class AlertItem extends Equatable {
   const AlertItem({
     required this.id,
     required this.kind,
-    required this.isUnread,
     required this.productName,
     required this.percentChange,
     required this.previousPrice,
     required this.newPrice,
     required this.createdAt,
+    required this.isUnread,
     this.locationName,
-    this.channel,
     this.opportunityId,
+    this.channel,
   });
 
   final String id;
   final AlertKind kind;
-  final bool isUnread;
-
-  /// The parts the alert's line is built from — the wording itself is
-  /// localised on the page, not written here.
   final String productName;
-
-  /// Signed: negative for a drop, positive for a rise.
   final num percentChange;
   final num previousPrice;
   final num newPrice;
-
-  /// Empty when the API sent no mandi/supplier name for the alert.
-  final String? locationName;
   final DateTime createdAt;
-  final AlertChannel? channel;
-
-  /// Present when the alert links to a buying opportunity.
+  final bool isUnread;
+  final String? locationName;
   final String? opportunityId;
+  final AlertChannel? channel;
 
   @override
   List<Object?> get props => [
     id,
     kind,
-    isUnread,
     productName,
     percentChange,
     previousPrice,
     newPrice,
-    locationName,
     createdAt,
-    channel,
+    isUnread,
+    locationName,
     opportunityId,
+    channel,
+  ];
+}
+
+class NewAlert extends Equatable {
+  const NewAlert({
+    required this.commodityId,
+    required this.marketId,
+    required this.condition,
+    required this.value,
+    required this.push,
+    required this.whatsapp,
+  });
+
+  final String commodityId;
+  final String marketId;
+  final PriceCondition condition;
+
+  /// Rupees for [PriceCondition.below]/[PriceCondition.above], percent for
+  /// [PriceCondition.percent].
+  final num value;
+  final bool push;
+  final bool whatsapp;
+
+  @override
+  List<Object?> get props => [
+    commodityId,
+    marketId,
+    condition,
+    value,
+    push,
+    whatsapp,
   ];
 }
 
@@ -74,6 +105,8 @@ class AlertProduct extends Equatable {
   final String id;
   final String name;
   final String categoryCode;
+
+  /// Display symbol of the product's default unit, e.g. `qtl`.
   final String unit;
 
   @override
@@ -90,7 +123,7 @@ class AlertMarket extends Equatable {
   final String id;
   final String name;
 
-  /// The mandi's state, so the form can show the user's own state first.
+  /// Empty when the mandi master has no state for it.
   final String stateName;
 
   @override
@@ -109,8 +142,10 @@ class AlertOptions extends Equatable {
   final List<AlertProduct> products;
   final List<AlertMarket> markets;
 
-  /// Number and language code WhatsApp alerts go to.
+  /// Where WhatsApp alerts go; null hides the subtitle on the toggle.
   final String? whatsappNumber;
+
+  /// Language code WhatsApp alerts are sent in.
   final String? whatsappLanguage;
 
   @override
@@ -122,6 +157,7 @@ class AlertOptions extends Equatable {
   ];
 }
 
+/// Latest modal price for a product at the selected mandi — the form's hint.
 class CurrentPrice extends Equatable {
   const CurrentPrice({
     required this.marketName,
@@ -137,50 +173,18 @@ class CurrentPrice extends Equatable {
   List<Object?> get props => [marketName, price, unit];
 }
 
-class NewAlert extends Equatable {
-  const NewAlert({
-    required this.commodityId,
-    required this.marketId,
-    required this.condition,
-    required this.value,
-    required this.push,
-    required this.whatsapp,
-  });
-
-  final String commodityId;
-  final String marketId;
-  final PriceCondition condition;
-
-  /// Rupees for below/above, percent for [PriceCondition.percent].
-  final num value;
-  final bool push;
-  final bool whatsapp;
-
-  @override
-  List<Object?> get props => [
-    commodityId,
-    marketId,
-    condition,
-    value,
-    push,
-    whatsapp,
-  ];
-}
-
-enum AlertThresholdType { priceDrop, priceSpike, priceBelow, priceAbove }
-
 class AlertRule extends Equatable {
   const AlertRule({
     required this.id,
     required this.productName,
-    this.variantName,
-    this.locationName,
     required this.thresholdType,
-    this.thresholdPercent,
-    this.thresholdPrice,
     required this.unit,
     required this.isActive,
     required this.createdAtUtc,
+    this.variantName,
+    this.locationName,
+    this.thresholdPercent,
+    this.thresholdPrice,
   });
 
   final String id;
@@ -209,18 +213,26 @@ class AlertRule extends Equatable {
   ];
 }
 
-class UpdateAlertRuleRequest {
+class UpdateAlertRuleRequest extends Equatable {
   const UpdateAlertRuleRequest({
     required this.thresholdType,
+    required this.isActive,
     this.thresholdPercent,
     this.thresholdPrice,
-    required this.isActive,
   });
 
   final AlertThresholdType thresholdType;
   final num? thresholdPercent;
   final num? thresholdPrice;
   final bool isActive;
+
+  @override
+  List<Object?> get props => [
+    thresholdType,
+    thresholdPercent,
+    thresholdPrice,
+    isActive,
+  ];
 }
 
 abstract interface class AlertsRepository {

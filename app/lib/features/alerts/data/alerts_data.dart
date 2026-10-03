@@ -102,8 +102,18 @@ class AlertsRepositoryImpl implements AlertsRepository {
   @override
   Future<Result<List<AlertItem>>> getAlerts(AlertFilter filter) =>
       runApiCall(() async {
-        final items = await _remote.getAlerts(1, 50);
-        return parseList(items, _alertItem);
+        final items = parseList(await _remote.getAlerts(1, 50), _alertItem);
+        return switch (filter) {
+          AlertFilter.all => items,
+          AlertFilter.signals => [
+            for (final a in items)
+              if (a.kind != AlertKind.opportunity) a,
+          ],
+          AlertFilter.opportunities => [
+            for (final a in items)
+              if (a.kind == AlertKind.opportunity) a,
+          ],
+        };
       });
 
   /// Every catalog product tagged with the category it was fetched under, plus

@@ -105,22 +105,20 @@ void main() {
     verify(session.completeOnboarding).called(1);
   });
 
-  test('CategoryModel parses the documented payload', () {
+  test('CategoryModel keys the category by its code and carries no highlights', () {
+    // The API identifies categories by `code`; it sends no highlights or flags.
     final model = CategoryModel.fromJson({
-      'id': '1',
       'code': 'agriculture',
       'name': 'Agriculture',
-      'highlights': ['Commodities', 'Mandis'],
-      'isAvailable': true,
     });
 
     expect(
       model.toEntity(),
       const ProcurementCategory(
-        id: '1',
+        id: 'agriculture',
         code: 'agriculture',
         name: 'Agriculture',
-        highlights: ['Commodities', 'Mandis'],
+        highlights: [],
         isAvailable: true,
       ),
     );

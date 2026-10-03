@@ -15,4 +15,13 @@ internal sealed class SubscriptionRepository(MolBhavDbContext dbContext) : Repos
 
     public Task<Subscription?> GetByGatewayOrderIdAsync(string orderId, CancellationToken cancellationToken = default) =>
         Set.FirstOrDefaultAsync(s => s.RazorpayOrderId == orderId, cancellationToken);
+
+    // Served by the partial index ix_subscriptions_active_expires_at_utc (AddSubscriptionExpiryIndex): the sweep
+    // touches only Active rows instead of scanning billing history.
+    public async Task<IReadOnlyList<Subscription>> GetLapsedActiveAsync(DateTimeOffset nowUtc, int batchSize, CancellationToken cancellationToken = default) =>
+        await Set
+            .Where(s => s.Status == SubscriptionStatus.Active && s.ExpiresAtUtc <= nowUtc)
+            .OrderBy(s => s.ExpiresAtUtc)
+            .Take(batchSize)
+            .ToListAsync(cancellationToken);
 }

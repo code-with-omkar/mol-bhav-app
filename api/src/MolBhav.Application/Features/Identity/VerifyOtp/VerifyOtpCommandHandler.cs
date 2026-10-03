@@ -8,6 +8,7 @@ using MolBhav.Domain.SharedKernel;
 namespace MolBhav.Application.Features.Identity.VerifyOtp;
 
 internal sealed class VerifyOtpCommandHandler(
+    ILoginMethods loginMethods,
     IOtpChallengeRepository otpChallenges,
     IUserRepository users,
     IRefreshTokenRepository refreshTokens,
@@ -18,6 +19,12 @@ internal sealed class VerifyOtpCommandHandler(
 {
     public async Task<Result<VerifyOtpResponse>> Handle(VerifyOtpCommand request, CancellationToken cancellationToken)
     {
+        // OTP costs money per SMS; deployments without a DLT-registered sender switch it off (Authentication:LoginMethods:Otp).
+        if (!loginMethods.OtpEnabled)
+        {
+            return IdentityErrors.LoginMethodDisabled;
+        }
+
         var phoneResult = PhoneNumber.Create(request.PhoneNumber);
         if (phoneResult.IsFailure)
         {

@@ -134,29 +134,52 @@ class MarketComparisonCubit extends Cubit<MarketComparisonState> {
       );
       return;
     }
+    final catalog = categoryResult.fold(
+      (_) => const <CatalogCategory>[],
+      (list) => list,
+    );
+    final requested = commodities.where((c) => c.id == commodityId).firstOrNull;
+    // Only the user's own categories — plus whatever a deep link or Home tile
+    // explicitly opened, so a shared price still lands on that price. Without
+    // the catalog (its fetch failed) there is nothing to scope by.
+    final allowed = {
+      for (final c in userCategories(
+        catalog,
+        _profile.state.data?.categoryCodes ?? const <String>[],
+      ))
+        c.code,
+      ?requested?.categoryCode,
+      ?categoryCode,
+    };
+    final scoped = catalog.isEmpty
+        ? commodities
+        : [
+            for (final c in commodities)
+              if (allowed.contains(c.categoryCode)) c,
+          ];
     final categories = _orderCategories(
-      categoryResult.fold((_) => const <CatalogCategory>[], (list) => list),
-      commodities,
+      [
+        for (final c in catalog)
+          if (allowed.contains(c.code)) c,
+      ],
+      scoped,
     );
     // The route's category wins, then the opened commodity's, then the user's own.
     var selected =
         categoryCode ??
-        commodities
-            .where((c) => c.id == commodityId)
-            .firstOrNull
-            ?.categoryCode ??
+        requested?.categoryCode ??
         categories.firstOrNull?.code;
     final initial =
-        commodities.where((c) => c.id == commodityId).firstOrNull ??
-        commodities.where((c) => c.categoryCode == selected).firstOrNull ??
-        commodities.firstOrNull;
+        requested ??
+        scoped.where((c) => c.categoryCode == selected).firstOrNull ??
+        scoped.firstOrNull;
     // A category with nothing in it would show an empty picker: fall back to All.
     if (initial != null && initial.categoryCode != selected) selected = null;
     if (initial == null) {
       emit(
         state.copyWith(
           status: LoadStatus.ready,
-          commodities: commodities,
+          commodities: scoped,
           categories: categories,
           categoryCode: () => selected,
         ),
@@ -165,7 +188,7 @@ class MarketComparisonCubit extends Cubit<MarketComparisonState> {
     }
     emit(
       state.copyWith(
-        commodities: commodities,
+        commodities: scoped,
         categories: categories,
         categoryCode: () => selected,
         commodityId: initial.id,
@@ -192,8 +215,8 @@ class MarketComparisonCubit extends Cubit<MarketComparisonState> {
     await _compare(id, null);
   }
 
-  /// The user's own procurement categories first, then the rest — and only
-  /// categories that actually have products to show.
+  /// The user's own procurement categories first, then any extra one a link
+  /// opened — and only categories that actually have products to show.
   List<CatalogCategory> _orderCategories(
     List<CatalogCategory> categories,
     List<Commodity> commodities,

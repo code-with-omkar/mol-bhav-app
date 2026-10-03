@@ -9,6 +9,7 @@ import '../../../core/utils/formatters.dart';
 import '../../../core/utils/statuses.dart';
 import '../../../core/utils/timestamps.dart';
 import '../../../shared/widgets/mb_app_bar.dart';
+import '../../../shared/widgets/mb_button.dart';
 import '../../../shared/widgets/mb_cards.dart';
 import '../../../shared/widgets/mb_icons.dart';
 import '../../../shared/widgets/mb_panels.dart';
@@ -39,6 +40,15 @@ class AlertsPage extends StatelessWidget {
             onPressed: null,
           ),
         ],
+      ),
+      floatingActionButton: MbButton(
+        label: l10n.createAlertAction,
+        icon: MbIcons.plus,
+        onPressed: () async {
+          final cubit = context.read<AlertsCubit>();
+          await context.push(AppRoutes.createAlert);
+          if (context.mounted) await cubit.load();
+        },
       ),
       body: BlocBuilder<AlertsCubit, AlertsState>(
         builder: (context, state) {
@@ -76,6 +86,8 @@ class AlertsPage extends StatelessWidget {
                     _AlertTile(alert: alert),
                     const SizedBox(height: MbSpacing.s3),
                   ],
+                // Keeps the last card clear of the "Create alert" button.
+                const SizedBox(height: 72),
               ],
             ),
           );

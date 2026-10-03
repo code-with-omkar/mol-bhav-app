@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
-import '../../core/brand.dart';
 import '../../core/theme/app_theme.dart';
 import '../../core/theme/mb_dimens.dart';
 import 'mb_icon.dart';
@@ -9,7 +8,7 @@ import 'mb_panels.dart';
 import 'mb_wordmark.dart';
 
 /// Home band on `hero`: wordmark, alerts bell with unread dot, avatar,
-/// Hindi tagline, greeting and name. The content sheet below overlaps it by
+/// greeting and name. The content sheet below overlaps it by
 /// [overlap] with a `radius-xl` top.
 class MbHeroHeader extends StatelessWidget {
   const MbHeroHeader({
@@ -77,15 +76,6 @@ class MbHeroHeader extends StatelessWidget {
                           const SizedBox(width: MbSpacing.s2),
                           MbAvatar(name: name),
                         ],
-                      ),
-                    ),
-                    const SizedBox(height: MbSpacing.s2),
-                    Text(
-                      Brand.taglineHi,
-                      style: t.taglineHi.copyWith(
-                        fontSize: 17,
-                        height: 26 / 17,
-                        color: onHero,
                       ),
                     ),
                     const SizedBox(height: MbSpacing.s5),

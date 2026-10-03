@@ -28,6 +28,8 @@ class MbTextField extends StatefulWidget {
     this.enabled = true,
     this.minLines,
     this.maxLines = 1,
+    this.obscureText = false,
+    this.trailing,
   });
 
   final TextEditingController? controller;
@@ -50,6 +52,12 @@ class MbTextField extends StatefulWidget {
   /// grow. Defaults keep every existing field single-line.
   final int? minLines;
   final int? maxLines;
+
+  /// Hides the input (passwords). Forces a single line.
+  final bool obscureText;
+
+  /// Tappable widget after the input, e.g. a show/hide-password toggle.
+  final Widget? trailing;
 
   @override
   State<MbTextField> createState() => _MbTextFieldState();
@@ -105,8 +113,11 @@ class _MbTextFieldState extends State<MbTextField> {
                 textInputAction: widget.textInputAction,
                 onChanged: widget.onChanged,
                 onSubmitted: widget.onSubmitted,
-                minLines: widget.minLines,
-                maxLines: widget.maxLines,
+                obscureText: widget.obscureText,
+                enableSuggestions: !widget.obscureText,
+                autocorrect: !widget.obscureText,
+                minLines: widget.obscureText ? null : widget.minLines,
+                maxLines: widget.obscureText ? 1 : widget.maxLines,
                 style: t.fieldInput.copyWith(color: c.ink),
                 cursorColor: c.primary,
                 decoration: InputDecoration(
@@ -122,6 +133,10 @@ class _MbTextFieldState extends State<MbTextField> {
           if (widget.suffix != null) ...[
             const SizedBox(width: 8),
             Text(widget.suffix!, style: affixStyle),
+          ],
+          if (widget.trailing != null) ...[
+            const SizedBox(width: 4),
+            widget.trailing!,
           ],
         ],
       ),

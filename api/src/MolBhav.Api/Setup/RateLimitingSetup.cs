@@ -36,6 +36,11 @@ internal static class RateLimitingSetup
                     $"otp-verify:{ClientIp(context)}",
                     _ => FixedWindow(settings.OtpVerifyPermitLimit, TimeSpan.FromSeconds(settings.OtpWindowSeconds))));
 
+            options.AddPolicy(RateLimitPolicies.PasswordLogin, context =>
+                RateLimitPartition.GetFixedWindowLimiter(
+                    $"password-login:{ClientIp(context)}",
+                    _ => FixedWindow(settings.PasswordLoginPermitLimit, TimeSpan.FromSeconds(settings.OtpWindowSeconds))));
+
             options.AddPolicy(RateLimitPolicies.CouponValidate, context =>
                 RateLimitPartition.GetFixedWindowLimiter(
                     $"coupon:{context.User.FindFirst(MolBhavClaimTypes.Subject)?.Value ?? ClientIp(context)}",

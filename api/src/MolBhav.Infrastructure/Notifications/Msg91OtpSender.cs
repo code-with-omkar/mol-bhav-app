@@ -1,4 +1,6 @@
 using System.Net.Http.Json;
+using System.Text.Json;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using MolBhav.Application.Abstractions.Notifications;
 using MolBhav.Domain.SharedKernel;
@@ -10,9 +12,14 @@ namespace MolBhav.Infrastructure.Notifications;
 /// and <c>OtpDelivery:Msg91:AuthKey</c> is non-empty. Falls back to <see cref="LoggingOtpSender"/> in Development
 /// when the key is absent (see <c>DependencyInjection.AddIdentityModule</c>).
 /// </summary>
+/// <remarks>
+/// MSG91 reports most failures (bad template, DLT mismatch, IP not whitelisted, invalid authkey) as HTTP 200 with
+/// <c>{"type":"error","message":"..."}</c>, so the body is inspected as well as the status code.
+/// </remarks>
 internal sealed class Msg91OtpSender(
     IHttpClientFactory httpClientFactory,
-    IOptions<Msg91Options> options) : IOtpSender
+    IOptions<Msg91Options> options,
+    ILogger<Msg91OtpSender> logger) : IOtpSender
 {
     public const string HttpClientName = "msg91";
 
@@ -37,12 +44,43 @@ internal sealed class Msg91OtpSender(
         };
 
         var client = httpClientFactory.CreateClient(HttpClientName);
-        using var response = await client.PostAsJsonAsync(OtpEndpoint, payload, cancellationToken);
-
-        if (!response.IsSuccessStatusCode)
+        using var request = new HttpRequestMessage(HttpMethod.Post, OtpEndpoint)
         {
-            var body = await response.Content.ReadAsStringAsync(cancellationToken);
+            Content = JsonContent.Create(payload),
+        };
+        request.Headers.TryAddWithoutValidation("authkey", opts.AuthKey);
+
+        using var response = await client.SendAsync(request, cancellationToken);
+        var body = await response.Content.ReadAsStringAsync(cancellationToken);
+
+        if (!response.IsSuccessStatusCode || !IsSuccessBody(body))
+        {
+            logger.LogError("MSG91 OTP delivery failed for {Mobile} (HTTP {StatusCode}): {Body}",
+                MaskMobile(mobile), (int)response.StatusCode, body);
             throw new OtpDeliveryException((int)response.StatusCode, body);
         }
+
+        logger.LogInformation("MSG91 accepted OTP for {Mobile}: {Body}", MaskMobile(mobile), body);
     }
+
+    private static bool IsSuccessBody(string body)
+    {
+        if (string.IsNullOrWhiteSpace(body))
+            return false;
+
+        try
+        {
+            using var doc = JsonDocument.Parse(body);
+            return doc.RootElement.ValueKind == JsonValueKind.Object
+                && doc.RootElement.TryGetProperty("type", out var type)
+                && string.Equals(type.GetString(), "success", StringComparison.OrdinalIgnoreCase);
+        }
+        catch (JsonException)
+        {
+            return false;
+        }
+    }
+
+    private static string MaskMobile(string mobile) =>
+        mobile.Length <= 4 ? "****" : new string('*', mobile.Length - 4) + mobile[^4..];
 }

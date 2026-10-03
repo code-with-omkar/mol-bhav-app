@@ -20,18 +20,18 @@ abstract final class AppRoutes {
   static const mandiPrices = '/markets/by-mandi';
   static const watchlistAdd = '/watchlist/add';
   static const reports = '/more/reports';
+  static const costEstimator = '/more/estimator';
+  static const alertRules = '/alerts/rules';
   static const helpSupport = '/more/help';
   static const raiseTicket = '/more/help/new-ticket';
   static const supportTickets = '/more/help/tickets';
 
   // Full screen.
   static const createAlert = '/alerts/create';
-  static const alertRules = '/alerts/rules';
   static const opportunityPath = '/opportunities/:id';
 
   /// Shared deep link target, registered only when `DEEP_LINK_BASE` is set.
   static const productDeepLinkPath = '/p/:productId';
-  static const costEstimator = '/estimator';
   static const billingPlans = '/billing/plans';
   static const billingCheckout = '/billing/checkout';
   static const billingSubscription = '/billing/subscription';

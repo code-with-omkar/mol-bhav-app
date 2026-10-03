@@ -311,6 +311,14 @@ public static class DependencyInjection
 
         services.AddHostedService<IngestionSchedulerBackgroundService>();
 
+        services.AddOptions<SubscriptionExpiryOptions>()
+            .Bind(configuration.GetSection(SubscriptionExpiryOptions.SectionName))
+            .Validate(o => o.IntervalMinutes is >= 1 and <= 1440, "SubscriptionExpiry:IntervalMinutes must be between 1 and 1440.")
+            .Validate(o => o.BatchSize is >= 1 and <= 5000, "SubscriptionExpiry:BatchSize must be between 1 and 5000.")
+            .ValidateOnStart();
+
+        services.AddHostedService<SubscriptionExpiryBackgroundService>();
+
         return services;
     }
 
@@ -357,6 +365,25 @@ public static class DependencyInjection
         services.AddScoped<IUserProfileReadService, UserProfileReadService>();
 
         services.AddSingleton<IOtpCodeGenerator, OtpCodeGenerator>();
+        services.AddSingleton<IPasswordHasher, Pbkdf2PasswordHasher>();
+
+        services.AddOptions<LoginMethodsOptions>()
+            .Bind(configuration.GetSection(LoginMethodsOptions.SectionName))
+            .Validate(o => o.Otp || o.Password, $"{LoginMethodsOptions.SectionName}: enable at least one of Otp or Password.")
+            .Validate(
+                o => !o.AllowClaimingPasswordlessAccounts || environment.IsDevelopment(),
+                $"{LoginMethodsOptions.SectionName}:AllowClaimingPasswordlessAccounts is allowed only in Development — " +
+                "without OTP nothing proves the caller owns the number.")
+            .ValidateOnStart();
+        services.AddSingleton<ILoginMethods, ConfiguredLoginMethods>();
+
+        var loginMethods = configuration.GetSection(LoginMethodsOptions.SectionName).Get<LoginMethodsOptions>() ?? new LoginMethodsOptions();
+        if (!loginMethods.Otp)
+        {
+            // OTP switched off: no SMS provider or secrets needed. Turn it back on once a DLT-registered sender exists.
+            services.AddSingleton<IOtpSender, DisabledOtpSender>();
+            return services;
+        }
 
         var otpDelivery = configuration.GetSection(OtpDeliveryOptions.SectionName).Get<OtpDeliveryOptions>() ?? new OtpDeliveryOptions();
 

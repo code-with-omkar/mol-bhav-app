@@ -43,5 +43,9 @@ internal sealed class SubscriptionConfiguration : IEntityTypeConfiguration<Subsc
         // Activation looks subscriptions up by order; uniqueness also stops one payment activating two subscriptions.
         builder.HasIndex(s => s.RazorpayOrderId).IsUnique().HasFilter("razorpay_order_id IS NOT NULL");
         builder.HasIndex(s => s.RazorpayPaymentId).IsUnique().HasFilter("razorpay_payment_id IS NOT NULL");
+
+        // The expiry sweep asks "which Active subscriptions have lapsed?" every few minutes. Only Active rows
+        // (SubscriptionStatus.Active, stored as text) are indexed, so the index stays tiny however much billing history piles up.
+        builder.HasIndex(s => s.ExpiresAtUtc).HasDatabaseName("ix_subscriptions_active_expires_at_utc").HasFilter("status = 'Active'");
     }
 }

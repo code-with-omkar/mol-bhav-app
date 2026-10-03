@@ -18,6 +18,9 @@ public interface ISubscriptionRepository : IRepository<Subscription, Guid>
     Task<Subscription?> GetPendingByUserAndPlanAsync(Guid userId, Guid planId, CancellationToken cancellationToken = default);
 
     Task<Subscription?> GetByGatewayOrderIdAsync(string orderId, CancellationToken cancellationToken = default);
+
+    /// <summary>Active subscriptions whose paid period ended at or before <paramref name="nowUtc"/>, oldest first, at most <paramref name="batchSize"/>.</summary>
+    Task<IReadOnlyList<Subscription>> GetLapsedActiveAsync(DateTimeOffset nowUtc, int batchSize, CancellationToken cancellationToken = default);
 }
 
 public interface ICouponRepository : IRepository<Coupon, Guid>

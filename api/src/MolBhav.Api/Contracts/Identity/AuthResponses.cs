@@ -20,3 +20,8 @@ public sealed record SessionResponse(
 /// <param name="IsNewUser">Account was created by this login.</param>
 /// <param name="IsOnboarded">False → show onboarding (category + profile) before home.</param>
 public sealed record LoginResponse(SessionResponse Session, bool IsNewUser, bool IsOnboarded);
+
+/// <summary>Sign-in options this server accepts; the login screen shows only these.</summary>
+/// <param name="Otp">Mobile number + SMS code.</param>
+/// <param name="Password">Mobile number + password (login and "create account").</param>
+public sealed record LoginMethodsDto(bool Otp, bool Password);

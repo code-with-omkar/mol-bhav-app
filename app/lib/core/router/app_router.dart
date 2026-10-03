@@ -18,8 +18,12 @@ import '../../features/alerts/presentation/alerts_cubits.dart';
 import '../../features/alerts/presentation/alerts_page.dart';
 import '../../features/alerts/presentation/create_alert_page.dart';
 import '../../features/auth/domain/entities/otp_challenge.dart';
+import '../../features/auth/domain/repositories/auth_repository.dart';
+import '../../features/auth/domain/usecases/password_auth.dart';
 import '../../features/auth/presentation/cubit/login_cubit.dart';
+import '../../features/auth/presentation/cubit/login_methods_cubit.dart';
 import '../../features/auth/presentation/cubit/otp_cubit.dart';
+import '../../features/auth/presentation/cubit/password_login_cubit.dart';
 import '../../features/auth/presentation/pages/login_page.dart';
 import '../../features/auth/presentation/pages/otp_page.dart';
 import '../../features/home/presentation/home_cubit.dart';
@@ -87,8 +91,23 @@ GoRouter createAppRouter(SessionManager session) {
         ),
       GoRoute(
         path: AppRoutes.login,
-        builder: (context, state) => BlocProvider(
-          create: (_) => getIt<LoginCubit>(),
+        builder: (context, state) => MultiBlocProvider(
+          providers: [
+            BlocProvider(create: (_) => getIt<LoginCubit>()),
+            // Built by hand (like SubscriptionTierSync) so no injectable
+            // codegen run is needed; the repository is already registered.
+            BlocProvider(
+              create: (_) =>
+                  LoginMethodsCubit(GetLoginMethods(getIt<AuthRepository>()))
+                    ..load(),
+            ),
+            BlocProvider(
+              create: (_) => PasswordLoginCubit(
+                LoginWithPassword(getIt<AuthRepository>()),
+                RegisterWithPassword(getIt<AuthRepository>()),
+              ),
+            ),
+          ],
           child: LoginPage(sessionExpired: session.consumeExpiredNotice()),
         ),
         routes: [
@@ -237,9 +256,9 @@ GoRouter createAppRouter(SessionManager session) {
                       );
                     },
                   ),
+                  // Inside the Alerts tab so the bottom nav stays visible.
                   GoRoute(
                     path: 'rules',
-                    parentNavigatorKey: _rootKey,
                     builder: (context, state) => BlocProvider(
                       create: (_) => getIt<AlertRulesCubit>()..load(),
                       child: const AlertRulesPage(),
@@ -258,6 +277,14 @@ GoRouter createAppRouter(SessionManager session) {
                   child: const MorePage(),
                 ),
                 routes: [
+                  // Inside the More tab so the bottom nav stays visible.
+                  GoRoute(
+                    path: 'estimator',
+                    builder: (context, state) => BlocProvider(
+                      create: (_) => getIt<CostEstimatorCubit>()..load(),
+                      child: const CostEstimatorPage(),
+                    ),
+                  ),
                   GoRoute(
                     path: 'reports',
                     builder: (context, state) => BlocProvider(
@@ -323,13 +350,6 @@ GoRouter createAppRouter(SessionManager session) {
         builder: (context, state) => BlocProvider(
           create: (_) => getIt<NotificationPrefsCubit>()..load(),
           child: const NotificationPreferencesPage(),
-        ),
-      ),
-      GoRoute(
-        path: AppRoutes.costEstimator,
-        builder: (context, state) => BlocProvider(
-          create: (_) => getIt<CostEstimatorCubit>()..load(),
-          child: const CostEstimatorPage(),
         ),
       ),
       GoRoute(

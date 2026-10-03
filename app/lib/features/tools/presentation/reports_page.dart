@@ -195,8 +195,13 @@ String _timings(BuildContext context, GeneratedReport report, String locale) {
         l10n.reportGeneratedAt(formatDateTime(report.completedAt!, locale)),
       ReportStatus.ready => l10n.reportReadyLabel,
     },
-    if (report.lastDownloadedAt != null)
-      l10n.reportDownloadedAt(formatDateTime(report.lastDownloadedAt!, locale)),
+    // A report that finished but was never opened says so, instead of showing nothing.
+    if (report.status == ReportStatus.ready)
+      report.lastDownloadedAt != null
+          ? l10n.reportDownloadedAt(
+              formatDateTime(report.lastDownloadedAt!, locale),
+            )
+          : l10n.reportNotDownloadedYet,
   ].join('\n');
 }
 

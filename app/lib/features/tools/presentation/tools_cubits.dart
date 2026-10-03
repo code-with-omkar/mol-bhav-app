@@ -146,15 +146,23 @@ class CostEstimatorCubit extends Cubit<CostEstimatorState> {
 
   Future<void> load() async {
     emit(state.copyWith(categories: const DataState.loading()));
+    await _profile.ensureLoaded();
     final profile = _profile.state.data;
     final (categories, states, _) = await (
       _catalog.getCategories(),
       _locations.getStates(),
       _loadSaved(),
     ).wait;
+    // Only the categories the user registered for.
     final options = categories.fold(
       (f) => null,
-      (list) => [for (final c in list) NamedOption(id: c.code, name: c.name)],
+      (list) => [
+        for (final c in userCategories(
+          list,
+          profile?.categoryCodes ?? const <String>[],
+        ))
+          NamedOption(id: c.code, name: c.name),
+      ],
     );
     if (isClosed) return;
     emit(

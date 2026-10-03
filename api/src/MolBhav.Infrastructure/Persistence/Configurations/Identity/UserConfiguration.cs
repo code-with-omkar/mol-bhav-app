@@ -42,6 +42,13 @@ internal sealed class UserConfiguration : IEntityTypeConfiguration<User>
         builder.Property(u => u.Role).IsRequired();
         builder.Property(u => u.LastLoginAtUtc);
 
+        // Password credential (nullable: OTP-only accounts have none). Columns on users rather than a separate table:
+        // exactly one password per account (1:1, no repeating group), always read with the user at login.
+        builder.Property(u => u.PasswordHash).HasMaxLength(User.PasswordHashMaxLength);
+        builder.Property(u => u.FailedPasswordAttempts).IsRequired();
+        builder.Property(u => u.PasswordLockoutEndsAtUtc);
+        builder.Ignore(u => u.HasPassword);
+
         builder.Ignore(u => u.IsOnboarded);
 
         // Table-split owned type: profile columns live on identity.users (1:1, always loaded with the user).

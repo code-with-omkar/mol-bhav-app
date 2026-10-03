@@ -13,7 +13,6 @@ public sealed class RazorpayOptions
     [Required]
     public string KeySecret { get; init; } = string.Empty;
 
-    /// <summary>Required with the keys: without it the webhook could not authenticate a single event.</summary>
-    [Required]
+    /// <summary>Required in production. In development, webhook signature verification is skipped; can be any placeholder value.</summary>
     public string WebhookSecret { get; init; } = string.Empty;
 }

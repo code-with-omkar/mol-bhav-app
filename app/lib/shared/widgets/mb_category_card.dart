@@ -8,8 +8,9 @@ import 'mb_icon.dart';
 /// other live categories `navy`, not-yet-launched ones `grey`.
 enum MbCategoryTone { green, amber, navy, grey }
 
-/// Procurement category row (the "Select Category" list). Shows a check when
-/// [selected], a chevron otherwise; `onTap: null` renders it disabled.
+/// Procurement category row (the "Select Category" list). Shows a filled check
+/// when [selected], an outlined "+" to add it otherwise; `onTap: null` renders
+/// it disabled with no trailing affordance (e.g. "coming soon").
 class MbCategoryRow extends StatelessWidget {
   const MbCategoryRow({
     super.key,
@@ -111,8 +112,22 @@ class MbCategoryRow extends StatelessWidget {
                           color: c.onPrimary,
                         ),
                       )
-                    else
-                      MbIcon(MbIcons.chevronRight, size: 18, color: c.inkMuted),
+                    else if (enabled)
+                      Container(
+                        width: 22,
+                        height: 22,
+                        alignment: Alignment.center,
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          border: Border.all(color: c.primary, width: 1.5),
+                        ),
+                        child: MbIcon(
+                          MbIcons.plus,
+                          size: 14,
+                          strokeWidth: 2.5,
+                          color: c.primary,
+                        ),
+                      ),
                   ],
                 ),
               ),

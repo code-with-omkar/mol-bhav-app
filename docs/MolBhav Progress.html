@@ -1,0 +1,455 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#faf9f5;color:#141413}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>MolBhav Progress</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap">
+<style>
+  :root {
+    --bg: #0f1117;
+    --bg2: #161b27;
+    --bg3: #1e2436;
+    --border: #2a3148;
+    --text: #e8ecf4;
+    --muted: #7a85a0;
+    --done: #22c55e;
+    --done-bg: rgba(34,197,94,0.1);
+    --done-border: rgba(34,197,94,0.25);
+    --pending: #ef4444;
+    --pending-bg: rgba(239,68,68,0.1);
+    --pending-border: rgba(239,68,68,0.25);
+    --partial: #f59e0b;
+    --partial-bg: rgba(245,158,11,0.1);
+    --partial-border: rgba(245,158,11,0.25);
+    --api: #6366f1;
+    --api-bg: rgba(99,102,241,0.12);
+    --app: #ec4899;
+    --app-bg: rgba(236,72,153,0.12);
+    --radius: 10px;
+    color-scheme: dark;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Inter', system-ui, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    padding-block: 32px;
+    padding-inline: 20px;
+    min-height: 100vh;
+    font-size: 14px;
+    line-height: 1.5;
+  }
+
+  .header {
+    max-width: 1100px;
+    margin: 0 auto 40px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    flex-wrap: wrap;
+  }
+  .logo-area { display: flex; align-items: center; gap: 12px; }
+  .logo-circle {
+    width: 44px; height: 44px; border-radius: 12px;
+    background: linear-gradient(135deg, var(--api) 0%, var(--app) 100%);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 20px; font-weight: 700; color: #fff;
+    flex-shrink: 0;
+  }
+  .project-name { font-size: 20px; font-weight: 700; color: var(--text); }
+  .project-sub { font-size: 12px; color: var(--muted); margin-top: 2px; }
+  .header-date { font-size: 12px; color: var(--muted); font-family: 'JetBrains Mono', monospace; }
+
+  .overview {
+    max-width: 1100px;
+    margin: 0 auto 36px;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 14px;
+  }
+  .ov-card {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 18px 20px;
+  }
+  .ov-label { font-size: 11px; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); margin-bottom: 10px; }
+  .ov-value { font-size: 28px; font-weight: 700; line-height: 1; }
+  .ov-sub { font-size: 12px; color: var(--muted); margin-top: 4px; }
+  .ov-bar { height: 4px; background: var(--border); border-radius: 4px; margin-top: 12px; overflow: hidden; }
+  .ov-bar-fill { height: 100%; border-radius: 4px; transition: width .6s ease; }
+  .c-api { color: var(--api); } .c-app { color: var(--app); } .c-done { color: var(--done); }
+  .f-api { background: var(--api); } .f-app { background: var(--app); } .f-done { background: var(--done); }
+
+  .section {
+    max-width: 1100px;
+    margin: 0 auto 12px;
+  }
+  .section-title {
+    font-size: 13px; font-weight: 600; letter-spacing: .04em; text-transform: uppercase;
+    color: var(--muted); margin-bottom: 14px; padding-bottom: 10px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .timeline {
+    max-width: 1100px;
+    margin: 0 auto 36px;
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+  }
+  .tl-row {
+    display: grid;
+    grid-template-columns: 80px 1fr 1fr;
+    gap: 0;
+    position: relative;
+  }
+  .tl-row:not(:last-child)::after {
+    content: '';
+    position: absolute;
+    left: 40px;
+    top: 52px;
+    bottom: 0;
+    width: 2px;
+    background: var(--border);
+    z-index: 0;
+  }
+
+  .tl-phase {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding-top: 16px;
+    position: relative;
+    z-index: 1;
+  }
+  .tl-dot {
+    width: 36px; height: 36px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 13px; font-weight: 700;
+    border: 2px solid transparent;
+    flex-shrink: 0;
+  }
+  .tl-dot.done   { background: var(--done-bg);    border-color: var(--done);    color: var(--done); }
+  .tl-dot.partial { background: var(--partial-bg); border-color: var(--partial); color: var(--partial); }
+  .tl-dot.pending { background: var(--pending-bg); border-color: var(--pending); color: var(--pending); }
+  .tl-phase-lbl { font-size: 9px; font-weight: 600; letter-spacing: .04em; color: var(--muted); margin-top: 4px; text-transform: uppercase; }
+
+  .tl-cell {
+    padding: 12px 12px 20px 16px;
+    border-left: 1px solid var(--border);
+    margin-left: -1px;
+  }
+  .tl-cell:first-of-type { border-left: none; padding-left: 20px; }
+  .cell-header { display: flex; align-items: center; gap: 8px; margin-bottom: 10px; }
+  .cell-badge {
+    font-size: 10px; font-weight: 600; padding: 2px 8px; border-radius: 20px;
+    letter-spacing: .04em; text-transform: uppercase; flex-shrink: 0;
+  }
+  .badge-api { background: var(--api-bg); color: var(--api); border: 1px solid rgba(99,102,241,.3); }
+  .badge-app { background: var(--app-bg); color: var(--app); border: 1px solid rgba(236,72,153,.3); }
+  .cell-title { font-size: 13px; font-weight: 600; }
+
+  .task-list { list-style: none; display: flex; flex-direction: column; gap: 5px; }
+  .task-item {
+    display: flex; align-items: flex-start; gap: 8px;
+    font-size: 12px; color: var(--muted); line-height: 1.4;
+  }
+  .task-icon { flex-shrink: 0; margin-top: 1px; font-size: 11px; }
+  .task-item.done { color: #9ca3b0; }
+  .task-item.done .task-icon { color: var(--done); }
+  .task-item.pending { color: var(--muted); }
+  .task-item.pending .task-icon { color: #3a4157; }
+  .task-item.warn { color: var(--partial); }
+  .task-item.warn .task-icon { color: var(--partial); }
+
+  .cell-mini-bar { margin-top: 10px; }
+  .mini-bar { height: 3px; background: var(--border); border-radius: 3px; overflow: hidden; }
+  .mini-bar-fill { height: 100%; border-radius: 3px; }
+  .mini-pct { font-size: 10px; color: var(--muted); margin-top: 4px; font-family: 'JetBrains Mono', monospace; }
+
+  .blockers {
+    max-width: 1100px;
+    margin: 0 auto 36px;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 14px;
+  }
+  .blocker-card {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 16px 18px;
+  }
+  .blocker-head { display: flex; align-items: center; gap: 8px; margin-bottom: 12px; }
+  .blocker-icon { font-size: 16px; }
+  .blocker-title { font-size: 13px; font-weight: 600; }
+  .blocker-list { display: flex; flex-direction: column; gap: 7px; }
+  .blocker-item { display: flex; align-items: flex-start; gap: 8px; font-size: 12px; color: var(--muted); }
+  .blocker-dot { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; margin-top: 4px; }
+  .dot-warn { background: var(--partial); }
+  .dot-err  { background: var(--pending); }
+  .dot-ok   { background: var(--done); }
+
+  .tabs {
+    max-width: 1100px;
+    margin: 0 auto 36px;
+  }
+  .tab-buttons { display: flex; gap: 6px; margin-bottom: 16px; flex-wrap: wrap; }
+  .tab-btn {
+    padding: 7px 16px; border-radius: 8px; border: 1px solid var(--border);
+    background: var(--bg2); color: var(--muted); font-size: 12px; font-weight: 500;
+    cursor: pointer; transition: all .15s; font-family: inherit;
+  }
+  .tab-btn.active { border-color: var(--api); background: var(--api-bg); color: var(--api); }
+  .tab-btn.active.app-tab { border-color: var(--app); background: var(--app-bg); color: var(--app); }
+  .tab-panel { display: none; }
+  .tab-panel.active { display: block; }
+
+  .module-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 10px;
+  }
+  .mod-card {
+    background: var(--bg2); border: 1px solid var(--border);
+    border-radius: 8px; padding: 12px 14px;
+    display: flex; align-items: flex-start; gap: 10px;
+  }
+  .mod-icon { font-size: 14px; flex-shrink: 0; margin-top: 1px; }
+  .mod-name { font-size: 12px; font-weight: 600; margin-bottom: 2px; }
+  .mod-note { font-size: 11px; color: var(--muted); line-height: 1.4; }
+  .mod-done   { border-left: 3px solid var(--done); }
+  .mod-partial { border-left: 3px solid var(--partial); }
+  .mod-pending { border-left: 3px solid var(--pending); }
+
+  .secrets-table { width: 100%; border-collapse: collapse; font-size: 12px; }
+  .secrets-table th {
+    text-align: left; padding: 8px 12px; background: var(--bg3);
+    color: var(--muted); font-size: 11px; font-weight: 600; letter-spacing: .04em;
+    text-transform: uppercase; border-bottom: 1px solid var(--border);
+  }
+  .secrets-table td { padding: 9px 12px; border-bottom: 1px solid var(--border); vertical-align: top; }
+  .secrets-table tr:last-child td { border-bottom: none; }
+  .code-txt { font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--text); }
+  .pill {
+    display: inline-flex; align-items: center; gap: 4px;
+    padding: 2px 8px; border-radius: 12px; font-size: 10px; font-weight: 600;
+  }
+  .pill-done    { background: var(--done-bg);    color: var(--done);    border: 1px solid var(--done-border); }
+  .pill-warn    { background: var(--partial-bg); color: var(--partial); border: 1px solid var(--partial-border); }
+  .pill-pending { background: var(--pending-bg); color: var(--pending); border: 1px solid var(--pending-border); }
+
+  .next-steps {
+    max-width: 1100px;
+    margin: 0 auto 40px;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 14px;
+  }
+  .ns-card {
+    background: var(--bg2); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 16px 18px;
+  }
+  .ns-num {
+    font-size: 11px; font-weight: 700; font-family: 'JetBrains Mono', monospace;
+    color: var(--api); margin-bottom: 6px;
+  }
+  .ns-title { font-size: 13px; font-weight: 600; margin-bottom: 8px; }
+  .ns-detail { font-size: 12px; color: var(--muted); line-height: 1.5; }
+  .ns-tag {
+    display: inline-block; margin-top: 8px; padding: 2px 8px;
+    border-radius: 4px; font-size: 10px; font-weight: 600;
+    background: var(--api-bg); color: var(--api); border: 1px solid rgba(99,102,241,.25);
+    font-family: 'JetBrains Mono', monospace;
+  }
+  .ns-tag.app { background: var(--app-bg); color: var(--app); border-color: rgba(236,72,153,.25); }
+
+  footer {
+    max-width: 1100px; margin: 0 auto;
+    text-align: center; font-size: 11px; color: var(--muted);
+    padding-top: 20px; border-top: 1px solid var(--border);
+  }
+
+  @media (max-width: 640px) {
+    .tl-row { grid-template-columns: 60px 1fr; }
+    .tl-cell:nth-child(3) { display: none; }
+    .tl-row:not(:last-child)::after { left: 30px; }
+    .tl-phase { padding-top: 12px; }
+    .tl-dot { width: 28px; height: 28px; font-size: 11px; }
+    .header { flex-direction: column; align-items: flex-start; }
+    .overview { grid-template-columns: 1fr 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="logo-area">
+    <div class="logo-circle">M</div>
+    <div>
+      <div class="project-name">MolBhav</div>
+      <div class="project-sub">Market Intelligence Platform · API + Flutter App</div>
+    </div>
+  </div>
+  <div class="header-date">Updated: 3 Oct 2026</div>
+</div>
+
+<div class="section"><div class="section-title">Overall Progress</div></div>
+<div class="overview">
+  <div class="ov-card">
+    <div class="ov-label">API Progress</div>
+    <div class="ov-value c-api">96%</div>
+    <div class="ov-sub">14 / 14 modules built</div>
+    <div class="ov-bar"><div class="ov-bar-fill f-api" style="width:96%"></div></div>
+  </div>
+  <div class="ov-card">
+    <div class="ov-label">App Progress</div>
+    <div class="ov-value c-app">88%</div>
+    <div class="ov-sub">Phases 0–3 + Phase 5 done</div>
+    <div class="ov-bar"><div class="ov-bar-fill f-app" style="width:88%"></div></div>
+  </div>
+  <div class="ov-card">
+    <div class="ov-label">Phases Complete</div>
+    <div class="ov-value c-done">5.5 / 6</div>
+    <div class="ov-sub">Code complete · E2E verify pending</div>
+    <div class="ov-bar"><div class="ov-bar-fill f-done" style="width:92%"></div></div>
+  </div>
+  <div class="ov-card">
+    <div class="ov-label">Blockers</div>
+    <div class="ov-value" style="color:var(--partial)">1</div>
+    <div class="ov-sub">Local build/run verification</div>
+    <div class="ov-bar"><div class="ov-bar-fill" style="width:33%;background:var(--pending)"></div></div>
+  </div>
+</div>
+
+<div class="section"><div class="section-title">Current Blockers (3 Oct 2026)</div></div>
+<div class="blockers">
+  <div class="blocker-card">
+    <div class="blocker-head">
+      <span class="blocker-icon">🚨</span>
+      <span class="blocker-title">Action Items</span>
+    </div>
+    <div class="blocker-list">
+      <div class="blocker-item"><div class="blocker-dot dot-warn"></div><div><strong>Run migration + build</strong> — <code style="font-family:monospace;font-size:11px">dotnet ef migrations add AddSubscriptionExpiryIndex</code>, then build/test API and app (3 Oct code is unbuilt).</div></div>
+      <div class="blocker-item"><div class="blocker-dot dot-warn"></div><div><strong>E2E run</strong> — API <code style="font-family:monospace;font-size:11px">--launch-profile lan</code> + <code style="font-family:monospace;font-size:11px">flutter run -d web-server</code>; login via Msg91 SMS.</div></div>
+      <div class="blocker-item"><div class="blocker-dot dot-warn"></div><div><strong>Msg91 TemplateId</strong> — DLT template with ##OTP##; rotate the key shared in chat.</div></div>
+      <div class="blocker-item"><div class="blocker-dot dot-ok"></div><div><strong>No open decisions</strong> — D1 app.jagtech.in · D4 client-side · D5 closed.</div></div>
+    </div>
+  </div>
+  <div class="blocker-card">
+    <div class="blocker-head">
+      <span class="blocker-icon">✅</span>
+      <span class="blocker-title">Built Today (3 Oct)</span>
+    </div>
+    <div class="blocker-list">
+      <div class="blocker-item"><div class="blocker-dot dot-ok"></div><div>API: expiry sweep worker + command + partial index + 4 tests</div></div>
+      <div class="blocker-item"><div class="blocker-dot dot-ok"></div><div>App: SubscriptionTierSync on resume (refresh profile, renew token) + 6 tests</div></div>
+      <div class="blocker-item"><div class="blocker-dot dot-ok"></div><div>D4 closed (options already client-side) · D5 "Not downloaded yet" copy</div></div>
+      <div class="blocker-item"><div class="blocker-dot dot-ok"></div><div>Release signing via key.properties + docs/release-signing.md</div></div>
+      <div class="blocker-item"><div class="blocker-dot dot-ok"></div><div>Msg91 configured via user-secrets; CategoryModel test fixed (78/78)</div></div>
+      <div class="blocker-item"><div class="blocker-dot dot-ok"></div><div>Hindi + Marathi: 127 keys each → 352/352 (placeholders machine-checked)</div></div>
+    </div>
+  </div>
+</div>
+
+<div class="section"><div class="section-title">Phase 4: Razorpay — Development Update</div></div>
+<div class="timeline">
+  <div class="tl-row">
+    <div class="tl-phase">
+      <div class="tl-dot partial">4</div>
+      <div class="tl-phase-lbl">Phase 4</div>
+    </div>
+    <div class="tl-cell">
+      <div class="cell-header">
+        <span class="cell-badge badge-api">API</span>
+        <span class="cell-title">Razorpay + Subscriptions</span>
+      </div>
+      <ul class="task-list">
+        <li class="task-item done"><span class="task-icon">✓</span>RazorpayPaymentGateway (HMAC-SHA256)</li>
+        <li class="task-item done"><span class="task-icon">✓</span>Dev-mode webhook bypass (IWebHostEnvironment check)</li>
+        <li class="task-item done"><span class="task-icon">✓</span>API startup verified (no WebhookSecret required in dev)</li>
+        <li class="task-item done"><span class="task-icon">✓</span>RazorpayOptions: WebhookSecret optional</li>
+        <li class="task-item pending"><span class="task-icon">○</span>Payment initialization endpoint testing</li>
+        <li class="task-item pending"><span class="task-icon">○</span>Client-side confirmation flow</li>
+      </ul>
+      <div class="cell-mini-bar">
+        <div class="mini-bar"><div class="mini-bar-fill" style="width:30%;background:var(--partial)"></div></div>
+        <div class="mini-pct">30% · ⏳ Testing in progress (blocked on mobile connectivity)</div>
+      </div>
+    </div>
+    <div class="tl-cell">
+      <div class="cell-header">
+        <span class="cell-badge badge-app">App</span>
+        <span class="cell-title">Subscription + Billing UI</span>
+      </div>
+      <ul class="task-list">
+        <li class="task-item pending"><span class="task-icon">○</span>razorpay_flutter ^1.3.7 integration</li>
+        <li class="task-item pending"><span class="task-icon">○</span>PlansPage, CheckoutPage, SuccessPage</li>
+        <li class="task-item pending"><span class="task-icon">○</span>ProBanner + SubscriptionGuard</li>
+        <li class="task-item pending"><span class="task-icon">○</span>API connectivity testing (debug: 10.0.2.2 vs PC IP)</li>
+        <li class="task-item pending"><span class="task-icon">○</span>OTP delivery verification on mobile</li>
+      </ul>
+      <div class="cell-mini-bar">
+        <div class="mini-bar"><div class="mini-bar-fill" style="width:10%;background:var(--pending)"></div></div>
+        <div class="mini-pct">10% · ⏳ Blocked on mobile diagnostics</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="section"><div class="section-title">What's Next</div></div>
+<div class="next-steps">
+  <div class="ns-card">
+    <div class="ns-num">PRIORITY 1</div>
+    <div class="ns-title">Fix Mobile → API Connectivity</div>
+    <div class="ns-detail">
+      <strong>On PC:</strong> Run <code style="font-family:monospace;font-size:11px">dotnet run</code> in api folder. Verify http://localhost:5189/health works. Check Windows Firewall allows port 5189.<br>
+      <strong>On Mobile/Emulator:</strong> Test http://<PC-IPv4-Address>:5189/health (not 10.0.2.2 for real device).
+    </div>
+    <div class="ns-tag">blocker</div>
+  </div>
+  <div class="ns-card">
+    <div class="ns-num">PRIORITY 2</div>
+    <div class="ns-title">Verify OTP Delivery Config</div>
+    <div class="ns-detail">
+      Check if <code style="font-family:monospace;font-size:11px">OtpDelivery:Msg91:AuthKey</code> is set in appsettings.json or environment variables. If not configured, LoggingOtpSender fallback will be used (dev mode). Once configured, re-test OTP on mobile.
+    </div>
+    <div class="ns-tag">blocker</div>
+  </div>
+  <div class="ns-card">
+    <div class="ns-num">NEXT →</div>
+    <div class="ns-title">Test Payment Initialization</div>
+    <div class="ns-detail">Once mobile connects: call <code style="font-family:monospace;font-size:11px">POST /api/v1/billing/orders/initialize</code> from app. Verify order creation in Razorpay. Webhook testing bypassed in dev mode.</div>
+    <div class="ns-tag">phase4-partial</div>
+  </div>
+  <div class="ns-card">
+    <div class="ns-num">THEN →</div>
+    <div class="ns-title">Phase 5E — Device Verification</div>
+    <div class="ns-detail">NDK 28.2 ready. Run token refresh scenarios. Resolve D1 (domain) first. Complete deep-link testing on real device.</div>
+    <div class="ns-tag app">Phase 5E</div>
+  </div>
+</div>
+
+<footer>
+  MolBhav · JagTech · Last updated 3 Oct 2026 · API + App · Phase 4 Testing Underway
+</footer>
+
+<script>
+  function switchTab(id, btn) {
+    document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    document.getElementById(id).classList.add('active');
+    btn.classList.add('active');
+  }
+</script>
+
+</body>
+</html>
+
+</body></html>

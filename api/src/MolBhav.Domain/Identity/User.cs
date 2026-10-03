@@ -7,8 +7,8 @@ using MolBhav.Domain.SharedKernel;
 namespace MolBhav.Domain.Identity;
 
 /// <summary>
-/// A MolBhav account (BRD §7). Identified by mobile number, not email/password — the only credential is
-/// possession of the phone (OTP). Owns its <see cref="UserProfile"/> and procurement <see cref="Categories"/>;
+/// A MolBhav account (BRD §7). Identified by mobile number. Credentials are configurable (see <c>ILoginMethods</c>):
+/// possession of the phone (OTP) and/or a password chosen at registration. Owns its <see cref="UserProfile"/> and procurement <see cref="Categories"/>;
 /// subscription tier and preferred language live here because every request (JWT claims) needs them.
 /// </summary>
 public sealed class User : AggregateRoot<Guid>, IAuditableEntity, ISoftDeletable
@@ -16,6 +16,15 @@ public sealed class User : AggregateRoot<Guid>, IAuditableEntity, ISoftDeletable
     public const int MaxCategories = 10;
     public const int DisplayNameMinLength = 2;
     public const int DisplayNameMaxLength = 60;
+
+    /// <summary>Wrong passwords tolerated before the account is temporarily locked (OWASP brute-force control).</summary>
+    public const int MaxFailedPasswordAttempts = 5;
+
+    /// <summary>Upper bound for the stored hash string (algorithm id, iterations, salt and digest, Base64).</summary>
+    public const int PasswordHashMaxLength = 256;
+
+    /// <summary>How long password login stays blocked after <see cref="MaxFailedPasswordAttempts"/> consecutive failures.</summary>
+    public static readonly TimeSpan PasswordLockoutDuration = TimeSpan.FromMinutes(15);
 
     private readonly List<UserProfileCategory> _categories = [];
 
@@ -53,6 +62,17 @@ public sealed class User : AggregateRoot<Guid>, IAuditableEntity, ISoftDeletable
 
     public DateTimeOffset? LastLoginAtUtc { get; private set; }
 
+    /// <summary>Self-describing password hash (never the plain password); null for OTP-only accounts.</summary>
+    public string? PasswordHash { get; private set; }
+
+    /// <summary>Consecutive wrong passwords since the last successful login or lockout.</summary>
+    public int FailedPasswordAttempts { get; private set; }
+
+    /// <summary>Password login is refused until this instant; null when not locked.</summary>
+    public DateTimeOffset? PasswordLockoutEndsAtUtc { get; private set; }
+
+    public bool HasPassword => PasswordHash is not null;
+
     public UserProfile Profile { get; private set; }
 
     /// <summary>Procurement categories the user operates in (BRD §6/§7 — one or more).</summary>
@@ -85,7 +105,52 @@ public sealed class User : AggregateRoot<Guid>, IAuditableEntity, ISoftDeletable
         return user;
     }
 
-    public void RecordLogin(DateTimeOffset nowUtc) => LastLoginAtUtc = nowUtc;
+    /// <summary>Registration with a password (free login path, no SMS). Same just-in-time account as <see cref="Register"/>.</summary>
+    public static User RegisterWithPassword(PhoneNumber phoneNumber, string passwordHash)
+    {
+        var user = Register(phoneNumber);
+        user.SetPassword(passwordHash);
+        return user;
+    }
+
+    /// <summary>Any successful login (OTP or password) clears the brute-force counters.</summary>
+    public void RecordLogin(DateTimeOffset nowUtc)
+    {
+        LastLoginAtUtc = nowUtc;
+        FailedPasswordAttempts = 0;
+        PasswordLockoutEndsAtUtc = null;
+    }
+
+    /// <summary>Sets or replaces the password hash; resets the brute-force counters.</summary>
+    public void SetPassword(string passwordHash)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(passwordHash);
+        if (passwordHash.Length > PasswordHashMaxLength)
+        {
+            throw new DomainException("User.PasswordHashTooLong", $"A password hash must be at most {PasswordHashMaxLength} characters.");
+        }
+
+        PasswordHash = passwordHash;
+        FailedPasswordAttempts = 0;
+        PasswordLockoutEndsAtUtc = null;
+    }
+
+    public bool IsPasswordLockedOut(DateTimeOffset nowUtc) =>
+        PasswordLockoutEndsAtUtc is { } endsAt && endsAt > nowUtc;
+
+    /// <summary>
+    /// Counts a wrong password. The <see cref="MaxFailedPasswordAttempts"/>th consecutive failure locks password login for
+    /// <see cref="PasswordLockoutDuration"/> and restarts the count, so each lockout window allows a fresh, bounded number of tries.
+    /// </summary>
+    public void RecordFailedPasswordAttempt(DateTimeOffset nowUtc)
+    {
+        FailedPasswordAttempts++;
+        if (FailedPasswordAttempts >= MaxFailedPasswordAttempts)
+        {
+            PasswordLockoutEndsAtUtc = nowUtc.Add(PasswordLockoutDuration);
+            FailedPasswordAttempts = 0;
+        }
+    }
 
     public void SetSubscriptionTier(SubscriptionTier tier) => SubscriptionTier = tier;
 

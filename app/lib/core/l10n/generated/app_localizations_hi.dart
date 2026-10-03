@@ -785,439 +785,498 @@ class AppLocalizationsHi extends AppLocalizations {
 
   @override
   String alertRose(String product, String percent) {
-    return '$product rose $percent%';
+    return '$product $percent% बढ़ा';
   }
 
   @override
   String alertDropped(String product, String percent) {
-    return '$product dropped $percent%';
+    return '$product $percent% गिरा';
   }
 
   @override
   String alertRoseIn(String product, String percent, String market) {
-    return '$product rose $percent% in $market';
+    return '$market में $product $percent% बढ़ा';
   }
 
   @override
   String alertDroppedIn(String product, String percent, String market) {
-    return '$product dropped $percent% in $market';
+    return '$market में $product $percent% गिरा';
   }
 
   @override
   String alertPreviousPrice(String price) {
-    return 'Previous: $price';
+    return 'पिछला: $price';
   }
 
   @override
   String alertCurrentPrice(String price) {
-    return 'Current: $price';
+    return 'मौजूदा: $price';
   }
 
   @override
-  String get showAllStates => 'Show mandis from all states';
+  String get showAllStates => 'सभी राज्यों की मंडियाँ दिखाएँ';
 
   @override
   String reportRequestedAt(String dateTime) {
-    return 'Requested $dateTime';
+    return 'अनुरोध: $dateTime';
   }
 
   @override
   String reportGeneratedAt(String dateTime) {
-    return 'Generated $dateTime';
+    return 'तैयार हुई: $dateTime';
   }
+
+  @override
+  String get reportNotDownloadedYet => 'अभी तक डाउनलोड नहीं हुई';
 
   @override
   String reportDownloadedAt(String dateTime) {
-    return 'Downloaded $dateTime';
+    return 'डाउनलोड: $dateTime';
   }
 
   @override
-  String get reportReadyLabel => 'Ready';
+  String get reportReadyLabel => 'तैयार';
 
   @override
-  String get contactUs => 'Contact us';
+  String get contactUs => 'हमसे संपर्क करें';
 
   @override
-  String get contactWhatsApp => 'WhatsApp us';
+  String get contactWhatsApp => 'WhatsApp पर संदेश भेजें';
 
   @override
-  String get contactCall => 'Call us';
+  String get contactCall => 'हमें कॉल करें';
 
   @override
-  String get contactEmail => 'Email us';
+  String get contactEmail => 'हमें ईमेल करें';
 
   @override
-  String get cannotOpenLink => 'No app on this device can open that.';
+  String get cannotOpenLink => 'इस डिवाइस पर इसे खोलने वाला कोई ऐप नहीं है।';
 
   @override
-  String get supportWhatsAppPrefill => 'Hello MolBhav, I need help with';
+  String get supportWhatsAppPrefill => 'नमस्ते MolBhav, मुझे इसमें मदद चाहिए:';
 
   @override
-  String get supportEmailSubject => 'MolBhav support request';
+  String get supportEmailSubject => 'MolBhav सहायता अनुरोध';
 
   @override
-  String get supportEmailIntro => 'Please describe what you need help with:';
+  String get supportEmailIntro => 'कृपया बताएँ कि आपको किस बारे में मदद चाहिए:';
 
   @override
-  String get appVersionLabel => 'App version';
+  String get appVersionLabel => 'ऐप संस्करण';
 
   @override
-  String get accountLabel => 'Account';
+  String get accountLabel => 'खाता';
 
   @override
-  String get faqTitle => 'Common questions';
+  String get faqTitle => 'आम सवाल';
 
   @override
-  String get faqEmpty => 'No questions are available right now.';
+  String get faqEmpty => 'अभी कोई सवाल उपलब्ध नहीं है।';
 
   @override
-  String get raiseTicket => 'Raise a ticket';
+  String get raiseTicket => 'टिकट बनाएँ';
 
   @override
-  String get myTickets => 'My tickets';
+  String get myTickets => 'मेरे टिकट';
 
   @override
-  String get ticketsEmpty => 'You have not raised a ticket yet.';
+  String get ticketsEmpty => 'आपने अभी तक कोई टिकट नहीं बनाया है।';
 
   @override
-  String get ticketTitle => 'Ticket';
+  String get ticketTitle => 'टिकट';
 
   @override
-  String get ticketRaised => 'Ticket raised. We will reply here.';
+  String get ticketRaised => 'टिकट बन गया। हम यहीं जवाब देंगे।';
 
   @override
-  String get submitTicket => 'Submit ticket';
+  String get submitTicket => 'टिकट जमा करें';
 
   @override
-  String get ticketCategoryLabel => 'What is it about?';
+  String get ticketCategoryLabel => 'यह किस बारे में है?';
 
   @override
-  String get ticketCategoryAccount => 'Account';
+  String get ticketCategoryAccount => 'खाता';
 
   @override
-  String get ticketCategoryPayment => 'Payment';
+  String get ticketCategoryPayment => 'भुगतान';
 
   @override
-  String get ticketCategoryData => 'Prices & data';
+  String get ticketCategoryData => 'भाव और डेटा';
 
   @override
-  String get ticketCategoryOther => 'Something else';
+  String get ticketCategoryOther => 'कुछ और';
 
   @override
-  String get ticketSubjectLabel => 'Subject';
+  String get ticketSubjectLabel => 'विषय';
 
   @override
-  String get ticketSubjectHint => 'Onion price for APMC Pune looks wrong';
+  String get ticketSubjectHint => 'APMC पुणे में प्याज़ का भाव गलत दिख रहा है';
 
   @override
   String ticketSubjectHelper(int count) {
-    return 'At least $count characters.';
+    return 'कम से कम $count अक्षर।';
   }
 
   @override
-  String get ticketMessageLabel => 'Message';
+  String get ticketMessageLabel => 'संदेश';
 
   @override
-  String get ticketMessageHint =>
-      'Tell us what happened, and what you expected instead.';
+  String get ticketMessageHint => 'बताएँ क्या हुआ और आप क्या उम्मीद कर रहे थे।';
 
   @override
-  String get ticketStatusOpen => 'Open';
+  String get ticketStatusOpen => 'खुला';
 
   @override
-  String get ticketStatusInProgress => 'In progress';
+  String get ticketStatusInProgress => 'प्रक्रिया में';
 
   @override
-  String get ticketStatusResolved => 'Resolved';
+  String get ticketStatusResolved => 'हल हो गया';
 
   @override
-  String get ticketStatusClosed => 'Closed';
+  String get ticketStatusClosed => 'बंद';
 
   @override
   String ticketUpdatedAt(String dateTime) {
-    return 'Updated $dateTime';
+    return 'अपडेट: $dateTime';
   }
 
   @override
-  String get ticketAuthorYou => 'You';
+  String get ticketAuthorYou => 'आप';
 
   @override
-  String get ticketAuthorSupport => 'Support';
+  String get ticketAuthorSupport => 'सहायता टीम';
 
   @override
-  String get ticketReplyHint => 'Write a reply';
+  String get ticketReplyHint => 'जवाब लिखें';
 
   @override
-  String get sendReply => 'Send reply';
+  String get sendReply => 'जवाब भेजें';
 
   @override
   String get ticketClosedNotice =>
-      'This ticket is closed. Raise a new one if you still need help.';
+      'यह टिकट बंद है। मदद चाहिए तो नया टिकट बनाएँ।';
 
   @override
-  String get sharePrice => 'Share price';
+  String get sharePrice => 'भाव शेयर करें';
 
   @override
-  String get shareModalLabel => 'Modal price';
+  String get shareModalLabel => 'मॉडल भाव';
 
   @override
   String shareModalLine(String price) {
-    return 'Modal: $price';
+    return 'मॉडल: $price';
   }
 
   @override
   String sharePriceHeadline(String product, String market) {
-    return '$product at $market';
+    return '$market में $product';
   }
 
   @override
   String shareRange(String min, String max) {
-    return 'Range: $min – $max';
+    return 'रेंज: $min – $max';
   }
 
   @override
   String sourceLine(String source) {
-    return 'Source: $source';
+    return 'स्रोत: $source';
   }
 
   @override
-  String get shareImageSaved => 'Price card saved to your downloads.';
+  String get shareImageSaved => 'भाव कार्ड आपके डाउनलोड में सेव हो गया।';
 
   @override
-  String get fromLink => 'Shared';
+  String get fromLink => 'शेयर किया गया';
 
   @override
-  String get inviteFriend => 'Invite a friend';
+  String get inviteFriend => 'दोस्त को आमंत्रित करें';
 
   @override
-  String get inviteFriendSubtitle => 'Share MolBhav with other buyers';
+  String get inviteFriendSubtitle =>
+      'MolBhav को दूसरे खरीदारों के साथ शेयर करें';
 
   @override
   String get inviteMessage =>
-      'I use MolBhav to check daily mandi and material prices before I buy. Try it:';
+      'मैं खरीदारी से पहले रोज़ मंडी और सामग्री के भाव देखने के लिए MolBhav इस्तेमाल करता हूँ। आप भी आज़माएँ:';
 
   @override
-  String get myRulesAction => 'My Rules';
+  String get myRulesAction => 'मेरे नियम';
 
   @override
-  String get alertRulesTitle => 'My Alert Rules';
+  String get alertRulesTitle => 'मेरे अलर्ट नियम';
 
   @override
   String get alertRulesEmpty =>
-      'No alert rules yet. Create one from any commodity page.';
+      'अभी कोई अलर्ट नियम नहीं है। नया जोड़ने के लिए “अलर्ट बनाएँ” दबाएँ।';
 
   @override
-  String get alertRuleDeleted => 'Alert rule deleted.';
+  String get alertRuleDeleted => 'अलर्ट नियम हटा दिया गया।';
 
   @override
-  String get alertRuleActiveLabel => 'Active';
+  String get alertRuleActiveLabel => 'चालू';
 
   @override
-  String get alertRuleInactiveLabel => 'Paused';
+  String get alertRuleInactiveLabel => 'रुका हुआ';
 
   @override
   String alertRuleConditionBelow(String price) {
-    return 'Price below $price';
+    return 'भाव $price से नीचे';
   }
 
   @override
   String alertRuleConditionAbove(String price) {
-    return 'Price above $price';
+    return 'भाव $price से ऊपर';
   }
 
   @override
   String alertRuleConditionDrop(String percent) {
-    return 'Drops by $percent%';
+    return '$percent% गिरावट';
   }
 
   @override
   String alertRuleConditionSpike(String percent) {
-    return 'Spikes by $percent%';
+    return '$percent% उछाल';
   }
 
   @override
-  String get alertRulesEditTitle => 'Edit Alert Rule';
+  String get alertRulesEditTitle => 'अलर्ट नियम बदलें';
 
   @override
-  String get alertRulesThresholdPercentLabel => 'Threshold (%)';
+  String get alertRulesThresholdPercentLabel => 'सीमा (%)';
 
   @override
   String alertRulesThresholdPriceLabel(String unit) {
-    return 'Threshold (₹/$unit)';
+    return 'सीमा (₹/$unit)';
   }
 
   @override
-  String get alertRulesActiveLabel => 'Active';
+  String get alertRulesActiveLabel => 'चालू';
 
   @override
-  String get alertRulesCancel => 'Cancel';
+  String get alertRulesCancel => 'रद्द करें';
 
   @override
-  String get alertRulesSave => 'Save';
+  String get alertRulesSave => 'सेव करें';
 
   @override
-  String get changeNumberAction => 'Change number';
+  String get changeNumberAction => 'नंबर बदलें';
 
   @override
   String resendOtpIn(int seconds) {
-    return 'Resend OTP in ${seconds}s';
+    return '$seconds सेकंड में OTP दोबारा भेजें';
   }
 
   @override
-  String get resendOtpAction => 'Resend OTP';
+  String get resendOtpAction => 'OTP दोबारा भेजें';
 
   @override
   String otpAutoFillHint(String phone) {
-    return 'Enter OTP sent to $phone';
+    return '$phone पर भेजा गया OTP डालें';
   }
 
   @override
-  String get notificationSettingsTitle => 'Notification Settings';
+  String get notificationSettingsTitle => 'नोटिफिकेशन सेटिंग';
 
   @override
-  String get pushNotificationsLabel => 'Push notifications';
+  String get pushNotificationsLabel => 'पुश नोटिफिकेशन';
 
   @override
-  String get alertPushLabel => 'Price alert push';
+  String get alertPushLabel => 'भाव अलर्ट पुश';
 
   @override
-  String get priceUpdatePushLabel => 'Daily price update push';
+  String get priceUpdatePushLabel => 'रोज़ाना भाव अपडेट पुश';
 
   @override
-  String get whatsappNotificationsLabel => 'WhatsApp notifications';
+  String get whatsappNotificationsLabel => 'WhatsApp नोटिफिकेशन';
 
   @override
-  String get alertWhatsappLabel => 'Price alert on WhatsApp';
+  String get alertWhatsappLabel => 'WhatsApp पर भाव अलर्ट';
 
   @override
-  String get notificationSettingsAction => 'Notification settings';
+  String get notificationSettingsAction => 'नोटिफिकेशन सेटिंग';
 
   @override
-  String get monthlyBilling => 'Monthly';
+  String get monthlyBilling => 'मासिक';
 
   @override
-  String get yearlyBillingPlain => 'Yearly';
+  String get yearlyBillingPlain => 'वार्षिक';
 
   @override
   String yearlyBilling(int percent) {
-    return 'Yearly (Save $percent%)';
+    return 'वार्षिक ($percent% बचाएँ)';
   }
 
   @override
-  String get upgradeToPro => 'Upgrade to Pro';
+  String get upgradeToPro => 'Pro में अपग्रेड करें';
 
   @override
-  String get renewPro => 'Renew Pro';
+  String get renewPro => 'Pro रिन्यू करें';
 
   @override
-  String get mySubscription => 'My Subscription';
+  String get mySubscription => 'मेरी सदस्यता';
 
   @override
   String subscriptionActive(String date) {
-    return 'Active — renews $date';
+    return 'चालू — $date को रिन्यू होगी';
   }
 
   @override
-  String get subscriptionExpired => 'Expired';
+  String get subscriptionExpired => 'समाप्त';
 
   @override
-  String get subscriptionCancelled => 'Cancelled';
+  String get subscriptionCancelled => 'रद्द';
 
   @override
-  String get subscriptionPending => 'Payment pending';
+  String get subscriptionPending => 'भुगतान बाकी';
 
   @override
-  String get subscriptionFree => 'Free Plan';
+  String get subscriptionFree => 'फ़्री प्लान';
 
   @override
-  String get cancelSubscription => 'Cancel Subscription';
+  String get cancelSubscription => 'सदस्यता रद्द करें';
 
   @override
   String get cancelSubscriptionConfirm =>
-      'Cancel your Pro subscription? Pro features stop right away and the rest of the period is not refunded.';
+      'क्या Pro सदस्यता रद्द करें? Pro सुविधाएँ तुरंत बंद हो जाएँगी और बचे हुए समय का पैसा वापस नहीं होगा।';
 
   @override
-  String get keepSubscription => 'Keep Pro';
+  String get keepSubscription => 'Pro रखें';
 
   @override
-  String get checkoutTitle => 'Checkout';
+  String get checkoutTitle => 'चेकआउट';
 
   @override
-  String get summaryPlan => 'Plan';
+  String get summaryPlan => 'प्लान';
 
   @override
-  String get summaryDiscount => 'Coupon discount';
+  String get summaryDiscount => 'कूपन छूट';
 
   @override
-  String get summaryTotal => 'Total';
+  String get summaryTotal => 'कुल';
 
   @override
-  String get couponCode => 'Coupon Code';
+  String get couponCode => 'कूपन कोड';
 
   @override
   String couponApplied(String amount) {
-    return 'Coupon applied! You save $amount';
+    return 'कूपन लग गया! आप $amount बचाएँगे';
   }
 
   @override
-  String get couponInvalid => 'Invalid or expired coupon';
+  String get couponInvalid => 'कूपन अमान्य या समाप्त है';
 
   @override
   String proceedToPay(String amount) {
-    return 'Pay $amount';
+    return '$amount चुकाएँ';
   }
 
   @override
-  String get confirmingPayment => 'Confirming payment…';
+  String get confirmingPayment => 'भुगतान की पुष्टि हो रही है…';
 
   @override
-  String get paymentSuccess => 'Payment Successful!';
+  String get paymentSuccess => 'भुगतान सफल रहा!';
 
   @override
   String get paymentSuccessMessage =>
-      'You are now a Pro subscriber. Enjoy all premium features.';
+      'अब आप Pro सदस्य हैं। सभी प्रीमियम सुविधाओं का आनंद लें।';
 
   @override
-  String get exploreProFeatures => 'Explore Pro Features';
+  String get exploreProFeatures => 'Pro सुविधाएँ देखें';
 
   @override
-  String get paymentFailed => 'Payment Failed';
+  String get paymentFailed => 'भुगतान विफल रहा';
 
   @override
-  String get paymentsMobileOnly => 'Payments are available in the mobile app';
+  String get paymentsMobileOnly => 'भुगतान मोबाइल ऐप में उपलब्ध है';
 
   @override
   String get paymentActivationPending =>
-      'Payment received — activation pending. Pull to refresh in a minute.';
+      'भुगतान मिल गया — सक्रियण बाकी है। एक मिनट बाद रिफ्रेश करें।';
 
   @override
   String get externalWalletUnsupported =>
-      'External wallets are not supported. Choose another payment method.';
+      'बाहरी वॉलेट समर्थित नहीं हैं। कोई दूसरा भुगतान तरीका चुनें।';
 
   @override
-  String get upgradeToUnlock => 'Upgrade to Pro to unlock this feature';
+  String get upgradeToUnlock => 'यह सुविधा खोलने के लिए Pro में अपग्रेड करें';
 
   @override
-  String get seePlans => 'See Plans';
+  String get seePlans => 'प्लान देखें';
 
   @override
-  String get proFeatureReports => 'Price history export (CSV)';
+  String get proFeatureReports => 'भाव इतिहास एक्सपोर्ट (CSV)';
 
   @override
-  String get proFeatureAlerts => 'Price alert rules';
+  String get proFeatureAlerts => 'भाव अलर्ट नियम';
 
   @override
-  String get proFeatureProcurement => 'Procurement cost estimator';
+  String get proFeatureProcurement => 'खरीद लागत अनुमान';
 
   @override
-  String get proFeatureComparison => 'Mandi price comparison';
+  String get proFeatureComparison => 'मंडी भाव तुलना';
 
   @override
-  String get freeFeatureBasicPrices => 'Basic daily prices';
+  String get freeFeatureBasicPrices => 'रोज़ाना के बुनियादी भाव';
 
   @override
-  String get freeFeatureWatchlist => 'Personal watchlist';
+  String get freeFeatureWatchlist => 'निजी वॉचलिस्ट';
 
   @override
-  String get proFeatureEverythingInFree => 'Everything in Free';
+  String get proFeatureEverythingInFree => 'फ़्री की सभी सुविधाएँ';
+
+  @override
+  String get passwordLabel => 'पासवर्ड';
+
+  @override
+  String get confirmPasswordLabel => 'पासवर्ड दोबारा डालें';
+
+  @override
+  String get passwordLoginSubtitle => 'अपना मोबाइल नंबर और पासवर्ड डालें।';
+
+  @override
+  String get registerTitle => 'अपना खाता बनाएँ';
+
+  @override
+  String get registerSubtitle =>
+      'मोबाइल नंबर से लॉग इन करने के लिए पासवर्ड चुनें।';
+
+  @override
+  String get loginAction => 'लॉग इन करें';
+
+  @override
+  String get createAccountAction => 'खाता बनाएँ';
+
+  @override
+  String get switchToRegister => 'MolBhav पर नए हैं? खाता बनाएँ';
+
+  @override
+  String get switchToLogin => 'पहले से खाता है? लॉग इन करें';
+
+  @override
+  String get passwordRequired => 'अपना पासवर्ड डालें।';
+
+  @override
+  String get passwordTooWeak =>
+      'कम से कम 8 अक्षर रखें, जिनमें एक अक्षर और एक अंक हो।';
+
+  @override
+  String get passwordsDoNotMatch => 'पासवर्ड मेल नहीं खाते।';
+
+  @override
+  String get invalidCredentials => 'मोबाइल नंबर या पासवर्ड गलत है।';
+
+  @override
+  String get accountExists => 'इस नंबर का खाता पहले से है। कृपया लॉग इन करें।';
+
+  @override
+  String get useOtpInstead => 'OTP से लॉग इन करें';
+
+  @override
+  String get usePasswordInstead => 'पासवर्ड से लॉग इन करें';
+
+  @override
+  String get showPassword => 'पासवर्ड दिखाएँ';
+
+  @override
+  String get hidePassword => 'पासवर्ड छिपाएँ';
 }

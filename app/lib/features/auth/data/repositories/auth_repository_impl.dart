@@ -5,10 +5,12 @@ import '../../../../core/network/api_call.dart';
 import '../../../../core/session/session_manager.dart';
 import '../../domain/auth_failures.dart';
 import '../../domain/entities/auth_session.dart';
+import '../../domain/entities/login_methods.dart';
 import '../../domain/entities/mobile_number.dart';
 import '../../domain/entities/otp_challenge.dart';
 import '../../domain/repositories/auth_repository.dart';
 import '../datasources/auth_remote_data_source.dart';
+import '../models/auth_models.dart';
 
 @LazySingleton(as: AuthRepository)
 class AuthRepositoryImpl implements AuthRepository {
@@ -16,6 +18,54 @@ class AuthRepositoryImpl implements AuthRepository {
 
   final AuthRemoteDataSource _remote;
   final SessionManager _session;
+
+  @override
+  Future<Result<LoginMethods>> getLoginMethods() {
+    return runApiCall(() async {
+      final response = await _remote.getLoginMethods();
+      return LoginMethods(otp: response.otp, password: response.password);
+    });
+  }
+
+  @override
+  Future<Result<AuthSession>> loginWithPassword({
+    required MobileNumber mobile,
+    required String password,
+  }) {
+    return runApiCall(
+      () async =>
+          _startSession(await _remote.loginWithPassword(mobile.e164, password)),
+      mapError: (e) => switch (e.response?.statusCode) {
+        400 => const InvalidCredentialsFailure(),
+        _ => null,
+      },
+    );
+  }
+
+  @override
+  Future<Result<AuthSession>> registerWithPassword({
+    required MobileNumber mobile,
+    required String password,
+  }) {
+    return runApiCall(
+      () async => _startSession(
+        await _remote.registerWithPassword(mobile.e164, password),
+      ),
+      mapError: (e) => switch (e.response?.statusCode) {
+        409 => const AccountExistsFailure(),
+        _ => null,
+      },
+    );
+  }
+
+  Future<AuthSession> _startSession(OtpVerifyResponse response) async {
+    await _session.signIn(
+      accessToken: response.accessToken,
+      refreshToken: response.refreshToken,
+      onboarded: response.isOnboarded,
+    );
+    return AuthSession(isOnboarded: response.isOnboarded);
+  }
 
   @override
   Future<Result<OtpChallenge>> requestOtp(MobileNumber mobile) {

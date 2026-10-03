@@ -21,6 +21,12 @@ public sealed class RateLimitingSettings
     /// </summary>
     public int OtpVerifyPermitLimit { get; set; } = 15;
 
+    /// <summary>
+    /// Password login/register attempts per IP per <see cref="OtpWindowSeconds"/>. Per-account guessing is already capped
+    /// by the domain lockout (5 wrong passwords → 15 minutes); this bounds guessing across many numbers from one client.
+    /// </summary>
+    public int PasswordLoginPermitLimit { get; set; } = 20;
+
     /// <summary>Coupon checks per user per <see cref="WindowSeconds"/>; the checkout screen debounces, so real users need few.</summary>
     public int CouponValidatePermitLimit { get; set; } = 10;
 }

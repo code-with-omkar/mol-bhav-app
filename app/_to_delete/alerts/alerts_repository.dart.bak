@@ -1,0 +1,165 @@
+import 'package:dio/dio.dart';
+import 'package:injectable/injectable.dart';
+
+import '../../../core/error/failure.dart';
+import '../../../core/error/result.dart';
+import '../domain/alerts.dart';
+
+@lazySingleton
+class AlertsRepository {
+  const AlertsRepository(this._dio);
+
+  final Dio _dio;
+
+  /// Fetch alerts filtered by type (all, signals, opportunities).
+  Future<Result<List<AlertItem>>> getAlerts(AlertFilter filter) async {
+    try {
+      final queryParam = switch (filter) {
+        AlertFilter.all => 'all',
+        AlertFilter.signals => 'signals',
+        AlertFilter.opportunities => 'opportunities',
+      };
+
+      final response = await _dio.get(
+        '/alerts',
+        queryParameters: {'filter': queryParam},
+      );
+
+      final List<dynamic> items = response.data['data'] ?? [];
+      final alerts = [
+        for (final item in items)
+          AlertItem(
+            id: item['id'] as String,
+            kind: _parseAlertKind(item['kind'] as String),
+            productName: item['productName'] as String,
+            percentChange: (item['percentChange'] as num).toDouble(),
+            previousPrice: (item['previousPrice'] as num).toDouble(),
+            newPrice: (item['newPrice'] as num).toDouble(),
+            createdAt: DateTime.parse(item['createdAt'] as String),
+            isUnread: item['isUnread'] as bool? ?? false,
+            locationName: item['locationName'] as String?,
+            opportunityId: item['opportunityId'] as String?,
+            channel: _parseAlertChannel(item['channel'] as String?),
+          )
+      ];
+
+      return Ok(alerts);
+    } on DioException catch (e) {
+      return Err(_failureFromDioException(e));
+    } catch (_) {
+      return const Err(UnexpectedFailure());
+    }
+  }
+
+  /// Fetch alert creation options (products + markets).
+  Future<Result<AlertOptions>> getAlertOptions() async {
+    try {
+      final response = await _dio.get('/alert-rules');
+
+      final data = response.data['data'] as Map<String, dynamic>;
+      final productsList = (data['products'] as List<dynamic>?) ?? [];
+      final marketsList = (data['markets'] as List<dynamic>?) ?? [];
+
+      final products = [
+        for (final p in productsList)
+          AlertProduct(
+            id: p['id'] as String,
+            name: p['name'] as String,
+            categoryCode: p['categoryCode'] as String,
+          )
+      ];
+
+      final markets = [
+        for (final m in marketsList)
+          AlertMarket(
+            id: m['id'] as String,
+            name: m['name'] as String,
+            stateName: m['stateName'] as String,
+          )
+      ];
+
+      return Ok(AlertOptions(products: products, markets: markets));
+    } on DioException catch (e) {
+      return Err(_failureFromDioException(e));
+    } catch (_) {
+      return const Err(UnexpectedFailure());
+    }
+  }
+
+  /// Fetch current price for a product/market pair.
+  Future<Result<CurrentPrice>> getCurrentPrice(
+    String productId,
+    String marketId,
+  ) async {
+    try {
+      final response = await _dio.get(
+        '/pricing/latest',
+        queryParameters: {
+          'productId': productId,
+          'marketId': marketId,
+        },
+      );
+
+      final data = response.data['data'] as Map<String, dynamic>;
+      return Ok(
+        CurrentPrice(
+          price: (data['price'] as num).toDouble(),
+          priceAt: DateTime.parse(data['priceAt'] as String),
+        ),
+      );
+    } on DioException catch (e) {
+      return Err(_failureFromDioException(e));
+    } catch (_) {
+      return const Err(UnexpectedFailure());
+    }
+  }
+
+  /// Create a new alert rule.
+  Future<Result<void>> createAlert(NewAlert alert) async {
+    try {
+      await _dio.post(
+        '/alert-rules',
+        data: {
+          'commodityId': alert.commodityId,
+          'marketId': alert.marketId,
+          'condition': alert.condition.name,
+          'value': alert.value,
+          'push': alert.push,
+          'whatsapp': alert.whatsapp,
+        },
+      );
+
+      return const Ok(null);
+    } on DioException catch (e) {
+      return Err(_failureFromDioException(e));
+    } catch (_) {
+      return const Err(UnexpectedFailure());
+    }
+  }
+
+  AlertKind _parseAlertKind(String kind) => switch (kind.toLowerCase()) {
+    'signal' => AlertKind.signal,
+    'spike' => AlertKind.spike,
+    'opportunity' => AlertKind.opportunity,
+    _ => AlertKind.signal,
+  };
+
+  AlertChannel? _parseAlertChannel(String? channel) =>
+      switch (channel?.toLowerCase()) {
+        'whatsapp' => AlertChannel.whatsapp,
+        'push' => AlertChannel.push,
+        _ => null,
+      };
+
+  Failure _failureFromDioException(DioException e) => switch (e.type) {
+    DioExceptionType.connectionTimeout ||
+    DioExceptionType.receiveTimeout ||
+    DioExceptionType.sendTimeout =>
+      const NetworkFailure(),
+    DioExceptionType.badResponse => ServerFailure(
+      statusCode: e.response?.statusCode,
+      message: e.response?.data?['message'] as String?,
+    ),
+    _ => const NetworkFailure(),
+  };
+}

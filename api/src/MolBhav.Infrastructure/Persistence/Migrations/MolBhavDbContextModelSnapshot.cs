@@ -514,6 +514,10 @@ namespace MolBhav.Infrastructure.Persistence.Migrations
                     b.HasKey("Id")
                         .HasName("pk_subscriptions");
 
+                    b.HasIndex("ExpiresAtUtc")
+                        .HasDatabaseName("ix_subscriptions_active_expires_at_utc")
+                        .HasFilter("status = 'Active'");
+
                     b.HasIndex("PlanId")
                         .HasDatabaseName("ix_subscriptions_plan_id");
 
@@ -1005,6 +1009,10 @@ namespace MolBhav.Infrastructure.Persistence.Migrations
                         .HasColumnType("character varying(60)")
                         .HasColumnName("display_name");
 
+                    b.Property<int>("FailedPasswordAttempts")
+                        .HasColumnType("integer")
+                        .HasColumnName("failed_password_attempts");
+
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("boolean")
                         .HasColumnName("is_deleted");
@@ -1012,6 +1020,15 @@ namespace MolBhav.Infrastructure.Persistence.Migrations
                     b.Property<DateTimeOffset?>("LastLoginAtUtc")
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("last_login_at_utc");
+
+                    b.Property<string>("PasswordHash")
+                        .HasMaxLength(256)
+                        .HasColumnType("character varying(256)")
+                        .HasColumnName("password_hash");
+
+                    b.Property<DateTimeOffset?>("PasswordLockoutEndsAtUtc")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("password_lockout_ends_at_utc");
 
                     b.Property<string>("PhoneNumber")
                         .IsRequired()

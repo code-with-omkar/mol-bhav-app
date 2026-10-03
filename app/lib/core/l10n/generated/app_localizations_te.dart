@@ -824,6 +824,9 @@ class AppLocalizationsTe extends AppLocalizations {
   }
 
   @override
+  String get reportNotDownloadedYet => 'Not downloaded yet';
+
+  @override
   String reportDownloadedAt(String dateTime) {
     return 'Downloaded $dateTime';
   }
@@ -1001,7 +1004,7 @@ class AppLocalizationsTe extends AppLocalizations {
 
   @override
   String get alertRulesEmpty =>
-      'No alert rules yet. Create one from any commodity page.';
+      'No alert rules yet. Tap “Create alert” to add one.';
 
   @override
   String get alertRuleDeleted => 'Alert rule deleted.';
@@ -1217,4 +1220,61 @@ class AppLocalizationsTe extends AppLocalizations {
 
   @override
   String get proFeatureEverythingInFree => 'Everything in Free';
+
+  @override
+  String get passwordLabel => 'Password';
+
+  @override
+  String get confirmPasswordLabel => 'Confirm password';
+
+  @override
+  String get passwordLoginSubtitle => 'Enter your mobile number and password.';
+
+  @override
+  String get registerTitle => 'Create your account';
+
+  @override
+  String get registerSubtitle =>
+      'Choose a password to log in with your mobile number.';
+
+  @override
+  String get loginAction => 'Log in';
+
+  @override
+  String get createAccountAction => 'Create account';
+
+  @override
+  String get switchToRegister => 'New to MolBhav? Create an account';
+
+  @override
+  String get switchToLogin => 'Already have an account? Log in';
+
+  @override
+  String get passwordRequired => 'Enter your password.';
+
+  @override
+  String get passwordTooWeak =>
+      'Use at least 8 characters with a letter and a number.';
+
+  @override
+  String get passwordsDoNotMatch => 'Passwords do not match.';
+
+  @override
+  String get invalidCredentials => 'Incorrect mobile number or password.';
+
+  @override
+  String get accountExists =>
+      'This number already has an account. Log in instead.';
+
+  @override
+  String get useOtpInstead => 'Log in with OTP instead';
+
+  @override
+  String get usePasswordInstead => 'Log in with password instead';
+
+  @override
+  String get showPassword => 'Show password';
+
+  @override
+  String get hidePassword => 'Hide password';
 }
