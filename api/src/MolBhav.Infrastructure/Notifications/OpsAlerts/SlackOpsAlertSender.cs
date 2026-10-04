@@ -7,9 +7,10 @@ using MolBhav.Application.Abstractions.Notifications;
 namespace MolBhav.Infrastructure.Notifications.OpsAlerts;
 
 /// <summary>
-/// Posts alerts to a Slack incoming webhook (<c>{"text": "..."}</c>; Slack answers 200 <c>ok</c>). Failures are
-/// logged and swallowed — the alert's facts are in that log line too, so nothing is lost if Slack is down.
-/// The webhook URL is a credential and is never logged.
+/// Posts alerts to a Slack incoming webhook (<c>{"text": "..."}</c>; Slack answers 200 <c>ok</c>, or a 4xx with a short
+/// reason such as <c>no_service</c> or <c>channel_is_archived</c>). Failures are logged with that reason and swallowed —
+/// the alert's facts are in the same log line, so nothing is lost if Slack is down. The webhook URL is a credential and
+/// is never logged.
 /// </summary>
 internal sealed partial class SlackOpsAlertSender(
     IHttpClientFactory httpClientFactory,
@@ -17,8 +18,14 @@ internal sealed partial class SlackOpsAlertSender(
     ILogger<SlackOpsAlertSender> logger) : IOpsAlertSender
 {
     public const string HttpClientName = "ops-alerts-slack";
+    public const string ChannelName = "slack";
 
-    public async Task SendAsync(OpsAlert alert, CancellationToken cancellationToken = default)
+    /// <summary>Slack's error bodies are short codes (e.g. <c>no_service</c>, <c>channel_is_archived</c>); cap what we log.</summary>
+    private const int MaxReasonLength = 200;
+
+    public string Channel => ChannelName;
+
+    public async Task<bool> SendAsync(OpsAlert alert, CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(alert);
 
@@ -30,16 +37,22 @@ internal sealed partial class SlackOpsAlertSender(
             var client = httpClientFactory.CreateClient(HttpClientName);
             using var response = await client.PostAsJsonAsync(new Uri(settings.SlackWebhookUrl!), new { text }, cancellationToken);
 
-            if (!response.IsSuccessStatusCode)
+            if (response.IsSuccessStatusCode)
             {
-                var statusCode = (int)response.StatusCode;
-                LogRejected(logger, statusCode, text);
+                return true;
             }
+
+            var statusCode = (int)response.StatusCode;
+            var body = await response.Content.ReadAsStringAsync(cancellationToken);
+            var reason = body.Length <= MaxReasonLength ? body : body[..MaxReasonLength];
+            LogRejected(logger, statusCode, reason, text);
+            return false;
         }
         catch (Exception ex) when (ex is not OperationCanceledException || !cancellationToken.IsCancellationRequested)
         {
             var errorType = ex.GetType().Name;
             LogFailed(logger, errorType, text);
+            return false;
         }
     }
 
@@ -63,8 +76,8 @@ internal sealed partial class SlackOpsAlertSender(
             .Replace("<", "&lt;", StringComparison.Ordinal)
             .Replace(">", "&gt;", StringComparison.Ordinal);
 
-    [LoggerMessage(Level = LogLevel.Critical, Message = "Ops alert rejected by Slack with HTTP {StatusCode}; alert was: {Alert}")]
-    private static partial void LogRejected(ILogger logger, int statusCode, string alert);
+    [LoggerMessage(Level = LogLevel.Critical, Message = "Ops alert rejected by Slack with HTTP {StatusCode} ({Reason}); alert was: {Alert}")]
+    private static partial void LogRejected(ILogger logger, int statusCode, string reason, string alert);
 
     [LoggerMessage(Level = LogLevel.Critical, Message = "Ops alert could not be sent to Slack ({ErrorType}); alert was: {Alert}")]
     private static partial void LogFailed(ILogger logger, string errorType, string alert);

@@ -215,6 +215,12 @@ jobs:
           expect "$(echo "$detail" | jq -r '.data.payload.event')" payment.captured "admin detail returns the raw payload as JSON"
           expect "$(status -H "Authorization: Bearer $admin" "$api/admin/billing/webhooks/00000000-0000-0000-0000-000000000001")" 404 "unknown webhook is 404"
 
+          # --- Ops alert channel test (no Slack URL in CI, so the log channel answers) ---
+          expect "$(status -X POST -H "Authorization: Bearer $user" "$api/admin/notifications/ops-alerts/test")" 403 "non-admin cannot send a test alert"
+          test_alert=$(curl -sf -X POST -H "Authorization: Bearer $admin" "$api/admin/notifications/ops-alerts/test")
+          expect "$(echo "$test_alert" | jq -r '.data.channel')" log "test alert reports the log channel"
+          wait_for 5 "test alert written by the log channel" logged "OPS ALERT (no alert channel configured): Test alert"
+
           # --- Replay: back in the queue, retried with a fresh budget, parks again (the order still doesn't exist) ---
           before=$(sql "SELECT last_attempt_at_utc FROM billing.webhook_inbox WHERE id = '$id'")
           expect "$(status -X POST -H "Authorization: Bearer $admin" "$api/admin/billing/webhooks/$id/replay")" 204 "replay accepted"

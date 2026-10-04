@@ -6,7 +6,11 @@ namespace MolBhav.Application.Abstractions.Notifications;
 /// </summary>
 public interface IOpsAlertSender
 {
-    Task SendAsync(OpsAlert alert, CancellationToken cancellationToken = default);
+    /// <summary>Where alerts go: <c>slack</c>, or <c>log</c> when no channel is configured.</summary>
+    string Channel { get; }
+
+    /// <returns><c>true</c> if the channel accepted the alert; <c>false</c> if delivery failed (already logged).</returns>
+    Task<bool> SendAsync(OpsAlert alert, CancellationToken cancellationToken = default);
 }
 
 /// <param name="Title">One line, e.g. "Payment webhook parked".</param>

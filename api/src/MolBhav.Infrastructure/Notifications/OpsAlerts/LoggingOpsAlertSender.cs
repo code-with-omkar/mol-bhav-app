@@ -9,7 +9,11 @@ namespace MolBhav.Infrastructure.Notifications.OpsAlerts;
 /// </summary>
 internal sealed partial class LoggingOpsAlertSender(ILogger<LoggingOpsAlertSender> logger) : IOpsAlertSender
 {
-    public Task SendAsync(OpsAlert alert, CancellationToken cancellationToken = default)
+    public const string ChannelName = "log";
+
+    public string Channel => ChannelName;
+
+    public Task<bool> SendAsync(OpsAlert alert, CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(alert);
 
@@ -19,7 +23,7 @@ internal sealed partial class LoggingOpsAlertSender(ILogger<LoggingOpsAlertSende
             LogAlert(logger, alert.Title, details);
         }
 
-        return Task.CompletedTask;
+        return Task.FromResult(true);
     }
 
     [LoggerMessage(Level = LogLevel.Critical, Message = "OPS ALERT (no alert channel configured): {Title} — {Details}")]

@@ -298,10 +298,33 @@ UPDATE identity.users SET role = 'Admin' WHERE phone_number = '+919876543210';
 | Admin | `GET/POST /api/v1/admin/billing/plans`, `PUT …/plans/{id}` |
 | Admin | `GET /api/v1/admin/billing/subscriptions?userId&status&page&pageSize` |
 | Admin | `POST /api/v1/admin/billing/subscriptions/{id}/expire` |
+| Razorpay | `POST /api/v1/billing/webhook` — signature-checked, recorded in `billing.webhook_inbox`, 200 at once; applied asynchronously |
+| Admin | `GET /api/v1/admin/billing/webhooks?state=Pending\|Processed\|Parked&eventType&page&pageSize`, `GET …/webhooks/{id}` (raw payload), `POST …/webhooks/{id}/replay` |
+| Admin | `POST /api/v1/admin/notifications/ops-alerts/test` — sends a test alert, reports the channel used |
 
 - **`IPaymentGateway` is stubbed** (`StubPaymentGateway`) and, unlike the Notification/Reporting stubs, **always succeeds** with a synthetic `STUB-{guid}` transaction reference — by design, so the subscribe flow is fully exercisable end-to-end before a real gateway (Razorpay/Stripe) is wired up behind the same interface. Confirmed live: subscribing flips `identity.users.subscription_tier` to `Pro` in the database.
 - **`Plan.Price`/`Currency` are plain `decimal`/`string`**, not the `Money` value object — `Money` has no established EF mapping convention in this codebase yet.
 - Plans are deactivated, never deleted (reference data); subscriptions are never deleted (billing history) — cancel/expire only change `Status`.
+
+### Payment webhooks, reconciliation and ops alerts
+
+- **Inbox** (`WebhookInbox` config): webhooks are deduplicated on `x-razorpay-event-id`, retried with backoff (30 s → 1 h) and **parked** after `MaxAttempts` or on errors a retry can't fix (wrong amount, payment on a cancelled subscription). Parked = a human must look, usually a refund; fix the cause, then replay.
+- **Reconciliation** (`PaymentReconciliation` config): every 15 min, recent pending orders are checked against Razorpay; a captured payment whose webhook never arrived activates the subscription (logged at Warning).
+- **Monitoring**: meter `MolBhav.Billing.Webhooks` (`dotnet-counters monitor --counters MolBhav.Billing.Webhooks`); `/health/ready` reports `Degraded` (still HTTP 200) after a park in the last 24 h or when the processor falls behind.
+- **Ops alerts** go to Slack when `OpsAlerts:SlackWebhookUrl` is set, otherwise to the log at Critical (`OPS ALERT …`). One alert per parked webhook.
+
+**Setting up the Slack alert channel**
+
+1. In Slack, create a private channel for alerts (e.g. `#molbhav-alerts`) and invite whoever handles payments.
+2. At <https://api.slack.com/apps> → **Create New App** → *From scratch* (name it e.g. "MolBhav Alerts", pick your workspace).
+3. **Incoming Webhooks** → turn on → **Add New Webhook to Workspace** → choose the channel → **Allow**. Copy the URL (`https://hooks.slack.com/services/…`). It is a credential: anyone with it can post to the channel.
+4. Set it — never in appsettings or Git:
+   - Development: `dotnet user-secrets set "OpsAlerts:SlackWebhookUrl" "https://hooks.slack.com/services/…" --project src/MolBhav.Api`
+   - Staging/Production (Docker on the VPS): environment variables `OpsAlerts__SlackWebhookUrl=…` and `OpsAlerts__EnvironmentLabel=MolBhav prod` (or `MolBhav staging`, so one channel can serve both).
+5. Restart the API, then `POST /api/v1/admin/notifications/ops-alerts/test` as an admin (`.http` 62h). Expect `"channel": "slack"` and a message in the channel. A `502 OpsAlerts.DeliveryFailed` means Slack refused it: the API log line *Ops alert rejected by Slack* gives Slack's reason (`no_service` = wrong or revoked URL, `channel_is_archived`, …).
+6. To rotate: add a new webhook in the Slack app, swap the variable, restart, re-run the test, then remove the old webhook in Slack.
+
+Only `https` URLs are accepted (startup fails otherwise). Without a URL the API still starts and alerts go to the log, so a missing channel never takes the API down.
 
 ## Ingestion module (automated price-data pull; Agmarknet live, construction stubbed)
 

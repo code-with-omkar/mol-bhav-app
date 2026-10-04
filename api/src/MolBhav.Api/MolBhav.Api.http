@@ -550,6 +550,12 @@ Authorization: Bearer {{accessToken}}
 POST {{host}}/api/v1/admin/billing/webhooks/{{parkedWebhooks.response.body.$.data[0].id}}/replay
 Authorization: Bearer {{accessToken}}
 
+### 62h. Admin — send a test ops alert. 200 with "channel": "slack" once OpsAlerts:SlackWebhookUrl is set (check the
+### Slack channel), "log" otherwise (a Critical "OPS ALERT" log line). 502 OpsAlerts.DeliveryFailed = Slack rejected it
+### or was unreachable; the API log has Slack's reason (no_service = URL revoked/wrong, channel_is_archived, …).
+POST {{host}}/api/v1/admin/notifications/ops-alerts/test
+Authorization: Bearer {{accessToken}}
+
 ### --- Ingestion ---
 
 ### 63. Manually trigger an ingestion run — source code `agmarknet` pulls live data.gov.in prices (needs Agmarknet:ApiKey); other codes hit the stub and end Failed
