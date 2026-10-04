@@ -493,6 +493,37 @@ Authorization: Bearer {{accessToken}}
 POST {{host}}/api/v1/admin/billing/subscriptions/{{subscribe.response.body.$.data.id}}/expire
 Authorization: Bearer {{accessToken}}
 
+### 62a. Razorpay webhook (Development only — signature check is skipped). Returns 200 at once; the webhook inbox
+### processor applies it within ~5 s (log: "Webhook … applied on attempt 1"), then GET /billing/subscription shows Active.
+### Run it twice: the second call is a redelivery (same event id) — 200, nothing new queued.
+POST {{host}}/api/v1/billing/webhook
+Content-Type: application/json
+x-razorpay-event-id: evt_dev_{{subscribe.response.body.$.data.gatewayOrderId}}
+
+{
+  "entity": "event",
+  "event": "payment.captured",
+  "payload": {
+    "payment": {
+      "entity": { "id": "pay_dev_0001", "order_id": "{{subscribe.response.body.$.data.gatewayOrderId}}", "status": "captured", "currency": "INR" }
+    }
+  }
+}
+
+### 62b. Razorpay webhook for an unknown order — 200 now; the processor retries with backoff (30 s, 1 m, 2 m …) and parks it
+### after WebhookInbox:MaxAttempts (log level Critical). Inspect: SELECT * FROM billing.webhook_inbox ORDER BY received_at_utc DESC;
+POST {{host}}/api/v1/billing/webhook
+Content-Type: application/json
+x-razorpay-event-id: evt_dev_unknown_order_0001
+
+{ "entity": "event", "event": "payment.captured", "payload": { "payment": { "entity": { "id": "pay_dev_0002", "order_id": "order_does_not_exist" } } } }
+
+### 62c. Missing x-razorpay-event-id — 400 (ValidationProblemDetails), nothing stored
+POST {{host}}/api/v1/billing/webhook
+Content-Type: application/json
+
+{ "entity": "event", "event": "payment.captured", "payload": {} }
+
 ### --- Ingestion ---
 
 ### 63. Manually trigger an ingestion run — source code `agmarknet` pulls live data.gov.in prices (needs Agmarknet:ApiKey); other codes hit the stub and end Failed

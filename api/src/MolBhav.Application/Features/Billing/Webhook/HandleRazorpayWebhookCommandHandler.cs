@@ -2,14 +2,20 @@ using Microsoft.Extensions.Logging;
 using MolBhav.Application.Abstractions.Billing;
 using MolBhav.Application.Abstractions.Messaging;
 using MolBhav.Application.Features.Billing.Activation;
+using MolBhav.Domain.Billing;
 using MolBhav.Domain.Common.Results;
 
 namespace MolBhav.Application.Features.Billing.Webhook;
 
 /// <summary>
-/// Orders-API events only: <c>payment.captured</c> and <c>order.paid</c> activate (Razorpay may send either or both),
-/// <c>payment.failed</c> is logged, anything else is ignored. Events for unknown orders succeed so Razorpay stops
-/// retrying them; replays are no-ops because activation is idempotent.
+/// Applies one webhook from the inbox. Orders-API events only: <c>payment.captured</c> and <c>order.paid</c> activate
+/// (Razorpay may send either or both), <c>payment.failed</c> is logged, anything else is ignored. Replays are no-ops
+/// because activation is idempotent.
+/// <para>
+/// An unknown order fails with <see cref="BillingErrors.SubscriptionNotFound"/> so the inbox retries it: the webhook
+/// can arrive before the subscribe request that attached the order has committed. If the order never appears, the
+/// message is parked after the configured attempts instead of being silently dropped.
+/// </para>
 /// </summary>
 internal sealed partial class HandleRazorpayWebhookCommandHandler(
     ISubscriptionRepository subscriptions,
@@ -49,7 +55,7 @@ internal sealed partial class HandleRazorpayWebhookCommandHandler(
         if (subscription is null)
         {
             LogUnknownOrder(logger, request.EventType, request.OrderId);
-            return Result.Success();
+            return BillingErrors.SubscriptionNotFound;
         }
 
         return await activation.ActivateAsync(subscription, request.PaymentId, signature: null, cancellationToken);
@@ -64,6 +70,6 @@ internal sealed partial class HandleRazorpayWebhookCommandHandler(
     [LoggerMessage(Level = LogLevel.Warning, Message = "Razorpay {EventType} webhook without order or payment id; ignored.")]
     private static partial void LogMissingIds(ILogger logger, string eventType);
 
-    [LoggerMessage(Level = LogLevel.Warning, Message = "Razorpay {EventType} webhook for unknown order {OrderId}; ignored.")]
+    [LoggerMessage(Level = LogLevel.Warning, Message = "Razorpay {EventType} webhook for unknown order {OrderId}; will be retried.")]
     private static partial void LogUnknownOrder(ILogger logger, string eventType, string orderId);
 }

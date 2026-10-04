@@ -27,6 +27,7 @@ using MolBhav.Application.Abstractions.Watchlist;
 using MolBhav.Infrastructure.Authentication;
 using MolBhav.Infrastructure.Billing;
 using MolBhav.Infrastructure.Billing.Razorpay;
+using MolBhav.Infrastructure.Billing.Webhooks;
 using MolBhav.Infrastructure.Ingestion;
 using MolBhav.Infrastructure.Messaging;
 using MolBhav.Infrastructure.Messaging.Outbox;
@@ -269,6 +270,22 @@ public static class DependencyInjection
 
             services.AddSingleton<IPaymentGateway, RazorpayPaymentGateway>();
         }
+
+        // Webhooks are recorded on the request path and applied by the processor (retry, backoff, parking).
+        services.AddScoped<IWebhookInbox, WebhookInbox>();
+
+        services.AddOptions<WebhookInboxOptions>()
+            .Bind(configuration.GetSection(WebhookInboxOptions.SectionName))
+            .Validate(o => o.PollingIntervalSeconds is >= 1 and <= 300, "WebhookInbox:PollingIntervalSeconds must be between 1 and 300.")
+            .Validate(o => o.BatchSize is >= 1 and <= 500, "WebhookInbox:BatchSize must be between 1 and 500.")
+            .Validate(o => o.MaxAttempts is >= 1 and <= 50, "WebhookInbox:MaxAttempts must be between 1 and 50.")
+            .Validate(o => o.BaseRetryDelaySeconds is >= 1 and <= 3600, "WebhookInbox:BaseRetryDelaySeconds must be between 1 and 3600.")
+            .Validate(
+                o => o.MaxRetryDelaySeconds >= o.BaseRetryDelaySeconds && o.MaxRetryDelaySeconds <= 86_400,
+                "WebhookInbox:MaxRetryDelaySeconds must be at least BaseRetryDelaySeconds and at most 86400.")
+            .ValidateOnStart();
+
+        services.AddHostedService<WebhookInboxProcessor>();
 
         return services;
     }

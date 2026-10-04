@@ -122,6 +122,7 @@ Secrets (`ConnectionStrings:MolBhav`, `Jwt:SigningKey`) are never stored in apps
 | `AddReportLastDownloadedAt` | nullable `reporting.reports.last_downloaded_at_utc` — stamped on each successful owner download |
 | `AddSupportModule` | `support` schema: `support_tickets`, `support_ticket_messages` (cascade from the ticket); `(user_id, last_activity_at_utc DESC)` and `(status, last_activity_at_utc DESC)` indexes |
 | `SeedSupportFaq` | 10 FAQ Q&A pairs under `support.faq.{n}.q`/`.a` plus `support.reply.title`/`.body` in `localization` (en/hi/mr), fixed ids, one sentinel `created_by` so `Down` is exact |
+| `AddBillingWebhookInbox` | `billing.webhook_inbox` (raw Razorpay webhook `payload jsonb`, attempt/backoff bookkeeping, `processed_at_utc` / `parked_at_utc`); unique `(provider, event_id)` for redelivery dedup; partial index on `next_attempt_at_utc` over pending rows; partial index on `parked_at_utc` over parked rows |
 
 New change: `dotnet ef migrations add <DescriptiveName> -p src/MolBhav.Infrastructure -s src/MolBhav.Api -o Persistence/Migrations` (with `ASPNETCORE_ENVIRONMENT=Development`). One migration per logical change.
 

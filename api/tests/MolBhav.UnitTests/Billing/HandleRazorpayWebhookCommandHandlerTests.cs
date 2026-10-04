@@ -44,13 +44,14 @@ public sealed class HandleRazorpayWebhookCommandHandlerTests
     }
 
     [Fact]
-    public async Task Handle_UnknownOrder_SucceedsWithoutActivating()
+    public async Task Handle_UnknownOrder_FailsAsNotFoundSoTheInboxRetries()
     {
         var result = await _handler.Handle(
             new HandleRazorpayWebhookCommand(HandleRazorpayWebhookCommandHandler.PaymentCaptured, "order_unknown", "pay_1"),
             CancellationToken.None);
 
-        Assert.True(result.IsSuccess);
+        Assert.True(result.IsFailure);
+        Assert.Equal(BillingErrors.SubscriptionNotFound, result.Error);
         Assert.Equal(SubscriptionStatus.PendingPayment, _context.Subscription.Status);
     }
 
