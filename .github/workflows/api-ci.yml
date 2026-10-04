@@ -1,0 +1,101 @@
+name: API CI
+
+# Builds and tests the API on every push to main / feature branches and on PRs into main.
+# Also guards migrations: if the EF model changed without a migration, the job generates one with the real
+# `dotnet ef` tool (named PendingModelChanges), uploads it as an artifact and fails, so a missing migration
+# can never reach main. Rename it to a descriptive name when committing it.
+
+on:
+  push:
+    branches: [main, "feature/**"]
+    paths: ["api/**", ".github/workflows/api-ci.yml"]
+  pull_request:
+    branches: [main]
+    paths: ["api/**", ".github/workflows/api-ci.yml"]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: api-ci-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  DOTNET_NOLOGO: "true"
+  DOTNET_CLI_TELEMETRY_OPTOUT: "true"
+  DOTNET_EF_VERSION: "10.0.12" # keep in step with MicrosoftPackagesVersion in api/Directory.Packages.props
+
+jobs:
+  build-test:
+    name: Build, test, migration check
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    defaults:
+      run:
+        working-directory: api
+    env:
+      # Design-time host build only (no database is contacted). Throwaway CI values, not secrets.
+      ASPNETCORE_ENVIRONMENT: Development
+      ConnectionStrings__MolBhav: "Host=localhost;Port=5432;Database=molbhav_ci;Username=ci;Password=ci"
+      Jwt__SigningKey: "ci-design-time-only-signing-key-not-a-secret-0123456789abcdef"
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          global-json-file: api/global.json
+
+      - name: Restore
+        run: dotnet restore MolBhav.sln
+
+      - name: Build
+        run: dotnet build MolBhav.sln --no-restore --configuration Release
+
+      - name: Test
+        run: >
+          dotnet test MolBhav.sln --no-build --configuration Release
+          --logger "trx;LogFileName=test-results.trx" --results-directory TestResults
+
+      - name: Upload test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-results
+          path: api/TestResults
+          if-no-files-found: ignore
+
+      - name: Install dotnet-ef
+        run: dotnet tool install --global dotnet-ef --version "$DOTNET_EF_VERSION"
+
+      - name: Check for model changes without a migration
+        id: pending
+        run: |
+          if dotnet ef migrations has-pending-model-changes \
+               -p src/MolBhav.Infrastructure -s src/MolBhav.Api --configuration Release --no-build; then
+            echo "pending=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "pending=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Generate the missing migration
+        if: steps.pending.outputs.pending == 'true'
+        run: >
+          dotnet ef migrations add PendingModelChanges
+          -p src/MolBhav.Infrastructure -s src/MolBhav.Api -o Persistence/Migrations
+          --configuration Release --no-build
+
+      - name: Upload generated migration
+        if: steps.pending.outputs.pending == 'true'
+        uses: actions/upload-artifact@v4
+        with:
+          name: pending-migration
+          path: |
+            api/src/MolBhav.Infrastructure/Persistence/Migrations/*_PendingModelChanges.cs
+            api/src/MolBhav.Infrastructure/Persistence/Migrations/*_PendingModelChanges.Designer.cs
+            api/src/MolBhav.Infrastructure/Persistence/Migrations/MolBhavDbContextModelSnapshot.cs
+
+      - name: Fail on missing migration
+        if: steps.pending.outputs.pending == 'true'
+        run: |
+          echo "::error::The EF model has changes with no migration. A generated migration is attached as the 'pending-migration' artifact; rename it descriptively and commit it."
+          exit 1
