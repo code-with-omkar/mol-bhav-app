@@ -13,7 +13,12 @@ internal sealed partial class LoggingOpsAlertSender(ILogger<LoggingOpsAlertSende
     {
         ArgumentNullException.ThrowIfNull(alert);
 
-        LogAlert(logger, alert.Title, string.Join("; ", alert.Details.Select(d => $"{d.Key}: {d.Value}")));
+        if (logger.IsEnabled(LogLevel.Critical))
+        {
+            var details = string.Join("; ", alert.Details.Select(d => $"{d.Key}: {d.Value}"));
+            LogAlert(logger, alert.Title, details);
+        }
+
         return Task.CompletedTask;
     }
 

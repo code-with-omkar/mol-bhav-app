@@ -32,12 +32,14 @@ internal sealed partial class SlackOpsAlertSender(
 
             if (!response.IsSuccessStatusCode)
             {
-                LogRejected(logger, (int)response.StatusCode, text);
+                var statusCode = (int)response.StatusCode;
+                LogRejected(logger, statusCode, text);
             }
         }
         catch (Exception ex) when (ex is not OperationCanceledException || !cancellationToken.IsCancellationRequested)
         {
-            LogFailed(logger, ex.GetType().Name, text);
+            var errorType = ex.GetType().Name;
+            LogFailed(logger, errorType, text);
         }
     }
 
