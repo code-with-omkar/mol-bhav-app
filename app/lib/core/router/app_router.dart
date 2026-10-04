@@ -5,6 +5,9 @@ import 'package:go_router/go_router.dart';
 import '../../app/app_shell.dart';
 import '../../features/account/presentation/account_cubits.dart';
 import '../../features/account/presentation/more_page.dart';
+import '../../features/admin/domain/admin_ingestion.dart';
+import '../../features/admin/presentation/admin_schedules_cubit.dart';
+import '../../features/admin/presentation/admin_schedules_page.dart';
 import '../../features/billing/presentation/cubit/coupon_cubit.dart';
 import '../../features/billing/presentation/cubit/plans_cubit.dart';
 import '../../features/billing/presentation/cubit/subscription_cubit.dart';
@@ -283,6 +286,17 @@ GoRouter createAppRouter(SessionManager session) {
                     builder: (context, state) => BlocProvider(
                       create: (_) => getIt<CostEstimatorCubit>()..load(),
                       child: const CostEstimatorPage(),
+                    ),
+                  ),
+                  // Admin only: the More entry is hidden for other roles and
+                  // every admin endpoint returns 403 to them anyway.
+                  GoRoute(
+                    path: 'admin/schedules',
+                    builder: (context, state) => BlocProvider(
+                      create: (_) =>
+                          AdminSchedulesCubit(getIt<AdminIngestionRepository>())
+                            ..load(),
+                      child: const AdminSchedulesPage(),
                     ),
                   ),
                   GoRoute(

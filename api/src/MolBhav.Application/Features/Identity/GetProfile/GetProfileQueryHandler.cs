@@ -43,6 +43,7 @@ internal sealed class GetProfileQueryHandler(
             profile.PushEnabled,
             profile.WhatsAppEnabled,
             profile.LastLoginAtUtc,
-            profile.CreatedAtUtc);
+            profile.CreatedAtUtc,
+            currentUser.IsInRole(Roles.Admin));
     }
 }

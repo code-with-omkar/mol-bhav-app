@@ -937,5 +937,165 @@
   "showPassword": "Show password",
   "@showPassword": {},
   "hidePassword": "Hide password",
-  "@hidePassword": {}
+  "@hidePassword": {},
+  "unlockWatchlistTitle": "Your free watchlist is full",
+  "@unlockWatchlistTitle": {},
+  "unlockAlertsTitle": "You've used your free alerts",
+  "@unlockAlertsTitle": {},
+  "unlockReportTitle": "Unlock this report",
+  "@unlockReportTitle": {},
+  "unlockWatchlistBody": "Watch a short ad to add {slots} more items, or go Pro for an unlimited watchlist.",
+  "@unlockWatchlistBody": {
+    "placeholders": {
+      "slots": {
+        "type": "int"
+      }
+    }
+  },
+  "unlockAlertsBody": "Watch a short ad to add {slots} more alerts, or go Pro for unlimited alerts.",
+  "@unlockAlertsBody": {
+    "placeholders": {
+      "slots": {
+        "type": "int"
+      }
+    }
+  },
+  "unlockReportBody": "Watch short ads to get this report free, or go Pro for unlimited reports.",
+  "@unlockReportBody": {},
+  "unlockLimitUsed": "You've reached the free limit for now. Go Pro for unlimited access.",
+  "@unlockLimitUsed": {},
+  "unlockProOnly": "Ads aren't available here. Go Pro for unlimited access.",
+  "@unlockProOnly": {},
+  "watchAdsButton": "{count, plural, =1{Watch 1 ad} other{Watch {count} ads}}",
+  "@watchAdsButton": {
+    "placeholders": {
+      "count": {
+        "type": "num",
+        "format": "compact"
+      }
+    }
+  },
+  "goProNoAds": "Go Pro – no ads",
+  "@goProNoAds": {},
+  "unlockAdProgress": "Ad {current} of {total}",
+  "@unlockAdProgress": {
+    "placeholders": {
+      "current": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "unlockVerifying": "Confirming…",
+  "@unlockVerifying": {},
+  "unlockGranted": "Unlocked! Trying again…",
+  "@unlockGranted": {},
+  "unlockFailed": "We couldn't confirm the ad. Please try again.",
+  "@unlockFailed": {},
+  "reportFreeUnlockHint": "Free plan: unlock price history by watching short ads, a few times a day. Pro: unlimited.",
+  "@reportFreeUnlockHint": {},
+  "adsPersonalisedTitle": "Personalised ads",
+  "@adsPersonalisedTitle": {},
+  "adsPersonalisedSubtitle": "Show ads based on how you use MolBhav. Off: ads still appear but aren't based on you.",
+  "@adsPersonalisedSubtitle": {},
+  "promotionSponsored": "Sponsored",
+  "@promotionSponsored": {
+    "description": "Label on a paid advertiser's card."
+  },
+  "adminSchedulesTitle": "Data pull schedules",
+  "adminSchedulesSubtitle": "When government prices are pulled automatically",
+  "adminSchedulesHint": "Times are India Standard Time. A source without a schedule is pulled only when you tap Run now.",
+  "adminNoSources": "No price sources yet.",
+  "scheduleDaily": "Daily at {time} IST",
+  "@scheduleDaily": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "scheduleWeekly": "Every {day} at {time} IST",
+  "@scheduleWeekly": {
+    "placeholders": {
+      "day": {
+        "type": "String"
+      },
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "scheduleEveryNHours": "Every {hours} h from {time} IST",
+  "@scheduleEveryNHours": {
+    "placeholders": {
+      "hours": {
+        "type": "String"
+      },
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "scheduleNotConfigured": "Not scheduled",
+  "scheduleStatusOn": "On",
+  "scheduleStatusPaused": "Paused",
+  "scheduleStatusNone": "Not scheduled",
+  "sourceInactive": "Source inactive",
+  "scheduleNextRun": "Next run: {when}",
+  "@scheduleNextRun": {
+    "placeholders": {
+      "when": {
+        "type": "String"
+      }
+    }
+  },
+  "scheduleLastRun": "Last run: {when} · {status}",
+  "@scheduleLastRun": {
+    "placeholders": {
+      "when": {
+        "type": "String"
+      },
+      "status": {
+        "type": "String"
+      }
+    }
+  },
+  "jobStatusRunning": "Running",
+  "jobStatusSucceeded": "Succeeded",
+  "jobStatusPartial": "Partly saved",
+  "jobStatusFailed": "Failed",
+  "jobCounts": "{saved} saved, {failed} failed",
+  "@jobCounts": {
+    "placeholders": {
+      "saved": {
+        "type": "String"
+      },
+      "failed": {
+        "type": "String"
+      }
+    }
+  },
+  "runNowAction": "Run now",
+  "editScheduleAction": "Edit schedule",
+  "saveScheduleAction": "Save schedule",
+  "scheduleFrequencyLabel": "Frequency",
+  "frequencyDaily": "Daily",
+  "frequencyWeekly": "Weekly",
+  "frequencyEveryNHours": "Every few hours",
+  "scheduleTimeLabel": "Time (IST)",
+  "scheduleDayLabel": "Day",
+  "scheduleIntervalLabel": "Repeat every",
+  "intervalHoursOption": "{hours} hours",
+  "@intervalHoursOption": {
+    "placeholders": {
+      "hours": {
+        "type": "String"
+      }
+    }
+  },
+  "scheduleEnabledLabel": "Run automatically",
+  "scheduleSaved": "Schedule saved.",
+  "runCompleted": "Run finished. See the last run on the card."
 }

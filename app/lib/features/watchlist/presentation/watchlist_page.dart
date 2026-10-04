@@ -16,6 +16,7 @@ import '../../../shared/widgets/mb_panels.dart';
 import '../../../shared/widgets/mb_price.dart';
 import '../../../shared/widgets/mb_state_views.dart';
 import '../../../shared/widgets/mb_text_field.dart';
+import '../../monetization/presentation/ads/banner_ad_slot.dart';
 import '../domain/watchlist.dart';
 import 'watch_star.dart';
 import 'watchlist_cubit.dart';
@@ -58,6 +59,7 @@ class _WatchlistPageState extends State<WatchlistPage> {
     final l10n = context.l10n;
     final cubit = context.read<WatchlistCubit>();
     return Scaffold(
+      bottomNavigationBar: const BannerAdSlot(),
       appBar: MbAppBar(
         title: l10n.watchlistTitle,
         actions: [

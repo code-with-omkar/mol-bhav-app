@@ -1,16 +1,20 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+import '../../../core/error/failure.dart';
 import '../../../core/error/result.dart';
 import '../../../core/l10n/l10n.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../shared/widgets/mb_icon_button.dart';
 import '../../../shared/widgets/mb_icons.dart';
 import '../../../shared/widgets/mb_state_views.dart';
+import '../../monetization/presentation/unlock_sheet.dart';
 import '../domain/watchlist.dart';
 import 'watchlist_cubit.dart';
 
-/// Adds or removes a product (or one variant) and reports the outcome.
+/// Adds or removes a product (or one variant) and reports the outcome. When
+/// the free watchlist is full it offers the unlock sheet and, once unlocked,
+/// adds the item after all.
 Future<void> toggleWatch(
   BuildContext context,
   String productId, {
@@ -18,8 +22,16 @@ Future<void> toggleWatch(
 }) async {
   final cubit = context.read<WatchlistCubit>();
   final removing = cubit.state.itemFor(productId, variantId: variantId);
-  final result = await cubit.toggle(productId, variantId: variantId);
+  var result = await cubit.toggle(productId, variantId: variantId);
   if (!context.mounted) return;
+
+  if (result case Err(failure: LimitReachedFailure(:final feature))) {
+    final unlocked = await showUnlockSheet(context, feature);
+    if (!unlocked || !context.mounted) return;
+    result = await cubit.toggle(productId, variantId: variantId);
+    if (!context.mounted) return;
+  }
+
   showWatchlistResult(context, result, removed: removing);
 }
 

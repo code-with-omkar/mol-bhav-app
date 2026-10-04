@@ -2337,6 +2337,312 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Hide password'**
   String get hidePassword;
+
+  /// No description provided for @unlockWatchlistTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Your free watchlist is full'**
+  String get unlockWatchlistTitle;
+
+  /// No description provided for @unlockAlertsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'You\'ve used your free alerts'**
+  String get unlockAlertsTitle;
+
+  /// No description provided for @unlockReportTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Unlock this report'**
+  String get unlockReportTitle;
+
+  /// No description provided for @unlockWatchlistBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Watch a short ad to add {slots} more items, or go Pro for an unlimited watchlist.'**
+  String unlockWatchlistBody(int slots);
+
+  /// No description provided for @unlockAlertsBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Watch a short ad to add {slots} more alerts, or go Pro for unlimited alerts.'**
+  String unlockAlertsBody(int slots);
+
+  /// No description provided for @unlockReportBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Watch short ads to get this report free, or go Pro for unlimited reports.'**
+  String get unlockReportBody;
+
+  /// No description provided for @unlockLimitUsed.
+  ///
+  /// In en, this message translates to:
+  /// **'You\'ve reached the free limit for now. Go Pro for unlimited access.'**
+  String get unlockLimitUsed;
+
+  /// No description provided for @unlockProOnly.
+  ///
+  /// In en, this message translates to:
+  /// **'Ads aren\'t available here. Go Pro for unlimited access.'**
+  String get unlockProOnly;
+
+  /// No description provided for @watchAdsButton.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{Watch 1 ad} other{Watch {count} ads}}'**
+  String watchAdsButton(num count);
+
+  /// No description provided for @goProNoAds.
+  ///
+  /// In en, this message translates to:
+  /// **'Go Pro – no ads'**
+  String get goProNoAds;
+
+  /// No description provided for @unlockAdProgress.
+  ///
+  /// In en, this message translates to:
+  /// **'Ad {current} of {total}'**
+  String unlockAdProgress(int current, int total);
+
+  /// No description provided for @unlockVerifying.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirming…'**
+  String get unlockVerifying;
+
+  /// No description provided for @unlockGranted.
+  ///
+  /// In en, this message translates to:
+  /// **'Unlocked! Trying again…'**
+  String get unlockGranted;
+
+  /// No description provided for @unlockFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'We couldn\'t confirm the ad. Please try again.'**
+  String get unlockFailed;
+
+  /// No description provided for @reportFreeUnlockHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Free plan: unlock price history by watching short ads, a few times a day. Pro: unlimited.'**
+  String get reportFreeUnlockHint;
+
+  /// No description provided for @adsPersonalisedTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Personalised ads'**
+  String get adsPersonalisedTitle;
+
+  /// No description provided for @adsPersonalisedSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Show ads based on how you use MolBhav. Off: ads still appear but aren\'t based on you.'**
+  String get adsPersonalisedSubtitle;
+
+  /// Label on a paid advertiser's card.
+  ///
+  /// In en, this message translates to:
+  /// **'Sponsored'**
+  String get promotionSponsored;
+
+  /// No description provided for @adminSchedulesTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Data pull schedules'**
+  String get adminSchedulesTitle;
+
+  /// No description provided for @adminSchedulesSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'When government prices are pulled automatically'**
+  String get adminSchedulesSubtitle;
+
+  /// No description provided for @adminSchedulesHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Times are India Standard Time. A source without a schedule is pulled only when you tap Run now.'**
+  String get adminSchedulesHint;
+
+  /// No description provided for @adminNoSources.
+  ///
+  /// In en, this message translates to:
+  /// **'No price sources yet.'**
+  String get adminNoSources;
+
+  /// No description provided for @scheduleDaily.
+  ///
+  /// In en, this message translates to:
+  /// **'Daily at {time} IST'**
+  String scheduleDaily(String time);
+
+  /// No description provided for @scheduleWeekly.
+  ///
+  /// In en, this message translates to:
+  /// **'Every {day} at {time} IST'**
+  String scheduleWeekly(String day, String time);
+
+  /// No description provided for @scheduleEveryNHours.
+  ///
+  /// In en, this message translates to:
+  /// **'Every {hours} h from {time} IST'**
+  String scheduleEveryNHours(String hours, String time);
+
+  /// No description provided for @scheduleNotConfigured.
+  ///
+  /// In en, this message translates to:
+  /// **'Not scheduled'**
+  String get scheduleNotConfigured;
+
+  /// No description provided for @scheduleStatusOn.
+  ///
+  /// In en, this message translates to:
+  /// **'On'**
+  String get scheduleStatusOn;
+
+  /// No description provided for @scheduleStatusPaused.
+  ///
+  /// In en, this message translates to:
+  /// **'Paused'**
+  String get scheduleStatusPaused;
+
+  /// No description provided for @scheduleStatusNone.
+  ///
+  /// In en, this message translates to:
+  /// **'Not scheduled'**
+  String get scheduleStatusNone;
+
+  /// No description provided for @sourceInactive.
+  ///
+  /// In en, this message translates to:
+  /// **'Source inactive'**
+  String get sourceInactive;
+
+  /// No description provided for @scheduleNextRun.
+  ///
+  /// In en, this message translates to:
+  /// **'Next run: {when}'**
+  String scheduleNextRun(String when);
+
+  /// No description provided for @scheduleLastRun.
+  ///
+  /// In en, this message translates to:
+  /// **'Last run: {when} · {status}'**
+  String scheduleLastRun(String when, String status);
+
+  /// No description provided for @jobStatusRunning.
+  ///
+  /// In en, this message translates to:
+  /// **'Running'**
+  String get jobStatusRunning;
+
+  /// No description provided for @jobStatusSucceeded.
+  ///
+  /// In en, this message translates to:
+  /// **'Succeeded'**
+  String get jobStatusSucceeded;
+
+  /// No description provided for @jobStatusPartial.
+  ///
+  /// In en, this message translates to:
+  /// **'Partly saved'**
+  String get jobStatusPartial;
+
+  /// No description provided for @jobStatusFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed'**
+  String get jobStatusFailed;
+
+  /// No description provided for @jobCounts.
+  ///
+  /// In en, this message translates to:
+  /// **'{saved} saved, {failed} failed'**
+  String jobCounts(String saved, String failed);
+
+  /// No description provided for @runNowAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Run now'**
+  String get runNowAction;
+
+  /// No description provided for @editScheduleAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit schedule'**
+  String get editScheduleAction;
+
+  /// No description provided for @saveScheduleAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Save schedule'**
+  String get saveScheduleAction;
+
+  /// No description provided for @scheduleFrequencyLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Frequency'**
+  String get scheduleFrequencyLabel;
+
+  /// No description provided for @frequencyDaily.
+  ///
+  /// In en, this message translates to:
+  /// **'Daily'**
+  String get frequencyDaily;
+
+  /// No description provided for @frequencyWeekly.
+  ///
+  /// In en, this message translates to:
+  /// **'Weekly'**
+  String get frequencyWeekly;
+
+  /// No description provided for @frequencyEveryNHours.
+  ///
+  /// In en, this message translates to:
+  /// **'Every few hours'**
+  String get frequencyEveryNHours;
+
+  /// No description provided for @scheduleTimeLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Time (IST)'**
+  String get scheduleTimeLabel;
+
+  /// No description provided for @scheduleDayLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Day'**
+  String get scheduleDayLabel;
+
+  /// No description provided for @scheduleIntervalLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Repeat every'**
+  String get scheduleIntervalLabel;
+
+  /// No description provided for @intervalHoursOption.
+  ///
+  /// In en, this message translates to:
+  /// **'{hours} hours'**
+  String intervalHoursOption(String hours);
+
+  /// No description provided for @scheduleEnabledLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Run automatically'**
+  String get scheduleEnabledLabel;
+
+  /// No description provided for @scheduleSaved.
+  ///
+  /// In en, this message translates to:
+  /// **'Schedule saved.'**
+  String get scheduleSaved;
+
+  /// No description provided for @runCompleted.
+  ///
+  /// In en, this message translates to:
+  /// **'Run finished. See the last run on the card.'**
+  String get runCompleted;
 }
 
 class _AppLocalizationsDelegate

@@ -157,18 +157,13 @@ class MarketComparisonCubit extends Cubit<MarketComparisonState> {
             for (final c in commodities)
               if (allowed.contains(c.categoryCode)) c,
           ];
-    final categories = _orderCategories(
-      [
-        for (final c in catalog)
-          if (allowed.contains(c.code)) c,
-      ],
-      scoped,
-    );
+    final categories = _orderCategories([
+      for (final c in catalog)
+        if (allowed.contains(c.code)) c,
+    ], scoped);
     // The route's category wins, then the opened commodity's, then the user's own.
     var selected =
-        categoryCode ??
-        requested?.categoryCode ??
-        categories.firstOrNull?.code;
+        categoryCode ?? requested?.categoryCode ?? categories.firstOrNull?.code;
     final initial =
         requested ??
         scoped.where((c) => c.categoryCode == selected).firstOrNull ??

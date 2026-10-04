@@ -43,15 +43,24 @@ class _BootSplashState extends State<BootSplash> with TickerProviderStateMixin {
   /// splash's exact size.
   late final Animation<double> _pop = TweenSequence<double>([
     TweenSequenceItem(
-      tween: Tween(begin: 1.0, end: 0.92).chain(CurveTween(curve: Curves.easeOut)),
+      tween: Tween(
+        begin: 1.0,
+        end: 0.92,
+      ).chain(CurveTween(curve: Curves.easeOut)),
       weight: 25,
     ),
     TweenSequenceItem(
-      tween: Tween(begin: 0.92, end: 1.06).chain(CurveTween(curve: Curves.easeOut)),
+      tween: Tween(
+        begin: 0.92,
+        end: 1.06,
+      ).chain(CurveTween(curve: Curves.easeOut)),
       weight: 40,
     ),
     TweenSequenceItem(
-      tween: Tween(begin: 1.06, end: 1.0).chain(CurveTween(curve: Curves.easeInOut)),
+      tween: Tween(
+        begin: 1.06,
+        end: 1.0,
+      ).chain(CurveTween(curve: Curves.easeInOut)),
       weight: 35,
     ),
   ]).animate(_entrance);
@@ -75,16 +84,15 @@ class _BootSplashState extends State<BootSplash> with TickerProviderStateMixin {
     // Decode the mark first, then drop the native splash and animate — the
     // native one shows the same mark, so the swap is seamless. A decode error
     // must not keep the native splash up forever.
-    precacheImage(
-      const AssetImage(MbWordmark.markAsset),
-      context,
-    ).whenComplete(() {
-      FlutterNativeSplash.remove();
-      if (!mounted) return;
-      _entrance.forward().whenComplete(() {
-        if (mounted && !_ready) _breath.repeat();
-      });
-    });
+    precacheImage(const AssetImage(MbWordmark.markAsset), context).whenComplete(
+      () {
+        FlutterNativeSplash.remove();
+        if (!mounted) return;
+        _entrance.forward().whenComplete(() {
+          if (mounted && !_ready) _breath.repeat();
+        });
+      },
+    );
   }
 
   Future<void> _start() async {
@@ -129,8 +137,7 @@ class _BootSplashState extends State<BootSplash> with TickerProviderStateMixin {
 
   Widget _splash(BuildContext context) {
     const colors = MbColors.light;
-    final reduceMotion =
-        MediaQuery.maybeDisableAnimationsOf(context) ?? false;
+    final reduceMotion = MediaQuery.maybeDisableAnimationsOf(context) ?? false;
 
     return Directionality(
       key: const ValueKey('boot-splash'),

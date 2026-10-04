@@ -173,8 +173,7 @@ class ReportsRepositoryImpl implements ReportsRepository {
       )).data!;
       return body.str('id');
     },
-    mapError: (e) =>
-        e.response?.statusCode == 403 ? const ProRequiredFailure() : null,
+    // A 403 Report.ProRequired maps to LimitReachedFailure in runApiCall.
   );
 
   @override

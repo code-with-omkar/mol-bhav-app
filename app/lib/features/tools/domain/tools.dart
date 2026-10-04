@@ -246,11 +246,6 @@ class DownloadedFile {
   final Uint8List bytes;
 }
 
-/// The report needs a Pro plan (API 403).
-final class ProRequiredFailure extends Failure {
-  const ProRequiredFailure();
-}
-
 abstract interface class ReportsRepository {
   Future<Result<List<GeneratedReport>>> getReports();
 

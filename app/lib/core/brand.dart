@@ -5,8 +5,4 @@ abstract final class Brand {
 
   static const name = '';
   static const descriptor = '';
-
-  /// The Hindi tagline stays in Devanagari in every language.
-  // static const taglineHi = 'मोल समझो, भाव परखो, बेहतर खरीदो।';
-  static const taglineHi = '';
 }

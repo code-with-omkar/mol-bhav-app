@@ -18,6 +18,8 @@ import '../../../shared/widgets/mb_icon.dart';
 import '../../../shared/widgets/mb_panels.dart';
 import '../../../shared/widgets/mb_price.dart';
 import '../../../shared/widgets/mb_state_views.dart';
+import '../../promotions/domain/promotions.dart';
+import '../../promotions/presentation/ad_slot.dart';
 import '../domain/home_entities.dart';
 import 'home_cubit.dart';
 
@@ -170,6 +172,7 @@ class _Dashboard extends StatelessWidget {
                       ),
                     ),
                   gap,
+                  const AdSlot(placement: PromotionPlacement.homeFeed),
                   MbSectionHeader(
                     title: l10n.homeMyWatchlist,
                     actionLabel: l10n.viewAll,

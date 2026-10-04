@@ -112,7 +112,6 @@ void main() {
     await pumpLogin(tester);
 
     expect(find.byType(MbWordmark), findsOneWidget);
-    expect(find.text('मोल समझो, भाव परखो, बेहतर खरीदो।'), findsOneWidget);
     expect(find.text('Log in with your mobile'), findsOneWidget);
     expect(find.text('+91'), findsOneWidget);
     expect(find.text('Send OTP'), findsOneWidget);

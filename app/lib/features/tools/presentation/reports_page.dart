@@ -2,12 +2,12 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:go_router/go_router.dart';
 
+import '../../../core/di/injection.dart';
+import '../../../core/error/failure.dart';
 import '../../../core/files/file_saver.dart';
 import '../../../core/l10n/l10n.dart';
 import '../../../core/locale/app_language.dart';
-import '../../../core/router/app_routes.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/theme/mb_dimens.dart';
 import '../../../core/utils/formatters.dart';
@@ -20,8 +20,9 @@ import '../../../shared/widgets/mb_panels.dart';
 import '../../../shared/widgets/mb_price.dart';
 import '../../../shared/widgets/mb_select_field.dart';
 import '../../../shared/widgets/mb_state_views.dart';
-import '../../billing/presentation/widgets/pro_banner.dart';
 import '../../billing/presentation/widgets/subscription_guard.dart';
+import '../../monetization/presentation/ads/interstitial_ads.dart';
+import '../../monetization/presentation/unlock_sheet.dart';
 import '../domain/tools.dart';
 import 'tools_cubits.dart';
 
@@ -35,11 +36,14 @@ class ReportsPage extends StatefulWidget {
 
 class _ReportsPageState extends State<ReportsPage> {
   late final StreamSubscription<DownloadedFile> _downloads;
+  final _interstitials = getIt<InterstitialAds>();
+  bool _downloaded = false;
 
   @override
   void initState() {
     super.initState();
     _downloads = context.read<ReportsCubit>().downloads.listen(_open);
+    unawaited(_interstitials.warmUp());
   }
 
   @override
@@ -49,6 +53,7 @@ class _ReportsPageState extends State<ReportsPage> {
   }
 
   Future<void> _open(DownloadedFile file) async {
+    _downloaded = true;
     final opened = await saveAndOpenFile(
       name: file.name,
       mimeType: file.mimeType,
@@ -64,47 +69,53 @@ class _ReportsPageState extends State<ReportsPage> {
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
-    return Scaffold(
-      appBar: MbAppBar(title: l10n.reportsTitle),
-      body: BlocConsumer<ReportsCubit, ReportsState>(
-        listenWhen: (p, n) =>
-            (n.failure != null && p.failure != n.failure) ||
-            (n.readyId != null && p.readyId != n.readyId),
-        listener: (context, state) {
-          final failure = state.failure;
-          if (failure is ProRequiredFailure) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text(l10n.reportNeedsPro),
-                action: SnackBarAction(
-                  label: l10n.molbhavPro,
-                  onPressed: () => context.push(AppRoutes.billingPlans),
-                ),
+    // Backing out of Reports after a download is a natural break for a
+    // full-screen ad (the pacer keeps it rare). Only a user's own back
+    // navigation counts — not a sign-out redirect or a deep link replacing
+    // the stack, which also tear the page down.
+    return PopScope(
+      onPopInvokedWithResult: (didPop, _) {
+        if (didPop && _downloaded) unawaited(_interstitials.showIfDue());
+      },
+      child: Scaffold(
+        appBar: MbAppBar(title: l10n.reportsTitle),
+        body: BlocConsumer<ReportsCubit, ReportsState>(
+          listenWhen: (p, n) =>
+              (n.failure != null && p.failure != n.failure) ||
+              (n.readyId != null && p.readyId != n.readyId),
+          listener: (context, state) {
+            final failure = state.failure;
+            if (failure is LimitReachedFailure) {
+              // A free user without a report unlock: watch ads (or go Pro),
+              // then generate it after all.
+              final cubit = context.read<ReportsCubit>();
+              showUnlockSheet(context, failure.feature).then((unlocked) {
+                if (unlocked && !cubit.isClosed) cubit.generate();
+              });
+            } else if (failure != null) {
+              showFailureSnackBar(context, failure);
+            } else if (state.readyId != null) {
+              ScaffoldMessenger.of(context)
+                  .showSnackBar(SnackBar(content: Text(l10n.reportReady)));
+            }
+          },
+          builder: (context, state) {
+            final cubit = context.read<ReportsCubit>();
+            return RefreshIndicator(
+              onRefresh: cubit.load,
+              child: ListView(
+                padding: MbSpacing.screenPadding,
+                children: [
+                  _GenerateForm(state: state),
+                  const SizedBox(height: MbSpacing.s6),
+                  MbSectionHeader(title: l10n.yourReports),
+                  const SizedBox(height: MbSpacing.s3),
+                  ..._list(context, state),
+                ],
               ),
             );
-          } else if (failure != null) {
-            showFailureSnackBar(context, failure);
-          } else if (state.readyId != null) {
-            ScaffoldMessenger.of(context)
-                .showSnackBar(SnackBar(content: Text(l10n.reportReady)));
-          }
-        },
-        builder: (context, state) {
-          final cubit = context.read<ReportsCubit>();
-          return RefreshIndicator(
-            onRefresh: cubit.load,
-            child: ListView(
-              padding: MbSpacing.screenPadding,
-              children: [
-                _GenerateForm(state: state),
-                const SizedBox(height: MbSpacing.s6),
-                MbSectionHeader(title: l10n.yourReports),
-                const SizedBox(height: MbSpacing.s3),
-                ..._list(context, state),
-              ],
-            ),
-          );
-        },
+          },
+        ),
       ),
     );
   }
@@ -234,8 +245,7 @@ class _GenerateForm extends StatelessWidget {
     final period = state.period;
     final locale = Localizations.localeOf(context).languageCode;
     const gap = SizedBox(height: MbSpacing.s4);
-    final proLocked =
-        state.kind == ReportKind.priceHistoryCsv && !context.isProSubscriber;
+    final isPro = context.isProSubscriber;
 
     return Container(
       padding: const EdgeInsets.all(MbSpacing.s4),
@@ -295,11 +305,16 @@ class _GenerateForm extends StatelessWidget {
           ],
           if (state.kind == ReportKind.priceHistoryCsv) ...[
             gap,
-            // The API only generates price history for Pro (403 otherwise).
-            if (proLocked)
-              ProBanner(onTap: () => context.push(AppRoutes.billingPlans))
-            else
-              ..._csvFields(context),
+            // Pro-only on the API; a free user unlocks each one with ads
+            // (the 403 opens the unlock sheet), so the form stays usable.
+            if (!isPro) ...[
+              Text(
+                l10n.reportFreeUnlockHint,
+                style: t.caption.copyWith(color: c.inkMuted),
+              ),
+              const SizedBox(height: MbSpacing.s3),
+            ],
+            ..._csvFields(context),
           ],
           gap,
           MbSelectField<String>(
@@ -318,7 +333,7 @@ class _GenerateForm extends StatelessWidget {
             icon: MbIcons.report,
             block: true,
             isLoading: state.isGenerating,
-            onPressed: state.canGenerate && !proLocked ? cubit.generate : null,
+            onPressed: state.canGenerate ? cubit.generate : null,
           ),
         ],
       ),

@@ -14,6 +14,7 @@ import '../../../shared/widgets/mb_cards.dart';
 import '../../../shared/widgets/mb_icons.dart';
 import '../../../shared/widgets/mb_panels.dart';
 import '../../../shared/widgets/mb_state_views.dart';
+import '../../monetization/presentation/ads/banner_ad_slot.dart';
 import '../domain/alerts.dart';
 import 'alerts_cubits.dart';
 
@@ -25,6 +26,7 @@ class AlertsPage extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = context.l10n;
     return Scaffold(
+      bottomNavigationBar: const BannerAdSlot(),
       appBar: MbAppBar(
         title: l10n.alertsTitle,
         actions: [

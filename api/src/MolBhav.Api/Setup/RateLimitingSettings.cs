@@ -29,4 +29,16 @@ public sealed class RateLimitingSettings
 
     /// <summary>Coupon checks per user per <see cref="WindowSeconds"/>; the checkout screen debounces, so real users need few.</summary>
     public int CouponValidatePermitLimit { get; set; } = 10;
+
+    /// <summary>
+    /// AdMob SSV callbacks per IP per <see cref="WindowSeconds"/>. Google's callback servers share few IPs, so this is
+    /// sized for peak rewarded views, while still bounding signature-check work from a forger.
+    /// </summary>
+    public int AdCallbackPermitLimit { get; set; } = 600;
+
+    /// <summary>
+    /// Sponsored-card event batches per user per <see cref="WindowSeconds"/>. The app flushes at most every 30 seconds
+    /// (or on 20 queued events / backgrounding), so a handful is plenty; each batch is also capped per campaign.
+    /// </summary>
+    public int PromotionEventsPermitLimit { get; set; } = 6;
 }

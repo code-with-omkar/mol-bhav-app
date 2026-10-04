@@ -626,3 +626,93 @@ Authorization: Bearer {{accessToken}}
 Content-Type: application/json
 
 { "status": "Closed" }
+
+### 84. Free-tier entitlements — used/limit per feature, report unlocks left today (Pro: limits null)
+GET {{host}}/api/v1/monetization/entitlements
+Authorization: Bearer {{accessToken}}
+
+### 85. Start a rewarded-ad unlock (WatchlistSlots | AlertRuleSlots | PriceHistoryReport); its id is the ad's SSV custom_data
+# @name startUnlock
+POST {{host}}/api/v1/monetization/unlock-sessions
+Authorization: Bearer {{accessToken}}
+Content-Type: application/json
+
+{ "feature": "PriceHistoryReport" }
+
+### 86. Poll the unlock — status turns Granted once AdMob's signed callbacks for every required ad arrive
+GET {{host}}/api/v1/monetization/unlock-sessions/{{startUnlock.response.body.$.data.id}}
+Authorization: Bearer {{accessToken}}
+
+### 87. No ad could be loaded — grant without ads (1 per user per day; a second call today returns 403)
+POST {{host}}/api/v1/monetization/unlock-sessions/{{startUnlock.response.body.$.data.id}}/no-fill
+Authorization: Bearer {{accessToken}}
+
+### 88. AdMob SSV callback — unsigned, so this returns 403 AdMob.InvalidCallback (real calls come from Google)
+GET {{host}}/api/v1/ads/admob/ssv?transaction_id=test&custom_data={{startUnlock.response.body.$.data.id}}
+
+### 89. Admin — register an advertiser (GSTIN optional, 15 chars)
+# @name createAdvertiser
+POST {{host}}/api/v1/admin/promotions/advertisers
+Authorization: Bearer {{accessToken}}
+Content-Type: application/json
+
+{ "name": "Kisan Seeds Pvt Ltd", "contactName": "Rahul Patil", "contactPhone": "+919800000000", "gstin": "27ABCDE1234F1Z5" }
+
+### 90. Admin — book a campaign (created as Draft). No stateId = every state. Links must be https.
+# @name createCampaign
+POST {{host}}/api/v1/admin/promotions/campaigns
+Authorization: Bearer {{accessToken}}
+Content-Type: application/json
+
+{
+  "advertiserId": "{{createAdvertiser.response.body.$.data.id}}",
+  "campaign": {
+    "name": "Kisan Seeds – all states – Oct",
+    "placement": "HomeFeed",
+    "title": "Certified onion seed, rabi 2026",
+    "body": "High-germination seed from verified dealers near your mandi.",
+    "ctaLabel": "Get a quote",
+    "ctaUrl": "https://example.com/quote",
+    "imageUrl": null,
+    "startsAtUtc": "2026-10-01T00:00:00Z",
+    "endsAtUtc": "2026-11-01T00:00:00Z",
+    "priority": 50,
+    "dailyImpressionCap": 5000,
+    "targets": [ { "categoryCode": "agriculture", "stateId": null } ]
+  }
+}
+
+### 91. Admin — activate it (Activate | Pause | End; End is terminal)
+PUT {{host}}/api/v1/admin/promotions/campaigns/{{createCampaign.response.body.$.data.id}}/status
+Authorization: Bearer {{accessToken}}
+Content-Type: application/json
+
+{ "action": "Activate" }
+
+### 92. Sponsored card for a slot (HomeFeed | MandiPrices | MarketComparison); promotion is null when nothing matches or the user is Pro
+GET {{host}}/api/v1/promotions?placement=HomeFeed
+Authorization: Bearer {{accessToken}}
+
+### 93. Report impressions/clicks (≤50 per call; ≤10 impressions + 3 clicks per campaign per call; ≤20 + 5 per user per campaign per IST day; only campaigns that target this user)
+POST {{host}}/api/v1/promotions/events
+Authorization: Bearer {{accessToken}}
+Content-Type: application/json
+
+{
+  "events": [
+    { "campaignId": "{{createCampaign.response.body.$.data.id}}", "type": "Impression" },
+    { "campaignId": "{{createCampaign.response.body.$.data.id}}", "type": "Click" }
+  ]
+}
+
+### 94. Admin — campaigns with today's and lifetime delivery
+GET {{host}}/api/v1/admin/promotions/campaigns?status=Active
+Authorization: Bearer {{accessToken}}
+
+### 95. Admin — daily delivery for one campaign (IST days; default last 30)
+GET {{host}}/api/v1/admin/promotions/campaigns/{{createCampaign.response.body.$.data.id}}/stats
+Authorization: Bearer {{accessToken}}
+
+### 96. Admin — advertisers with their active campaign count
+GET {{host}}/api/v1/admin/promotions/advertisers
+Authorization: Bearer {{accessToken}}

@@ -18,6 +18,8 @@ import '../../../shared/widgets/mb_price.dart';
 import '../../../shared/widgets/mb_select_field.dart';
 import '../../../shared/widgets/mb_state_views.dart';
 import '../domain/markets_entities.dart';
+import '../../promotions/domain/promotions.dart';
+import '../../promotions/presentation/ad_slot.dart';
 import '../../watchlist/presentation/watch_star.dart';
 import '../../watchlist/presentation/watchlist_cubit.dart';
 import 'markets_cubits.dart';
@@ -206,6 +208,8 @@ class _Content extends StatelessWidget {
               source: comparison.source,
               updated: context.updatedAt(comparison.updatedAt),
             ),
+            // Below the data, after the source note: never between prices.
+            const AdSlot(placement: PromotionPlacement.marketComparison),
           ],
         ),
         if (state.refreshing) const LinearProgressIndicator(minHeight: 2),

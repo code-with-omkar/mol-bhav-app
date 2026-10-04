@@ -21,6 +21,7 @@ abstract final class AppRoutes {
   static const watchlistAdd = '/watchlist/add';
   static const reports = '/more/reports';
   static const costEstimator = '/more/estimator';
+  static const adminSchedules = '/more/admin/schedules';
   static const alertRules = '/alerts/rules';
   static const helpSupport = '/more/help';
   static const raiseTicket = '/more/help/new-ticket';

@@ -11,4 +11,7 @@ internal sealed class AlertRuleRepository(MolBhavDbContext dbContext) : Reposito
         await Set.AsNoTracking()
             .Where(r => r.ProductId == productId && r.IsActive)
             .ToArrayAsync(cancellationToken);
+
+    public Task<int> CountByUserAsync(Guid userId, CancellationToken cancellationToken = default) =>
+        Set.CountAsync(r => r.UserId == userId, cancellationToken);
 }

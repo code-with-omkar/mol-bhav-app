@@ -46,6 +46,12 @@ android {
         // build verifies nothing and claims no links.
         manifestPlaceholders["deepLinkHost"] =
             (project.findProperty("deep_link_host") as String?) ?: "invalid.example"
+
+        // AdMob app id. Defaults to Google's sample id, which only ever serves
+        // test ads; release builds pass the real one: -Padmob_app_id=ca-app-pub-…~…
+        manifestPlaceholders["admobAppId"] =
+            (project.findProperty("admob_app_id") as String?)
+                ?: "ca-app-pub-3940256099942544~3347511713"
     }
 
     signingConfigs {

@@ -3,6 +3,7 @@ using Microsoft.Extensions.DependencyInjection;
 using MolBhav.Application.Abstractions.Events;
 using MolBhav.Application.Common.Behaviors;
 using MolBhav.Application.Features.Billing.Activation;
+using MolBhav.Application.Features.Monetization;
 
 namespace MolBhav.Application;
 
@@ -27,6 +28,8 @@ public static class DependencyInjection
         services.AddDomainEventHandlers(assembly);
 
         services.AddScoped<SubscriptionActivationService>();
+        services.AddScoped<IEntitlementService, EntitlementService>();
+        services.AddScoped<Features.Promotions.Admin.CampaignInputResolver>();
 
         return services;
     }

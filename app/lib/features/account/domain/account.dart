@@ -19,6 +19,7 @@ class AccountProfile extends Equatable {
     required this.isPro,
     required this.pushEnabled,
     required this.whatsappEnabled,
+    this.isAdmin = false,
   });
 
   /// Empty until the user enters one.
@@ -45,6 +46,10 @@ class AccountProfile extends Equatable {
   final bool pushEnabled;
   final bool whatsappEnabled;
 
+  /// Shows the Admin entry on More. A UI hint only: the API enforces the Admin
+  /// role on every admin endpoint, and the role is granted only server-side.
+  final bool isAdmin;
+
   AccountProfile withNotifications({bool? push, bool? whatsapp}) =>
       AccountProfile(
         name: name,
@@ -61,6 +66,7 @@ class AccountProfile extends Equatable {
         isPro: isPro,
         pushEnabled: push ?? pushEnabled,
         whatsappEnabled: whatsapp ?? whatsappEnabled,
+        isAdmin: isAdmin,
       );
 
   @override
@@ -79,6 +85,7 @@ class AccountProfile extends Equatable {
     isPro,
     pushEnabled,
     whatsappEnabled,
+    isAdmin,
   ];
 }
 

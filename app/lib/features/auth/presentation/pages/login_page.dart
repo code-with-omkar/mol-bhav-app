@@ -5,7 +5,6 @@ import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 
-import '../../../../core/brand.dart';
 import '../../../../core/di/injection.dart';
 import '../../../../core/error/failure.dart';
 import '../../../../core/l10n/l10n.dart';
@@ -74,22 +73,6 @@ class LoginPage extends StatelessWidget {
           child: MbCenteredForm(
             children: [
               const MbWordmark(size: 34, alignment: Alignment.center),
-              const SizedBox(height: MbSpacing.s4),
-              Text(
-                Brand.taglineHi,
-                textAlign: TextAlign.center,
-                style: t.taglineHi.copyWith(
-                  fontSize: 20,
-                  height: 30 / 20,
-                  color: c.primaryText,
-                ),
-              ),
-              const SizedBox(height: 4),
-              Text(
-                l10n.taglineTranslation,
-                textAlign: TextAlign.center,
-                style: t.body.copyWith(color: c.inkMuted),
-              ),
               const SizedBox(height: MbSpacing.s6),
               const _SignInOptions(),
               const SizedBox(height: MbSpacing.s6),

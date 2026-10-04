@@ -1278,4 +1278,197 @@ class AppLocalizationsMr extends AppLocalizations {
 
   @override
   String get hidePassword => 'पासवर्ड लपवा';
+
+  @override
+  String get unlockWatchlistTitle => 'तुमची मोफत वॉचलिस्ट भरली आहे';
+
+  @override
+  String get unlockAlertsTitle => 'तुम्ही तुमचे मोफत अलर्ट वापरले आहेत';
+
+  @override
+  String get unlockReportTitle => 'हा अहवाल अनलॉक करा';
+
+  @override
+  String unlockWatchlistBody(int slots) {
+    return 'आणखी $slots आयटम जोडण्यासाठी एक छोटी जाहिरात पहा, किंवा अमर्याद वॉचलिस्टसाठी Pro घ्या.';
+  }
+
+  @override
+  String unlockAlertsBody(int slots) {
+    return 'आणखी $slots अलर्ट जोडण्यासाठी एक छोटी जाहिरात पहा, किंवा अमर्याद अलर्टसाठी Pro घ्या.';
+  }
+
+  @override
+  String get unlockReportBody =>
+      'हा अहवाल मोफत मिळवण्यासाठी छोट्या जाहिराती पहा, किंवा अमर्याद अहवालांसाठी Pro घ्या.';
+
+  @override
+  String get unlockLimitUsed =>
+      'सध्या मोफत मर्यादा पूर्ण झाली आहे. अमर्याद वापरासाठी Pro घ्या.';
+
+  @override
+  String get unlockProOnly =>
+      'इथे जाहिराती उपलब्ध नाहीत. अमर्याद वापरासाठी Pro घ्या.';
+
+  @override
+  String watchAdsButton(num count) {
+    final intl.NumberFormat countNumberFormat = intl.NumberFormat.compact(
+      locale: localeName,
+    );
+    final String countString = countNumberFormat.format(count);
+
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$countString जाहिराती पहा',
+      one: '1 जाहिरात पहा',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get goProNoAds => 'Pro घ्या – जाहिराती नाहीत';
+
+  @override
+  String unlockAdProgress(int current, int total) {
+    return 'जाहिरात $current / $total';
+  }
+
+  @override
+  String get unlockVerifying => 'खात्री करत आहोत…';
+
+  @override
+  String get unlockGranted => 'अनलॉक झाले! पुन्हा प्रयत्न करत आहोत…';
+
+  @override
+  String get unlockFailed =>
+      'आम्ही जाहिरातीची खात्री करू शकलो नाही. कृपया पुन्हा प्रयत्न करा.';
+
+  @override
+  String get reportFreeUnlockHint =>
+      'मोफत प्लॅन: छोट्या जाहिराती पाहून दिवसातून काही वेळा किंमत इतिहास अनलॉक करा. Pro: अमर्याद.';
+
+  @override
+  String get adsPersonalisedTitle => 'वैयक्तिक जाहिराती';
+
+  @override
+  String get adsPersonalisedSubtitle =>
+      'तुम्ही MolBhav कसे वापरता त्यानुसार जाहिराती दाखवा. बंद असताना जाहिराती दिसतील, पण तुमच्यावर आधारित नसतील.';
+
+  @override
+  String get promotionSponsored => 'प्रायोजित';
+
+  @override
+  String get adminSchedulesTitle => 'डेटा पुल वेळापत्रक';
+
+  @override
+  String get adminSchedulesSubtitle => 'सरकारी भाव आपोआप कधी आणायचे';
+
+  @override
+  String get adminSchedulesHint =>
+      'वेळ भारतीय प्रमाण वेळेनुसार आहे. वेळापत्रक नसलेला स्रोत फक्त \'आता चालवा\' दाबल्यावर आणला जातो.';
+
+  @override
+  String get adminNoSources => 'अद्याप कोणताही भाव स्रोत नाही.';
+
+  @override
+  String scheduleDaily(String time) {
+    return 'दररोज $time IST ला';
+  }
+
+  @override
+  String scheduleWeekly(String day, String time) {
+    return 'दर $day $time IST ला';
+  }
+
+  @override
+  String scheduleEveryNHours(String hours, String time) {
+    return '$time IST पासून दर $hours तासांनी';
+  }
+
+  @override
+  String get scheduleNotConfigured => 'वेळापत्रक नाही';
+
+  @override
+  String get scheduleStatusOn => 'चालू';
+
+  @override
+  String get scheduleStatusPaused => 'थांबवले';
+
+  @override
+  String get scheduleStatusNone => 'वेळापत्रक नाही';
+
+  @override
+  String get sourceInactive => 'स्रोत बंद आहे';
+
+  @override
+  String scheduleNextRun(String when) {
+    return 'पुढील वेळ: $when';
+  }
+
+  @override
+  String scheduleLastRun(String when, String status) {
+    return 'मागील वेळ: $when · $status';
+  }
+
+  @override
+  String get jobStatusRunning => 'चालू आहे';
+
+  @override
+  String get jobStatusSucceeded => 'यशस्वी';
+
+  @override
+  String get jobStatusPartial => 'अंशतः सेव्ह';
+
+  @override
+  String get jobStatusFailed => 'अयशस्वी';
+
+  @override
+  String jobCounts(String saved, String failed) {
+    return '$saved सेव्ह, $failed अयशस्वी';
+  }
+
+  @override
+  String get runNowAction => 'आता चालवा';
+
+  @override
+  String get editScheduleAction => 'वेळापत्रक बदला';
+
+  @override
+  String get saveScheduleAction => 'वेळापत्रक सेव्ह करा';
+
+  @override
+  String get scheduleFrequencyLabel => 'किती वेळा';
+
+  @override
+  String get frequencyDaily => 'दररोज';
+
+  @override
+  String get frequencyWeekly => 'दर आठवड्याला';
+
+  @override
+  String get frequencyEveryNHours => 'काही तासांनी';
+
+  @override
+  String get scheduleTimeLabel => 'वेळ (IST)';
+
+  @override
+  String get scheduleDayLabel => 'दिवस';
+
+  @override
+  String get scheduleIntervalLabel => 'इतक्या वेळाने';
+
+  @override
+  String intervalHoursOption(String hours) {
+    return '$hours तास';
+  }
+
+  @override
+  String get scheduleEnabledLabel => 'आपोआप चालवा';
+
+  @override
+  String get scheduleSaved => 'वेळापत्रक सेव्ह झाले.';
+
+  @override
+  String get runCompleted => 'चालवणे पूर्ण झाले. कार्डवर मागील वेळ पहा.';
 }

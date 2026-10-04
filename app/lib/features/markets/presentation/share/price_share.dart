@@ -7,9 +7,11 @@ import 'package:flutter/rendering.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:share_plus/share_plus.dart';
 
+import '../../../../core/di/injection.dart';
 import '../../../../core/files/file_saver.dart';
 import '../../../../core/l10n/l10n.dart';
 import '../../../../core/utils/formatters.dart';
+import '../../../monetization/presentation/ads/interstitial_ads.dart';
 import 'price_share_data.dart';
 import 'share_price_card.dart';
 
@@ -25,6 +27,18 @@ import 'share_price_card.dart';
 /// when the browser cannot share files is the text shared and the picture
 /// handed over as a download.
 Future<void> sharePriceCard(BuildContext context, PriceShareData data) async {
+  // Preload while the card renders and the share sheet is open; the ad (if
+  // one is due) shows once sharing is over — a natural break, never mid-task.
+  final interstitials = getIt<InterstitialAds>();
+  unawaited(interstitials.warmUp());
+  try {
+    await _share(context, data);
+  } finally {
+    unawaited(interstitials.showIfDue());
+  }
+}
+
+Future<void> _share(BuildContext context, PriceShareData data) async {
   final l10n = context.l10n;
   final text = priceShareText(context, data);
   final fileName = _fileName(data);

@@ -14,6 +14,11 @@ import 'package:dio/dio.dart' as _i361;
 import 'package:flutter_secure_storage/flutter_secure_storage.dart' as _i558;
 import 'package:get_it/get_it.dart' as _i174;
 import 'package:injectable/injectable.dart' as _i526;
+import 'package:mol_bhav/core/ads/ad_personalisation.dart' as _i977;
+import 'package:mol_bhav/core/ads/ad_request_factory.dart' as _i969;
+import 'package:mol_bhav/core/ads/interstitial_pacer.dart' as _i1056;
+import 'package:mol_bhav/core/ads/mobile_ads_bootstrap.dart' as _i992;
+import 'package:mol_bhav/core/ads/rewarded_ad_player.dart' as _i537;
 import 'package:mol_bhav/core/cache/response_cache.dart' as _i756;
 import 'package:mol_bhav/core/di/register_module.dart' as _i678;
 import 'package:mol_bhav/core/locale/locale_cubit.dart' as _i243;
@@ -28,9 +33,12 @@ import 'package:mol_bhav/core/utils/countdown.dart' as _i1044;
 import 'package:mol_bhav/features/account/data/account_data.dart' as _i968;
 import 'package:mol_bhav/features/account/domain/account.dart' as _i695;
 import 'package:mol_bhav/features/account/presentation/account_cubits.dart'
-    as _i955;
+    as _i956;
 import 'package:mol_bhav/features/account/presentation/profile_cubit.dart'
     as _i736;
+import 'package:mol_bhav/features/admin/data/admin_ingestion_data.dart'
+    as _i688;
+import 'package:mol_bhav/features/admin/domain/admin_ingestion.dart' as _i919;
 import 'package:mol_bhav/features/alerts/data/alerts_data.dart' as _i89;
 import 'package:mol_bhav/features/alerts/domain/alerts.dart' as _i1045;
 import 'package:mol_bhav/features/alerts/presentation/alert_rules_cubit.dart'
@@ -48,9 +56,9 @@ import 'package:mol_bhav/features/auth/domain/repositories/auth_repository.dart'
 import 'package:mol_bhav/features/auth/domain/usecases/password_auth.dart'
     as _i1050;
 import 'package:mol_bhav/features/auth/domain/usecases/request_otp.dart'
-    as _i969;
+    as _i970;
 import 'package:mol_bhav/features/auth/domain/usecases/verify_otp.dart'
-    as _i445;
+    as _i446;
 import 'package:mol_bhav/features/auth/presentation/cubit/login_cubit.dart'
     as _i597;
 import 'package:mol_bhav/features/auth/presentation/cubit/otp_cubit.dart'
@@ -75,6 +83,14 @@ import 'package:mol_bhav/features/markets/presentation/mandi_prices_cubit.dart'
     as _i804;
 import 'package:mol_bhav/features/markets/presentation/markets_cubits.dart'
     as _i333;
+import 'package:mol_bhav/features/monetization/data/monetization_data.dart'
+    as _i445;
+import 'package:mol_bhav/features/monetization/domain/monetization.dart'
+    as _i297;
+import 'package:mol_bhav/features/monetization/presentation/ads/interstitial_ads.dart'
+    as _i798;
+import 'package:mol_bhav/features/monetization/presentation/unlock_cubit.dart'
+    as _i1007;
 import 'package:mol_bhav/features/notifications/data/notification_prefs_data.dart'
     as _i234;
 import 'package:mol_bhav/features/notifications/domain/notification_prefs.dart'
@@ -93,6 +109,11 @@ import 'package:mol_bhav/features/onboarding/presentation/cubit/business_profile
     as _i976;
 import 'package:mol_bhav/features/onboarding/presentation/cubit/select_category_cubit.dart'
     as _i1019;
+import 'package:mol_bhav/features/promotions/data/promotion_events_tracker.dart'
+    as _i955;
+import 'package:mol_bhav/features/promotions/data/promotions_data.dart'
+    as _i292;
+import 'package:mol_bhav/features/promotions/domain/promotions.dart' as _i249;
 import 'package:mol_bhav/features/support/data/support_data.dart' as _i551;
 import 'package:mol_bhav/features/support/domain/support.dart' as _i339;
 import 'package:mol_bhav/features/support/presentation/support_cubits.dart'
@@ -122,6 +143,9 @@ extension GetItInjectableX on _i174.GetIt {
       preResolve: true,
     );
     gh.factory<_i1044.Countdown>(() => const _i1044.Countdown());
+    gh.lazySingleton<_i992.MobileAdsBootstrap>(
+      () => _i992.MobileAdsBootstrap(),
+    );
     gh.lazySingleton<_i558.FlutterSecureStorage>(
       () => registerModule.secureStorage,
     );
@@ -135,6 +159,12 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i411.TokenStorage>(),
         gh<_i444.TokenRefresher>(),
       ),
+    );
+    gh.lazySingleton<_i977.AdPersonalisationCubit>(
+      () => _i977.AdPersonalisationCubit(gh<_i460.SharedPreferences>()),
+    );
+    gh.lazySingleton<_i1056.InterstitialPacer>(
+      () => _i1056.InterstitialPacer(gh<_i460.SharedPreferences>()),
     );
     gh.lazySingleton<_i98.LocaleRepository>(
       () => _i98.LocaleRepository(gh<_i460.SharedPreferences>()),
@@ -151,10 +181,19 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i756.ResponseCache>(),
       ),
     );
+    gh.lazySingleton<_i969.AdRequestFactory>(
+      () => _i969.AdRequestFactory(gh<_i977.AdPersonalisationCubit>()),
+    );
     gh.lazySingleton<_i115.SessionManager>(
       () => _i115.SessionManager(
         gh<_i411.TokenStorage>(),
         gh<_i756.ResponseCache>(),
+      ),
+    );
+    gh.lazySingleton<_i537.RewardedAdPlayer>(
+      () => _i537.RewardedAdPlayer(
+        gh<_i992.MobileAdsBootstrap>(),
+        gh<_i969.AdRequestFactory>(),
       ),
     );
     gh.lazySingleton<_i361.Dio>(
@@ -192,6 +231,9 @@ extension GetItInjectableX on _i174.GetIt {
     gh.lazySingleton<_i234.NotificationPrefsRemoteDataSource>(
       () => _i234.DioNotificationPrefsRemoteDataSource(gh<_i361.Dio>()),
     );
+    gh.lazySingleton<_i297.MonetizationRepository>(
+      () => _i445.MonetizationRepositoryImpl(gh<_i361.Dio>()),
+    );
     gh.factory<_i995.GetMandiPrices>(
       () => _i995.GetMandiPrices(gh<_i995.MandiPricesRepository>()),
     );
@@ -201,11 +243,17 @@ extension GetItInjectableX on _i174.GetIt {
     gh.lazySingleton<_i196.BillingRemoteDataSource>(
       () => _i196.DioBillingRemoteDataSource(gh<_i361.Dio>()),
     );
+    gh.lazySingleton<_i249.PromotionsRepository>(
+      () => _i292.PromotionsRepositoryImpl(gh<_i361.Dio>()),
+    );
     gh.lazySingleton<_i696.AuthRepository>(
       () => _i154.AuthRepositoryImpl(
         gh<_i875.AuthRemoteDataSource>(),
         gh<_i115.SessionManager>(),
       ),
+    );
+    gh.lazySingleton<_i919.AdminIngestionRepository>(
+      () => _i688.AdminIngestionRepositoryImpl(gh<_i361.Dio>()),
     );
     gh.lazySingleton<_i968.AccountRemoteDataSource>(
       () => _i968.DioAccountRemoteDataSource(gh<_i361.Dio>()),
@@ -277,6 +325,25 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i234.NotificationPrefsRemoteDataSource>(),
       ),
     );
+    gh.lazySingleton<_i955.PromotionEventsTracker>(
+      () => _i955.PromotionEventsTracker(
+        gh<_i249.PromotionsRepository>(),
+        gh<_i115.SessionManager>(),
+      ),
+      dispose: (i) => i.dispose(),
+    );
+    gh.factory<_i297.GetEntitlements>(
+      () => _i297.GetEntitlements(gh<_i297.MonetizationRepository>()),
+    );
+    gh.factory<_i297.StartAdUnlock>(
+      () => _i297.StartAdUnlock(gh<_i297.MonetizationRepository>()),
+    );
+    gh.factory<_i297.GetAdUnlockSession>(
+      () => _i297.GetAdUnlockSession(gh<_i297.MonetizationRepository>()),
+    );
+    gh.factory<_i297.CompleteUnlockWithoutAds>(
+      () => _i297.CompleteUnlockWithoutAds(gh<_i297.MonetizationRepository>()),
+    );
     gh.factory<_i103.NotificationPrefsCubit>(
       () =>
           _i103.NotificationPrefsCubit(gh<_i287.NotificationPrefsRepository>()),
@@ -312,11 +379,11 @@ extension GetItInjectableX on _i174.GetIt {
     gh.factory<_i1050.RegisterWithPassword>(
       () => _i1050.RegisterWithPassword(gh<_i696.AuthRepository>()),
     );
-    gh.factory<_i969.RequestOtp>(
-      () => _i969.RequestOtp(gh<_i696.AuthRepository>()),
+    gh.factory<_i970.RequestOtp>(
+      () => _i970.RequestOtp(gh<_i696.AuthRepository>()),
     );
-    gh.factory<_i445.VerifyOtp>(
-      () => _i445.VerifyOtp(gh<_i696.AuthRepository>()),
+    gh.factory<_i446.VerifyOtp>(
+      () => _i446.VerifyOtp(gh<_i696.AuthRepository>()),
     );
     gh.factory<_i804.MandiPricesCubit>(
       () => _i804.MandiPricesCubit(gh<_i995.GetMandiPrices>()),
@@ -324,8 +391,8 @@ extension GetItInjectableX on _i174.GetIt {
     gh.factoryParam<_i245.OtpCubit, _i769.OtpChallenge, dynamic>(
       (challenge, _) => _i245.OtpCubit(
         challenge,
-        gh<_i445.VerifyOtp>(),
-        gh<_i969.RequestOtp>(),
+        gh<_i446.VerifyOtp>(),
+        gh<_i970.RequestOtp>(),
         gh<_i1044.Countdown>(),
       ),
     );
@@ -340,6 +407,9 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i587.WatchlistRemoteDataSource>(),
         gh<_i756.ResponseCache>(),
       ),
+    );
+    gh.factory<_i249.GetPromotion>(
+      () => _i249.GetPromotion(gh<_i249.PromotionsRepository>()),
     );
     gh.factory<_i333.PriceTrendsCubit>(
       () => _i333.PriceTrendsCubit(gh<_i806.GetPriceTrend>()),
@@ -431,6 +501,16 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i243.LocaleCubit>(),
       ),
     );
+    gh.factory<_i1007.UnlockCubit>(
+      () => _i1007.UnlockCubit(
+        gh<_i297.GetEntitlements>(),
+        gh<_i297.StartAdUnlock>(),
+        gh<_i297.GetAdUnlockSession>(),
+        gh<_i297.CompleteUnlockWithoutAds>(),
+        gh<_i537.RewardedAdPlayer>(),
+        gh<_i736.ProfileCubit>(),
+      ),
+    );
     gh.factory<_i333.MarketComparisonCubit>(
       () => _i333.MarketComparisonCubit(
         gh<_i806.GetCommodities>(),
@@ -445,8 +525,8 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i339.GetSupportContact>(),
       ),
     );
-    gh.factory<_i955.MoreCubit>(
-      () => _i955.MoreCubit(
+    gh.factory<_i956.MoreCubit>(
+      () => _i956.MoreCubit(
         gh<_i736.ProfileCubit>(),
         gh<_i695.SignOut>(),
         gh<_i552.NotificationService>(),
@@ -458,8 +538,16 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i339.ReplyToSupportTicket>(),
       ),
     );
+    gh.lazySingleton<_i798.InterstitialAds>(
+      () => _i798.InterstitialAds(
+        gh<_i992.MobileAdsBootstrap>(),
+        gh<_i969.AdRequestFactory>(),
+        gh<_i1056.InterstitialPacer>(),
+        gh<_i736.ProfileCubit>(),
+      ),
+    );
     gh.factory<_i597.LoginCubit>(
-      () => _i597.LoginCubit(gh<_i969.RequestOtp>()),
+      () => _i597.LoginCubit(gh<_i970.RequestOtp>()),
     );
     gh.factory<_i760.RaiseTicketCubit>(
       () => _i760.RaiseTicketCubit(gh<_i339.CreateSupportTicket>()),

@@ -1,20 +1,21 @@
 using MediatR;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using MolBhav.Application.Abstractions.Pricing;
+using MolBhav.Application.Abstractions.Ingestion;
 using MolBhav.Application.Features.Ingestion.Admin.RunIngestionJob;
+using MolBhav.Application.Features.Ingestion.Scheduling.ClaimDueIngestionSchedule;
 using MolBhav.Domain.Ingestion;
 
 namespace MolBhav.Infrastructure.Ingestion;
 
 /// <summary>
-/// Fulfils BRD §9/§18's "Background Services / scheduled workers" for ingestion: on <see cref="IngestionSchedulerOptions.IntervalHours"/>,
-/// runs one <see cref="RunIngestionJobCommand"/> per active <c>PriceSource</c>. Each source's run gets its own DI
-/// scope (own DbContext/transaction) so one failing source never blocks the rest, mirroring <c>OutboxProcessor</c>.
-/// Until real adapters are wired up, every scheduled run ends up a <see cref="IngestionJobStatus.Failed"/> job with
-/// an honest reason — this loop exists so the scheduling/observability plumbing is already in place when they are.
+/// Runs admin-configured <see cref="IngestionSchedule"/>s (BRD §9/§18). Every <see cref="IngestionSchedulerOptions.PollIntervalSeconds"/>
+/// it reads the due schedules, claims each slot in its own transaction (which advances the schedule, so a crash mid-run
+/// never re-runs the same slot and two API instances never both run it), then runs the source in a fresh scope.
+/// Sources without a schedule are never pulled automatically — an admin must schedule them (or use "Run now").
 /// </summary>
 internal sealed partial class IngestionSchedulerBackgroundService(
     IServiceScopeFactory scopeFactory,
@@ -32,7 +33,7 @@ internal sealed partial class IngestionSchedulerBackgroundService(
             return;
         }
 
-        using var timer = new PeriodicTimer(TimeSpan.FromHours(settings.IntervalHours), timeProvider);
+        using var timer = new PeriodicTimer(TimeSpan.FromSeconds(settings.PollIntervalSeconds), timeProvider);
 
         try
         {
@@ -40,7 +41,7 @@ internal sealed partial class IngestionSchedulerBackgroundService(
             {
                 try
                 {
-                    await RunAllSourcesAsync(stoppingToken);
+                    await RunDueSchedulesAsync(settings.MaxRunsPerTick, stoppingToken);
                 }
                 catch (Exception ex) when (ex is not OperationCanceledException)
                 {
@@ -55,28 +56,58 @@ internal sealed partial class IngestionSchedulerBackgroundService(
         }
     }
 
-    private async Task RunAllSourcesAsync(CancellationToken cancellationToken)
+    private async Task RunDueSchedulesAsync(int maxRuns, CancellationToken cancellationToken)
     {
-        IReadOnlyList<Domain.Pricing.PriceSource> sources;
+        IReadOnlyList<Guid> dueIds;
         await using (var scope = scopeFactory.CreateAsyncScope())
         {
-            var sourceRepository = scope.ServiceProvider.GetRequiredService<IPriceSourceRepository>();
-            sources = await sourceRepository.GetActiveAsync(cancellationToken);
+            var repository = scope.ServiceProvider.GetRequiredService<IIngestionScheduleRepository>();
+            dueIds = await repository.GetDueIdsAsync(timeProvider.GetUtcNow(), maxRuns, cancellationToken);
         }
 
-        foreach (var source in sources)
+        foreach (var scheduleId in dueIds)
         {
+            var priceSourceId = await TryClaimAsync(scheduleId, cancellationToken);
+            if (priceSourceId is null)
+            {
+                continue;
+            }
+
             await using var scope = scopeFactory.CreateAsyncScope();
             var sender = scope.ServiceProvider.GetRequiredService<ISender>();
 
             try
             {
-                await sender.Send(new RunIngestionJobCommand(source.Id, IngestionTriggerType.Scheduled, null), cancellationToken);
+                var result = await sender.Send(
+                    new RunIngestionJobCommand(priceSourceId.Value, IngestionTriggerType.Scheduled, null), cancellationToken);
+                if (result.IsFailure)
+                {
+                    // e.g. the source was deactivated after it was scheduled.
+                    LogRunRejected(logger, priceSourceId.Value, result.Error.Code, result.Error.Description);
+                }
             }
             catch (Exception ex) when (ex is not OperationCanceledException)
             {
-                LogSourceFailed(logger, source.Code, ex);
+                LogSourceFailed(logger, priceSourceId.Value, ex);
             }
+        }
+    }
+
+    /// <summary>The source to run, or null when the slot is gone (claimed elsewhere, or edited since it was read).</summary>
+    private async Task<Guid?> TryClaimAsync(Guid scheduleId, CancellationToken cancellationToken)
+    {
+        await using var scope = scopeFactory.CreateAsyncScope();
+        var sender = scope.ServiceProvider.GetRequiredService<ISender>();
+
+        try
+        {
+            var claim = await sender.Send(new ClaimDueIngestionScheduleCommand(scheduleId), cancellationToken);
+            return claim.IsSuccess ? claim.Value : null;
+        }
+        catch (DbUpdateConcurrencyException)
+        {
+            LogClaimLost(logger, scheduleId);
+            return null;
         }
     }
 
@@ -86,6 +117,12 @@ internal sealed partial class IngestionSchedulerBackgroundService(
     [LoggerMessage(Level = LogLevel.Error, Message = "Ingestion scheduler tick failed")]
     private static partial void LogTickFailed(ILogger logger, Exception exception);
 
-    [LoggerMessage(Level = LogLevel.Error, Message = "Scheduled ingestion run failed for source {SourceCode}")]
-    private static partial void LogSourceFailed(ILogger logger, string sourceCode, Exception exception);
+    [LoggerMessage(Level = LogLevel.Debug, Message = "Ingestion schedule {ScheduleId} was claimed by another instance")]
+    private static partial void LogClaimLost(ILogger logger, Guid scheduleId);
+
+    [LoggerMessage(Level = LogLevel.Warning, Message = "Scheduled ingestion for source {PriceSourceId} was rejected: {Code} {Description}")]
+    private static partial void LogRunRejected(ILogger logger, Guid priceSourceId, string code, string description);
+
+    [LoggerMessage(Level = LogLevel.Error, Message = "Scheduled ingestion run failed for source {PriceSourceId}")]
+    private static partial void LogSourceFailed(ILogger logger, Guid priceSourceId, Exception exception);
 }

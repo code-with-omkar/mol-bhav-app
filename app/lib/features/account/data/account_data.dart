@@ -80,6 +80,7 @@ class AccountRepositoryImpl implements AccountRepository {
       isPro: j.str('subscriptionTier') == 'pro',
       pushEnabled: j.flag('pushEnabled'),
       whatsappEnabled: j.flag('whatsAppEnabled'),
+      isAdmin: j.flag('isAdmin'),
     );
   }
 

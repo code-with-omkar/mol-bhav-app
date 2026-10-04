@@ -15,6 +15,10 @@ import '../../../shared/widgets/mb_price.dart';
 import '../../../shared/widgets/mb_select_field.dart';
 import '../../../shared/widgets/mb_state_views.dart';
 import '../domain/mandi_prices.dart';
+import '../../monetization/presentation/ads/ad_interleave.dart';
+import '../../monetization/presentation/ads/native_ad_slot.dart';
+import '../../promotions/domain/promotions.dart';
+import '../../promotions/presentation/ad_slot.dart';
 import '../../watchlist/presentation/watch_star.dart';
 import 'mandi_prices_cubit.dart';
 import 'share/price_share.dart';
@@ -144,46 +148,60 @@ class _Prices extends StatelessWidget {
       LoadStatus.ready when prices.data!.isEmpty => MbEmptyView(
         message: l10n.mandiPricesEmpty,
       ),
-      LoadStatus.ready => MbGroup(
-        children: [
-          for (final p in prices.data!)
-            Row(
-              children: [
-                Expanded(
-                  child: MbPriceRow(
-                    name: p.variantName == null
-                        ? p.productName
-                        : '${p.productName} · ${p.variantName}',
-                    meta:
-                        '${l10n.priceDate(formatDayMonth(p.recordDate, locale))}'
-                        ' · ${p.source}',
-                    price: formatInr(p.modalPrice),
-                    unit: p.unitSymbol,
-                    onShare: () => sharePriceCard(
-                      context,
-                      PriceShareData(
-                        productName: p.productName,
-                        variantName: p.variantName,
-                        mandiName: state.mandiName ?? '',
-                        minPrice: p.minPrice,
-                        maxPrice: p.maxPrice,
-                        modalPrice: p.modalPrice,
-                        unitSymbol: p.unitSymbol,
-                        recordDate: p.recordDate,
-                        source: p.source,
-                        link: DeepLinkConfig.productLink(
-                          p.productId,
-                          mandiId: state.mandiId,
+      // One native card per 8 rows, between groups — never inside one.
+      LoadStatus.ready => Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: interleaveAds(
+          every: 8,
+          group: (rows) => MbGroup(children: rows),
+          // The first slot can carry a sponsor; the rest stay AdMob.
+          ad: (i) => i == 0
+              ? const AdSlot(placement: PromotionPlacement.mandiPrices)
+              : const NativeAdSlot(),
+          spacing: const SizedBox(height: MbSpacing.s3),
+          rows: [
+            for (final p in prices.data!)
+              Row(
+                children: [
+                  Expanded(
+                    child: MbPriceRow(
+                      name: p.variantName == null
+                          ? p.productName
+                          : '${p.productName} · ${p.variantName}',
+                      meta:
+                          '${l10n.priceDate(formatDayMonth(p.recordDate, locale))}'
+                          ' · ${p.source}',
+                      price: formatInr(p.modalPrice),
+                      unit: p.unitSymbol,
+                      onShare: () => sharePriceCard(
+                        context,
+                        PriceShareData(
+                          productName: p.productName,
+                          variantName: p.variantName,
+                          mandiName: state.mandiName ?? '',
+                          minPrice: p.minPrice,
+                          maxPrice: p.maxPrice,
+                          modalPrice: p.modalPrice,
+                          unitSymbol: p.unitSymbol,
+                          recordDate: p.recordDate,
+                          source: p.source,
+                          link: DeepLinkConfig.productLink(
+                            p.productId,
+                            mandiId: state.mandiId,
+                          ),
                         ),
                       ),
+                      shareLabel: l10n.sharePrice,
                     ),
-                    shareLabel: l10n.sharePrice,
                   ),
-                ),
-                WatchStarButton(productId: p.productId, variantId: p.variantId),
-              ],
-            ),
-        ],
+                  WatchStarButton(
+                    productId: p.productId,
+                    variantId: p.variantId,
+                  ),
+                ],
+              ),
+          ],
+        ),
       ),
       _ => const Padding(
         padding: EdgeInsets.all(MbSpacing.s6),

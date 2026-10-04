@@ -36,6 +36,15 @@ Failure mapDioException(DioException e) {
     case DioExceptionType.badResponse:
       final status = e.response?.statusCode;
       if (status == 401) return const UnauthorizedFailure();
+      final limited = status == 403
+          ? limitedFeatureFor(errorCode(e.response?.data))
+          : null;
+      if (limited != null) {
+        return LimitReachedFailure(
+          limited,
+          message: serverMessage(e.response?.data),
+        );
+      }
       return ServerFailure(
         statusCode: status,
         message: serverMessage(e.response?.data),
@@ -48,6 +57,20 @@ Failure mapDioException(DioException e) {
       return const UnexpectedFailure();
   }
 }
+
+/// The API's stable `errorCode` on an RFC 7807 body.
+String? errorCode(Object? data) =>
+    data is Map<String, dynamic> && data['errorCode'] is String
+    ? data['errorCode'] as String
+    : null;
+
+/// Which free-tier limit an API error code reports, if any.
+LimitedFeature? limitedFeatureFor(String? code) => switch (code) {
+  'Entitlement.WatchlistLimitReached' => LimitedFeature.watchlist,
+  'Entitlement.AlertRuleLimitReached' => LimitedFeature.alertRules,
+  'Report.ProRequired' => LimitedFeature.proReport,
+  _ => null,
+};
 
 /// Reads the `message` (or RFC 7807 `detail`/`title`) from an error body.
 String? serverMessage(Object? data) {

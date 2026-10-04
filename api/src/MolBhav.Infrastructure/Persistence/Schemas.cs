@@ -49,6 +49,12 @@ public static class Schemas
     /// <summary>Support tickets and their message threads.</summary>
     public const string Support = "support";
 
+    /// <summary>Free-tier limits: rewarded-ad unlock sessions, verified ad views, earned feature grants.</summary>
+    public const string Monetization = "monetization";
+
+    /// <summary>Direct-sold sponsored campaigns: advertisers, campaigns, targets, daily delivery counts.</summary>
+    public const string Promotions = "promotions";
+
     /// <summary>Transactional outbox.</summary>
     public const string Messaging = "messaging";
 }

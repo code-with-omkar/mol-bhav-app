@@ -46,6 +46,16 @@ internal static class RateLimitingSetup
                     $"coupon:{context.User.FindFirst(MolBhavClaimTypes.Subject)?.Value ?? ClientIp(context)}",
                     _ => FixedWindow(settings.CouponValidatePermitLimit, window)));
 
+            options.AddPolicy(RateLimitPolicies.AdCallback, context =>
+                RateLimitPartition.GetFixedWindowLimiter(
+                    $"ad-callback:{ClientIp(context)}",
+                    _ => FixedWindow(settings.AdCallbackPermitLimit, window)));
+
+            options.AddPolicy(RateLimitPolicies.PromotionEvents, context =>
+                RateLimitPartition.GetFixedWindowLimiter(
+                    $"promotion-events:{context.User.FindFirst(MolBhavClaimTypes.Subject)?.Value ?? ClientIp(context)}",
+                    _ => FixedWindow(settings.PromotionEventsPermitLimit, window)));
+
             options.OnRejected =async (context, cancellationToken) =>
             {
                 if (context.Lease.TryGetMetadata(MetadataName.RetryAfter, out var retryAfter))

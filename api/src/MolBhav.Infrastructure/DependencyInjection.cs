@@ -18,9 +18,11 @@ using MolBhav.Application.Abstractions.Identity;
 using MolBhav.Application.Abstractions.Ingestion;
 using MolBhav.Application.Abstractions.Localization;
 using MolBhav.Application.Abstractions.Market;
+using MolBhav.Application.Abstractions.Monetization;
 using MolBhav.Application.Abstractions.Notifications;
 using MolBhav.Application.Abstractions.Pricing;
 using MolBhav.Application.Abstractions.Procurement;
+using MolBhav.Application.Abstractions.Promotions;
 using MolBhav.Application.Abstractions.Reporting;
 using MolBhav.Application.Abstractions.Support;
 using MolBhav.Application.Abstractions.Watchlist;
@@ -30,6 +32,7 @@ using MolBhav.Infrastructure.Billing.Razorpay;
 using MolBhav.Infrastructure.Ingestion;
 using MolBhav.Infrastructure.Messaging;
 using MolBhav.Infrastructure.Messaging.Outbox;
+using MolBhav.Infrastructure.Monetization;
 using MolBhav.Infrastructure.Notifications;
 using MolBhav.Infrastructure.Persistence;
 using MolBhav.Infrastructure.Persistence.Interceptors;
@@ -47,6 +50,7 @@ using Google.Apis.Auth.OAuth2;
 using MolBhav.Infrastructure.Persistence.Read.Notification;
 using MolBhav.Infrastructure.Persistence.Read.Pricing;
 using MolBhav.Infrastructure.Persistence.Read.Procurement;
+using MolBhav.Infrastructure.Persistence.Read.Promotions;
 using MolBhav.Infrastructure.Persistence.Read.Reporting;
 using MolBhav.Infrastructure.Persistence.Read.Support;
 using MolBhav.Infrastructure.Persistence.Read.Watchlist;
@@ -57,9 +61,11 @@ using MolBhav.Infrastructure.Persistence.Repositories.Identity;
 using MolBhav.Infrastructure.Persistence.Repositories.Ingestion;
 using MolBhav.Infrastructure.Persistence.Repositories.Localization;
 using MolBhav.Infrastructure.Persistence.Repositories.Market;
+using MolBhav.Infrastructure.Persistence.Repositories.Monetization;
 using MolBhav.Infrastructure.Persistence.Repositories.Notification;
 using MolBhav.Infrastructure.Persistence.Repositories.Pricing;
 using MolBhav.Infrastructure.Persistence.Repositories.Procurement;
+using MolBhav.Infrastructure.Persistence.Repositories.Promotions;
 using MolBhav.Infrastructure.Persistence.Repositories.Reporting;
 using MolBhav.Infrastructure.Persistence.Repositories.Support;
 using MolBhav.Infrastructure.Persistence.Repositories.Watchlist;
@@ -100,7 +106,9 @@ public static class DependencyInjection
             .AddBillingModule(configuration, environment)
             .AddIngestionModule(configuration, environment)
             .AddLocalizationModule()
-            .AddSupportModule(configuration);
+            .AddSupportModule(configuration)
+            .AddMonetizationModule(configuration)
+            .AddPromotionsModule();
 
         return services;
     }
@@ -284,6 +292,7 @@ public static class DependencyInjection
 
         services.AddScoped<IDataIngestionJobRepository, DataIngestionJobRepository>();
         services.AddScoped<IDataIngestionErrorRepository, DataIngestionErrorRepository>();
+        services.AddScoped<IIngestionScheduleRepository, IngestionScheduleRepository>();
         services.AddScoped<IIngestionReadService, IngestionReadService>();
 
         // Keyed per PriceSource.Code; unknown codes fall back to the stub (construction sources until a feed exists).
@@ -306,7 +315,8 @@ public static class DependencyInjection
 
         services.AddOptions<IngestionSchedulerOptions>()
             .Bind(configuration.GetSection(IngestionSchedulerOptions.SectionName))
-            .Validate(o => o.IntervalHours is >= 1 and <= 168, "IngestionScheduler:IntervalHours must be between 1 and 168.")
+            .Validate(o => o.PollIntervalSeconds is >= 10 and <= 3600, "IngestionScheduler:PollIntervalSeconds must be between 10 and 3600.")
+            .Validate(o => o.MaxRunsPerTick is >= 1 and <= 100, "IngestionScheduler:MaxRunsPerTick must be between 1 and 100.")
             .ValidateOnStart();
 
         services.AddHostedService<IngestionSchedulerBackgroundService>();
@@ -326,6 +336,43 @@ public static class DependencyInjection
     {
         services.AddScoped<ILocalizedTextRepository, LocalizedTextEntryRepository>();
         services.AddScoped<ILocalizationReadService, LocalizationReadService>();
+
+        return services;
+    }
+
+    private static IServiceCollection AddMonetizationModule(this IServiceCollection services, IConfiguration configuration)
+    {
+        services.AddScoped<IAdUnlockSessionRepository, AdUnlockSessionRepository>();
+        services.AddScoped<IRewardedAdViewRepository, RewardedAdViewRepository>();
+        services.AddScoped<IFeatureGrantRepository, FeatureGrantRepository>();
+
+        // Fail closed at startup: inconsistent limits would either block free users outright or give Pro away.
+        services.AddOptions<MonetizationOptions>()
+            .Bind(configuration.GetSection(MonetizationOptions.SectionName))
+            .Validate(o => o.ToLimits().IsValid, $"{MonetizationOptions.SectionName}: every allowance needs Included >= 0, PerUnlock >= 1, Maximum >= Included, AdsPerUnlock >= 1; report unlocks need positive counts and lifetime; NoFillGrantsPerDay >= 0; UnlockSessionLifetimeMinutes > 0.")
+            .ValidateOnStart();
+        services.AddSingleton<IFreeTierPolicy, ConfiguredFreeTierPolicy>();
+
+        services.AddOptions<AdMobOptions>()
+            .Bind(configuration.GetSection(AdMobOptions.SectionName))
+            .Validate(o => o.VerifierKeysUrl is { IsAbsoluteUri: true, Scheme: "https" }, $"{AdMobOptions.SectionName}:VerifierKeysUrl must be an absolute https URL.")
+            .Validate(o => o.KeyCacheHours is >= 1 and <= 168, $"{AdMobOptions.SectionName}:KeyCacheHours must be between 1 and 168.")
+            .Validate(o => o.MinRefreshIntervalSeconds is >= 10 and <= 3600, $"{AdMobOptions.SectionName}:MinRefreshIntervalSeconds must be between 10 and 3600.")
+            .ValidateOnStart();
+
+        services.AddHttpClient(AdMobVerifierKeySource.HttpClientName, client => client.Timeout = TimeSpan.FromSeconds(10));
+        services.AddSingleton<IAdMobVerifierKeySource, AdMobVerifierKeySource>();
+        services.AddScoped<IRewardedAdCallbackVerifier, AdMobRewardedCallbackVerifier>();
+
+        return services;
+    }
+
+    private static IServiceCollection AddPromotionsModule(this IServiceCollection services)
+    {
+        services.AddScoped<IAdvertiserRepository, AdvertiserRepository>();
+        services.AddScoped<ICampaignRepository, CampaignRepository>();
+        services.AddScoped<IPromotionReadService, PromotionReadService>();
+        services.AddScoped<IPromotionStatsWriter, PromotionStatsWriter>();
 
         return services;
     }

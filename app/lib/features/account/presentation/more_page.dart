@@ -3,6 +3,8 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:share_plus/share_plus.dart';
 
+import '../../../core/ads/ad_personalisation.dart';
+import '../../../core/di/injection.dart';
 import '../../../core/l10n/l10n.dart';
 import '../../../core/locale/locale_cubit.dart';
 import '../../../core/router/app_routes.dart';
@@ -119,6 +121,21 @@ class _Content extends StatelessWidget {
             ),
           ],
         ),
+        // Admin role is granted only server-side; the API enforces it too.
+        if (profile.isAdmin) ...[
+          gap,
+          MbGroup(
+            children: [
+              MbListItem(
+                icon: MbIcons.settings,
+                iconTone: MbTone.navy,
+                title: l10n.adminSchedulesTitle,
+                subtitle: l10n.adminSchedulesSubtitle,
+                onTap: () => context.go(AppRoutes.adminSchedules),
+              ),
+            ],
+          ),
+        ],
         gap,
         MbGroup(
           children: [
@@ -126,6 +143,22 @@ class _Content extends StatelessWidget {
               icon: MbIcons.alert,
               title: l10n.notificationSettingsAction,
               onTap: () => context.push(AppRoutes.notificationPreferences),
+            ),
+            // Consent for ads based on activity: off by default (DPDP), and
+            // using the app never depends on it.
+            BlocBuilder<AdPersonalisationCubit, bool>(
+              bloc: getIt<AdPersonalisationCubit>(),
+              builder: (context, personalised) => MbListItem(
+                icon: MbIcons.shield,
+                title: l10n.adsPersonalisedTitle,
+                subtitle: l10n.adsPersonalisedSubtitle,
+                showChevron: false,
+                trailing: MbToggle(
+                  value: personalised,
+                  semanticLabel: l10n.adsPersonalisedTitle,
+                  onChanged: getIt<AdPersonalisationCubit>().set,
+                ),
+              ),
             ),
           ],
         ),

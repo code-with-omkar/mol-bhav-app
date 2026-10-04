@@ -14,6 +14,7 @@ String failureMessage(BuildContext context, Failure failure) {
     NetworkFailure() => l10n.errorNetwork,
     UnauthorizedFailure() => l10n.errorSession,
     ServerFailure(:final message) => message ?? l10n.errorServer,
+    LimitReachedFailure(:final message) => message ?? l10n.errorServer,
     _ => l10n.errorUnexpected,
   };
 }

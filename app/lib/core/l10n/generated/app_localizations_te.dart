@@ -1277,4 +1277,198 @@ class AppLocalizationsTe extends AppLocalizations {
 
   @override
   String get hidePassword => 'Hide password';
+
+  @override
+  String get unlockWatchlistTitle => 'మీ ఉచిత వాచ్‌లిస్ట్ నిండిపోయింది';
+
+  @override
+  String get unlockAlertsTitle => 'మీరు మీ ఉచిత అలర్ట్‌లను ఉపయోగించుకున్నారు';
+
+  @override
+  String get unlockReportTitle => 'ఈ రిపోర్ట్‌ను అన్‌లాక్ చేయండి';
+
+  @override
+  String unlockWatchlistBody(int slots) {
+    return 'మరో $slots అంశాలు జోడించడానికి ఒక చిన్న ప్రకటన చూడండి, లేదా అపరిమిత వాచ్‌లిస్ట్ కోసం Pro తీసుకోండి.';
+  }
+
+  @override
+  String unlockAlertsBody(int slots) {
+    return 'మరో $slots అలర్ట్‌లు జోడించడానికి ఒక చిన్న ప్రకటన చూడండి, లేదా అపరిమిత అలర్ట్‌ల కోసం Pro తీసుకోండి.';
+  }
+
+  @override
+  String get unlockReportBody =>
+      'ఈ రిపోర్ట్‌ను ఉచితంగా పొందడానికి చిన్న ప్రకటనలు చూడండి, లేదా అపరిమిత రిపోర్ట్‌ల కోసం Pro తీసుకోండి.';
+
+  @override
+  String get unlockLimitUsed =>
+      'ప్రస్తుతానికి ఉచిత పరిమితి పూర్తయింది. అపరిమిత వినియోగం కోసం Pro తీసుకోండి.';
+
+  @override
+  String get unlockProOnly =>
+      'ఇక్కడ ప్రకటనలు అందుబాటులో లేవు. అపరిమిత వినియోగం కోసం Pro తీసుకోండి.';
+
+  @override
+  String watchAdsButton(num count) {
+    final intl.NumberFormat countNumberFormat = intl.NumberFormat.compact(
+      locale: localeName,
+    );
+    final String countString = countNumberFormat.format(count);
+
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$countString ప్రకటనలు చూడండి',
+      one: '1 ప్రకటన చూడండి',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get goProNoAds => 'Pro తీసుకోండి – ప్రకటనలు లేవు';
+
+  @override
+  String unlockAdProgress(int current, int total) {
+    return 'ప్రకటన $current / $total';
+  }
+
+  @override
+  String get unlockVerifying => 'నిర్ధారిస్తున్నాం…';
+
+  @override
+  String get unlockGranted => 'అన్‌లాక్ అయింది! మళ్లీ ప్రయత్నిస్తున్నాం…';
+
+  @override
+  String get unlockFailed =>
+      'ప్రకటనను నిర్ధారించలేకపోయాం. దయచేసి మళ్లీ ప్రయత్నించండి.';
+
+  @override
+  String get reportFreeUnlockHint =>
+      'ఉచిత ప్లాన్: చిన్న ప్రకటనలు చూసి రోజుకు కొన్నిసార్లు ధర చరిత్రను అన్‌లాక్ చేయండి. Pro: అపరిమితం.';
+
+  @override
+  String get adsPersonalisedTitle => 'వ్యక్తిగత ప్రకటనలు';
+
+  @override
+  String get adsPersonalisedSubtitle =>
+      'మీరు MolBhav‌ను ఉపయోగించే విధానం ఆధారంగా ప్రకటనలు చూపించండి. ఆఫ్‌లో ఉన్నా ప్రకటనలు వస్తాయి, కానీ మీ ఆధారంగా కాదు.';
+
+  @override
+  String get promotionSponsored => 'ప్రాయోజితం';
+
+  @override
+  String get adminSchedulesTitle => 'Data pull schedules';
+
+  @override
+  String get adminSchedulesSubtitle =>
+      'When government prices are pulled automatically';
+
+  @override
+  String get adminSchedulesHint =>
+      'Times are India Standard Time. A source without a schedule is pulled only when you tap Run now.';
+
+  @override
+  String get adminNoSources => 'No price sources yet.';
+
+  @override
+  String scheduleDaily(String time) {
+    return 'Daily at $time IST';
+  }
+
+  @override
+  String scheduleWeekly(String day, String time) {
+    return 'Every $day at $time IST';
+  }
+
+  @override
+  String scheduleEveryNHours(String hours, String time) {
+    return 'Every $hours h from $time IST';
+  }
+
+  @override
+  String get scheduleNotConfigured => 'Not scheduled';
+
+  @override
+  String get scheduleStatusOn => 'On';
+
+  @override
+  String get scheduleStatusPaused => 'Paused';
+
+  @override
+  String get scheduleStatusNone => 'Not scheduled';
+
+  @override
+  String get sourceInactive => 'Source inactive';
+
+  @override
+  String scheduleNextRun(String when) {
+    return 'Next run: $when';
+  }
+
+  @override
+  String scheduleLastRun(String when, String status) {
+    return 'Last run: $when · $status';
+  }
+
+  @override
+  String get jobStatusRunning => 'Running';
+
+  @override
+  String get jobStatusSucceeded => 'Succeeded';
+
+  @override
+  String get jobStatusPartial => 'Partly saved';
+
+  @override
+  String get jobStatusFailed => 'Failed';
+
+  @override
+  String jobCounts(String saved, String failed) {
+    return '$saved saved, $failed failed';
+  }
+
+  @override
+  String get runNowAction => 'Run now';
+
+  @override
+  String get editScheduleAction => 'Edit schedule';
+
+  @override
+  String get saveScheduleAction => 'Save schedule';
+
+  @override
+  String get scheduleFrequencyLabel => 'Frequency';
+
+  @override
+  String get frequencyDaily => 'Daily';
+
+  @override
+  String get frequencyWeekly => 'Weekly';
+
+  @override
+  String get frequencyEveryNHours => 'Every few hours';
+
+  @override
+  String get scheduleTimeLabel => 'Time (IST)';
+
+  @override
+  String get scheduleDayLabel => 'Day';
+
+  @override
+  String get scheduleIntervalLabel => 'Repeat every';
+
+  @override
+  String intervalHoursOption(String hours) {
+    return '$hours hours';
+  }
+
+  @override
+  String get scheduleEnabledLabel => 'Run automatically';
+
+  @override
+  String get scheduleSaved => 'Schedule saved.';
+
+  @override
+  String get runCompleted => 'Run finished. See the last run on the card.';
 }

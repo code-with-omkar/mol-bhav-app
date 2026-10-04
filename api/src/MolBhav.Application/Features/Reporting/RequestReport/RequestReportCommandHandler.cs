@@ -5,6 +5,7 @@ using MolBhav.Application.Abstractions.Localization;
 using MolBhav.Application.Abstractions.Messaging;
 using MolBhav.Application.Abstractions.Reporting;
 using MolBhav.Application.Features.Catalog.Models;
+using MolBhav.Application.Features.Monetization;
 using MolBhav.Domain.Common.Results;
 using MolBhav.Domain.Reporting;
 
@@ -12,6 +13,7 @@ namespace MolBhav.Application.Features.Reporting.RequestReport;
 
 internal sealed class RequestReportCommandHandler(
     IReportRepository reports,
+    IEntitlementService entitlements,
     ICurrentUser currentUser,
     ILanguageContext languageContext,
     TimeProvider timeProvider)
@@ -20,16 +22,20 @@ internal sealed class RequestReportCommandHandler(
     private const int DefaultRangeDays = 7;
     private static readonly TimeSpan IndiaOffset = TimeSpan.FromHours(5.5);
 
-    public Task<Result<CreatedResponse>> Handle(RequestReportCommand request, CancellationToken cancellationToken)
+    public async Task<Result<CreatedResponse>> Handle(RequestReportCommand request, CancellationToken cancellationToken)
     {
         var userId = currentUser.GetRequiredUserId();
         var reportType = request.ReportType!.Value;
 
-        if (ReportParameters.RequiresPro(reportType)
-            && !string.Equals(currentUser.SubscriptionTier, SubscriptionTiers.Pro, StringComparison.OrdinalIgnoreCase))
+        // Pro passes; a free user spends one rewarded-ad unlock, or gets Report.ProRequired. The unlock is consumed in
+        // this command's transaction, so a report that fails to be created gives it back.
+        if (ReportParameters.RequiresPro(reportType))
         {
-            return Task.FromResult(Result.Failure<CreatedResponse>(
-                Error.Forbidden("Report.ProRequired", "This report needs a Pro subscription.")));
+            var allowed = await entitlements.AuthorizeProReportAsync(cancellationToken);
+            if (allowed.IsFailure)
+            {
+                return Result.Failure<CreatedResponse>(allowed.Error);
+            }
         }
 
         // Generation runs in the background without the request's language or clock, so defaults are fixed here.
@@ -46,10 +52,10 @@ internal sealed class RequestReportCommandHandler(
         var report = Report.Create(userId, reportType, request.Format!.Value, JsonSerializer.Serialize(parameters), now);
         if (report.IsFailure)
         {
-            return Task.FromResult(Result.Failure<CreatedResponse>(report.Error));
+            return Result.Failure<CreatedResponse>(report.Error);
         }
 
         reports.Add(report.Value);
-        return Task.FromResult(Result.Success(new CreatedResponse(report.Value.Id)));
+        return Result.Success(new CreatedResponse(report.Value.Id));
     }
 }

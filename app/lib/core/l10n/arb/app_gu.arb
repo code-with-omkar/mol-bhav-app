@@ -1,3 +1,21 @@
 {
-  "@@locale": "gu"
+  "@@locale": "gu",
+  "unlockWatchlistTitle": "તમારી મફત વૉચલિસ્ટ ભરાઈ ગઈ છે",
+  "unlockAlertsTitle": "તમે તમારા મફત અલર્ટ વાપરી લીધા છે",
+  "unlockReportTitle": "આ રિપોર્ટ અનલૉક કરો",
+  "unlockWatchlistBody": "વધુ {slots} આઇટમ ઉમેરવા માટે એક ટૂંકી જાહેરાત જુઓ, અથવા અમર્યાદિત વૉચલિસ્ટ માટે Pro લો.",
+  "unlockAlertsBody": "વધુ {slots} અલર્ટ ઉમેરવા માટે એક ટૂંકી જાહેરાત જુઓ, અથવા અમર્યાદિત અલર્ટ માટે Pro લો.",
+  "unlockReportBody": "આ રિપોર્ટ મફત મેળવવા માટે ટૂંકી જાહેરાતો જુઓ, અથવા અમર્યાદિત રિપોર્ટ માટે Pro લો.",
+  "unlockLimitUsed": "હાલ માટે મફત મર્યાદા પૂરી થઈ ગઈ છે. અમર્યાદિત ઉપયોગ માટે Pro લો.",
+  "unlockProOnly": "અહીં જાહેરાતો ઉપલબ્ધ નથી. અમર્યાદિત ઉપયોગ માટે Pro લો.",
+  "watchAdsButton": "{count, plural, =1{1 જાહેરાત જુઓ} other{{count} જાહેરાતો જુઓ}}",
+  "goProNoAds": "Pro લો – કોઈ જાહેરાત નહીં",
+  "unlockAdProgress": "જાહેરાત {current} / {total}",
+  "unlockVerifying": "પુષ્ટિ થઈ રહી છે…",
+  "unlockGranted": "અનલૉક થયું! ફરી પ્રયાસ કરી રહ્યા છીએ…",
+  "unlockFailed": "અમે જાહેરાતની પુષ્ટિ કરી શક્યા નહીં. કૃપા કરીને ફરી પ્રયાસ કરો.",
+  "reportFreeUnlockHint": "મફત પ્લાન: ટૂંકી જાહેરાતો જોઈને દિવસમાં થોડી વાર ભાવ ઇતિહાસ અનલૉક કરો. Pro: અમર્યાદિત.",
+  "adsPersonalisedTitle": "વ્યક્તિગત જાહેરાતો",
+  "adsPersonalisedSubtitle": "તમે MolBhav કેવી રીતે વાપરો છો તેના આધારે જાહેરાતો બતાવો. બંધ હોય ત્યારે પણ જાહેરાતો દેખાશે, પણ તમારા આધારે નહીં.",
+  "promotionSponsored": "પ્રાયોજિત"
 }

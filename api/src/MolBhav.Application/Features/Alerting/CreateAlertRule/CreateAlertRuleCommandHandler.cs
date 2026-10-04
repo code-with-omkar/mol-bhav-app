@@ -4,8 +4,10 @@ using MolBhav.Application.Abstractions.Catalog;
 using MolBhav.Application.Abstractions.Market;
 using MolBhav.Application.Abstractions.Messaging;
 using MolBhav.Application.Features.Catalog.Models;
+using MolBhav.Application.Features.Monetization;
 using MolBhav.Domain.Alerting;
 using MolBhav.Domain.Common.Results;
+using MolBhav.Domain.Monetization;
 
 namespace MolBhav.Application.Features.Alerting.CreateAlertRule;
 
@@ -14,6 +16,7 @@ internal sealed class CreateAlertRuleCommandHandler(
     IProductRepository products,
     IMandiRepository mandis,
     ISupplierRepository suppliers,
+    IEntitlementService entitlements,
     ICurrentUser currentUser) : ICommandHandler<CreateAlertRuleCommand, CreatedResponse>
 {
     public async Task<Result<CreatedResponse>> Handle(CreateAlertRuleCommand request, CancellationToken cancellationToken)
@@ -39,6 +42,13 @@ internal sealed class CreateAlertRuleCommandHandler(
         if (request.SupplierId is { } supplierId && await suppliers.GetByIdAsync(supplierId, cancellationToken) is null)
         {
             return Error.NotFound("Supplier.NotFound", "Supplier not found.");
+        }
+
+        // Free tier: capacity grows with rewarded-ad unlocks; Pro is unlimited.
+        var allowed = await entitlements.EnsureCanAddAsync(MonetizedFeature.AlertRuleSlots, cancellationToken);
+        if (allowed.IsFailure)
+        {
+            return Result.Failure<CreatedResponse>(allowed.Error);
         }
 
         var rule = AlertRule.Create(

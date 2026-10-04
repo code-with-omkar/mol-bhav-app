@@ -7,7 +7,7 @@ public interface IPriceSourceRepository : IRepository<PriceSource, Guid>
 {
     Task<bool> CodeExistsAsync(string code, CancellationToken cancellationToken = default);
 
-    /// <summary>Every active source — the ingestion scheduler runs one job per row.</summary>
+    /// <summary>Every active source.</summary>
     Task<IReadOnlyList<PriceSource>> GetActiveAsync(CancellationToken cancellationToken = default);
 }
 

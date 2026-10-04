@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../core/error/failure.dart';
 import '../../../core/l10n/l10n.dart';
 import '../../../core/locale/app_language.dart';
 import '../../../core/theme/app_theme.dart';
@@ -20,6 +21,7 @@ import '../../../shared/widgets/mb_price.dart';
 import '../../../shared/widgets/mb_select_field.dart';
 import '../../../shared/widgets/mb_state_views.dart';
 import '../../../shared/widgets/mb_text_field.dart';
+import '../../monetization/presentation/unlock_sheet.dart';
 import '../domain/alerts.dart';
 import 'alerts_cubits.dart';
 
@@ -39,7 +41,15 @@ class CreateAlertPage extends StatelessWidget {
               .showSnackBar(SnackBar(content: Text(l10n.alertSaved)));
           context.pop();
         } else if (state.submitStatus == SubmitStatus.failure) {
-          showFailureSnackBar(context, state.submitFailure!);
+          final failure = state.submitFailure!;
+          if (failure is LimitReachedFailure) {
+            // Free alerts used up: unlock with an ad (or go Pro), then save.
+            showUnlockSheet(context, failure.feature).then((unlocked) {
+              if (unlocked && !cubit.isClosed) cubit.submit();
+            });
+          } else {
+            showFailureSnackBar(context, failure);
+          }
         }
       },
       builder: (context, state) {
