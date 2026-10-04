@@ -1,4 +1,4 @@
-using Microsoft.Extensions.Logging.Abstractions;
+﻿using Microsoft.Extensions.Logging.Abstractions;
 using MolBhav.Application.Features.Billing.Webhook;
 using MolBhav.Domain.Billing;
 using MolBhav.Domain.Identity;
@@ -16,8 +16,9 @@ public sealed class HandleRazorpayWebhookCommandHandlerTests
             _context.Subscriptions, _context.Activation, NullLogger<HandleRazorpayWebhookCommandHandler>.Instance);
     }
 
-    private HandleRazorpayWebhookCommand Captured(string eventType = HandleRazorpayWebhookCommandHandler.PaymentCaptured) =>
-        new(eventType, _context.Subscription.RazorpayOrderId, "pay_1");
+    private HandleRazorpayWebhookCommand Captured(
+        string eventType = HandleRazorpayWebhookCommandHandler.PaymentCaptured, long? amountPaise = null, string? currency = "INR") =>
+        new(eventType, _context.Subscription.RazorpayOrderId, "pay_1", amountPaise ?? _context.Subscription.ChargePaise, currency);
 
     [Theory]
     [InlineData(HandleRazorpayWebhookCommandHandler.PaymentCaptured)]
@@ -47,7 +48,7 @@ public sealed class HandleRazorpayWebhookCommandHandlerTests
     public async Task Handle_UnknownOrder_FailsAsNotFoundSoTheInboxRetries()
     {
         var result = await _handler.Handle(
-            new HandleRazorpayWebhookCommand(HandleRazorpayWebhookCommandHandler.PaymentCaptured, "order_unknown", "pay_1"),
+            new HandleRazorpayWebhookCommand(HandleRazorpayWebhookCommandHandler.PaymentCaptured, "order_unknown", "pay_1", 48_900, "INR"),
             CancellationToken.None);
 
         Assert.True(result.IsFailure);
@@ -73,5 +74,35 @@ public sealed class HandleRazorpayWebhookCommandHandlerTests
 
         Assert.True(result.IsSuccess);
         Assert.Equal(SubscriptionStatus.Active, _context.Subscription.Status);
+    }
+
+    [Fact]
+    public async Task Handle_AmountDiffersFromCharge_FailsAsConflictWithoutActivating()
+    {
+        var result = await _handler.Handle(Captured(amountPaise: _context.Subscription.ChargePaise - 100), CancellationToken.None);
+
+        Assert.Equal(BillingErrors.PaymentAmountMismatch, result.Error);
+        Assert.Equal(SubscriptionStatus.PendingPayment, _context.Subscription.Status);
+    }
+
+    [Fact]
+    public async Task Handle_CurrencyDiffers_FailsWithoutActivating()
+    {
+        var result = await _handler.Handle(Captured(currency: "USD"), CancellationToken.None);
+
+        Assert.Equal(BillingErrors.PaymentAmountMismatch, result.Error);
+        Assert.Equal(SubscriptionStatus.PendingPayment, _context.Subscription.Status);
+    }
+
+    [Fact]
+    public async Task Handle_AmountMissing_FailsWithoutActivating()
+    {
+        var command = new HandleRazorpayWebhookCommand(
+            HandleRazorpayWebhookCommandHandler.PaymentCaptured, _context.Subscription.RazorpayOrderId, "pay_1", null, "INR");
+
+        var result = await _handler.Handle(command, CancellationToken.None);
+
+        Assert.Equal(BillingErrors.PaymentAmountMismatch, result.Error);
+        Assert.Equal(SubscriptionStatus.PendingPayment, _context.Subscription.Status);
     }
 }

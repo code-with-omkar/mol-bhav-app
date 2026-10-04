@@ -19,6 +19,9 @@ public static class BillingErrors
     public static readonly Error PaymentMismatch =
         Error.Conflict("Subscription.PaymentMismatch", "This subscription was already activated by a different payment.");
 
+    public static readonly Error PaymentAmountMismatch =
+        Error.Conflict("Subscription.PaymentAmountMismatch", "The payment amount or currency does not match what this subscription charges.");
+
     public static readonly Error InvalidSignature =
         Error.Validation("Payment.InvalidSignature", "Payment signature verification failed.");
 

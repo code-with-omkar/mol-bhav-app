@@ -24,4 +24,17 @@ internal sealed class SubscriptionRepository(MolBhavDbContext dbContext) : Repos
             .OrderBy(s => s.ExpiresAtUtc)
             .Take(batchSize)
             .ToListAsync(cancellationToken);
+
+    // No dedicated index: pending rows are abandoned or in-flight checkouts, a small slice of a small table, and the
+    // sweep runs every few minutes. Revisit (partial index WHERE status = 'PendingPayment') if billing history grows large.
+    public async Task<IReadOnlyList<Guid>> GetPendingPaymentIdsChangedBetweenAsync(
+        DateTimeOffset changedFromUtc, DateTimeOffset changedToUtc, int limit, CancellationToken cancellationToken = default) =>
+        await Set
+            .AsNoTracking()
+            .Where(s => s.Status == SubscriptionStatus.PendingPayment && s.RazorpayOrderId != null)
+            .Where(s => (s.UpdatedAtUtc ?? s.CreatedAtUtc) >= changedFromUtc && (s.UpdatedAtUtc ?? s.CreatedAtUtc) <= changedToUtc)
+            .OrderByDescending(s => s.UpdatedAtUtc ?? s.CreatedAtUtc)
+            .Select(s => s.Id)
+            .Take(limit)
+            .ToListAsync(cancellationToken);
 }

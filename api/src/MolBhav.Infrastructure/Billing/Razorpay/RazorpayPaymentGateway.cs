@@ -41,8 +41,7 @@ internal sealed partial class RazorpayPaymentGateway(
                 notes = new { subscription_id = request.SubscriptionId.ToString() },
             }),
         };
-        message.Headers.Authorization = new AuthenticationHeaderValue(
-            "Basic", Convert.ToBase64String(Encoding.UTF8.GetBytes($"{_options.KeyId}:{_options.KeySecret}")));
+        message.Headers.Authorization = BasicAuthorization();
 
         try
         {
@@ -74,6 +73,48 @@ internal sealed partial class RazorpayPaymentGateway(
         }
     }
 
+    public async Task<OrderPaymentsResult> GetOrderPaymentsAsync(string orderId, CancellationToken ct = default)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(orderId);
+
+        using var message = new HttpRequestMessage(HttpMethod.Get, $"/v1/orders/{Uri.EscapeDataString(orderId)}/payments");
+        message.Headers.Authorization = BasicAuthorization();
+
+        try
+        {
+            var client = httpClientFactory.CreateClient(HttpClientName);
+            using var response = await client.SendAsync(message, ct);
+
+            if (!response.IsSuccessStatusCode)
+            {
+                LogPaymentsRejected(logger, orderId, (int)response.StatusCode);
+                return OrderPaymentsResult.Failed($"Gateway returned {(int)response.StatusCode}.");
+            }
+
+            // { "entity": "collection", "count": n, "items": [ { "id", "amount", "currency", "status", ... } ] }
+            await using var body = await response.Content.ReadAsStreamAsync(ct);
+            using var json = await JsonDocument.ParseAsync(body, cancellationToken: ct);
+
+            var payments = new List<GatewayPayment>();
+            foreach (var item in json.RootElement.GetProperty("items").EnumerateArray())
+            {
+                payments.Add(new GatewayPayment(
+                    item.GetProperty("id").GetString() ?? string.Empty,
+                    item.GetProperty("amount").GetInt64(),
+                    item.GetProperty("currency").GetString() ?? string.Empty,
+                    item.GetProperty("status").GetString() ?? string.Empty));
+            }
+
+            return OrderPaymentsResult.Success(payments);
+        }
+        // Network errors, resilience timeouts / open circuit, or an unexpected body: "unknown", retried on the next sweep.
+        catch (Exception ex) when (!ct.IsCancellationRequested)
+        {
+            LogPaymentsFailed(logger, orderId, ex.GetType().Name);
+            return OrderPaymentsResult.Failed("Gateway unreachable.");
+        }
+    }
+
     public bool VerifyCheckoutSignature(string orderId, string paymentId, string signature) =>
         !string.IsNullOrEmpty(orderId)
         && !string.IsNullOrEmpty(paymentId)
@@ -81,6 +122,9 @@ internal sealed partial class RazorpayPaymentGateway(
 
     public bool VerifyWebhookSignature(string rawBody, string signatureHeader) =>
         !string.IsNullOrEmpty(rawBody) && SignatureMatches(_options.WebhookSecret, rawBody, signatureHeader);
+
+    private AuthenticationHeaderValue BasicAuthorization() =>
+        new("Basic", Convert.ToBase64String(Encoding.UTF8.GetBytes($"{_options.KeyId}:{_options.KeySecret}")));
 
     /// <summary>HMAC-SHA256 → lowercase hex, compared in constant time.</summary>
     internal static bool SignatureMatches(string secret, string payload, string? signature)
@@ -101,4 +145,10 @@ internal sealed partial class RazorpayPaymentGateway(
 
     [LoggerMessage(Level = LogLevel.Warning, Message = "Razorpay order for subscription {SubscriptionId} failed: {ErrorType}.")]
     private static partial void LogOrderFailed(ILogger logger, Guid subscriptionId, string errorType);
+
+    [LoggerMessage(Level = LogLevel.Warning, Message = "Razorpay rejected the payments lookup for order {OrderId} with HTTP {StatusCode}.")]
+    private static partial void LogPaymentsRejected(ILogger logger, string orderId, int statusCode);
+
+    [LoggerMessage(Level = LogLevel.Warning, Message = "Razorpay payments lookup for order {OrderId} failed: {ErrorType}.")]
+    private static partial void LogPaymentsFailed(ILogger logger, string orderId, string errorType);
 }

@@ -287,6 +287,18 @@ public static class DependencyInjection
 
         services.AddHostedService<WebhookInboxProcessor>();
 
+        // Safety net for payments whose webhook never arrived: asks the gateway about recent pending orders.
+        services.AddOptions<PaymentReconciliationOptions>()
+            .Bind(configuration.GetSection(PaymentReconciliationOptions.SectionName))
+            .Validate(o => o.IntervalMinutes is >= 1 and <= 1440, "PaymentReconciliation:IntervalMinutes must be between 1 and 1440.")
+            .Validate(o => o.MinAgeMinutes is >= 1 and <= 1440, "PaymentReconciliation:MinAgeMinutes must be between 1 and 1440.")
+            .Validate(o => o.MaxAgeHours is >= 1 and <= 720, "PaymentReconciliation:MaxAgeHours must be between 1 and 720.")
+            .Validate(o => o.MaxAgeHours * 60 > o.MinAgeMinutes, "PaymentReconciliation:MaxAgeHours must cover more than MinAgeMinutes.")
+            .Validate(o => o.BatchSize is >= 1 and <= 1000, "PaymentReconciliation:BatchSize must be between 1 and 1000.")
+            .ValidateOnStart();
+
+        services.AddHostedService<PaymentReconciliationBackgroundService>();
+
         return services;
     }
 

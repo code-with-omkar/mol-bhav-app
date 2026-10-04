@@ -21,6 +21,14 @@ public interface ISubscriptionRepository : IRepository<Subscription, Guid>
 
     /// <summary>Active subscriptions whose paid period ended at or before <paramref name="nowUtc"/>, oldest first, at most <paramref name="batchSize"/>.</summary>
     Task<IReadOnlyList<Subscription>> GetLapsedActiveAsync(DateTimeOffset nowUtc, int batchSize, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Ids of pending-payment subscriptions with a gateway order whose last change (order attached, or created) falls in
+    /// [<paramref name="changedFromUtc"/>, <paramref name="changedToUtc"/>], most recently changed first (fresh orders are
+    /// the ones a real payment is most likely behind; older abandoned checkouts must not crowd them out of a capped batch).
+    /// </summary>
+    Task<IReadOnlyList<Guid>> GetPendingPaymentIdsChangedBetweenAsync(
+        DateTimeOffset changedFromUtc, DateTimeOffset changedToUtc, int limit, CancellationToken cancellationToken = default);
 }
 
 public interface ICouponRepository : IRepository<Coupon, Guid>

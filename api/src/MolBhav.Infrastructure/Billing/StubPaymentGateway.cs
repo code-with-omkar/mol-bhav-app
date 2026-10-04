@@ -22,6 +22,14 @@ internal sealed partial class StubPaymentGateway(ILogger<StubPaymentGateway> log
         return Task.FromResult(new CreateOrderResult(orderId, request.AmountPaise, request.Currency, true, null));
     }
 
+    public Task<OrderPaymentsResult> GetOrderPaymentsAsync(string orderId, CancellationToken ct = default)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(orderId);
+
+        // No payment is ever captured behind the stub's back, so reconciliation finds nothing to activate.
+        return Task.FromResult(OrderPaymentsResult.Success([]));
+    }
+
     public bool VerifyCheckoutSignature(string orderId, string paymentId, string signature)
     {
         LogVerify(logger, orderId, paymentId);

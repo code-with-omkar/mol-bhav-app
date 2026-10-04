@@ -505,7 +505,8 @@ x-razorpay-event-id: evt_dev_{{subscribe.response.body.$.data.gatewayOrderId}}
   "event": "payment.captured",
   "payload": {
     "payment": {
-      "entity": { "id": "pay_dev_0001", "order_id": "{{subscribe.response.body.$.data.gatewayOrderId}}", "status": "captured", "currency": "INR" }
+      "entity": { "id": "pay_dev_0001", "order_id": "{{subscribe.response.body.$.data.gatewayOrderId}}", "status": "captured",
+                  "amount": {{subscribe.response.body.$.data.amountPaise}}, "currency": "INR" }
     }
   }
 }
@@ -523,6 +524,15 @@ POST {{host}}/api/v1/billing/webhook
 Content-Type: application/json
 
 { "entity": "event", "event": "payment.captured", "payload": {} }
+
+### 62d. Razorpay webhook paying the wrong amount — 200 now; the processor parks it at once (Conflict
+### Subscription.PaymentAmountMismatch, log level Critical) and the subscription stays PendingPayment.
+### Run before 62a (or after a fresh subscribe); once 62a has run the subscription is already Active.
+POST {{host}}/api/v1/billing/webhook
+Content-Type: application/json
+x-razorpay-event-id: evt_dev_wrong_amount_{{subscribe.response.body.$.data.gatewayOrderId}}
+
+{ "entity": "event", "event": "payment.captured", "payload": { "payment": { "entity": { "id": "pay_dev_0003", "order_id": "{{subscribe.response.body.$.data.gatewayOrderId}}", "status": "captured", "amount": 100, "currency": "INR" } } } }
 
 ### --- Ingestion ---
 

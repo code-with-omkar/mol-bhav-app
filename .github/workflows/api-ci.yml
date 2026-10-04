@@ -188,6 +188,14 @@ jobs:
             echo "::error::processor batch failed"; grep -A20 "Webhook inbox batch failed" "$RUNNER_TEMP/api.log"; exit 1
           fi
 
+          # The reconciliation sweep runs once at startup, so its candidate query has hit PostgreSQL by now.
+          if grep -q "Payment reconciliation sweep failed" "$RUNNER_TEMP/api.log"; then
+            grep -A12 "Payment reconciliation sweep failed" "$RUNNER_TEMP/api.log" \
+              | while IFS= read -r line; do echo "::error title=reconciliation::${line:0:900}"; done
+            exit 1
+          fi
+          echo "ok  reconciliation sweep ran without errors"
+
       - name: API log
         if: always()
         run: |

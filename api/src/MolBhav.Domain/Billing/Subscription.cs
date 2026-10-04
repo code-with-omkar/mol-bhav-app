@@ -116,6 +116,14 @@ public sealed class Subscription : AggregateRoot<Guid>, IAuditableEntity
     }
 
     /// <summary>
+    /// Whether a payment reported by the gateway (webhook or reconciliation) is for exactly what this subscription's
+    /// order charges. Guards activation against a payment for a stale price or the wrong currency.
+    /// </summary>
+    public bool IsChargedBy(long paidPaise, string? paidCurrency) =>
+        paidPaise == ChargePaise
+        && string.Equals(paidCurrency?.Trim(), Currency, StringComparison.OrdinalIgnoreCase);
+
+    /// <summary>
     /// Confirms payment. Idempotent: activating again with the same payment is a no-op, which lets the client
     /// callback and the webhook race safely. <paramref name="continueFrom"/> is the expiry of a subscription being
     /// renewed early, so the new period starts where the old one ends instead of losing the remaining days.

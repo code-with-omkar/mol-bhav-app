@@ -9,8 +9,8 @@ namespace MolBhav.Application.Features.Billing.Webhook;
 
 /// <summary>
 /// Applies one webhook from the inbox. Orders-API events only: <c>payment.captured</c> and <c>order.paid</c> activate
-/// (Razorpay may send either or both), <c>payment.failed</c> is logged, anything else is ignored. Replays are no-ops
-/// because activation is idempotent.
+/// (Razorpay may send either or both) once the paid amount matches the subscription's charge, <c>payment.failed</c> is
+/// logged, anything else is ignored. Replays are no-ops because activation is idempotent.
 /// <para>
 /// An unknown order fails with <see cref="BillingErrors.SubscriptionNotFound"/> so the inbox retries it: the webhook
 /// can arrive before the subscribe request that attached the order has committed. If the order never appears, the
@@ -58,8 +58,20 @@ internal sealed partial class HandleRazorpayWebhookCommandHandler(
             return BillingErrors.SubscriptionNotFound;
         }
 
+        // A payment for a different amount (stale price after a checkout retry, tampering, wrong currency) must never
+        // activate; the Conflict parks the message for a human, who usually needs to refund it.
+        if (request.AmountPaise is not { } paid || !subscription.IsChargedBy(paid, request.Currency))
+        {
+            LogAmountMismatch(logger, request.EventType, request.OrderId, request.PaymentId, request.AmountPaise, request.Currency, subscription.ChargePaise, subscription.Currency);
+            return BillingErrors.PaymentAmountMismatch;
+        }
+
         return await activation.ActivateAsync(subscription, request.PaymentId, signature: null, cancellationToken);
     }
+
+    [LoggerMessage(Level = LogLevel.Error, Message = "Razorpay {EventType} webhook for order {OrderId}, payment {PaymentId}: paid {PaidPaise} {PaidCurrency}, subscription charges {ChargePaise} {Currency}; not activated.")]
+    private static partial void LogAmountMismatch(
+        ILogger logger, string eventType, string orderId, string paymentId, long? paidPaise, string? paidCurrency, long chargePaise, string currency);
 
     [LoggerMessage(Level = LogLevel.Warning, Message = "Razorpay payment failed: order {OrderId}, payment {PaymentId}.")]
     private static partial void LogPaymentFailed(ILogger logger, string? orderId, string? paymentId);
