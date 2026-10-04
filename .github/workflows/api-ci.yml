@@ -121,9 +121,15 @@ jobs:
           exit 1
 
       - name: Apply all migrations to PostgreSQL
-        run: >
-          dotnet ef database update
-          -p src/MolBhav.Infrastructure -s src/MolBhav.Api --configuration Release --no-build
+        run: |
+          set -o pipefail
+          if ! dotnet ef database update -p src/MolBhav.Infrastructure -s src/MolBhav.Api --configuration Release --no-build \
+               2>&1 | tee "$RUNNER_TEMP/migrate.log"; then
+            # Surface the failure as annotations (readable without downloading logs).
+            grep -iE "error|exception|failed|Npgsql|42[0-9A-Z]{3}" "$RUNNER_TEMP/migrate.log" | tail -15 \
+              | while IFS= read -r line; do echo "::error title=migration::${line:0:900}"; done
+            exit 1
+          fi
 
       - name: Start the API
         working-directory: api/src/MolBhav.Api
@@ -170,4 +176,8 @@ jobs:
 
       - name: API log
         if: always()
-        run: tail -200 "$RUNNER_TEMP/api.log" 2>/dev/null || true
+        run: |
+          [ -f "$RUNNER_TEMP/api.log" ] || exit 0
+          tail -200 "$RUNNER_TEMP/api.log"
+          grep -E "\[(ERR|FTL|CRI)\]|Exception|fail:" "$RUNNER_TEMP/api.log" | tail -15 \
+            | while IFS= read -r line; do echo "::warning title=api-log::${line:0:900}"; done
