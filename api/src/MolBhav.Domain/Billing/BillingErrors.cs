@@ -22,6 +22,12 @@ public static class BillingErrors
     public static readonly Error PaymentAmountMismatch =
         Error.Conflict("Subscription.PaymentAmountMismatch", "The payment amount or currency does not match what this subscription charges.");
 
+    public static readonly Error WebhookNotFound =
+        Error.NotFound("Webhook.NotFound", "No webhook with this id is in the inbox.");
+
+    public static readonly Error WebhookNotParked =
+        Error.Conflict("Webhook.NotParked", "Only a parked webhook can be replayed; this one is pending or already processed.");
+
     public static readonly Error InvalidSignature =
         Error.Validation("Payment.InvalidSignature", "Payment signature verification failed.");
 

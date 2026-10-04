@@ -534,6 +534,22 @@ x-razorpay-event-id: evt_dev_wrong_amount_{{subscribe.response.body.$.data.gatew
 
 { "entity": "event", "event": "payment.captured", "payload": { "payment": { "entity": { "id": "pay_dev_0003", "order_id": "{{subscribe.response.body.$.data.gatewayOrderId}}", "status": "captured", "amount": 100, "currency": "INR" } } } }
 
+### 62e. Admin — webhook inbox, newest first. Filters: state=Pending|Processed|Parked, eventType=payment.captured
+### After 62b/62d the parked ones show here; each park also raised an ops alert (Slack if OpsAlerts:SlackWebhookUrl is set,
+### otherwise a Critical "OPS ALERT" log line). GET /health/ready answers "Degraded" (still 200) for 24 h after a park.
+# @name parkedWebhooks
+GET {{host}}/api/v1/admin/billing/webhooks?state=Parked
+Authorization: Bearer {{accessToken}}
+
+### 62f. Admin — one webhook with its raw payload and last error
+GET {{host}}/api/v1/admin/billing/webhooks/{{parkedWebhooks.response.body.$.data[0].id}}
+Authorization: Bearer {{accessToken}}
+
+### 62g. Admin — replay a parked webhook (204; 409 if it is not parked, 404 if unknown). The processor applies it within
+### seconds; an order that still doesn't exist parks again after WebhookInbox:MaxAttempts.
+POST {{host}}/api/v1/admin/billing/webhooks/{{parkedWebhooks.response.body.$.data[0].id}}/replay
+Authorization: Bearer {{accessToken}}
+
 ### --- Ingestion ---
 
 ### 63. Manually trigger an ingestion run — source code `agmarknet` pulls live data.gov.in prices (needs Agmarknet:ApiKey); other codes hit the stub and end Failed

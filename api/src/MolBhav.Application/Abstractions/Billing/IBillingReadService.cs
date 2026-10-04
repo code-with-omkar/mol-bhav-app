@@ -17,6 +17,14 @@ public interface IBillingReadService
     Task<PagedResult<AdminSubscriptionResponse>> GetAdminSubscriptionsAsync(AdminSubscriptionFilter filter, CancellationToken cancellationToken = default);
 
     Task<PagedResult<AdminCouponResponse>> GetAdminCouponsAsync(PageRequest page, CancellationToken cancellationToken = default);
+
+    /// <summary>Gateway webhook inbox, newest first.</summary>
+    Task<PagedResult<AdminWebhookResponse>> GetAdminWebhooksAsync(AdminWebhookFilter filter, CancellationToken cancellationToken = default);
+
+    /// <summary>Null when no inbox row has this id.</summary>
+    Task<AdminWebhookDetailResponse?> GetAdminWebhookAsync(Guid id, CancellationToken cancellationToken = default);
 }
 
 public sealed record AdminSubscriptionFilter(Guid? UserId, SubscriptionStatus? Status, PageRequest Page);
+
+public sealed record AdminWebhookFilter(WebhookInboxState? State, string? EventType, PageRequest Page);

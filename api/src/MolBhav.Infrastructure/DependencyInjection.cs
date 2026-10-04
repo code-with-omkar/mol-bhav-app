@@ -32,6 +32,7 @@ using MolBhav.Infrastructure.Ingestion;
 using MolBhav.Infrastructure.Messaging;
 using MolBhav.Infrastructure.Messaging.Outbox;
 using MolBhav.Infrastructure.Notifications;
+using MolBhav.Infrastructure.Notifications.OpsAlerts;
 using MolBhav.Infrastructure.Persistence;
 using MolBhav.Infrastructure.Persistence.Interceptors;
 using MolBhav.Infrastructure.Persistence.Read;
@@ -88,6 +89,7 @@ public static class DependencyInjection
         services
             .AddPersistence(configuration)
             .AddOutbox(configuration)
+            .AddOpsAlerts(configuration)
             .AddJwtAuthentication(configuration)
             .AddIdentityModule(configuration, environment)
             .AddCatalogModule()
@@ -273,6 +275,9 @@ public static class DependencyInjection
 
         // Webhooks are recorded on the request path and applied by the processor (retry, backoff, parking).
         services.AddScoped<IWebhookInbox, WebhookInbox>();
+        services.AddSingleton<WebhookInboxMetrics>();
+        services.AddSingleton<WebhookInboxStatsReader>();
+        services.AddHealthChecks().AddCheck<WebhookInboxHealthCheck>(WebhookInboxHealthCheck.Name, tags: [ReadinessTag]);
 
         services.AddOptions<WebhookInboxOptions>()
             .Bind(configuration.GetSection(WebhookInboxOptions.SectionName))
@@ -283,6 +288,7 @@ public static class DependencyInjection
             .Validate(
                 o => o.MaxRetryDelaySeconds >= o.BaseRetryDelaySeconds && o.MaxRetryDelaySeconds <= 86_400,
                 "WebhookInbox:MaxRetryDelaySeconds must be at least BaseRetryDelaySeconds and at most 86400.")
+            .Validate(o => o.RetentionDays is >= 7 and <= 3650, "WebhookInbox:RetentionDays must be between 7 and 3650.")
             .ValidateOnStart();
 
         services.AddHostedService<WebhookInboxProcessor>();
@@ -519,6 +525,34 @@ public static class DependencyInjection
 
         services.AddHealthChecks()
             .AddDbContextCheck<MolBhavDbContext>("postgresql", tags: [ReadinessTag]);
+
+        return services;
+    }
+
+    /// <summary>
+    /// Alerts for operators. With a Slack webhook URL (a credential: user-secrets / environment only) alerts go to
+    /// Slack; without one they are logged at Critical. Not fail-closed: unlike a stub payment or OTP provider, logging
+    /// alerts misleads no one, and a missing channel must not stop the API from serving users.
+    /// Singleton because background services (the webhook inbox processor) depend on it.
+    /// </summary>
+    private static IServiceCollection AddOpsAlerts(this IServiceCollection services, IConfiguration configuration)
+    {
+        var section = configuration.GetSection(OpsAlertOptions.SectionName);
+        services.AddOptions<OpsAlertOptions>()
+            .Bind(section)
+            .ValidateDataAnnotations()
+            .Validate(o => o.HasValidSlackWebhookUrl, "OpsAlerts:SlackWebhookUrl must be empty or an absolute https URL.")
+            .ValidateOnStart();
+
+        if (string.IsNullOrWhiteSpace(section[nameof(OpsAlertOptions.SlackWebhookUrl)]))
+        {
+            services.AddSingleton<IOpsAlertSender, LoggingOpsAlertSender>();
+        }
+        else
+        {
+            services.AddHttpClient(SlackOpsAlertSender.HttpClientName).AddStandardResilienceHandler();
+            services.AddSingleton<IOpsAlertSender, SlackOpsAlertSender>();
+        }
 
         return services;
     }

@@ -1,8 +1,10 @@
+using System.Text.Json;
 using Dapper;
 using MolBhav.Application.Abstractions.Billing;
 using MolBhav.Application.Common.Models;
 using MolBhav.Application.Features.Billing.Models;
 using MolBhav.Domain.Billing;
+using MolBhav.Infrastructure.Billing.Webhooks;
 using MolBhav.Infrastructure.Persistence.Configurations.Billing;
 
 namespace MolBhav.Infrastructure.Persistence.Read.Billing;
@@ -12,6 +14,44 @@ internal sealed class BillingReadService(IDbConnectionFactory connectionFactory)
     private const string Plans = Schemas.Billing + "." + PlanConfiguration.TableName;
     private const string Subscriptions = Schemas.Billing + "." + SubscriptionConfiguration.TableName;
     private const string Coupons = Schemas.Billing + "." + CouponConfiguration.TableName;
+    private const string Webhooks = WebhookInboxMessageConfiguration.QualifiedTableName;
+
+    // State is derived from the two timestamps (parked wins: a row is never both).
+    private const string WebhookColumns = """
+        w.id, w.provider, w.event_id, w.event_type,
+        CASE WHEN w.parked_at_utc IS NOT NULL THEN 'Parked'
+             WHEN w.processed_at_utc IS NOT NULL THEN 'Processed'
+             ELSE 'Pending' END AS state,
+        w.attempt_count, w.received_at_utc, w.next_attempt_at_utc, w.last_attempt_at_utc,
+        w.processed_at_utc, w.parked_at_utc, w.last_error
+        """;
+
+    private const string AdminWebhooksWhere = """
+        WHERE (@State::text IS NULL
+               OR (@State::text = 'Parked' AND w.parked_at_utc IS NOT NULL)
+               OR (@State::text = 'Processed' AND w.processed_at_utc IS NOT NULL)
+               OR (@State::text = 'Pending' AND w.processed_at_utc IS NULL AND w.parked_at_utc IS NULL))
+          AND (@EventType::text IS NULL OR w.event_type = @EventType::text)
+        """;
+
+    // Admin-only, low volume (rows are purged after the retention period): no dedicated index on received_at_utc;
+    // the Parked/Pending filters still hit the inbox's partial indexes.
+    private static readonly string AdminWebhooksSql = $"""
+        SELECT count(*) FROM {Webhooks} w
+        {AdminWebhooksWhere};
+
+        SELECT {WebhookColumns}
+        FROM {Webhooks} w
+        {AdminWebhooksWhere}
+        ORDER BY w.received_at_utc DESC
+        LIMIT @Limit OFFSET @Offset;
+        """;
+
+    private static readonly string AdminWebhookSql = $"""
+        SELECT {WebhookColumns}, w.payload::text AS payload
+        FROM {Webhooks} w
+        WHERE w.id = @Id;
+        """;
 
     private const string AdminCouponsSql = $"""
         SELECT count(*) FROM {Coupons};
@@ -146,6 +186,44 @@ internal sealed class BillingReadService(IDbConnectionFactory connectionFactory)
     private static CommandDefinition Command(string sql, object? args, CancellationToken cancellationToken) =>
         new(sql, args, cancellationToken: cancellationToken);
 
+    public async Task<PagedResult<AdminWebhookResponse>> GetAdminWebhooksAsync(AdminWebhookFilter filter, CancellationToken cancellationToken = default)
+    {
+        ArgumentNullException.ThrowIfNull(filter);
+
+        var args = new DynamicParameters();
+        args.Add("State", filter.State?.ToString());
+        args.Add("EventType", string.IsNullOrWhiteSpace(filter.EventType) ? null : filter.EventType.Trim());
+        args.Add("Limit", filter.Page.PageSize);
+        args.Add("Offset", filter.Page.Offset);
+
+        await using var connection = await connectionFactory.OpenConnectionAsync(cancellationToken);
+        await using var grid = await connection.QueryMultipleAsync(Command(AdminWebhooksSql, args, cancellationToken));
+
+        var totalCount = await grid.ReadSingleAsync<long>();
+        var rows = await grid.ReadAsync<WebhookRow>();
+
+        return new PagedResult<AdminWebhookResponse>(rows.Select(ToResponse).ToArray(), filter.Page.Page, filter.Page.PageSize, totalCount);
+    }
+
+    public async Task<AdminWebhookDetailResponse?> GetAdminWebhookAsync(Guid id, CancellationToken cancellationToken = default)
+    {
+        await using var connection = await connectionFactory.OpenConnectionAsync(cancellationToken);
+        var row = await connection.QuerySingleOrDefaultAsync<WebhookRow>(Command(AdminWebhookSql, new { Id = id }, cancellationToken));
+
+        if (row is null)
+        {
+            return null;
+        }
+
+        // jsonb always holds valid JSON; Clone detaches the element from the disposed document.
+        using var payload = JsonDocument.Parse(row.Payload ?? "null");
+        return new AdminWebhookDetailResponse(ToResponse(row), payload.RootElement.Clone());
+    }
+
+    private static AdminWebhookResponse ToResponse(WebhookRow r) =>
+        new(r.Id, r.Provider, r.EventId, r.EventType, Enum.Parse<WebhookInboxState>(r.State), r.AttemptCount,
+            r.ReceivedAtUtc, r.NextAttemptAtUtc, r.LastAttemptAtUtc, r.ProcessedAtUtc, r.ParkedAtUtc, r.LastError);
+
 #pragma warning disable CA1812 // Instantiated by Dapper.
     private sealed class PlanRow
     {
@@ -245,6 +323,36 @@ internal sealed class BillingReadService(IDbConnectionFactory connectionFactory)
         public long MinAmountPaise { get; init; }
 
         public bool IsActive { get; init; }
+    }
+
+    private sealed class WebhookRow
+    {
+        public Guid Id { get; init; }
+
+        public string Provider { get; init; } = string.Empty;
+
+        public string EventId { get; init; } = string.Empty;
+
+        public string EventType { get; init; } = string.Empty;
+
+        public string State { get; init; } = string.Empty;
+
+        public int AttemptCount { get; init; }
+
+        public DateTimeOffset ReceivedAtUtc { get; init; }
+
+        public DateTimeOffset NextAttemptAtUtc { get; init; }
+
+        public DateTimeOffset? LastAttemptAtUtc { get; init; }
+
+        public DateTimeOffset? ProcessedAtUtc { get; init; }
+
+        public DateTimeOffset? ParkedAtUtc { get; init; }
+
+        public string? LastError { get; init; }
+
+        /// <summary>Only selected by the detail query.</summary>
+        public string? Payload { get; init; }
     }
 #pragma warning restore CA1812
 }

@@ -5,11 +5,11 @@ using MolBhav.Infrastructure.Persistence;
 namespace MolBhav.Infrastructure.Billing.Webhooks;
 
 /// <summary>
-/// One statement, no read-then-write race: <c>ON CONFLICT DO NOTHING</c> on the (provider, event_id) unique index makes
-/// concurrent redeliveries of the same event collapse to a single row, and the affected-row count says which call won.
-/// Runs on the caller's DbContext, so it joins the command's unit-of-work transaction.
+/// Enqueue is one statement with no read-then-write race: <c>ON CONFLICT DO NOTHING</c> on the (provider, event_id)
+/// unique index makes concurrent redeliveries of the same event collapse to a single row, and the affected-row count
+/// says which call won. Both operations run on the caller's DbContext, so they join the command's unit-of-work transaction.
 /// </summary>
-internal sealed class WebhookInbox(MolBhavDbContext dbContext, TimeProvider timeProvider) : IWebhookInbox
+internal sealed class WebhookInbox(MolBhavDbContext dbContext, WebhookInboxMetrics metrics, TimeProvider timeProvider) : IWebhookInbox
 {
     // Identifier comes from compile-time constants (never user input); every value is bound as a parameter.
     private const string InsertSql =
@@ -37,6 +37,26 @@ internal sealed class WebhookInbox(MolBhavDbContext dbContext, TimeProvider time
             new object[] { Guid.CreateVersion7(nowUtc), provider, eventId, eventType, payload, nowUtc },
             cancellationToken);
 
-        return inserted == 1;
+        var isNew = inserted == 1;
+        metrics.RecordReceived(eventType, duplicate: !isNew);
+        return isNew;
+    }
+
+    public async Task<WebhookRequeueResult> RequeueParkedAsync(Guid messageId, CancellationToken cancellationToken)
+    {
+        // Parked rows are never picked up by the processor, so there is no race with it here.
+        var message = await dbContext.Set<WebhookInboxMessage>().FirstOrDefaultAsync(m => m.Id == messageId, cancellationToken);
+        if (message is null)
+        {
+            return WebhookRequeueResult.NotFound;
+        }
+
+        if (message.ParkedAtUtc is null || message.ProcessedAtUtc is not null)
+        {
+            return WebhookRequeueResult.NotParked;
+        }
+
+        message.Requeue(timeProvider.GetUtcNow());
+        return WebhookRequeueResult.Requeued;
     }
 }

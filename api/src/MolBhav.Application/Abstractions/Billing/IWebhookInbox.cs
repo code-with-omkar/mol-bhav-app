@@ -17,4 +17,16 @@ public interface IWebhookInbox
         string eventType,
         string payload,
         CancellationToken cancellationToken);
+
+    /// <summary>Puts a parked message back in the queue with a fresh attempt budget. Runs in the caller's unit of work.</summary>
+    Task<WebhookRequeueResult> RequeueParkedAsync(Guid messageId, CancellationToken cancellationToken);
+}
+
+public enum WebhookRequeueResult
+{
+    Requeued = 0,
+    NotFound = 1,
+
+    /// <summary>Pending or already processed: only parked messages can be replayed.</summary>
+    NotParked = 2,
 }

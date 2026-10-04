@@ -17,4 +17,7 @@ public sealed class WebhookInboxOptions
     public int BaseRetryDelaySeconds { get; set; } = 30;
 
     public int MaxRetryDelaySeconds { get; set; } = 3600;
+
+    /// <summary>Processed messages older than this are deleted by the daily purge. Parked messages are never purged.</summary>
+    public int RetentionDays { get; set; } = 90;
 }

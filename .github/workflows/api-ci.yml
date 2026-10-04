@@ -148,7 +148,10 @@ jobs:
       - name: Start the API
         working-directory: api/src/MolBhav.Api
         env:
+          # Fast inbox so the smoke test can drive a webhook all the way to "parked": 1 s polls, 2 attempts, 1 s backoff.
           WebhookInbox__PollingIntervalSeconds: "1"
+          WebhookInbox__MaxAttempts: "2"
+          WebhookInbox__BaseRetryDelaySeconds: "1"
         run: |
           nohup dotnet bin/Release/net10.0/MolBhav.Api.dll --urls http://127.0.0.1:5080 > "$RUNNER_TEMP/api.log" 2>&1 &
           for i in $(seq 1 60); do
@@ -157,44 +160,80 @@ jobs:
           done
           echo "::error::API did not become ready"; tail -100 "$RUNNER_TEMP/api.log"; exit 1
 
-      - name: Smoke test — webhook inbox
+      - name: Smoke test — webhook inbox, alerts, health, admin replay
         run: |
           set -euo pipefail
-          url=http://127.0.0.1:5080/api/v1/billing/webhook
-          body='{"entity":"event","event":"payment.captured","payload":{"payment":{"entity":{"id":"pay_ci_1","order_id":"order_ci_unknown"}}}}'
+          api=http://127.0.0.1:5080/api/v1
+          body='{"entity":"event","event":"payment.captured","payload":{"payment":{"entity":{"id":"pay_ci_1","order_id":"order_ci_unknown","amount":100,"currency":"INR"}}}}'
 
-          post() { curl -s -o /dev/null -w '%{http_code}' -X POST "$url" -H 'Content-Type: application/json' "$@"; }
+          post() { curl -s -o /dev/null -w '%{http_code}' -X POST "$api/billing/webhook" -H 'Content-Type: application/json' "$@"; }
+          status() { curl -s -o /dev/null -w '%{http_code}' "$@"; }
           expect() { if [ "$1" != "$2" ]; then echo "::error::$3: expected $2, got $1"; exit 1; fi; echo "ok  $3"; }
           sql() { psql -tAq -c "$1"; }
+          logged() { grep -q "$1" "$RUNNER_TEMP/api.log"; }
+          wait_for() { # wait_for <seconds> <description> <command...>
+            local seconds=$1 what=$2; shift 2
+            for _ in $(seq 1 "$seconds"); do if "$@"; then echo "ok  $what"; return 0; fi; sleep 1; done
+            echo "::error::timed out waiting for: $what"; exit 1
+          }
 
+          # --- Receiving ---
           expect "$(post -H 'x-razorpay-event-id: evt_ci_1' -d "$body")" 200 "new event accepted"
           expect "$(post -H 'x-razorpay-event-id: evt_ci_1' -d "$body")" 200 "redelivery accepted"
           expect "$(post -d "$body")" 400 "missing event id rejected"
           expect "$(post -H 'x-razorpay-event-id: evt_ci_bad' -d '{"no_event":true}')" 200 "unreadable event acknowledged"
-
           expect "$(sql "SELECT count(*) FROM billing.webhook_inbox WHERE event_id = 'evt_ci_1'")" 1 "redelivery stored once"
           expect "$(sql "SELECT count(*) FROM billing.webhook_inbox WHERE event_id = 'evt_ci_bad'")" 0 "unreadable event not stored"
 
-          # The processor (1 s poll) must try the unknown order, fail it as NotFound and schedule a retry — not drop it.
-          for i in $(seq 1 30); do
-            state=$(sql "SELECT attempt_count || '|' || coalesce(last_error, '') || '|' || (processed_at_utc IS NULL) || '|' || (parked_at_utc IS NULL) || '|' || (next_attempt_at_utc > now())
-                         FROM billing.webhook_inbox WHERE event_id = 'evt_ci_1'")
-            case "$state" in 1\|Subscription.NotFound*\|true\|true\|true) echo "ok  unknown order retried later: $state"; break ;; esac
-            sleep 1
-          done
-          case "$state" in 1\|Subscription.NotFound*\|true\|true\|true) ;; *) echo "::error::unexpected inbox state: $state"; exit 1 ;; esac
+          # --- Retry, then park (MaxAttempts = 2): an unknown order is retried, never dropped ---
+          parked() { [ "$(sql "SELECT attempt_count || '|' || (parked_at_utc IS NOT NULL) || '|' || left(coalesce(last_error, ''), 21)
+                               FROM billing.webhook_inbox WHERE event_id = 'evt_ci_1'")" = "2|true|Subscription.NotFound" ]; }
+          wait_for 30 "unknown order retried once, then parked as Subscription.NotFound" parked
+          wait_for 10 "parked webhook raised an ops alert (log sink)" logged "OPS ALERT (no alert channel configured): Payment webhook parked"
 
-          if grep -q "Webhook inbox batch failed" "$RUNNER_TEMP/api.log"; then
+          # --- Health: Degraded (still HTTP 200) once the stats snapshot sees the park (refresh <= 30 s) ---
+          degraded() { [ "$(curl -s http://127.0.0.1:5080/health/ready)" = "Degraded" ]; }
+          wait_for 45 "readiness reports Degraded with HTTP 200 after a park" degraded
+          expect "$(status http://127.0.0.1:5080/health/ready)" 200 "readiness stays 200 while Degraded"
+
+          # --- Admin API: register two users, promote the first in the database, log in ---
+          creds() { printf '{"phoneNumber":"%s","password":"Ci-Smoke-Passw0rd-2026"}' "$1"; }
+          curl -sf -X POST "$api/auth/password/register" -H 'Content-Type: application/json' -d "$(creds 9876500001)" > /dev/null
+          sql "UPDATE identity.users SET role = 'Admin'" > /dev/null
+          admin=$(curl -sf -X POST "$api/auth/password/login" -H 'Content-Type: application/json' -d "$(creds 9876500001)" | jq -r '.data.session.accessToken')
+          user=$(curl -sf -X POST "$api/auth/password/register" -H 'Content-Type: application/json' -d "$(creds 9876500002)" | jq -r '.data.session.accessToken')
+          [ -n "$admin" ] && [ "$admin" != null ] && [ -n "$user" ] && [ "$user" != null ] || { echo "::error::could not obtain tokens"; exit 1; }
+
+          expect "$(status -H "Authorization: Bearer $user" "$api/admin/billing/webhooks")" 403 "non-admin cannot list webhooks"
+
+          list=$(curl -sf -H "Authorization: Bearer $admin" "$api/admin/billing/webhooks?state=Parked")
+          id=$(echo "$list" | jq -r '.data[] | select(.eventId == "evt_ci_1") | .id')
+          [ -n "$id" ] || { echo "::error::parked webhook missing from admin list: $list"; exit 1; }
+          expect "$(echo "$list" | jq -r '.data[] | select(.eventId == "evt_ci_1") | .state')" Parked "admin list shows it as Parked"
+
+          detail=$(curl -sf -H "Authorization: Bearer $admin" "$api/admin/billing/webhooks/$id")
+          expect "$(echo "$detail" | jq -r '.data.payload.event')" payment.captured "admin detail returns the raw payload as JSON"
+          expect "$(status -H "Authorization: Bearer $admin" "$api/admin/billing/webhooks/00000000-0000-0000-0000-000000000001")" 404 "unknown webhook is 404"
+
+          # --- Replay: back in the queue, retried with a fresh budget, parks again (the order still doesn't exist) ---
+          before=$(sql "SELECT last_attempt_at_utc FROM billing.webhook_inbox WHERE id = '$id'")
+          expect "$(status -X POST -H "Authorization: Bearer $admin" "$api/admin/billing/webhooks/$id/replay")" 204 "replay accepted"
+          wait_for 10 "replay logged with the admin id" logged "re-queued by admin"
+          reparked() { [ "$(sql "SELECT (parked_at_utc IS NOT NULL AND attempt_count = 2 AND last_attempt_at_utc > '$before')::text FROM billing.webhook_inbox WHERE id = '$id'")" = "true" ]; }
+          wait_for 30 "replayed webhook was retried again and re-parked" reparked
+          expect "$(status -X POST -H "Authorization: Bearer $admin" "$api/admin/billing/webhooks/00000000-0000-0000-0000-000000000001/replay")" 404 "replaying an unknown webhook is 404"
+
+          # --- Background services ran cleanly ---
+          if logged "Webhook inbox batch failed"; then
             echo "::error::processor batch failed"; grep -A20 "Webhook inbox batch failed" "$RUNNER_TEMP/api.log"; exit 1
           fi
-
-          # The reconciliation sweep runs once at startup, so its candidate query has hit PostgreSQL by now.
-          if grep -q "Payment reconciliation sweep failed" "$RUNNER_TEMP/api.log"; then
-            grep -A12 "Payment reconciliation sweep failed" "$RUNNER_TEMP/api.log" \
-              | while IFS= read -r line; do echo "::error title=reconciliation::${line:0:900}"; done
-            exit 1
-          fi
-          echo "ok  reconciliation sweep ran without errors"
+          for failure in "Webhook inbox stats refresh failed" "Webhook inbox purge failed" "Payment reconciliation sweep failed"; do
+            if logged "$failure"; then
+              grep -A12 "$failure" "$RUNNER_TEMP/api.log" | while IFS= read -r line; do echo "::error title=background::${line:0:900}"; done
+              exit 1
+            fi
+          done
+          echo "ok  stats refresh, purge and reconciliation sweep ran without errors"
 
       - name: API log
         if: always()

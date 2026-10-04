@@ -84,6 +84,22 @@ public sealed class WebhookInboxMessage
         LastError = Truncate(error);
     }
 
+    /// <summary>
+    /// Puts a parked message back in the queue (admin replay, once the cause is fixed — e.g. the order now exists).
+    /// The attempt budget restarts; the last error stays until the next attempt replaces it.
+    /// </summary>
+    public void Requeue(DateTimeOffset nowUtc)
+    {
+        if (ParkedAtUtc is null || ProcessedAtUtc is not null)
+        {
+            throw new InvalidOperationException($"Webhook inbox message {Id} is not parked.");
+        }
+
+        ParkedAtUtc = null;
+        AttemptCount = 0;
+        NextAttemptAtUtc = nowUtc;
+    }
+
     private void EnsurePending()
     {
         if (ProcessedAtUtc is not null || ParkedAtUtc is not null)

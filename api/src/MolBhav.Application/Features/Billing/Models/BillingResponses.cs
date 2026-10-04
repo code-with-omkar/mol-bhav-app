@@ -1,3 +1,4 @@
+using System.Text.Json;
 using MolBhav.Domain.Billing;
 
 namespace MolBhav.Application.Features.Billing.Models;
@@ -63,3 +64,33 @@ public sealed record AdminCouponResponse(
     string? ApplicablePlanCode,
     long MinAmountPaise,
     bool IsActive);
+
+/// <summary>Where a gateway webhook is in the inbox.</summary>
+public enum WebhookInboxState
+{
+    /// <summary>Not applied yet: due now or waiting out a retry backoff.</summary>
+    Pending = 0,
+
+    Processed = 1,
+
+    /// <summary>Retrying can't help; needs a human, then a replay.</summary>
+    Parked = 2,
+}
+
+/// <summary>One inbox row for the admin list (no payload).</summary>
+public sealed record AdminWebhookResponse(
+    Guid Id,
+    string Provider,
+    string EventId,
+    string EventType,
+    WebhookInboxState State,
+    int AttemptCount,
+    DateTimeOffset ReceivedAtUtc,
+    DateTimeOffset NextAttemptAtUtc,
+    DateTimeOffset? LastAttemptAtUtc,
+    DateTimeOffset? ProcessedAtUtc,
+    DateTimeOffset? ParkedAtUtc,
+    string? LastError);
+
+/// <summary>An inbox row with the raw gateway payload, as received (rendered as JSON, not a string).</summary>
+public sealed record AdminWebhookDetailResponse(AdminWebhookResponse Webhook, JsonElement Payload);
