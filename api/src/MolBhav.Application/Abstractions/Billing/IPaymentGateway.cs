@@ -34,6 +34,10 @@ public sealed record CreateOrderResult(string GatewayOrderId, long AmountPaise, 
         new(string.Empty, request.AmountPaise, request.Currency, false, error);
 }
 
+/// <summary>A payment the gateway holds against an order.</summary>
+/// <param name="PaymentId">Gateway payment id.</param>
+/// <param name="AmountPaise">Amount in paise.</param>
+/// <param name="Currency">ISO currency code, e.g. <c>INR</c>.</param>
 /// <param name="Status">Gateway payment status: <c>created</c>, <c>authorized</c>, <c>captured</c>, <c>refunded</c> or <c>failed</c>.</param>
 public sealed record GatewayPayment(string PaymentId, long AmountPaise, string Currency, string Status)
 {
