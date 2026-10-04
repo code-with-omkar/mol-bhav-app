@@ -1,9 +1,10 @@
 name: API CI
 
-# Builds and tests the API on every push to main / feature branches and on PRs into main.
-# Also guards migrations: if the EF model changed without a migration, the job generates one with the real
-# `dotnet ef` tool (named PendingModelChanges), uploads it as an artifact and fails, so a missing migration
-# can never reach main. Rename it to a descriptive name when committing it.
+# Builds and tests the API on every push to main / feature branches and on PRs into main, then:
+# - Migration guard: if the EF model changed without a migration, generates one with the real `dotnet ef` tool
+#   (named PendingModelChanges), uploads it as an artifact and fails, so a missing migration never reaches main.
+# - Applies every migration to a real PostgreSQL and smoke-tests the running API (webhook inbox: dedup,
+#   validation, retry of an unknown order).
 
 on:
   push:
@@ -27,17 +28,36 @@ env:
 
 jobs:
   build-test:
-    name: Build, test, migration check
+    name: Build, test, migrate, smoke test
     runs-on: ubuntu-latest
-    timeout-minutes: 25
+    timeout-minutes: 30
     defaults:
       run:
         working-directory: api
+
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_DB: molbhav_ci
+          POSTGRES_USER: ci
+          POSTGRES_PASSWORD: ci
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd "pg_isready -U ci -d molbhav_ci"
+          --health-interval 5s --health-timeout 5s --health-retries 20
+
     env:
-      # Design-time host build only (no database is contacted). Throwaway CI values, not secrets.
+      # Throwaway CI values for a disposable database, not secrets.
       ASPNETCORE_ENVIRONMENT: Development
       ConnectionStrings__MolBhav: "Host=localhost;Port=5432;Database=molbhav_ci;Username=ci;Password=ci"
       Jwt__SigningKey: "ci-design-time-only-signing-key-not-a-secret-0123456789abcdef"
+      PGHOST: localhost
+      PGPORT: "5432"
+      PGDATABASE: molbhav_ci
+      PGUSER: ci
+      PGPASSWORD: ci
+
     steps:
       - uses: actions/checkout@v4
 
@@ -99,3 +119,55 @@ jobs:
         run: |
           echo "::error::The EF model has changes with no migration. A generated migration is attached as the 'pending-migration' artifact; rename it descriptively and commit it."
           exit 1
+
+      - name: Apply all migrations to PostgreSQL
+        run: >
+          dotnet ef database update
+          -p src/MolBhav.Infrastructure -s src/MolBhav.Api --configuration Release --no-build
+
+      - name: Start the API
+        working-directory: api/src/MolBhav.Api
+        env:
+          WebhookInbox__PollingIntervalSeconds: "1"
+        run: |
+          nohup dotnet bin/Release/net10.0/MolBhav.Api.dll --urls http://127.0.0.1:5080 > "$RUNNER_TEMP/api.log" 2>&1 &
+          for i in $(seq 1 60); do
+            if curl -sf http://127.0.0.1:5080/health/ready > /dev/null; then echo "API ready after ${i}s"; exit 0; fi
+            sleep 1
+          done
+          echo "::error::API did not become ready"; tail -100 "$RUNNER_TEMP/api.log"; exit 1
+
+      - name: Smoke test — webhook inbox
+        run: |
+          set -euo pipefail
+          url=http://127.0.0.1:5080/api/v1/billing/webhook
+          body='{"entity":"event","event":"payment.captured","payload":{"payment":{"entity":{"id":"pay_ci_1","order_id":"order_ci_unknown"}}}}'
+
+          post() { curl -s -o /dev/null -w '%{http_code}' -X POST "$url" -H 'Content-Type: application/json' "$@"; }
+          expect() { if [ "$1" != "$2" ]; then echo "::error::$3: expected $2, got $1"; exit 1; fi; echo "ok  $3"; }
+          sql() { psql -tAq -c "$1"; }
+
+          expect "$(post -H 'x-razorpay-event-id: evt_ci_1' -d "$body")" 200 "new event accepted"
+          expect "$(post -H 'x-razorpay-event-id: evt_ci_1' -d "$body")" 200 "redelivery accepted"
+          expect "$(post -d "$body")" 400 "missing event id rejected"
+          expect "$(post -H 'x-razorpay-event-id: evt_ci_bad' -d '{"no_event":true}')" 200 "unreadable event acknowledged"
+
+          expect "$(sql "SELECT count(*) FROM billing.webhook_inbox WHERE event_id = 'evt_ci_1'")" 1 "redelivery stored once"
+          expect "$(sql "SELECT count(*) FROM billing.webhook_inbox WHERE event_id = 'evt_ci_bad'")" 0 "unreadable event not stored"
+
+          # The processor (1 s poll) must try the unknown order, fail it as NotFound and schedule a retry — not drop it.
+          for i in $(seq 1 30); do
+            state=$(sql "SELECT attempt_count || '|' || coalesce(last_error, '') || '|' || (processed_at_utc IS NULL) || '|' || (parked_at_utc IS NULL) || '|' || (next_attempt_at_utc > now())
+                         FROM billing.webhook_inbox WHERE event_id = 'evt_ci_1'")
+            case "$state" in 1\|Subscription.NotFound*\|true\|true\|true) echo "ok  unknown order retried later: $state"; break ;; esac
+            sleep 1
+          done
+          case "$state" in 1\|Subscription.NotFound*\|true\|true\|true) ;; *) echo "::error::unexpected inbox state: $state"; exit 1 ;; esac
+
+          if grep -q "Webhook inbox batch failed" "$RUNNER_TEMP/api.log"; then
+            echo "::error::processor batch failed"; grep -A20 "Webhook inbox batch failed" "$RUNNER_TEMP/api.log"; exit 1
+          fi
+
+      - name: API log
+        if: always()
+        run: tail -200 "$RUNNER_TEMP/api.log" 2>/dev/null || true
