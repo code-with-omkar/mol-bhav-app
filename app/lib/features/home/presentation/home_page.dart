@@ -10,6 +10,7 @@ import '../../../core/utils/data_state.dart';
 import '../../../core/utils/formatters.dart';
 import '../../../core/utils/statuses.dart';
 import '../../../core/utils/timestamps.dart';
+import '../../../core/weather/weather_models.dart';
 import '../../../shared/widgets/category_visuals.dart';
 import '../../../shared/widgets/mb_cards.dart';
 import '../../../shared/widgets/mb_category_card.dart';
@@ -18,12 +19,29 @@ import '../../../shared/widgets/mb_icon.dart';
 import '../../../shared/widgets/mb_panels.dart';
 import '../../../shared/widgets/mb_price.dart';
 import '../../../shared/widgets/mb_state_views.dart';
+import '../../../shared/widgets/weather_badge.dart';
 import '../domain/home_entities.dart';
 import 'home_cubit.dart';
+import 'weather_cubit.dart';
 
 /// Category-aware dashboard: Market → Compare → Opportunity → Action.
-class HomePage extends StatelessWidget {
+/// Initializes WeatherCubit and requests location permission on first load.
+class HomePage extends StatefulWidget {
   const HomePage({super.key});
+
+  @override
+  State<HomePage> createState() => _HomePageState();
+}
+
+class _HomePageState extends State<HomePage> {
+  @override
+  void initState() {
+    super.initState();
+    // Request location permission and fetch weather on home load.
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      context.read<WeatherCubit>().watchWeather();
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -90,7 +108,7 @@ class _Dashboard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          MbHeroHeader(
+          MbHeroHeaderWithWeather(
             name: data.userName,
             greeting: _greeting(context),
             chip: _chip(context),
@@ -348,6 +366,93 @@ class _QuickAction extends StatelessWidget {
           ),
         ),
       ),
+    );
+  }
+}
+
+/// MbHeroHeader wrapper that integrates weather badge on the location chip.
+/// Streams weather state and overlays the badge when weather data is available.
+class MbHeroHeaderWithWeather extends StatelessWidget {
+  const MbHeroHeaderWithWeather({
+    super.key,
+    required this.name,
+    required this.greeting,
+    required this.alertsLabel,
+    this.subtitle,
+    this.chip,
+    this.unread = false,
+    this.onAlerts,
+  });
+
+  final String name;
+  final String greeting;
+  final String alertsLabel;
+  final String? subtitle;
+  final String? chip;
+  final bool unread;
+  final VoidCallback? onAlerts;
+
+  @override
+  Widget build(BuildContext context) {
+    // Stream weather state and conditionally render badge.
+    return BlocBuilder<WeatherCubit, DataState<CurrentWeather>>(
+      builder: (context, weatherState) {
+        final hasWeather = weatherState.status == LoadStatus.ready &&
+            weatherState.data != null;
+
+        return MbHeroHeaderWithChip(
+          name: name,
+          greeting: greeting,
+          alertsLabel: alertsLabel,
+          subtitle: subtitle,
+          chip: chip,
+          unread: unread,
+          onAlerts: onAlerts,
+          weather: hasWeather ? weatherState.data : null,
+          showWeatherLoading: weatherState.status == LoadStatus.loading,
+        );
+      },
+    );
+  }
+}
+
+/// Internal hero header with optional weather overlay on chip.
+class MbHeroHeaderWithChip extends StatelessWidget {
+  const MbHeroHeaderWithChip({
+    super.key,
+    required this.name,
+    required this.greeting,
+    required this.alertsLabel,
+    this.subtitle,
+    this.chip,
+    this.unread = false,
+    this.onAlerts,
+    this.weather,
+    this.showWeatherLoading = false,
+  });
+
+  final String name;
+  final String greeting;
+  final String alertsLabel;
+  final String? subtitle;
+  final String? chip;
+  final bool unread;
+  final VoidCallback? onAlerts;
+  final CurrentWeather? weather;
+  final bool showWeatherLoading;
+
+  @override
+  Widget build(BuildContext context) {
+    return MbHeroHeader(
+      name: name,
+      greeting: greeting,
+      alertsLabel: alertsLabel,
+      subtitle: subtitle,
+      chip: chip,
+      unread: unread,
+      onAlerts: onAlerts,
+      weather: weather,
+      showWeatherLoading: showWeatherLoading,
     );
   }
 }

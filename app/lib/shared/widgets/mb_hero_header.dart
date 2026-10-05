@@ -3,9 +3,11 @@ import 'package:flutter/services.dart';
 
 import '../../core/theme/app_theme.dart';
 import '../../core/theme/mb_dimens.dart';
+import '../../core/weather/weather_models.dart';
 import 'mb_icon.dart';
 import 'mb_panels.dart';
 import 'mb_wordmark.dart';
+import 'weather_badge.dart';
 
 /// Home band on `hero`: wordmark, alerts bell with unread dot, avatar,
 /// greeting and name. The content sheet below overlaps it by
@@ -20,6 +22,8 @@ class MbHeroHeader extends StatelessWidget {
     this.chip,
     this.unread = false,
     this.onAlerts,
+    this.weather,
+    this.showWeatherLoading = false,
   });
 
   static const overlap = MbSpacing.s6;
@@ -34,6 +38,12 @@ class MbHeroHeader extends StatelessWidget {
   final String? chip;
   final bool unread;
   final VoidCallback? onAlerts;
+
+  /// Optional current weather to display as overlay badge on chip.
+  final CurrentWeather? weather;
+
+  /// Show loading skeleton for weather badge while fetching.
+  final bool showWeatherLoading;
 
   @override
   Widget build(BuildContext context) {
@@ -91,30 +101,53 @@ class MbHeroHeader extends StatelessWidget {
                       Text(name, style: t.valueMd.copyWith(color: onHero)),
                     if (chip != null) ...[
                       const SizedBox(height: MbSpacing.s2),
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 10,
-                          vertical: 4,
-                        ),
-                        decoration: BoxDecoration(
-                          color: onHero.withValues(alpha: 0.14),
-                          borderRadius: BorderRadius.circular(MbRadius.pill),
-                        ),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            MbIcon(MbIcons.market, size: 14, color: onHero),
-                            const SizedBox(width: 6),
-                            Flexible(
-                              child: Text(
-                                chip!,
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
-                                style: t.caption.copyWith(color: onHero),
+                      Stack(
+                        children: [
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 10,
+                              vertical: 4,
+                            ),
+                            decoration: BoxDecoration(
+                              color: onHero.withValues(alpha: 0.14),
+                              borderRadius: BorderRadius.circular(MbRadius.pill),
+                            ),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                MbIcon(MbIcons.market, size: 14, color: onHero),
+                                const SizedBox(width: 6),
+                                Flexible(
+                                  child: Text(
+                                    chip!,
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                    style: t.caption.copyWith(color: onHero),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          // Weather badge overlay on top-right of chip
+                          if (weather != null)
+                            Positioned(
+                              top: -6,
+                              right: -6,
+                              child: WeatherBadge(
+                                weather: weather!,
+                                backgroundColor: onHero.withValues(alpha: 0.12),
+                                textColor: onHero,
+                              ),
+                            )
+                          else if (showWeatherLoading)
+                            Positioned(
+                              top: -6,
+                              right: -6,
+                              child: WeatherBadgeSkeleton(
+                                backgroundColor: onHero.withValues(alpha: 0.12),
                               ),
                             ),
-                          ],
-                        ),
+                        ],
                       ),
                     ],
                     if (subtitle != null) ...[

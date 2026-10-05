@@ -937,5 +937,17 @@
   "showPassword": "Show password",
   "@showPassword": {},
   "hidePassword": "Hide password",
-  "@hidePassword": {}
+  "@hidePassword": {},
+  "weatherPermissionTitle": "Enable Location",
+  "@weatherPermissionTitle": {},
+  "weatherPermissionSubtitle": "We need your location to show local weather on the home screen.",
+  "@weatherPermissionSubtitle": {},
+  "weatherPermissionAllow": "Allow Location",
+  "@weatherPermissionAllow": {},
+  "weatherPermissionDeny": "Not Now",
+  "@weatherPermissionDeny": {},
+  "weatherFetchError": "Couldn't fetch weather",
+  "@weatherFetchError": {},
+  "weatherRetry": "Retry",
+  "@weatherRetry": {}
 }
