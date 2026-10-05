@@ -938,6 +938,7 @@
   "@showPassword": {},
   "hidePassword": "Hide password",
   "@hidePassword": {},
+<<<<<<< HEAD
   "unlockWatchlistTitle": "Your free watchlist is full",
   "@unlockWatchlistTitle": {},
   "unlockAlertsTitle": "You've used your free alerts",
@@ -1270,4 +1271,18 @@
       }
     }
   }
+=======
+  "weatherPermissionTitle": "Enable Location",
+  "@weatherPermissionTitle": {},
+  "weatherPermissionSubtitle": "We need your location to show local weather on the home screen.",
+  "@weatherPermissionSubtitle": {},
+  "weatherPermissionAllow": "Allow Location",
+  "@weatherPermissionAllow": {},
+  "weatherPermissionDeny": "Not Now",
+  "@weatherPermissionDeny": {},
+  "weatherFetchError": "Couldn't fetch weather",
+  "@weatherFetchError": {},
+  "weatherRetry": "Retry",
+  "@weatherRetry": {}
+>>>>>>> 3c0db1a53330c423562aed2a14ec726797682e4f
 }
