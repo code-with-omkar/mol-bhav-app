@@ -25,6 +25,21 @@ abstract interface class AuthRepository {
     required String password,
   });
 
+  /// "Continue with Google" with an ID token from Google Sign-In, then stores
+  /// the session. A new Google account fails with
+  /// `GooglePhoneRequiredFailure` until [mobile] is given; a [mobile] that
+  /// already has an account fails with `AccountExistsFailure`.
+  Future<Result<AuthSession>> loginWithGoogle({
+    required String idToken,
+    MobileNumber? mobile,
+  });
+
+  /// Adds Google sign-in to the signed-in account. Returns the Google email.
+  Future<Result<String?>> linkGoogle(String idToken);
+
+  /// Removes Google sign-in; `LastSignInMethodFailure` if it is the only one.
+  Future<Result<void>> unlinkGoogle();
+
   /// Creates an account with a password, then stores the session.
   /// Fails with `AccountExistsFailure` when the number is already registered.
   Future<Result<AuthSession>> registerWithPassword({

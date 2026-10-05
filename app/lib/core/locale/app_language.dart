@@ -7,11 +7,7 @@ import 'dart:ui';
 enum AppLanguage {
   english('en', 'English'),
   hindi('hi', 'हिन्दी'),
-  marathi('mr', 'मराठी'),
-  gujarati('gu', 'ગુજરાતી'),
-  tamil('ta', 'தமிழ்'),
-  telugu('te', 'తెలుగు'),
-  kannada('kn', 'ಕನ್ನಡ');
+  marathi('mr', 'मराठी');
 
   const AppLanguage(this.code, this.nativeName);
 

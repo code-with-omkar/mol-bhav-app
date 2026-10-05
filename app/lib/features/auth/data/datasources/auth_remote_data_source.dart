@@ -23,6 +23,20 @@ abstract interface class AuthRemoteDataSource {
     String password,
   );
 
+  /// `POST /auth/google` with `{ "idToken": "…", "phoneNumber"?: "…" }`.
+  /// 422 `Auth.PhoneRequired` for a new Google account without a number;
+  /// 409 when the number already has an account.
+  Future<OtpVerifyResponse> loginWithGoogle(
+    String idToken,
+    String? phoneNumber,
+  );
+
+  /// `POST /auth/google/link` `{ "idToken" }` → `{ "email" }` (signed in).
+  Future<String?> linkGoogle(String idToken);
+
+  /// `DELETE /auth/google/link` → 204; 422 when it is the only sign-in method.
+  Future<void> unlinkGoogle();
+
   /// `POST /auth/otp/request` with `{ "phoneNumber": "+919876543210" }`.
   Future<OtpRequestResponse> requestOtp(String phoneNumber);
 
@@ -48,6 +62,31 @@ class DioAuthRemoteDataSource implements AuthRemoteDataSource {
     );
     return LoginMethodsResponse.fromJson(response.data!);
   }
+
+  @override
+  Future<OtpVerifyResponse> loginWithGoogle(
+    String idToken,
+    String? phoneNumber,
+  ) async {
+    final response = await _dio.post<Map<String, dynamic>>(
+      '/auth/google',
+      data: {'idToken': idToken, 'phoneNumber': ?phoneNumber},
+      options: _noSession,
+    );
+    return OtpVerifyResponse.fromJson(response.data!);
+  }
+
+  @override
+  Future<String?> linkGoogle(String idToken) async {
+    final response = await _dio.post<Map<String, dynamic>>(
+      '/auth/google/link',
+      data: {'idToken': idToken},
+    );
+    return response.data?['email'] as String?;
+  }
+
+  @override
+  Future<void> unlinkGoogle() => _dio.delete<void>('/auth/google/link');
 
   @override
   Future<OtpVerifyResponse> loginWithPassword(

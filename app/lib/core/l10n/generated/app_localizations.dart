@@ -2643,6 +2643,474 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Run finished. See the last run on the card.'**
   String get runCompleted;
+
+  /// No description provided for @backfillAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Pull past days'**
+  String get backfillAction;
+
+  /// No description provided for @backfillPickerTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Market days to pull'**
+  String get backfillPickerTitle;
+
+  /// No description provided for @backfillTooLong.
+  ///
+  /// In en, this message translates to:
+  /// **'Pick at most {max} days at a time.'**
+  String backfillTooLong(String max);
+
+  /// No description provided for @backfillQueued.
+  ///
+  /// In en, this message translates to:
+  /// **'{days} day(s) queued. Pull down to refresh as they finish.'**
+  String backfillQueued(String days);
+
+  /// No description provided for @jobMarketDay.
+  ///
+  /// In en, this message translates to:
+  /// **'Market day: {date}'**
+  String jobMarketDay(String date);
+
+  /// No description provided for @jobUnchanged.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} unchanged'**
+  String jobUnchanged(String count);
+
+  /// No description provided for @uploadCsvAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Upload CSV'**
+  String get uploadCsvAction;
+
+  /// No description provided for @uploadCompleted.
+  ///
+  /// In en, this message translates to:
+  /// **'CSV imported. See the last run on the card.'**
+  String get uploadCompleted;
+
+  /// No description provided for @uploadTooLarge.
+  ///
+  /// In en, this message translates to:
+  /// **'The file is larger than 10 MB. Split it by date or state.'**
+  String get uploadTooLarge;
+
+  /// No description provided for @jobFromUpload.
+  ///
+  /// In en, this message translates to:
+  /// **'from CSV upload'**
+  String get jobFromUpload;
+
+  /// No description provided for @adminAllCategories.
+  ///
+  /// In en, this message translates to:
+  /// **'All'**
+  String get adminAllCategories;
+
+  /// No description provided for @runAllAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Run all'**
+  String get runAllAction;
+
+  /// No description provided for @categoryRunQueued.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} source(s) queued. Pull down to refresh as they finish.'**
+  String categoryRunQueued(String count);
+
+  /// No description provided for @addSourceAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Add source'**
+  String get addSourceAction;
+
+  /// No description provided for @editSourceAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit source'**
+  String get editSourceAction;
+
+  /// No description provided for @sourceCodeLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Code'**
+  String get sourceCodeLabel;
+
+  /// No description provided for @sourceCodeHint.
+  ///
+  /// In en, this message translates to:
+  /// **'e.g. cpwd-dsr. Cannot be changed later.'**
+  String get sourceCodeHint;
+
+  /// No description provided for @sourceCodeInvalid.
+  ///
+  /// In en, this message translates to:
+  /// **'Use lowercase letters, digits and hyphens, starting with a letter.'**
+  String get sourceCodeInvalid;
+
+  /// No description provided for @sourceNameLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Name'**
+  String get sourceNameLabel;
+
+  /// No description provided for @sourceNameRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter a name.'**
+  String get sourceNameRequired;
+
+  /// No description provided for @sourceCategoryLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Category'**
+  String get sourceCategoryLabel;
+
+  /// No description provided for @sourceActiveLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Active'**
+  String get sourceActiveLabel;
+
+  /// No description provided for @saveSourceAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Save source'**
+  String get saveSourceAction;
+
+  /// No description provided for @sourceCreated.
+  ///
+  /// In en, this message translates to:
+  /// **'Source added.'**
+  String get sourceCreated;
+
+  /// No description provided for @sourceUpdated.
+  ///
+  /// In en, this message translates to:
+  /// **'Source updated.'**
+  String get sourceUpdated;
+
+  /// No description provided for @categoryNoSources.
+  ///
+  /// In en, this message translates to:
+  /// **'No sources in this category yet.'**
+  String get categoryNoSources;
+
+  /// No description provided for @csvTemplateAction.
+  ///
+  /// In en, this message translates to:
+  /// **'CSV format'**
+  String get csvTemplateAction;
+
+  /// No description provided for @csvTemplateTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'CSV template'**
+  String get csvTemplateTitle;
+
+  /// No description provided for @csvTemplateBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Every source accepts a CSV whose first line is this header. Use MolBhav product codes and mandi or supplier codes; location_kind is mandi or supplier; dates as yyyy-MM-dd. Rows for products outside the source\'s category are rejected. Agmarknet also accepts the data.gov.in and portal exports.'**
+  String get csvTemplateBody;
+
+  /// No description provided for @csvTemplateCopied.
+  ///
+  /// In en, this message translates to:
+  /// **'Header copied.'**
+  String get csvTemplateCopied;
+
+  /// No description provided for @weatherTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Weather'**
+  String get weatherTitle;
+
+  /// No description provided for @weatherToday.
+  ///
+  /// In en, this message translates to:
+  /// **'Today'**
+  String get weatherToday;
+
+  /// No description provided for @weatherTomorrow.
+  ///
+  /// In en, this message translates to:
+  /// **'Tomorrow'**
+  String get weatherTomorrow;
+
+  /// No description provided for @weatherSevenDay.
+  ///
+  /// In en, this message translates to:
+  /// **'7-day forecast'**
+  String get weatherSevenDay;
+
+  /// No description provided for @weatherSelectDay.
+  ///
+  /// In en, this message translates to:
+  /// **'Select day'**
+  String get weatherSelectDay;
+
+  /// No description provided for @weatherStation.
+  ///
+  /// In en, this message translates to:
+  /// **'IMD · {station}'**
+  String weatherStation(String station);
+
+  /// No description provided for @weatherRainChance.
+  ///
+  /// In en, this message translates to:
+  /// **'{percent}% rain'**
+  String weatherRainChance(String percent);
+
+  /// No description provided for @weatherHumidity.
+  ///
+  /// In en, this message translates to:
+  /// **'Humidity'**
+  String get weatherHumidity;
+
+  /// No description provided for @weatherWind.
+  ///
+  /// In en, this message translates to:
+  /// **'Wind'**
+  String get weatherWind;
+
+  /// No description provided for @weatherWindValue.
+  ///
+  /// In en, this message translates to:
+  /// **'{speed} km/h'**
+  String weatherWindValue(String speed);
+
+  /// No description provided for @weatherTempRange.
+  ///
+  /// In en, this message translates to:
+  /// **'{min}° / {max}°'**
+  String weatherTempRange(String min, String max);
+
+  /// No description provided for @weatherTempDegrees.
+  ///
+  /// In en, this message translates to:
+  /// **'{temp}°'**
+  String weatherTempDegrees(String temp);
+
+  /// No description provided for @weatherUpdated.
+  ///
+  /// In en, this message translates to:
+  /// **'Updated {time}'**
+  String weatherUpdated(String time);
+
+  /// No description provided for @weatherClear.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear'**
+  String get weatherClear;
+
+  /// No description provided for @weatherPartlyCloudy.
+  ///
+  /// In en, this message translates to:
+  /// **'Partly cloudy'**
+  String get weatherPartlyCloudy;
+
+  /// No description provided for @weatherCloudy.
+  ///
+  /// In en, this message translates to:
+  /// **'Cloudy'**
+  String get weatherCloudy;
+
+  /// No description provided for @weatherRain.
+  ///
+  /// In en, this message translates to:
+  /// **'Rain'**
+  String get weatherRain;
+
+  /// No description provided for @weatherThunderstorm.
+  ///
+  /// In en, this message translates to:
+  /// **'Thunderstorm'**
+  String get weatherThunderstorm;
+
+  /// No description provided for @weatherPermissionTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Show weather for your area?'**
+  String get weatherPermissionTitle;
+
+  /// No description provided for @weatherPermissionBody.
+  ///
+  /// In en, this message translates to:
+  /// **'MolBhav uses your approximate location once to find the nearest IMD weather station. It stays on this device.'**
+  String get weatherPermissionBody;
+
+  /// No description provided for @weatherAllow.
+  ///
+  /// In en, this message translates to:
+  /// **'Allow'**
+  String get weatherAllow;
+
+  /// No description provided for @weatherNotNow.
+  ///
+  /// In en, this message translates to:
+  /// **'Not now'**
+  String get weatherNotNow;
+
+  /// No description provided for @weatherEnableLocation.
+  ///
+  /// In en, this message translates to:
+  /// **'Enable location'**
+  String get weatherEnableLocation;
+
+  /// No description provided for @weatherOpenSettings.
+  ///
+  /// In en, this message translates to:
+  /// **'Open settings'**
+  String get weatherOpenSettings;
+
+  /// No description provided for @weatherNoForecast.
+  ///
+  /// In en, this message translates to:
+  /// **'No forecast'**
+  String get weatherNoForecast;
+
+  /// No description provided for @weatherNoForecastBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Allow location to see the weather for your area.'**
+  String get weatherNoForecastBody;
+
+  /// No description provided for @weatherServiceOff.
+  ///
+  /// In en, this message translates to:
+  /// **'Location is turned off. Turn it on to see the weather for your area.'**
+  String get weatherServiceOff;
+
+  /// No description provided for @weatherDeniedForever.
+  ///
+  /// In en, this message translates to:
+  /// **'Location permission is blocked. Allow it in settings to see the weather.'**
+  String get weatherDeniedForever;
+
+  /// No description provided for @weatherOutOfCoverage.
+  ///
+  /// In en, this message translates to:
+  /// **'No IMD weather station near you.'**
+  String get weatherOutOfCoverage;
+
+  /// No description provided for @weatherUnavailable.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not find your location.'**
+  String get weatherUnavailable;
+
+  /// No description provided for @alertRuleConditionChange.
+  ///
+  /// In en, this message translates to:
+  /// **'Changes by {percent}% (up or down)'**
+  String alertRuleConditionChange(String percent);
+
+  /// No description provided for @savePasswordLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Save password'**
+  String get savePasswordLabel;
+
+  /// No description provided for @savePasswordHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Stored securely on this phone. Turn off on shared phones.'**
+  String get savePasswordHint;
+
+  /// No description provided for @continueWithGoogle.
+  ///
+  /// In en, this message translates to:
+  /// **'Continue with Google'**
+  String get continueWithGoogle;
+
+  /// No description provided for @orDivider.
+  ///
+  /// In en, this message translates to:
+  /// **'or'**
+  String get orDivider;
+
+  /// No description provided for @googlePhoneTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'One more step'**
+  String get googlePhoneTitle;
+
+  /// No description provided for @googlePhoneSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter your mobile number. We use it for WhatsApp price alerts and support.'**
+  String get googlePhoneSubtitle;
+
+  /// No description provided for @googlePhoneContinue.
+  ///
+  /// In en, this message translates to:
+  /// **'Create account'**
+  String get googlePhoneContinue;
+
+  /// No description provided for @googleAccountExists.
+  ///
+  /// In en, this message translates to:
+  /// **'This mobile number already has an account. Log in with your password, then link Google from More.'**
+  String get googleAccountExists;
+
+  /// No description provided for @googleSignInFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Google sign-in did not work. Please try again.'**
+  String get googleSignInFailed;
+
+  /// No description provided for @googleSignInTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Google sign-in'**
+  String get googleSignInTitle;
+
+  /// No description provided for @googleLinked.
+  ///
+  /// In en, this message translates to:
+  /// **'Linked'**
+  String get googleLinked;
+
+  /// No description provided for @googleLinkedAs.
+  ///
+  /// In en, this message translates to:
+  /// **'Linked: {email}'**
+  String googleLinkedAs(String email);
+
+  /// No description provided for @googleUnlinkAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Unlink'**
+  String get googleUnlinkAction;
+
+  /// No description provided for @googleLinkAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Link Google account'**
+  String get googleLinkAction;
+
+  /// No description provided for @googleLinkHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign in with Google next time instead of your password.'**
+  String get googleLinkHint;
+
+  /// No description provided for @googleLinkedElsewhere.
+  ///
+  /// In en, this message translates to:
+  /// **'This Google account is already linked to another MolBhav account.'**
+  String get googleLinkedElsewhere;
+
+  /// No description provided for @googleLastSignInMethod.
+  ///
+  /// In en, this message translates to:
+  /// **'Set a password before unlinking Google — it is your only way to sign in.'**
+  String get googleLastSignInMethod;
 }
 
 class _AppLocalizationsDelegate

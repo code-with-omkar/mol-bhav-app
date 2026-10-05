@@ -10,6 +10,8 @@ using MolBhav.Application.Features.Catalog.GetProduct;
 using MolBhav.Application.Features.Catalog.GetProducts;
 using MolBhav.Application.Features.Catalog.GetUnits;
 using MolBhav.Application.Features.Catalog.Models;
+using Microsoft.AspNetCore.OutputCaching;
+using MolBhav.Api.Setup;
 
 namespace MolBhav.Api.Controllers.V1;
 
@@ -20,6 +22,7 @@ namespace MolBhav.Api.Controllers.V1;
 [ApiVersion("1.0")]
 [Route("api/v{version:apiVersion}/catalog")]
 [AllowAnonymous]
+[OutputCache(PolicyName = ResponseCachingSetup.ReferenceDataPolicy)] // same for every caller; evicted on admin edits
 public sealed class CatalogController(ISender sender) : ApiControllerBase(sender)
 {
     /// <summary>Select Category screen: categories with their sub-categories.</summary>

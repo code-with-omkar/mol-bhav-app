@@ -16,11 +16,16 @@ public sealed class LoginMethodsOptions
     public bool AllowClaimingPasswordlessAccounts { get; set; }
 }
 
-internal sealed class ConfiguredLoginMethods(IOptions<LoginMethodsOptions> options) : ILoginMethods
+internal sealed class ConfiguredLoginMethods(IOptions<LoginMethodsOptions> options, IOptions<GoogleSignInOptions> google)
+    : ILoginMethods
 {
     public bool OtpEnabled => options.Value.Otp;
 
     public bool PasswordEnabled => options.Value.Password;
 
     public bool AllowClaimingPasswordlessAccounts => options.Value.AllowClaimingPasswordlessAccounts;
+
+    public bool GoogleEnabled => google.Value.Enabled && !string.IsNullOrWhiteSpace(google.Value.ServerClientId);
+
+    public string? GoogleServerClientId => GoogleEnabled ? google.Value.ServerClientId : null;
 }

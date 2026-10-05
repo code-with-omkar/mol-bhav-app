@@ -34,3 +34,13 @@ class RegisterWithPassword {
   Future<Result<AuthSession>> call(MobileNumber mobile, String password) =>
       _repository.registerWithPassword(mobile: mobile, password: password);
 }
+
+@injectable
+class LoginWithGoogle {
+  const LoginWithGoogle(this._repository);
+
+  final AuthRepository _repository;
+
+  Future<Result<AuthSession>> call(String idToken, {MobileNumber? mobile}) =>
+      _repository.loginWithGoogle(idToken: idToken, mobile: mobile);
+}

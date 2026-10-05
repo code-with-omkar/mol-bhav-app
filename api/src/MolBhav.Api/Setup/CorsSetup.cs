@@ -32,8 +32,9 @@ internal static class CorsSetup
             policy
                 .SetIsOriginAllowed(origin => allowed.Contains(origin) || (settings.AllowAnyLocalhostPort && IsLocalhost(origin)))
                 .WithMethods(HttpMethods.Get, HttpMethods.Post, HttpMethods.Put, HttpMethods.Patch, HttpMethods.Delete)
-                .WithHeaders(HeaderNames.Authorization, HeaderNames.ContentType, HeaderNames.AcceptLanguage)
-                .WithExposedHeaders(HeaderNames.RetryAfter, HeaderNames.ContentLanguage, HeaderNames.ContentDisposition, "api-supported-versions")
+                // If-None-Match / ETag: conditional GETs from the web app (ConditionalGetMiddleware).
+                .WithHeaders(HeaderNames.Authorization, HeaderNames.ContentType, HeaderNames.AcceptLanguage, HeaderNames.IfNoneMatch)
+                .WithExposedHeaders(HeaderNames.RetryAfter, HeaderNames.ContentLanguage, HeaderNames.ContentDisposition, HeaderNames.ETag, "api-supported-versions")
                 .SetPreflightMaxAge(TimeSpan.FromMinutes(10));
         }));
 

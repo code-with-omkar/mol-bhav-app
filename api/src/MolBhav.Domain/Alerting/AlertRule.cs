@@ -64,7 +64,7 @@ public sealed class AlertRule : AggregateRoot<Guid>, IAuditableEntity
     public AlertThresholdType ThresholdType { get; private set; }
 
     /// <summary>
-    /// Percent change (0, 100] that triggers the alert, e.g. 10 = a 10% drop/spike vs. the previous price.
+    /// Percent change (0, 100] that triggers the alert, e.g. 10 = a 10% drop/spike/either-way move vs. the previous price.
     /// Set for the percent types only — null for <see cref="AlertThresholdType.PriceBelow"/>/<see cref="AlertThresholdType.PriceAbove"/>.
     /// </summary>
     public decimal? ThresholdPercent { get; private set; }
@@ -119,7 +119,7 @@ public sealed class AlertRule : AggregateRoot<Guid>, IAuditableEntity
 
     /// <summary>True when <paramref name="thresholdType"/> is measured as a percent move rather than a rupee level.</summary>
     public static bool IsPercentType(AlertThresholdType thresholdType) =>
-        thresholdType is AlertThresholdType.PriceDrop or AlertThresholdType.PriceSpike;
+        thresholdType is AlertThresholdType.PriceDrop or AlertThresholdType.PriceSpike or AlertThresholdType.PriceChange;
 
     /// <summary>
     /// The threshold a rule carries is fixed by its <see cref="ThresholdType"/>, so an update sets whichever of the

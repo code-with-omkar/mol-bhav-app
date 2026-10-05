@@ -3,6 +3,8 @@ import 'dart:typed_data';
 import 'package:dio/dio.dart';
 import 'package:injectable/injectable.dart';
 
+import '../../../core/cache/cached_api_call.dart';
+import '../../../core/cache/response_cache.dart';
 import '../../../core/error/result.dart';
 import '../../../core/network/api_call.dart';
 import '../../../core/network/json.dart';
@@ -17,9 +19,12 @@ import '../domain/tools.dart';
 /// - `DELETE /procurement/requirements/{id}`
 @LazySingleton(as: EstimatorRepository)
 class EstimatorRepositoryImpl implements EstimatorRepository {
-  EstimatorRepositoryImpl(this._dio);
+  EstimatorRepositoryImpl(this._dio, this._cache);
 
   final Dio _dio;
+  final ResponseCache _cache;
+
+  static const savedKey = 'tools.estimates';
 
   static const _path = '/procurement/requirements';
 
@@ -100,24 +105,27 @@ class EstimatorRepositoryImpl implements EstimatorRepository {
     );
   }
 
+  /// Live first; offline the last saved list is shown.
   @override
-  Future<Result<List<SavedEstimate>>> getSaved() => runApiCall(
-    () async =>
-        parseList((await _dio.get<List<dynamic>>(_path)).data ?? const [], (j) {
-          final product = j.obj('product');
-          final variant = j.strOrNull('variantName');
-          return SavedEstimate(
-            id: j.str('id'),
-            productId: product.str('id'),
-            productName: variant == null
-                ? product.str('name')
-                : '${product.str('name')} · $variant',
-            quantity: j.number('quantity'),
-            unitSymbol: j.obj('unit').str('symbol'),
-            districtName: j.strOrNull('targetDistrictName'),
-            createdAt: j.date('createdAtUtc'),
-          );
-        }),
+  Future<Result<List<SavedEstimate>>> getSaved() => runCachedApiCall(
+    cache: _cache,
+    key: savedKey,
+    fetch: () async => (await _dio.get<List<dynamic>>(_path)).data ?? const [],
+    parse: (json) => parseList(json as List<dynamic>, (j) {
+      final product = j.obj('product');
+      final variant = j.strOrNull('variantName');
+      return SavedEstimate(
+        id: j.str('id'),
+        productId: product.str('id'),
+        productName: variant == null
+            ? product.str('name')
+            : '${product.str('name')} · $variant',
+        quantity: j.number('quantity'),
+        unitSymbol: j.obj('unit').str('symbol'),
+        districtName: j.strOrNull('targetDistrictName'),
+        createdAt: j.date('createdAtUtc'),
+      );
+    }),
   );
 
   @override
@@ -134,20 +142,26 @@ class EstimatorRepositoryImpl implements EstimatorRepository {
 /// - `GET /reports/{id}/download` → the file
 @LazySingleton(as: ReportsRepository)
 class ReportsRepositoryImpl implements ReportsRepository {
-  ReportsRepositoryImpl(this._dio);
+  ReportsRepositoryImpl(this._dio, this._cache);
 
   final Dio _dio;
+  final ResponseCache _cache;
 
+  static const reportsKey = 'tools.reports';
+
+  /// Live first (statuses change while a report is generated); offline the
+  /// last saved list is shown.
   @override
-  Future<Result<List<GeneratedReport>>> getReports() => runApiCall(
-    () async => parseList(
-      (await _dio.get<List<dynamic>>(
-            '/reports',
-            queryParameters: {'pageSize': 50},
-          )).data ??
-          const [],
-      _report,
-    ),
+  Future<Result<List<GeneratedReport>>> getReports() => runCachedApiCall(
+    cache: _cache,
+    key: reportsKey,
+    fetch: () async =>
+        (await _dio.get<List<dynamic>>(
+          '/reports',
+          queryParameters: {'pageSize': 50},
+        )).data ??
+        const [],
+    parse: (json) => parseList(json as List<dynamic>, _report),
   );
 
   @override

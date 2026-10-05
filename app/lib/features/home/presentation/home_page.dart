@@ -22,6 +22,8 @@ import '../../promotions/domain/promotions.dart';
 import '../../promotions/presentation/ad_slot.dart';
 import '../domain/home_entities.dart';
 import 'home_cubit.dart';
+import 'weather_badge_widget.dart';
+import '../../../core/weather/weather_service.dart';
 
 /// Category-aware dashboard: Market → Compare → Opportunity → Action.
 class HomePage extends StatelessWidget {
@@ -51,6 +53,42 @@ class HomePage extends StatelessWidget {
           },
         );
       },
+    );
+  }
+}
+
+/// The header with the weather badge floating on its greeting line. The badge
+/// shows once the weather is known; tapping the location chip toggles it.
+class _WeatherHero extends StatefulWidget {
+  const _WeatherHero({required this.weather, required this.builder});
+
+  final CurrentWeather? weather;
+  final Widget Function(VoidCallback onChipTap) builder;
+
+  @override
+  State<_WeatherHero> createState() => _WeatherHeroState();
+}
+
+class _WeatherHeroState extends State<_WeatherHero> {
+  bool _shown = true;
+
+  @override
+  Widget build(BuildContext context) {
+    final weather = widget.weather;
+    // Header rows above the greeting: safe area, padding, the 48px top row
+    // and the gap below it.
+    final top =
+        MediaQuery.paddingOf(context).top + MbSpacing.s2 + 48 + MbSpacing.s5;
+    return Stack(
+      children: [
+        widget.builder(() => setState(() => _shown = !_shown)),
+        if (weather != null)
+          Positioned(
+            top: top,
+            right: MbSpacing.s4,
+            child: WeatherBadgeWidget(weather: weather, visible: _shown),
+          ),
+      ],
     );
   }
 }
@@ -92,14 +130,18 @@ class _Dashboard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          MbHeroHeader(
-            name: data.userName,
-            greeting: _greeting(context),
-            chip: _chip(context),
-            subtitle: l10n.homeSubtitle,
-            alertsLabel: l10n.alertsLabel,
-            unread: data.hasUnreadAlerts,
-            onAlerts: () => context.go(AppRoutes.alerts),
+          _WeatherHero(
+            weather: data.weather,
+            builder: (onChipTap) => MbHeroHeader(
+              name: data.userName,
+              greeting: _greeting(context),
+              chip: _chip(context),
+              onChipTap: data.weather == null ? null : onChipTap,
+              subtitle: l10n.homeSubtitle,
+              alertsLabel: l10n.alertsLabel,
+              unread: data.hasUnreadAlerts,
+              onAlerts: () => context.go(AppRoutes.alerts),
+            ),
           ),
           Transform.translate(
             offset: const Offset(0, -MbHeroHeader.overlap),

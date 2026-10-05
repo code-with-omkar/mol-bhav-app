@@ -44,6 +44,9 @@ internal sealed class GetProfileQueryHandler(
             profile.WhatsAppEnabled,
             profile.LastLoginAtUtc,
             profile.CreatedAtUtc,
-            currentUser.IsInRole(Roles.Admin));
+            currentUser.IsInRole(Roles.Admin),
+            profile.HasPassword,
+            profile.HasGoogleLogin,
+            profile.GoogleEmail);
     }
 }

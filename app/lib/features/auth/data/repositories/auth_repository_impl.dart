@@ -1,3 +1,4 @@
+import 'package:dio/dio.dart';
 import 'package:injectable/injectable.dart';
 
 import '../../../../core/error/result.dart';
@@ -23,7 +24,12 @@ class AuthRepositoryImpl implements AuthRepository {
   Future<Result<LoginMethods>> getLoginMethods() {
     return runApiCall(() async {
       final response = await _remote.getLoginMethods();
-      return LoginMethods(otp: response.otp, password: response.password);
+      return LoginMethods(
+        otp: response.otp,
+        password: response.password,
+        google: response.google,
+        googleClientId: response.googleClientId,
+      );
     });
   }
 
@@ -57,6 +63,44 @@ class AuthRepositoryImpl implements AuthRepository {
       },
     );
   }
+
+  @override
+  Future<Result<AuthSession>> loginWithGoogle({
+    required String idToken,
+    MobileNumber? mobile,
+  }) {
+    return runApiCall(
+      () async =>
+          _startSession(await _remote.loginWithGoogle(idToken, mobile?.e164)),
+      mapError: (e) => switch ((e.response?.statusCode, _errorCode(e))) {
+        (422, 'Auth.PhoneRequired') => const GooglePhoneRequiredFailure(),
+        (409, _) => const AccountExistsFailure(),
+        (400, 'Auth.GoogleTokenInvalid') => const GoogleTokenInvalidFailure(),
+        _ => null,
+      },
+    );
+  }
+
+  @override
+  Future<Result<String?>> linkGoogle(String idToken) => runApiCall(
+    () => _remote.linkGoogle(idToken),
+    mapError: (e) => switch ((e.response?.statusCode, _errorCode(e))) {
+      (409, _) => const GoogleLinkedElsewhereFailure(),
+      (400, 'Auth.GoogleTokenInvalid') => const GoogleTokenInvalidFailure(),
+      _ => null,
+    },
+  );
+
+  @override
+  Future<Result<void>> unlinkGoogle() => runApiCall(
+    _remote.unlinkGoogle,
+    mapError: (e) => switch (e.response?.statusCode) {
+      422 => const LastSignInMethodFailure(),
+      _ => null,
+    },
+  );
+
+  static String? _errorCode(DioException e) => errorCode(e.response?.data);
 
   Future<AuthSession> _startSession(OtpVerifyResponse response) async {
     await _session.signIn(

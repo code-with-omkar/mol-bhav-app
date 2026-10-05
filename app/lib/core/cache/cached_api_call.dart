@@ -63,13 +63,21 @@ Stream<Result<T>> watchCachedApiCall<T>({
 bool _isFresh(CachedResponse cached, Duration ttl) =>
     DateTime.now().difference(cached.savedAt) < ttl;
 
+/// Requests in flight per cache key: a second caller asking for the same key
+/// while the first request is running shares it instead of sending another.
+final Map<String, Future<Object>> _inFlight = {};
+
 Future<Result<T>> _fetchLive<T>(
   ResponseCache cache,
   String key,
   Future<Object> Function() fetch,
   T Function(Object json) parse,
 ) => runApiCall(() async {
-  final json = await fetch();
+  // Block body on purpose: `remove` returns the removed future — this very
+  // one — and returning it from `whenComplete` would make it wait on itself.
+  final json = await (_inFlight[key] ??= fetch().whenComplete(() {
+    _inFlight.remove(key);
+  }));
   final value = parse(json);
   await cache.write(key, json);
   return value;

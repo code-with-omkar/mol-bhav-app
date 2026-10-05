@@ -20,6 +20,9 @@ class AccountProfile extends Equatable {
     required this.pushEnabled,
     required this.whatsappEnabled,
     this.isAdmin = false,
+    this.hasPassword = true,
+    this.hasGoogleLogin = false,
+    this.googleEmail,
   });
 
   /// Empty until the user enters one.
@@ -50,6 +53,13 @@ class AccountProfile extends Equatable {
   /// role on every admin endpoint, and the role is granted only server-side.
   final bool isAdmin;
 
+  /// False for accounts created with Google only — they cannot unlink it.
+  final bool hasPassword;
+  final bool hasGoogleLogin;
+
+  /// Shown as "Linked: name@gmail.com".
+  final String? googleEmail;
+
   AccountProfile withNotifications({bool? push, bool? whatsapp}) =>
       AccountProfile(
         name: name,
@@ -67,6 +77,9 @@ class AccountProfile extends Equatable {
         pushEnabled: push ?? pushEnabled,
         whatsappEnabled: whatsapp ?? whatsappEnabled,
         isAdmin: isAdmin,
+        hasPassword: hasPassword,
+        hasGoogleLogin: hasGoogleLogin,
+        googleEmail: googleEmail,
       );
 
   @override
@@ -86,6 +99,9 @@ class AccountProfile extends Equatable {
     pushEnabled,
     whatsappEnabled,
     isAdmin,
+    hasPassword,
+    hasGoogleLogin,
+    googleEmail,
   ];
 }
 

@@ -42,9 +42,7 @@ class AlertRulesCubit extends Cubit<AlertRulesState> {
 
   Future<void> load() async {
     emit(const AlertRulesLoading());
-    final result = await _repository.getAlertRules();
-    if (isClosed) return;
-    emit(result.fold(AlertRulesError.new, AlertRulesLoaded.new));
+    await _watch();
   }
 
   Future<void> deleteRule(String id) async {
@@ -59,9 +57,14 @@ class AlertRulesCubit extends Cubit<AlertRulesState> {
     result.fold((_) {}, (_) => _reload());
   }
 
-  Future<void> _reload() async {
-    final result = await _repository.getAlertRules();
-    if (isClosed) return;
-    emit(result.fold(AlertRulesError.new, AlertRulesLoaded.new));
+  Future<void> _reload() => _watch();
+
+  /// Saved rules first, then live (the repository drops the saved copy after
+  /// every change, so a reload after edit/delete is always live).
+  Future<void> _watch() async {
+    await for (final result in _repository.watchAlertRules()) {
+      if (isClosed) return;
+      emit(result.fold(AlertRulesError.new, AlertRulesLoaded.new));
+    }
   }
 }

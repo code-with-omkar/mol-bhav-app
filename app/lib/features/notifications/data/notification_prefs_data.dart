@@ -4,6 +4,8 @@ import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 import 'package:injectable/injectable.dart';
 
+import '../../../core/cache/cached_api_call.dart';
+import '../../../core/cache/response_cache.dart';
 import '../../../core/network/api_call.dart';
 import '../../../core/network/json.dart';
 import '../domain/notification_prefs.dart';
@@ -57,31 +59,40 @@ class DioNotificationPrefsRemoteDataSource
 
 @LazySingleton(as: NotificationPrefsRepository)
 class NotificationPrefsRepositoryImpl implements NotificationPrefsRepository {
-  NotificationPrefsRepositoryImpl(this._remote);
+  NotificationPrefsRepositoryImpl(this._remote, this._cache);
 
   final NotificationPrefsRemoteDataSource _remote;
+  final ResponseCache _cache;
 
+  static const prefsKey = 'notifications.prefs';
+
+  /// Only this user changes these, and every save rewrites the saved copy, so
+  /// a day-old copy is still right; offline the saved copy beats defaults.
   @override
-  Future<NotificationPrefs> getPreferences() => runApiCall(
-    () async => _prefs(
-      (await _remote.getPreferences())['data'] as Map<String, dynamic>,
-    ),
+  Future<NotificationPrefs> getPreferences() => runCachedApiCall(
+    cache: _cache,
+    key: prefsKey,
+    ttl: const Duration(days: 1),
+    fetch: () async =>
+        (await _remote.getPreferences())['data'] as Map<String, dynamic>,
+    parse: (json) => _prefs(json as Map<String, dynamic>),
   ).then((r) => r.fold((_) => const NotificationPrefs.defaults(), (v) => v));
 
   @override
   Future<NotificationPrefs> updatePreferences(NotificationPrefs prefs) =>
-      runApiCall(
-        () async => _prefs(
-          (await _remote.updatePreferences({
-                'pushEnabled': prefs.pushEnabled,
-                'alertPushEnabled': prefs.alertPushEnabled,
-                'priceUpdatePushEnabled': prefs.priceUpdatePushEnabled,
-                'whatsAppEnabled': prefs.whatsAppEnabled,
-                'alertWhatsAppEnabled': prefs.alertWhatsAppEnabled,
-              }))['data']
-              as Map<String, dynamic>,
-        ),
-      ).then((r) => r.fold((_) => prefs, (v) => v));
+      runApiCall(() async {
+        final json =
+            (await _remote.updatePreferences({
+                  'pushEnabled': prefs.pushEnabled,
+                  'alertPushEnabled': prefs.alertPushEnabled,
+                  'priceUpdatePushEnabled': prefs.priceUpdatePushEnabled,
+                  'whatsAppEnabled': prefs.whatsAppEnabled,
+                  'alertWhatsAppEnabled': prefs.alertWhatsAppEnabled,
+                }))['data']
+                as Map<String, dynamic>;
+        await _cache.write(prefsKey, json); // the saved copy is the new truth
+        return _prefs(json);
+      }).then((r) => r.fold((_) => prefs, (v) => v));
 
   static NotificationPrefs _prefs(Map<String, dynamic> j) => NotificationPrefs(
     pushEnabled: j.flag('pushEnabled'),

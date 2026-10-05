@@ -13,6 +13,7 @@ using MolBhav.Application.Features.Billing.GetPlans;
 using MolBhav.Application.Features.Billing.Models;
 using MolBhav.Application.Features.Billing.Subscribe;
 using MolBhav.Application.Features.Billing.ValidateCoupon;
+using Microsoft.AspNetCore.OutputCaching;
 
 namespace MolBhav.Api.Controllers.V1;
 
@@ -22,6 +23,7 @@ namespace MolBhav.Api.Controllers.V1;
 public sealed class BillingController(ISender sender) : ApiControllerBase(sender)
 {
     [HttpGet("plans")]
+    [OutputCache(PolicyName = ResponseCachingSetup.ReferenceDataPolicy)] // same plans for every caller
     [ProducesResponseType<ApiResponse<IReadOnlyList<PlanResponse>>>(StatusCodes.Status200OK)]
     public async Task<IActionResult> GetPlans(CancellationToken cancellationToken) =>
         OkEnvelope(await Sender.Send(new GetPlansQuery(), cancellationToken));

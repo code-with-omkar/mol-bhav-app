@@ -15,6 +15,7 @@ import '../core/theme/app_theme.dart';
 import '../features/account/presentation/profile_cubit.dart';
 import '../features/billing/presentation/subscription_tier_sync.dart';
 import '../features/watchlist/presentation/watchlist_cubit.dart';
+import '../features/weather/presentation/weather_cubit.dart';
 
 class MolBhavApp extends StatefulWidget {
   const MolBhavApp({super.key});
@@ -59,6 +60,7 @@ class _MolBhavAppState extends State<MolBhavApp> with WidgetsBindingObserver {
         BlocProvider.value(value: getIt<LocaleCubit>()),
         BlocProvider.value(value: getIt<ProfileCubit>()),
         BlocProvider.value(value: getIt<WatchlistCubit>()),
+        BlocProvider.value(value: getIt<WeatherCubit>()),
       ],
       child: BlocBuilder<LocaleCubit, AppLanguage>(
         builder: (context, language) => MaterialApp.router(

@@ -19,6 +19,7 @@ import '../../../shared/widgets/mb_state_views.dart';
 import '../domain/account.dart';
 import 'account_cubits.dart';
 import '../../billing/presentation/widgets/subscription_badge.dart';
+import 'google_link_tile.dart';
 import 'profile_text.dart';
 
 /// Account hub: profile, plan, categories, language, notifications, help.
@@ -121,6 +122,8 @@ class _Content extends StatelessWidget {
             ),
           ],
         ),
+        // Link or unlink Google sign-in (hidden while the server has it off).
+        GoogleLinkTile(profile: profile),
         // Admin role is granted only server-side; the API enforces it too.
         if (profile.isAdmin) ...[
           gap,

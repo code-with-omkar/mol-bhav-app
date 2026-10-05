@@ -37,8 +37,13 @@ internal sealed class UserProfileReadService(IDbConnectionFactory connectionFact
                false                                                        AS push_enabled,
                false                                                        AS whats_app_enabled,
                u.last_login_at_utc,
-               u.created_at_utc
+               u.created_at_utc,
+               u.password_hash IS NOT NULL                                  AS has_password,
+               g.user_id IS NOT NULL                                        AS has_google_login,
+               g.email                                                      AS google_email
         FROM {UserConfiguration.QualifiedTableName} u
+        LEFT JOIN {UserConfiguration.QualifiedExternalLoginsTableName} g
+               ON g.user_id = u.id AND g.provider = 'Google'
         LEFT JOIN LATERAL (
             SELECT st.id, st.code, st.name
             FROM {States} st
@@ -110,7 +115,10 @@ internal sealed class UserProfileReadService(IDbConnectionFactory connectionFact
             row.PushEnabled,
             row.WhatsAppEnabled,
             row.LastLoginAtUtc is { } lastLogin ? AsUtc(lastLogin) : null,
-            AsUtc(row.CreatedAtUtc));
+            AsUtc(row.CreatedAtUtc),
+            row.HasPassword,
+            row.HasGoogleLogin,
+            row.GoogleEmail);
     }
 
     /// <summary>Npgsql hands <c>timestamptz</c> to Dapper as a UTC <see cref="DateTime"/>; Dapper cannot convert that to <see cref="DateTimeOffset"/> itself.</summary>
@@ -152,6 +160,12 @@ internal sealed class UserProfileReadService(IDbConnectionFactory connectionFact
         public DateTime? LastLoginAtUtc { get; init; }
 
         public DateTime CreatedAtUtc { get; init; }
+
+        public bool HasPassword { get; init; }
+
+        public bool HasGoogleLogin { get; init; }
+
+        public string? GoogleEmail { get; init; }
     }
 
     private sealed class CategoryRow

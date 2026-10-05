@@ -42,6 +42,7 @@ public static class DependencyInjection
             .AddScopedCors(configuration, environment)
             .AddRequestLanguageNegotiation(configuration)
             .AddReverseProxySupport(configuration)
+            .AddApiResponseCaching()
             .AddVersionedOpenApi();
 
         services.AddHsts(options =>

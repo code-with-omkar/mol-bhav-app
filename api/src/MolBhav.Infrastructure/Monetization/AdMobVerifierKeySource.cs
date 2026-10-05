@@ -26,7 +26,8 @@ internal sealed partial class AdMobVerifierKeySource(
     public const string HttpClientName = "admob-ssv-keys";
 
     private readonly SemaphoreSlim _refreshLock = new(1, 1);
-    private IReadOnlyDictionary<long, string> _keys = new Dictionary<long, string>();
+    // Replaced wholesale on refresh (never mutated), so readers always see a complete snapshot.
+    private Dictionary<long, string> _keys = [];
     private DateTimeOffset _fetchedAtUtc = DateTimeOffset.MinValue;
 
     public async Task<string?> GetPemAsync(long keyId, CancellationToken cancellationToken = default)

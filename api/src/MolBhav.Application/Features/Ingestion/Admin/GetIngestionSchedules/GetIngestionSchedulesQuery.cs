@@ -3,4 +3,5 @@ using MolBhav.Application.Features.Ingestion.Models;
 
 namespace MolBhav.Application.Features.Ingestion.Admin.GetIngestionSchedules;
 
-public sealed record GetIngestionSchedulesQuery : IQuery<IReadOnlyList<AdminIngestionScheduleResponse>>;
+/// <param name="CategoryCode">Only sources of this procurement category; null = all categories.</param>
+public sealed record GetIngestionSchedulesQuery(string? CategoryCode = null) : IQuery<IReadOnlyList<AdminIngestionScheduleResponse>>;

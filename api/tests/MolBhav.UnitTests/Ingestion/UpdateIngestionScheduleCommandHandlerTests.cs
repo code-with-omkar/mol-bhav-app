@@ -14,7 +14,7 @@ public sealed class UpdateIngestionScheduleCommandHandlerTests
 
     private readonly IPriceSourceRepository _sources = Substitute.For<IPriceSourceRepository>();
     private readonly IIngestionScheduleRepository _schedules = Substitute.For<IIngestionScheduleRepository>();
-    private readonly PriceSource _source = PriceSource.Create("agmarknet", "Agmarknet").Value;
+    private readonly PriceSource _source = PriceSource.Create("agmarknet", "Agmarknet", Guid.CreateVersion7()).Value;
 
     public UpdateIngestionScheduleCommandHandlerTests()
     {

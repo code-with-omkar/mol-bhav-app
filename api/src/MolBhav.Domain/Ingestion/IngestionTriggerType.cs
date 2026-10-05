@@ -8,4 +8,7 @@ public enum IngestionTriggerType
 
     /// <summary>The scheduler background service triggered the run on its configured interval.</summary>
     Scheduled = 1,
+
+    /// <summary>An admin uploaded a file (e.g. an Agmarknet CSV export) — the fallback when the source's API is down.</summary>
+    Upload = 2,
 }

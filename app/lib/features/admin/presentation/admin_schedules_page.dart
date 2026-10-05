@@ -1,4 +1,6 @@
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
 
@@ -15,7 +17,8 @@ import '../domain/admin_ingestion.dart';
 import 'admin_schedules_cubit.dart';
 
 /// Admin only (the entry is shown only to admins, and the API rejects anyone
-/// else): when each price source is pulled from its government feed.
+/// else): price sources grouped by procurement category — when each is pulled,
+/// "Run all" per category, add/edit sources, backfill and CSV upload.
 class AdminSchedulesPage extends StatelessWidget {
   const AdminSchedulesPage({super.key});
 
@@ -24,6 +27,26 @@ class AdminSchedulesPage extends StatelessWidget {
     final l10n = context.l10n;
     return Scaffold(
       appBar: MbAppBar(title: l10n.adminSchedulesTitle),
+      floatingActionButton:
+          BlocBuilder<AdminSchedulesCubit, AdminSchedulesState>(
+            buildWhen: (p, n) =>
+                p.items != n.items ||
+                p.categories != n.categories ||
+                p.selectedCategory != n.selectedCategory,
+            builder: (context, state) {
+              final categories = state.visibleCategories;
+              if (categories.isEmpty) return const SizedBox.shrink();
+              return FloatingActionButton.extended(
+                icon: const Icon(Icons.add),
+                label: Text(l10n.addSourceAction),
+                onPressed: () => _openSourceForm(
+                  context,
+                  categories: categories,
+                  initialCategory: state.selectedCategory,
+                ),
+              );
+            },
+          ),
       body: BlocConsumer<AdminSchedulesCubit, AdminSchedulesState>(
         listenWhen: (p, n) => p.actionSeq != n.actionSeq,
         listener: (context, state) {
@@ -35,6 +58,15 @@ class AdminSchedulesPage extends StatelessWidget {
                 content: Text(switch (action) {
                   AdminActionKind.saved => l10n.scheduleSaved,
                   AdminActionKind.ran => l10n.runCompleted,
+                  AdminActionKind.backfillQueued => l10n.backfillQueued(
+                    '${state.queuedDays}',
+                  ),
+                  AdminActionKind.uploaded => l10n.uploadCompleted,
+                  AdminActionKind.categoryRunQueued => l10n.categoryRunQueued(
+                    '${state.queuedSources}',
+                  ),
+                  AdminActionKind.sourceCreated => l10n.sourceCreated,
+                  AdminActionKind.sourceUpdated => l10n.sourceUpdated,
                 }),
               ),
             );
@@ -51,7 +83,8 @@ class AdminSchedulesPage extends StatelessWidget {
                   )
                 : const MbLoadingView();
           }
-          if (items.isEmpty) {
+          final categories = state.visibleCategories;
+          if (items.isEmpty && categories.isEmpty) {
             return MbEmptyView(
               message: l10n.adminNoSources,
               onRetry: cubit.load,
@@ -59,22 +92,50 @@ class AdminSchedulesPage extends StatelessWidget {
           }
           return RefreshIndicator(
             onRefresh: cubit.load,
-            child: ListView.separated(
+            child: ListView(
               padding: MbSpacing.screenPadding,
               physics: const AlwaysScrollableScrollPhysics(),
-              itemCount: items.length + 1,
-              separatorBuilder: (_, _) => const SizedBox(height: MbSpacing.s3),
-              itemBuilder: (context, i) => i == 0
-                  ? Text(
-                      l10n.adminSchedulesHint,
-                      style: context.mbText.caption.copyWith(
-                        color: context.mbColors.inkMuted,
+              children: [
+                Text(
+                  l10n.adminSchedulesHint,
+                  style: context.mbText.caption.copyWith(
+                    color: context.mbColors.inkMuted,
+                  ),
+                ),
+                const SizedBox(height: MbSpacing.s3),
+                _CategoryChips(
+                  categories: categories,
+                  selected: state.selectedCategory,
+                  onSelected: cubit.selectCategory,
+                ),
+                for (final (category, sources) in state.sections) ...[
+                  const SizedBox(height: MbSpacing.s4),
+                  _CategoryHeader(
+                    category: category,
+                    canRunAll: sources.any((s) => s.sourceIsActive),
+                    busy: state.busyCategories.contains(category.code),
+                    onRunAll: () => cubit.runCategory(category.code),
+                  ),
+                  const SizedBox(height: MbSpacing.s2),
+                  if (sources.isEmpty)
+                    _EmptyCategory(
+                      onAdd: () => _openSourceForm(
+                        context,
+                        categories: categories,
+                        initialCategory: category.code,
                       ),
-                    )
-                  : _SourceCard(
-                      item: items[i - 1],
-                      busy: state.busySourceIds.contains(items[i - 1].sourceId),
                     ),
+                  for (final item in sources) ...[
+                    _SourceCard(
+                      item: item,
+                      categories: categories,
+                      busy: state.busySourceIds.contains(item.sourceId),
+                    ),
+                    const SizedBox(height: MbSpacing.s3),
+                  ],
+                ],
+                const SizedBox(height: 72),
+              ],
             ),
           );
         },
@@ -83,10 +144,116 @@ class AdminSchedulesPage extends StatelessWidget {
   }
 }
 
+/// "All" plus one chip per category; filters the sections below.
+class _CategoryChips extends StatelessWidget {
+  const _CategoryChips({
+    required this.categories,
+    required this.selected,
+    required this.onSelected,
+  });
+
+  final List<AdminCategory> categories;
+  final String? selected;
+  final ValueChanged<String?> onSelected;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = context.l10n;
+    return Wrap(
+      spacing: MbSpacing.s2,
+      runSpacing: MbSpacing.s2,
+      children: [
+        ChoiceChip(
+          label: Text(l10n.adminAllCategories),
+          selected: selected == null,
+          onSelected: (_) => onSelected(null),
+        ),
+        for (final c in categories)
+          ChoiceChip(
+            label: Text(c.name),
+            selected: selected == c.code,
+            onSelected: (_) => onSelected(c.code),
+          ),
+      ],
+    );
+  }
+}
+
+/// Category name with its "Run all" button.
+class _CategoryHeader extends StatelessWidget {
+  const _CategoryHeader({
+    required this.category,
+    required this.canRunAll,
+    required this.busy,
+    required this.onRunAll,
+  });
+
+  final AdminCategory category;
+  final bool canRunAll;
+  final bool busy;
+  final VoidCallback onRunAll;
+
+  @override
+  Widget build(BuildContext context) {
+    final c = context.mbColors;
+    return Row(
+      children: [
+        Expanded(
+          child: Text(
+            category.name,
+            style: context.mbText.h2.copyWith(color: c.ink),
+          ),
+        ),
+        TextButton.icon(
+          icon: busy
+              ? const SizedBox.square(
+                  dimension: 16,
+                  child: CircularProgressIndicator(strokeWidth: 2),
+                )
+              : const Icon(Icons.play_circle_outline, size: 18),
+          label: Text(context.l10n.runAllAction),
+          onPressed: busy || !canRunAll ? null : onRunAll,
+        ),
+      ],
+    );
+  }
+}
+
+class _EmptyCategory extends StatelessWidget {
+  const _EmptyCategory({required this.onAdd});
+
+  final VoidCallback onAdd;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = context.l10n;
+    return MbCard(
+      child: Row(
+        children: [
+          Expanded(
+            child: Text(
+              l10n.categoryNoSources,
+              style: context.mbText.body.copyWith(
+                color: context.mbColors.inkMuted,
+              ),
+            ),
+          ),
+          TextButton(onPressed: onAdd, child: Text(l10n.addSourceAction)),
+        ],
+      ),
+    );
+  }
+}
+
 class _SourceCard extends StatelessWidget {
-  const _SourceCard({required this.item, required this.busy});
+  const _SourceCard({
+    required this.item,
+    required this.categories,
+    required this.busy,
+  });
 
   final IngestionScheduleItem item;
+  final List<AdminCategory> categories;
   final bool busy;
 
   @override
@@ -111,6 +278,17 @@ class _SourceCard extends StatelessWidget {
                 ),
               ),
               _StatusChip(item: item),
+              IconButton(
+                tooltip: l10n.editSourceAction,
+                icon: const Icon(Icons.edit_outlined, size: 20),
+                onPressed: busy
+                    ? null
+                    : () => _openSourceForm(
+                        context,
+                        categories: categories,
+                        source: item,
+                      ),
+              ),
             ],
           ),
           Text(item.sourceCode, style: t.caption.copyWith(color: c.inkMuted)),
@@ -139,6 +317,13 @@ class _SourceCard extends StatelessWidget {
                     : c.inkMuted,
               ),
             ),
+            if (job.asOfDate case final day?)
+              Text(
+                job.isUpload
+                    ? '${l10n.jobMarketDay(formatDayMonth(day, locale))} · ${l10n.jobFromUpload}'
+                    : l10n.jobMarketDay(formatDayMonth(day, locale)),
+                style: t.caption.copyWith(color: c.inkMuted),
+              ),
             if (job.failureReason case final reason?)
               Text(
                 reason,
@@ -180,10 +365,321 @@ class _SourceCard extends StatelessWidget {
               ),
             ],
           ),
+          Wrap(
+            spacing: MbSpacing.s2,
+            children: [
+              TextButton.icon(
+                icon: const Icon(Icons.history, size: 18),
+                label: Text(l10n.backfillAction),
+                onPressed: busy || !item.sourceIsActive
+                    ? null
+                    : () => _pickBackfill(context, item, cubit),
+              ),
+              TextButton.icon(
+                icon: const Icon(Icons.upload_file, size: 18),
+                label: Text(l10n.uploadCsvAction),
+                onPressed: busy || !item.sourceIsActive
+                    ? null
+                    : () => _pickCsv(context, item, cubit),
+              ),
+              TextButton.icon(
+                icon: const Icon(Icons.info_outline, size: 18),
+                label: Text(l10n.csvTemplateAction),
+                onPressed: () => _showCsvTemplate(context),
+              ),
+            ],
+          ),
         ],
       ),
     );
   }
+}
+
+/// The standard template header, with a copy button.
+Future<void> _showCsvTemplate(BuildContext context) {
+  final l10n = context.l10n;
+  final material = MaterialLocalizations.of(context);
+  final messenger = ScaffoldMessenger.of(context);
+  return showDialog<void>(
+    context: context,
+    builder: (dialogContext) => AlertDialog(
+      title: Text(l10n.csvTemplateTitle),
+      content: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(l10n.csvTemplateBody),
+          const SizedBox(height: MbSpacing.s3),
+          SelectableText(
+            standardCsvHeader,
+            style: const TextStyle(fontFamily: 'monospace', fontSize: 12),
+          ),
+        ],
+      ),
+      actions: [
+        TextButton(
+          onPressed: () async {
+            await Clipboard.setData(
+              const ClipboardData(text: standardCsvHeader),
+            );
+            if (dialogContext.mounted) Navigator.of(dialogContext).pop();
+            messenger.showSnackBar(
+              SnackBar(content: Text(l10n.csvTemplateCopied)),
+            );
+          },
+          child: Text(material.copyButtonLabel),
+        ),
+        TextButton(
+          onPressed: () => Navigator.of(dialogContext).pop(),
+          child: Text(material.closeButtonLabel),
+        ),
+      ],
+    ),
+  );
+}
+
+/// Add (no [source]) or edit a price source. The cubit is read from [context]
+/// before the sheet opens, since the sheet's own context is outside the page's
+/// BlocProvider scope on some routes.
+void _openSourceForm(
+  BuildContext context, {
+  required List<AdminCategory> categories,
+  IngestionScheduleItem? source,
+  String? initialCategory,
+}) {
+  final cubit = context.read<AdminSchedulesCubit>();
+  showModalBottomSheet<void>(
+    context: context,
+    isScrollControlled: true,
+    useSafeArea: true,
+    shape: const RoundedRectangleBorder(
+      borderRadius: BorderRadius.vertical(top: Radius.circular(MbRadius.lg)),
+    ),
+    builder: (_) => PriceSourceFormSheet(
+      categories: categories,
+      initial:
+          source?.toSourceInput() ??
+          PriceSourceInput(
+            code: '',
+            name: '',
+            categoryCode: initialCategory ?? categories.first.code,
+          ),
+      isEdit: source != null,
+      onSave: (input) => source == null
+          ? cubit.createSource(input)
+          : cubit.updateSource(source.sourceId, input),
+    ),
+  );
+}
+
+/// Code (create only), name, category and — when editing — the active flag.
+class PriceSourceFormSheet extends StatefulWidget {
+  const PriceSourceFormSheet({
+    super.key,
+    required this.categories,
+    required this.initial,
+    required this.isEdit,
+    required this.onSave,
+  });
+
+  final List<AdminCategory> categories;
+  final PriceSourceInput initial;
+  final bool isEdit;
+
+  /// Resolves true when saved; the sheet then closes.
+  final Future<bool> Function(PriceSourceInput input) onSave;
+
+  @override
+  State<PriceSourceFormSheet> createState() => _PriceSourceFormSheetState();
+}
+
+class _PriceSourceFormSheetState extends State<PriceSourceFormSheet> {
+  final _formKey = GlobalKey<FormState>();
+  late final _code = TextEditingController(text: widget.initial.code);
+  late final _name = TextEditingController(text: widget.initial.name);
+  late String _categoryCode = widget.initial.categoryCode;
+  late bool _isActive = widget.initial.isActive;
+  bool _saving = false;
+
+  @override
+  void dispose() {
+    _code.dispose();
+    _name.dispose();
+    super.dispose();
+  }
+
+  Future<void> _submit() async {
+    if (!(_formKey.currentState?.validate() ?? false)) return;
+    setState(() => _saving = true);
+    final saved = await widget.onSave(
+      PriceSourceInput(
+        code: _code.text.trim().toLowerCase(),
+        name: _name.text.trim(),
+        categoryCode: _categoryCode,
+        isActive: _isActive,
+      ),
+    );
+    if (!mounted) return;
+    if (saved) {
+      Navigator.of(context).pop();
+    } else {
+      setState(() => _saving = false);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = context.l10n;
+    final c = context.mbColors;
+    final t = context.mbText;
+    final categoryCodes = widget.categories.map((x) => x.code).toSet();
+
+    return Padding(
+      padding: EdgeInsets.only(
+        left: MbSpacing.s5,
+        right: MbSpacing.s5,
+        top: MbSpacing.s5,
+        bottom: MediaQuery.of(context).viewInsets.bottom + MbSpacing.s5,
+      ),
+      child: Form(
+        key: _formKey,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              widget.isEdit ? l10n.editSourceAction : l10n.addSourceAction,
+              style: t.h2.copyWith(color: c.ink),
+            ),
+            const SizedBox(height: MbSpacing.s4),
+            TextFormField(
+              controller: _code,
+              enabled: !widget.isEdit,
+              maxLength: PriceSourceInput.codeMaxLength,
+              autocorrect: false,
+              decoration: InputDecoration(
+                labelText: l10n.sourceCodeLabel,
+                helperText: widget.isEdit ? null : l10n.sourceCodeHint,
+              ),
+              validator: (v) {
+                if (widget.isEdit) return null;
+                final code = (v ?? '').trim().toLowerCase();
+                return PriceSourceInput.codePattern.hasMatch(code)
+                    ? null
+                    : l10n.sourceCodeInvalid;
+              },
+            ),
+            const SizedBox(height: MbSpacing.s2),
+            TextFormField(
+              controller: _name,
+              maxLength: PriceSourceInput.nameMaxLength,
+              decoration: InputDecoration(labelText: l10n.sourceNameLabel),
+              validator: (v) =>
+                  (v ?? '').trim().isEmpty ? l10n.sourceNameRequired : null,
+            ),
+            const SizedBox(height: MbSpacing.s2),
+            DropdownButtonFormField<String>(
+              initialValue: categoryCodes.contains(_categoryCode)
+                  ? _categoryCode
+                  : null,
+              decoration: InputDecoration(labelText: l10n.sourceCategoryLabel),
+              items: [
+                for (final category in widget.categories)
+                  DropdownMenuItem(
+                    value: category.code,
+                    child: Text(category.name),
+                  ),
+              ],
+              validator: (v) => v == null ? l10n.sourceCategoryLabel : null,
+              onChanged: (v) {
+                if (v != null) setState(() => _categoryCode = v);
+              },
+            ),
+            if (widget.isEdit) ...[
+              const SizedBox(height: MbSpacing.s3),
+              Row(
+                children: [
+                  Expanded(
+                    child: Text(
+                      l10n.sourceActiveLabel,
+                      style: t.body.copyWith(color: c.ink),
+                    ),
+                  ),
+                  Switch(
+                    value: _isActive,
+                    onChanged: (v) => setState(() => _isActive = v),
+                  ),
+                ],
+              ),
+            ],
+            const SizedBox(height: MbSpacing.s4),
+            MbButton(
+              label: l10n.saveSourceAction,
+              block: true,
+              isLoading: _saving,
+              onPressed: _saving ? null : _submit,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+/// Picks a CSV (MolBhav template, or the Agmarknet / data.gov.in export) and
+/// uploads it. Works on web too: the bytes are read in memory, there is no
+/// file path.
+Future<void> _pickCsv(
+  BuildContext context,
+  IngestionScheduleItem item,
+  AdminSchedulesCubit cubit,
+) async {
+  final l10n = context.l10n;
+  final messenger = ScaffoldMessenger.of(context);
+  final files = await FilePicker.pickFiles(
+    type: FileType.custom,
+    allowedExtensions: const ['csv'],
+  );
+  if (files case [final file, ...]) {
+    final bytes = await file.readAsBytes();
+    if (bytes.length > maxUploadBytes) {
+      messenger.showSnackBar(SnackBar(content: Text(l10n.uploadTooLarge)));
+      return;
+    }
+    await cubit.uploadCsv(item.sourceId, file.name, bytes);
+  }
+}
+
+/// Date range for "Pull past days": up to [maxBackfillDays], ending today.
+Future<void> _pickBackfill(
+  BuildContext context,
+  IngestionScheduleItem item,
+  AdminSchedulesCubit cubit,
+) async {
+  final l10n = context.l10n;
+  final messenger = ScaffoldMessenger.of(context);
+  final now = DateTime.now();
+  final today = DateTime(now.year, now.month, now.day);
+  final yesterday = today.subtract(const Duration(days: 1));
+  final range = await showDateRangePicker(
+    context: context,
+    firstDate: today.subtract(const Duration(days: 365)),
+    lastDate: today,
+    initialDateRange: DateTimeRange(
+      start: yesterday.subtract(const Duration(days: 6)),
+      end: yesterday,
+    ),
+    helpText: l10n.backfillPickerTitle,
+  );
+  if (range == null) return;
+  final days = range.end.difference(range.start).inDays + 1;
+  if (days > maxBackfillDays) {
+    messenger.showSnackBar(
+      SnackBar(content: Text(l10n.backfillTooLong('$maxBackfillDays'))),
+    );
+    return;
+  }
+  await cubit.backfill(item.sourceId, range.start, range.end);
 }
 
 class _StatusChip extends StatelessWidget {
@@ -251,10 +747,13 @@ String dayName(BuildContext context, String apiDay) {
 
 String _jobStatusText(BuildContext context, IngestionLastJob job) {
   final l10n = context.l10n;
-  final counts = l10n.jobCounts(
+  final saved = l10n.jobCounts(
     '${job.recordsPersisted}',
     '${job.recordsFailed}',
   );
+  final counts = job.recordsUnchanged > 0
+      ? '$saved, ${l10n.jobUnchanged('${job.recordsUnchanged}')}'
+      : saved;
   return switch (job.status) {
     IngestionJobStatus.running => l10n.jobStatusRunning,
     IngestionJobStatus.succeeded => '${l10n.jobStatusSucceeded} · $counts',

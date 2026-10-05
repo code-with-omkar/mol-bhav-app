@@ -24,6 +24,7 @@ import '../../features/auth/domain/entities/otp_challenge.dart';
 import '../../features/auth/domain/repositories/auth_repository.dart';
 import '../../features/auth/domain/usecases/password_auth.dart';
 import '../../features/auth/presentation/cubit/login_cubit.dart';
+import '../../features/auth/presentation/cubit/google_login_cubit.dart';
 import '../../features/auth/presentation/cubit/login_methods_cubit.dart';
 import '../../features/auth/presentation/cubit/otp_cubit.dart';
 import '../../features/auth/presentation/cubit/password_login_cubit.dart';
@@ -31,6 +32,7 @@ import '../../features/auth/presentation/pages/login_page.dart';
 import '../../features/auth/presentation/pages/otp_page.dart';
 import '../../features/home/presentation/home_cubit.dart';
 import '../../features/home/presentation/home_page.dart';
+import '../../features/weather/presentation/weather_page.dart';
 import '../../features/markets/presentation/buying_opportunity_page.dart';
 import '../../features/markets/presentation/mandi_prices_cubit.dart';
 import '../../features/markets/presentation/mandi_prices_page.dart';
@@ -54,6 +56,7 @@ import '../../features/tools/presentation/tools_cubits.dart';
 import '../../features/watchlist/presentation/watchlist_page.dart';
 import '../../features/watchlist/presentation/watchlist_picker.dart';
 import '../session/session_manager.dart';
+import '../storage/saved_credentials_store.dart';
 import '../di/injection.dart';
 import '../share/deep_link_config.dart';
 import 'app_routes.dart';
@@ -108,7 +111,12 @@ GoRouter createAppRouter(SessionManager session) {
               create: (_) => PasswordLoginCubit(
                 LoginWithPassword(getIt<AuthRepository>()),
                 RegisterWithPassword(getIt<AuthRepository>()),
-              ),
+                savedCredentials: getIt<SavedCredentialsStore>(),
+              )..loadSaved(),
+            ),
+            BlocProvider(
+              create: (_) =>
+                  GoogleLoginCubit(LoginWithGoogle(getIt<AuthRepository>())),
             ),
           ],
           child: LoginPage(sessionExpired: session.consumeExpiredNotice()),
@@ -158,6 +166,12 @@ GoRouter createAppRouter(SessionManager session) {
                   create: (_) => getIt<HomeCubit>()..load(),
                   child: const HomePage(),
                 ),
+                routes: [
+                  GoRoute(
+                    path: 'weather',
+                    builder: (context, state) => const WeatherPage(),
+                  ),
+                ],
               ),
             ],
           ),

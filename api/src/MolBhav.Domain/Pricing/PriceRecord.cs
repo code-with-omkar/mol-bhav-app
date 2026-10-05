@@ -159,6 +159,13 @@ public sealed class PriceRecord : AggregateRoot<Guid>, IAuditableEntity
         return record;
     }
 
+    /// <summary>
+    /// True when a re-fetched row carries exactly these figures — ingestion then leaves the record alone instead of
+    /// voiding and re-creating it (which would raise a second <see cref="PriceRecordedDomainEvent"/> for the same day).
+    /// </summary>
+    public bool HasSameFigures(decimal? minPrice, decimal? maxPrice, decimal modalPrice, decimal? arrivalQuantity) =>
+        MinPrice == minPrice && MaxPrice == maxPrice && ModalPrice == modalPrice && ArrivalQuantity == arrivalQuantity;
+
     /// <summary>Marks a bad record so reads stop surfacing it. Never physically deleted — ingestion provenance is kept.</summary>
     public void Void()
     {

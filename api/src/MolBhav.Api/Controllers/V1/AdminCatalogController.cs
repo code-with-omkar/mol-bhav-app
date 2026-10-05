@@ -30,6 +30,7 @@ namespace MolBhav.Api.Controllers.V1;
 /// Nothing is deleted — items are deactivated (<c>isActive: false</c>) because prices and user selections reference them.
 /// Codes, and a unit's dimension/factor, are immutable after creation.
 /// </summary>
+[EvictReferenceDataCache] // edits here change cached catalog / market / plan / translation responses
 [ApiVersion("1.0")]
 [Route("api/v{version:apiVersion}/admin/catalog")]
 [Authorize(Policy = AuthorizationPolicies.Admin)]

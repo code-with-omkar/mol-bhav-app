@@ -26,6 +26,7 @@ using MolBhav.Application.Abstractions.Promotions;
 using MolBhav.Application.Abstractions.Reporting;
 using MolBhav.Application.Abstractions.Support;
 using MolBhav.Application.Abstractions.Watchlist;
+using MolBhav.Application.Abstractions.Weather;
 using MolBhav.Infrastructure.Authentication;
 using MolBhav.Infrastructure.Billing;
 using MolBhav.Infrastructure.Billing.Razorpay;
@@ -54,6 +55,7 @@ using MolBhav.Infrastructure.Persistence.Read.Promotions;
 using MolBhav.Infrastructure.Persistence.Read.Reporting;
 using MolBhav.Infrastructure.Persistence.Read.Support;
 using MolBhav.Infrastructure.Persistence.Read.Watchlist;
+using MolBhav.Infrastructure.Persistence.Read.Weather;
 using MolBhav.Infrastructure.Persistence.Repositories.Alerting;
 using MolBhav.Infrastructure.Persistence.Repositories.Billing;
 using MolBhav.Infrastructure.Persistence.Repositories.Catalog;
@@ -69,6 +71,8 @@ using MolBhav.Infrastructure.Persistence.Repositories.Promotions;
 using MolBhav.Infrastructure.Persistence.Repositories.Reporting;
 using MolBhav.Infrastructure.Persistence.Repositories.Support;
 using MolBhav.Infrastructure.Persistence.Repositories.Watchlist;
+using MolBhav.Infrastructure.Persistence.Repositories.Weather;
+using MolBhav.Infrastructure.Weather;
 using MolBhav.Infrastructure.Reporting;
 using MolBhav.Infrastructure.Support;
 using Npgsql;
@@ -105,6 +109,7 @@ public static class DependencyInjection
             .AddReportingModule()
             .AddBillingModule(configuration, environment)
             .AddIngestionModule(configuration, environment)
+            .AddWeatherModule(configuration, environment)
             .AddLocalizationModule()
             .AddSupportModule(configuration)
             .AddMonetizationModule(configuration)
@@ -281,6 +286,51 @@ public static class DependencyInjection
         return services;
     }
 
+    private static IServiceCollection AddWeatherModule(this IServiceCollection services, IConfiguration configuration, IHostEnvironment environment)
+    {
+        // Fail closed: fixture forecasts must never reach real users outside a developer machine.
+        if (configuration.GetValue<bool>($"{ImdOptions.SectionName}:{nameof(ImdOptions.UseMockData)}") && !environment.IsDevelopment())
+        {
+            throw new InvalidOperationException(
+                $"{ImdOptions.SectionName}:UseMockData is allowed only in Development (current environment: '{environment.EnvironmentName}').");
+        }
+
+        services.AddScoped<IWeatherForecastRepository, WeatherForecastRepository>();
+        services.AddScoped<IWeatherReadService, WeatherReadService>();
+
+        services.AddOptions<ImdOptions>()
+            .Bind(configuration.GetSection(ImdOptions.SectionName))
+            .Validate(o => Uri.TryCreate(o.BaseAddress, UriKind.Absolute, out _), "Imd:BaseAddress must be an absolute URL.")
+            .Validate(o => o.ForecastPathTemplate.Contains("{station}", StringComparison.Ordinal), "Imd:ForecastPathTemplate must contain {station}.")
+            .Validate(o => o.RequestTimeoutSeconds is >= 5 and <= 120, "Imd:RequestTimeoutSeconds must be between 5 and 120.")
+            .Validate(o => o.RetryAfterMinutes is >= 1 and <= 1440, "Imd:RetryAfterMinutes must be between 1 and 1440.")
+            .Validate(
+                o => TimeOnly.TryParseExact(o.DailyRunTimeIst, "HH:mm", System.Globalization.CultureInfo.InvariantCulture, System.Globalization.DateTimeStyles.None, out _),
+                "Imd:DailyRunTimeIst must be HH:mm.")
+            .ValidateOnStart();
+
+        // 3 retries with exponential backoff on transient failures (5xx/408/429/network), mirroring the mandi feed's
+        // tolerance. Timeouts are sized so the total budget covers every attempt (the handler validates this at startup).
+        services.AddHttpClient(ImdHttpClient.HttpClientName, (sp, client) =>
+        {
+            var imd = sp.GetRequiredService<IOptions<ImdOptions>>().Value;
+            client.BaseAddress = new Uri(imd.BaseAddress);
+            client.DefaultRequestHeaders.Accept.ParseAdd("application/json");
+        }).AddStandardResilienceHandler(resilience =>
+        {
+            resilience.Retry.MaxRetryAttempts = ImdOptions.RetryAttempts;
+            resilience.Retry.BackoffType = Polly.DelayBackoffType.Exponential;
+            resilience.Retry.Delay = TimeSpan.FromSeconds(2);
+            resilience.AttemptTimeout.Timeout = TimeSpan.FromSeconds(15);
+            resilience.CircuitBreaker.SamplingDuration = TimeSpan.FromSeconds(60);
+            resilience.TotalRequestTimeout.Timeout = TimeSpan.FromSeconds(90);
+        });
+
+        services.AddScoped<IWeatherForecastSource, ImdHttpClient>();
+
+        return services;
+    }
+
     private static IServiceCollection AddIngestionModule(this IServiceCollection services, IConfiguration configuration, IHostEnvironment environment)
     {
         // Fail closed: mock data must never be ingested as real prices outside a developer machine.
@@ -312,14 +362,25 @@ public static class DependencyInjection
         services.AddKeyedScoped<IIngestionSourceAdapter, AgmarknetIngestionSourceAdapter>(AgmarknetIngestionSourceAdapter.SourceCode);
         services.AddKeyedScoped<IIngestionSourceAdapter, StubIngestionSourceAdapter>(IngestionAdapterDispatcher.FallbackKey);
         services.AddScoped<IIngestionSourceAdapter, IngestionAdapterDispatcher>();
+        // Upload parsers: keyed by source code like the adapters; the standard template covers every other source/category.
+        services.AddKeyedScoped<IIngestionFileParser, AgmarknetCsvParser>(AgmarknetIngestionSourceAdapter.SourceCode);
+        services.AddKeyedScoped<IIngestionFileParser, StandardPriceCsvParser>(IngestionFileParserDispatcher.StandardKey);
+        services.AddScoped<IIngestionFileParser, IngestionFileParserDispatcher>();
 
         services.AddOptions<IngestionSchedulerOptions>()
             .Bind(configuration.GetSection(IngestionSchedulerOptions.SectionName))
             .Validate(o => o.PollIntervalSeconds is >= 10 and <= 3600, "IngestionScheduler:PollIntervalSeconds must be between 10 and 3600.")
             .Validate(o => o.MaxRunsPerTick is >= 1 and <= 100, "IngestionScheduler:MaxRunsPerTick must be between 1 and 100.")
+            .Validate(o => o.DataLagDays is >= 0 and <= 7, "IngestionScheduler:DataLagDays must be between 0 and 7.")
+            .Validate(o => o.BackfillDelaySeconds is >= 0 and <= 60, "IngestionScheduler:BackfillDelaySeconds must be between 0 and 60.")
             .ValidateOnStart();
 
         services.AddHostedService<IngestionSchedulerBackgroundService>();
+
+        // One queue instance shared by the command handler (writer) and the worker (reader).
+        services.AddSingleton<IngestionBackfillQueue>();
+        services.AddSingleton<IIngestionBackfillQueue>(sp => sp.GetRequiredService<IngestionBackfillQueue>());
+        services.AddHostedService<IngestionBackfillBackgroundService>();
 
         services.AddOptions<SubscriptionExpiryOptions>()
             .Bind(configuration.GetSection(SubscriptionExpiryOptions.SectionName))
@@ -423,6 +484,15 @@ public static class DependencyInjection
                 "without OTP nothing proves the caller owns the number.")
             .ValidateOnStart();
         services.AddSingleton<ILoginMethods, ConfiguredLoginMethods>();
+
+        services.AddOptions<GoogleSignInOptions>()
+            .Bind(configuration.GetSection(GoogleSignInOptions.SectionName))
+            .Validate(
+                o => !o.Enabled || !string.IsNullOrWhiteSpace(o.ServerClientId),
+                $"{GoogleSignInOptions.SectionName}:ServerClientId is required when Google sign-in is enabled.")
+            .ValidateOnStart();
+        services.AddHttpClient(GoogleIdTokenVerifier.HttpClientName, client => client.Timeout = TimeSpan.FromSeconds(10));
+        services.AddSingleton<IGoogleIdTokenVerifier, GoogleIdTokenVerifier>();
 
         var loginMethods = configuration.GetSection(LoginMethodsOptions.SectionName).Get<LoginMethodsOptions>() ?? new LoginMethodsOptions();
         if (!loginMethods.Otp)

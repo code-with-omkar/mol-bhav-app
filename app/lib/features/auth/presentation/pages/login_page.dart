@@ -22,6 +22,8 @@ import '../../../../shared/widgets/mb_state_views.dart';
 import '../../../../shared/widgets/mb_text_field.dart';
 import '../../../../shared/widgets/mb_wordmark.dart';
 import '../../domain/auth_failures.dart';
+import '../../../../shared/widgets/google/google_sign_in_button.dart';
+import '../cubit/google_login_cubit.dart';
 import '../cubit/login_cubit.dart';
 import '../cubit/login_methods_cubit.dart';
 import '../cubit/password_login_cubit.dart';
@@ -46,6 +48,10 @@ class LoginPage extends StatelessWidget {
         BlocListener<PasswordLoginCubit, PasswordLoginState>(
           listenWhen: (previous, current) => previous.status != current.status,
           listener: _onPasswordStatus,
+        ),
+        BlocListener<GoogleLoginCubit, GoogleLoginState>(
+          listenWhen: (previous, current) => previous.status != current.status,
+          listener: _onGoogleStatus,
         ),
         BlocListener<LoginCubit, LoginState>(
           listenWhen: (previous, current) => previous.status != current.status,
@@ -104,6 +110,9 @@ class LoginPage extends StatelessWidget {
 void _onPasswordStatus(BuildContext context, PasswordLoginState state) {
   switch (state.status) {
     case PasswordLoginStatus.success:
+      // Tells Android/iOS/the browser the login worked, so their password
+      // manager offers "Save password?" (and fills it in next time).
+      TextInput.finishAutofillContext();
       // Same as after OTP: token registration must not block navigation.
       unawaited(getIt<NotificationService>().initialize());
       context.go(
@@ -114,6 +123,160 @@ void _onPasswordStatus(BuildContext context, PasswordLoginState state) {
     case PasswordLoginStatus.editing:
     case PasswordLoginStatus.submitting:
       break;
+  }
+}
+
+void _onGoogleStatus(BuildContext context, GoogleLoginState state) {
+  switch (state.status) {
+    case GoogleLoginStatus.success:
+      unawaited(getIt<NotificationService>().initialize());
+      // Replacing the page stack also closes the mobile-number sheet.
+      context.go(
+        state.session!.isOnboarded ? AppRoutes.home : AppRoutes.businessProfile,
+      );
+    case GoogleLoginStatus.needsPhone:
+      if (!state.showInvalidNumber) _askGooglePhone(context);
+    case GoogleLoginStatus.failure:
+      final l10n = context.l10n;
+      final message = switch (state.failure) {
+        AccountExistsFailure() => l10n.googleAccountExists,
+        GoogleTokenInvalidFailure() => l10n.googleSignInFailed,
+        _ => null,
+      };
+      if (message == null) {
+        showFailureSnackBar(context, state.failure!);
+      } else {
+        ScaffoldMessenger.of(context)
+          ..hideCurrentSnackBar()
+          ..showSnackBar(SnackBar(content: Text(message)));
+      }
+    case GoogleLoginStatus.idle:
+    case GoogleLoginStatus.submitting:
+      break;
+  }
+}
+
+/// New Google account: one more step for the mobile number.
+Future<void> _askGooglePhone(BuildContext context) async {
+  final cubit = context.read<GoogleLoginCubit>();
+  await showModalBottomSheet<void>(
+    context: context,
+    isScrollControlled: true,
+    useSafeArea: true,
+    shape: const RoundedRectangleBorder(
+      borderRadius: BorderRadius.vertical(top: Radius.circular(MbRadius.lg)),
+    ),
+    builder: (_) =>
+        BlocProvider.value(value: cubit, child: const _GooglePhoneSheet()),
+  );
+  // Dismissed without finishing: back to the normal login screen.
+  if (!cubit.isClosed && cubit.state.status == GoogleLoginStatus.needsPhone) {
+    cubit.cancel();
+  }
+}
+
+class _GooglePhoneSheet extends StatelessWidget {
+  const _GooglePhoneSheet();
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = context.l10n;
+    final c = context.mbColors;
+    final t = context.mbText;
+    final cubit = context.read<GoogleLoginCubit>();
+    var mobile = '';
+
+    return BlocConsumer<GoogleLoginCubit, GoogleLoginState>(
+      listenWhen: (p, n) =>
+          p.status != n.status && n.status == GoogleLoginStatus.failure,
+      listener: (context, _) => Navigator.of(context).pop(),
+      builder: (context, state) => Padding(
+        padding: EdgeInsets.only(
+          left: MbSpacing.s5,
+          right: MbSpacing.s5,
+          top: MbSpacing.s5,
+          bottom: MediaQuery.of(context).viewInsets.bottom + MbSpacing.s5,
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Text(l10n.googlePhoneTitle, style: t.h2.copyWith(color: c.ink)),
+            const SizedBox(height: 4),
+            Text(
+              l10n.googlePhoneSubtitle,
+              style: t.caption.copyWith(color: c.inkMuted),
+            ),
+            const SizedBox(height: MbSpacing.s4),
+            MbTextField(
+              key: const ValueKey('google-phone'),
+              label: l10n.mobileNumberLabel,
+              prefix: '+91',
+              hint: '',
+              keyboardType: TextInputType.phone,
+              autofillHints: const [AutofillHints.telephoneNumberNational],
+              inputFormatters: const [MobileNumberFormatter()],
+              textInputAction: TextInputAction.done,
+              error: state.showInvalidNumber ? l10n.mobileNumberInvalid : null,
+              onChanged: (v) => mobile = v,
+              onSubmitted: (v) => cubit.submitPhone(v),
+            ),
+            const SizedBox(height: MbSpacing.s4),
+            MbButton(
+              label: l10n.googlePhoneContinue,
+              size: MbButtonSize.lg,
+              block: true,
+              isLoading: state.isBusy,
+              onPressed: state.isBusy ? null : () => cubit.submitPhone(mobile),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+/// "or" + "Continue with Google", when the server enables it.
+class _GoogleSection extends StatelessWidget {
+  const _GoogleSection({required this.clientId});
+
+  final String clientId;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = context.l10n;
+    final c = context.mbColors;
+    final cubit = context.read<GoogleLoginCubit>();
+    final busy = context.select<GoogleLoginCubit, bool>((b) => b.state.isBusy);
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        const SizedBox(height: MbSpacing.s4),
+        Row(
+          children: [
+            Expanded(child: Divider(color: c.border)),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: MbSpacing.s3),
+              child: Text(
+                l10n.orDivider,
+                style: context.mbText.caption.copyWith(color: c.inkMuted),
+              ),
+            ),
+            Expanded(child: Divider(color: c.border)),
+          ],
+        ),
+        const SizedBox(height: MbSpacing.s4),
+        GoogleSignInButton(
+          key: const ValueKey('google-sign-in'),
+          clientId: clientId,
+          label: l10n.continueWithGoogle,
+          busy: busy,
+          onIdToken: cubit.signIn,
+          onError: cubit.deviceSignInFailed,
+        ),
+      ],
+    );
   }
 }
 
@@ -172,6 +335,8 @@ class _SignInOptionsState extends State<_SignInOptions> {
             child: Text(showOtp ? l10n.usePasswordInstead : l10n.useOtpInstead),
           ),
         ],
+        if (methods.showGoogle)
+          _GoogleSection(clientId: methods.googleClientId!),
       ],
     );
   }
@@ -186,6 +351,31 @@ class _PasswordCard extends StatefulWidget {
 
 class _PasswordCardState extends State<_PasswordCard> {
   bool _obscure = true;
+  final _mobile = TextEditingController();
+  final _password = TextEditingController();
+
+  @override
+  void initState() {
+    super.initState();
+    // The saved login may already be loaded when the card first builds.
+    _applyPrefill(context.read<PasswordLoginCubit>().state);
+  }
+
+  @override
+  void dispose() {
+    _mobile.dispose();
+    _password.dispose();
+    super.dispose();
+  }
+
+  void _applyPrefill(PasswordLoginState state) {
+    if (state.prefillSeq == 0) return;
+    _mobile.value = const MobileNumberFormatter().formatEditUpdate(
+      TextEditingValue.empty,
+      TextEditingValue(text: state.mobile),
+    );
+    _password.text = state.password;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -194,7 +384,9 @@ class _PasswordCardState extends State<_PasswordCard> {
     final l10n = context.l10n;
     final cubit = context.read<PasswordLoginCubit>();
 
-    return BlocBuilder<PasswordLoginCubit, PasswordLoginState>(
+    return BlocConsumer<PasswordLoginCubit, PasswordLoginState>(
+      listenWhen: (p, n) => p.prefillSeq != n.prefillSeq,
+      listener: (_, state) => _applyPrefill(state),
       builder: (context, state) {
         final register = state.isRegister;
         final passwordError = switch (state.passwordIssue) {
@@ -245,6 +437,7 @@ class _PasswordCardState extends State<_PasswordCard> {
                 const SizedBox(height: MbSpacing.s4),
                 MbTextField(
                   key: const ValueKey('password-login-mobile'),
+                  controller: _mobile,
                   label: l10n.mobileNumberLabel,
                   prefix: '+91',
                   hint: '',
@@ -260,6 +453,7 @@ class _PasswordCardState extends State<_PasswordCard> {
                 const SizedBox(height: MbSpacing.s3),
                 MbTextField(
                   key: const ValueKey('password-login-password'),
+                  controller: _password,
                   label: l10n.passwordLabel,
                   hint: '',
                   obscureText: _obscure,
@@ -308,6 +502,37 @@ class _PasswordCardState extends State<_PasswordCard> {
                     onSubmitted: (_) => submit(),
                   ),
                 ],
+                if (state.canSavePassword)
+                  Padding(
+                    padding: const EdgeInsets.only(top: MbSpacing.s2),
+                    child: Row(
+                      children: [
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                l10n.savePasswordLabel,
+                                style: t.body.copyWith(color: c.ink),
+                              ),
+                              Text(
+                                l10n.savePasswordHint,
+                                style: t.caption.copyWith(color: c.inkMuted),
+                              ),
+                            ],
+                          ),
+                        ),
+                        Switch(
+                          key: const ValueKey('password-login-save'),
+                          value: state.savePassword,
+                          onChanged:
+                              state.status == PasswordLoginStatus.submitting
+                              ? null
+                              : cubit.savePasswordChanged,
+                        ),
+                      ],
+                    ),
+                  ),
                 const SizedBox(height: MbSpacing.s4),
                 MbButton(
                   label: register ? l10n.createAccountAction : l10n.loginAction,

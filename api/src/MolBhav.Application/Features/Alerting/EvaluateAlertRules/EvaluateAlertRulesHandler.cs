@@ -56,6 +56,12 @@ internal sealed class EvaluateAlertRulesHandler(
             return;
         }
 
+        if (previous.ModalPrice == domainEvent.ModalPrice)
+        {
+            // Same price as before (e.g. a correction that only changed min/max/arrivals) — no move to alert on.
+            return;
+        }
+
         var percentChange = (domainEvent.ModalPrice - previous.ModalPrice) / previous.ModalPrice * 100m;
         var triggeredAtUtc = timeProvider.GetUtcNow();
         var anyTriggered = false;
@@ -97,10 +103,11 @@ internal sealed class EvaluateAlertRulesHandler(
     /// Percent rules compare the move itself; price rules fire only when the new price crosses the level the previous
     /// price was still on the other side of, so a price that lingers past the threshold alerts once, not every day.
     /// </summary>
-    private static bool Crosses(AlertRule rule, decimal previousModal, decimal newModal, decimal percentChange) => rule.ThresholdType switch
+    internal static bool Crosses(AlertRule rule, decimal previousModal, decimal newModal, decimal percentChange) => rule.ThresholdType switch
     {
         AlertThresholdType.PriceDrop => rule.ThresholdPercent is { } p && percentChange <= -p,
         AlertThresholdType.PriceSpike => rule.ThresholdPercent is { } p && percentChange >= p,
+        AlertThresholdType.PriceChange => rule.ThresholdPercent is { } p && Math.Abs(percentChange) >= p,
         AlertThresholdType.PriceBelow => rule.ThresholdPrice is { } p && newModal <= p && previousModal > p,
         AlertThresholdType.PriceAbove => rule.ThresholdPrice is { } p && newModal >= p && previousModal < p,
         _ => false,

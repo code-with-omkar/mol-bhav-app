@@ -18,7 +18,15 @@ enum AlertChannel { whatsapp, push }
 enum PriceCondition { below, above, percent }
 
 /// Server-side rule threshold, mirrored 1:1 from the API's `thresholdType`.
-enum AlertThresholdType { priceDrop, priceSpike, priceBelow, priceAbove }
+/// Mirrors the API's `AlertThresholdType`. [priceChange] is "changes by %"
+/// in either direction (what the create form offers).
+enum AlertThresholdType {
+  priceDrop,
+  priceSpike,
+  priceBelow,
+  priceAbove,
+  priceChange,
+}
 
 class AlertItem extends Equatable {
   const AlertItem({
@@ -236,7 +244,8 @@ class UpdateAlertRuleRequest extends Equatable {
 }
 
 abstract interface class AlertsRepository {
-  Future<Result<List<AlertItem>>> getAlerts(AlertFilter filter);
+  /// Saved list first (instant), then the live one — see `watchCachedApiCall`.
+  Stream<Result<List<AlertItem>>> watchAlerts(AlertFilter filter);
 
   Future<Result<AlertOptions>> getOptions();
 
@@ -247,7 +256,9 @@ abstract interface class AlertsRepository {
 
   Future<Result<void>> create(NewAlert alert);
 
-  Future<Result<List<AlertRule>>> getAlertRules();
+  /// Saved rules first, then live. Create / update / delete drop the saved
+  /// copy, so the next watch reflects the change.
+  Stream<Result<List<AlertRule>>> watchAlertRules();
 
   Future<Result<void>> updateAlertRule(String id, UpdateAlertRuleRequest req);
 
@@ -260,8 +271,8 @@ class GetAlerts {
 
   final AlertsRepository _repository;
 
-  Future<Result<List<AlertItem>>> call(AlertFilter filter) =>
-      _repository.getAlerts(filter);
+  Stream<Result<List<AlertItem>>> call(AlertFilter filter) =>
+      _repository.watchAlerts(filter);
 }
 
 @injectable

@@ -7,9 +7,13 @@ namespace MolBhav.Api.Contracts.Pricing;
 
 /// <param name="Code">Immutable, e.g. <c>agmarknet</c>.</param>
 /// <param name="Name">Display name.</param>
-public sealed record CreatePriceSourceRequest(string? Code, string? Name);
+/// <param name="CategoryCode">Procurement category this source prices, e.g. <c>agriculture</c> or <c>construction</c>.</param>
+public sealed record CreatePriceSourceRequest(string? Code, string? Name, string? CategoryCode);
 
-public sealed record UpdatePriceSourceRequest(string? Name, bool? IsActive);
+/// <param name="Name">Display name.</param>
+/// <param name="IsActive">Inactive sources are never run or scheduled.</param>
+/// <param name="CategoryCode">Procurement category this source prices; changing it affects future runs and uploads only.</param>
+public sealed record UpdatePriceSourceRequest(string? Name, bool? IsActive, string? CategoryCode);
 
 /// <param name="ProductId">The product this price is for.</param>
 /// <param name="VariantId">Optional variant of the product.</param>

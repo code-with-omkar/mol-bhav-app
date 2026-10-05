@@ -25,11 +25,16 @@ import 'package:mol_bhav/core/locale/locale_cubit.dart' as _i243;
 import 'package:mol_bhav/core/locale/locale_repository.dart' as _i98;
 import 'package:mol_bhav/core/notifications/notification_service.dart' as _i552;
 import 'package:mol_bhav/core/payments/razorpay_service.dart' as _i923;
+import 'package:mol_bhav/core/permissions/location_permission_handler.dart'
+    as _i351;
 import 'package:mol_bhav/core/session/session_manager.dart' as _i115;
 import 'package:mol_bhav/core/session/token_refresher.dart' as _i444;
 import 'package:mol_bhav/core/session/token_renewal.dart' as _i550;
+import 'package:mol_bhav/core/auth/google_id_token_source.dart' as _i9003;
+import 'package:mol_bhav/core/storage/saved_credentials_store.dart' as _i9001;
 import 'package:mol_bhav/core/storage/token_storage.dart' as _i411;
 import 'package:mol_bhav/core/utils/countdown.dart' as _i1044;
+import 'package:mol_bhav/core/weather/weather_service.dart' as _i688;
 import 'package:mol_bhav/features/account/data/account_data.dart' as _i968;
 import 'package:mol_bhav/features/account/domain/account.dart' as _i695;
 import 'package:mol_bhav/features/account/presentation/account_cubits.dart'
@@ -37,7 +42,7 @@ import 'package:mol_bhav/features/account/presentation/account_cubits.dart'
 import 'package:mol_bhav/features/account/presentation/profile_cubit.dart'
     as _i736;
 import 'package:mol_bhav/features/admin/data/admin_ingestion_data.dart'
-    as _i688;
+    as _i689;
 import 'package:mol_bhav/features/admin/domain/admin_ingestion.dart' as _i919;
 import 'package:mol_bhav/features/alerts/data/alerts_data.dart' as _i89;
 import 'package:mol_bhav/features/alerts/domain/alerts.dart' as _i1045;
@@ -74,6 +79,8 @@ import 'package:mol_bhav/features/billing/presentation/cubit/subscription_cubit.
 import 'package:mol_bhav/features/catalog/data/catalog_data.dart' as _i214;
 import 'package:mol_bhav/features/catalog/domain/catalog.dart' as _i169;
 import 'package:mol_bhav/features/home/presentation/home_cubit.dart' as _i197;
+import 'package:mol_bhav/features/home/presentation/home_prefetcher.dart'
+    as _i9002;
 import 'package:mol_bhav/features/markets/data/mandi_prices_data.dart' as _i216;
 import 'package:mol_bhav/features/markets/data/markets_data.dart' as _i217;
 import 'package:mol_bhav/features/markets/domain/mandi_prices.dart' as _i995;
@@ -128,6 +135,13 @@ import 'package:mol_bhav/features/watchlist/presentation/watchlist_cubit.dart'
     as _i312;
 import 'package:mol_bhav/features/watchlist/presentation/watchlist_picker.dart'
     as _i692;
+import 'package:mol_bhav/features/weather/data/weather_remote_data_source.dart'
+    as _i321;
+import 'package:mol_bhav/features/weather/data/weather_repository_impl.dart'
+    as _i735;
+import 'package:mol_bhav/features/weather/domain/weather.dart' as _i524;
+import 'package:mol_bhav/features/weather/presentation/weather_cubit.dart'
+    as _i645;
 import 'package:shared_preferences/shared_preferences.dart' as _i460;
 
 extension GetItInjectableX on _i174.GetIt {
@@ -138,6 +152,7 @@ extension GetItInjectableX on _i174.GetIt {
   }) async {
     final gh = _i526.GetItHelper(this, environment, environmentFilter);
     final registerModule = _$RegisterModule();
+    final weatherModule = _$WeatherModule();
     await gh.factoryAsync<_i460.SharedPreferences>(
       () => registerModule.prefs,
       preResolve: true,
@@ -154,6 +169,15 @@ extension GetItInjectableX on _i174.GetIt {
     gh.lazySingleton<_i411.TokenStorage>(
       () => _i411.TokenStorage(gh<_i558.FlutterSecureStorage>()),
     );
+    gh.lazySingleton<_i9002.HomePrefetcher>(
+      () => _i9002.HomePrefetcher(gh<_i1045.AlertsRepository>()),
+    );
+    gh.lazySingleton<_i9003.GoogleIdTokenSource>(
+      () => _i9003.GoogleIdTokenSource(),
+    );
+    gh.lazySingleton<_i9001.SavedCredentialsStore>(
+      () => _i9001.SavedCredentialsStore(gh<_i558.FlutterSecureStorage>()),
+    );
     gh.lazySingleton<_i550.TokenRenewal>(
       () => _i550.TokenRenewal(
         gh<_i411.TokenStorage>(),
@@ -168,6 +192,12 @@ extension GetItInjectableX on _i174.GetIt {
     );
     gh.lazySingleton<_i98.LocaleRepository>(
       () => _i98.LocaleRepository(gh<_i460.SharedPreferences>()),
+    );
+    gh.lazySingleton<_i351.LocationPermissionHandler>(
+      () => _i351.LocationPermissionHandler(gh<_i460.SharedPreferences>()),
+    );
+    gh.lazySingleton<_i688.WeatherService>(
+      () => _i688.WeatherService(gh<_i460.SharedPreferences>()),
     );
     gh.lazySingleton<_i756.ResponseCache>(
       () => _i756.ResponseCache(
@@ -202,6 +232,7 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i444.TokenRefresher>(),
         gh<_i115.SessionManager>(),
         gh<_i98.LocaleRepository>(),
+        gh<_i756.ResponseCache>(),
       ),
     );
     gh.lazySingleton<_i89.AlertsRemoteDataSource>(
@@ -238,10 +269,16 @@ extension GetItInjectableX on _i174.GetIt {
       () => _i995.GetMandiPrices(gh<_i995.MandiPricesRepository>()),
     );
     gh.lazySingleton<_i17.EstimatorRepository>(
-      () => _i844.EstimatorRepositoryImpl(gh<_i361.Dio>()),
+      () => _i844.EstimatorRepositoryImpl(
+        gh<_i361.Dio>(),
+        gh<_i756.ResponseCache>(),
+      ),
     );
     gh.lazySingleton<_i196.BillingRemoteDataSource>(
       () => _i196.DioBillingRemoteDataSource(gh<_i361.Dio>()),
+    );
+    gh.lazySingleton<_i321.WeatherRemoteDataSource>(
+      () => weatherModule.weatherRemoteDataSource(gh<_i361.Dio>()),
     );
     gh.lazySingleton<_i249.PromotionsRepository>(
       () => _i292.PromotionsRepositoryImpl(gh<_i361.Dio>()),
@@ -253,7 +290,7 @@ extension GetItInjectableX on _i174.GetIt {
       ),
     );
     gh.lazySingleton<_i919.AdminIngestionRepository>(
-      () => _i688.AdminIngestionRepositoryImpl(gh<_i361.Dio>()),
+      () => _i689.AdminIngestionRepositoryImpl(gh<_i361.Dio>()),
     );
     gh.lazySingleton<_i968.AccountRemoteDataSource>(
       () => _i968.DioAccountRemoteDataSource(gh<_i361.Dio>()),
@@ -270,7 +307,10 @@ extension GetItInjectableX on _i174.GetIt {
       ),
     );
     gh.lazySingleton<_i17.ReportsRepository>(
-      () => _i844.ReportsRepositoryImpl(gh<_i361.Dio>()),
+      () => _i844.ReportsRepositoryImpl(
+        gh<_i361.Dio>(),
+        gh<_i756.ResponseCache>(),
+      ),
     );
     gh.lazySingleton<_i339.SupportRepository>(
       () => _i551.SupportRepositoryImpl(
@@ -291,6 +331,7 @@ extension GetItInjectableX on _i174.GetIt {
       () => _i89.AlertsRepositoryImpl(
         gh<_i89.AlertsRemoteDataSource>(),
         gh<_i169.CatalogRepository>(),
+        gh<_i756.ResponseCache>(),
       ),
     );
     gh.lazySingleton<_i806.MarketsRepository>(
@@ -323,6 +364,7 @@ extension GetItInjectableX on _i174.GetIt {
     gh.lazySingleton<_i287.NotificationPrefsRepository>(
       () => _i234.NotificationPrefsRepositoryImpl(
         gh<_i234.NotificationPrefsRemoteDataSource>(),
+        gh<_i756.ResponseCache>(),
       ),
     );
     gh.lazySingleton<_i955.PromotionEventsTracker>(
@@ -387,6 +429,12 @@ extension GetItInjectableX on _i174.GetIt {
     );
     gh.factory<_i804.MandiPricesCubit>(
       () => _i804.MandiPricesCubit(gh<_i995.GetMandiPrices>()),
+    );
+    gh.lazySingleton<_i524.WeatherRepository>(
+      () => _i735.WeatherRepositoryImpl(
+        gh<_i321.WeatherRemoteDataSource>(),
+        gh<_i756.ResponseCache>(),
+      ),
     );
     gh.factoryParam<_i245.OtpCubit, _i769.OtpChallenge, dynamic>(
       (challenge, _) => _i245.OtpCubit(
@@ -532,6 +580,12 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i552.NotificationService>(),
       ),
     );
+    gh.lazySingleton<_i645.WeatherCubit>(
+      () => _i645.WeatherCubit(
+        gh<_i524.WeatherRepository>(),
+        gh<_i351.LocationPermissionHandler>(),
+      ),
+    );
     gh.factory<_i760.TicketThreadCubit>(
       () => _i760.TicketThreadCubit(
         gh<_i339.GetSupportTicket>(),
@@ -603,7 +657,9 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i736.ProfileCubit>(),
         gh<_i312.WatchlistCubit>(),
         gh<_i169.CatalogRepository>(),
+        gh<_i688.WeatherService>(),
         gh<_i243.LocaleCubit>(),
+        gh<_i9002.HomePrefetcher>(),
       ),
     );
     return this;
@@ -611,3 +667,5 @@ extension GetItInjectableX on _i174.GetIt {
 }
 
 class _$RegisterModule extends _i678.RegisterModule {}
+
+class _$WeatherModule extends _i321.WeatherModule {}

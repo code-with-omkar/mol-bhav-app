@@ -20,6 +20,24 @@ public static class IdentityErrors
     public static readonly Error AccountAlreadyExists =
         Error.Conflict("Auth.AccountExists", "An account with this mobile number already exists. Log in instead.");
 
+    public static readonly Error GoogleTokenInvalid =
+        Error.Validation("Auth.GoogleTokenInvalid", "Google sign-in could not be verified. Try again.");
+
+    /// <summary>A Google account with no MolBhav account yet: the app asks for the mobile number and calls again.</summary>
+    public static readonly Error PhoneRequired =
+        Error.BusinessRule("Auth.PhoneRequired", "Enter your mobile number to finish creating your account.");
+
+    public static readonly Error PhoneTakenForGoogle =
+        Error.Conflict(
+            "Auth.AccountExists",
+            "An account with this mobile number already exists. Log in with your password, then link Google in Profile.");
+
+    public static readonly Error GoogleLinkedElsewhere =
+        Error.Conflict("Auth.GoogleLinkedElsewhere", "This Google account is already linked to another MolBhav account.");
+
+    public static readonly Error Suspended =
+        Error.Forbidden("User.Suspended", "This account has been suspended. Contact support.");
+
     public static Error LockedOut(DateTimeOffset? lockedUntilUtc, DateTimeOffset nowUtc)
     {
         var minutes = lockedUntilUtc is { } until ? Math.Max(1, (int)Math.Ceiling((until - nowUtc).TotalMinutes)) : 15;

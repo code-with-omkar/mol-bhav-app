@@ -22,6 +22,8 @@ internal sealed class DataIngestionJobConfiguration : IEntityTypeConfiguration<D
         builder.Property(j => j.RecordsFetched).IsRequired();
         builder.Property(j => j.RecordsPersisted).IsRequired();
         builder.Property(j => j.RecordsFailed).IsRequired();
+        builder.Property(j => j.RecordsUnchanged).IsRequired().HasDefaultValue(0);
+        builder.Property(j => j.AsOfDate);
         builder.Property(j => j.FailureReason).HasMaxLength(DataIngestionJob.FailureReasonMaxLength);
         builder.Property(j => j.StartedAtUtc).IsRequired();
 

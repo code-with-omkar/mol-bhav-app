@@ -27,6 +27,9 @@ public sealed record UserProfileResponse(
     bool WhatsAppEnabled,
     DateTimeOffset? LastLoginAtUtc,
     DateTimeOffset MemberSinceUtc,
-    bool IsAdmin);
+    bool IsAdmin,
+    bool HasPassword,
+    bool HasGoogleLogin,
+    string? GoogleEmail);
 
 public sealed record ProfileCategoryResponse(string Code, string Name);

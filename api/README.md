@@ -53,6 +53,7 @@ One database, one schema per module. Modules never write into another module's s
 | `reporting` | ✅ `reports`, `report_files` |
 | `localization` | ✅ `localized_text_entries`, `localized_text_values` |
 | `support` | ✅ `support_tickets`, `support_ticket_messages` |
+| `weather` | ✅ `imd_forecasts` |
 | `messaging` | Outbox |
 | `platform` | default schema, EF migrations history |
 
@@ -122,6 +123,7 @@ Secrets (`ConnectionStrings:MolBhav`, `Jwt:SigningKey`) are never stored in apps
 | `AddReportLastDownloadedAt` | nullable `reporting.reports.last_downloaded_at_utc` — stamped on each successful owner download |
 | `AddSupportModule` | `support` schema: `support_tickets`, `support_ticket_messages` (cascade from the ticket); `(user_id, last_activity_at_utc DESC)` and `(status, last_activity_at_utc DESC)` indexes |
 | `SeedSupportFaq` | 10 FAQ Q&A pairs under `support.faq.{n}.q`/`.a` plus `support.reply.title`/`.body` in `localization` (en/hi/mr), fixed ids, one sentinel `created_by` so `Down` is exact |
+| `AddWeatherModule` | `weather` schema: `imd_forecasts` (one row per user — `days` jsonb array of up to 7 days, `station_code`, `forecast_date`, `fetched_at_utc`; unique `user_id`, cascade from the user) |
 
 New change: `dotnet ef migrations add <DescriptiveName> -p src/MolBhav.Infrastructure -s src/MolBhav.Api -o Persistence/Migrations` (with `ASPNETCORE_ENVIRONMENT=Development`). One migration per logical change.
 
@@ -321,6 +323,21 @@ UPDATE identity.users SET role = 'Admin' WHERE phone_number = '+919876543210';
 - **`IngestionSchedulerBackgroundService`** fulfils BRD §9/§18's "Background Services / scheduled workers": on a configurable interval (`IngestionScheduler:IntervalHours`, default 24h) it runs one ingestion job per active `PriceSource`, each in its own DI scope (mirrors `OutboxProcessor`) so one source's failure never blocks another's. The admin manual-trigger endpoint runs the identical `RunIngestionJobCommand` with `TriggerType.Manual` instead of `Scheduled`.
 - **Ingestion always records at the product's default unit** — cross-unit source feeds are out of scope, the same simplification `ProcurementRequirement` makes (see its doc comment).
 - Jobs and errors are never deleted (ingestion audit trail); a duplicate row for the same product/location/source/date is recorded as a `DataIngestionError`, not silently skipped, so a re-run's outcome is always visible.
+
+## Weather module (per-user IMD 7-day forecast)
+
+| Who | Endpoint |
+|---|---|
+| User | `GET /api/v1/weather/forecast` — my 7-day forecast for the IMD station of my profile state (404 `Weather.ForecastNotFound` until the first refresh) |
+| Admin | `POST /api/v1/admin/weather/run[?userId]` — refetch now for every eligible user, or one; returns counts (`refreshed`, `skippedNoStation`, `failed`, per-station `failures`) |
+| Admin | `GET /api/v1/admin/weather/users/{userId}/forecast` — one user's stored forecast |
+
+- **Per-user row, replaced daily, no history**: `weather.imd_forecasts` holds one row per user with the whole 7-day array as `jsonb` (`WeatherForecast.Days`). A refresh calls `Replace()` on the existing row (`user_id` is unique, which also covers `(user_id, forecast_date)`).
+- **State → station, offline**: `ImdStationDirectory` maps a profile state to one of 36 hard-coded stations (the state/UT capital; Punjab uses Ludhiana). `UserProfile.State` stores the `market.states` **code** (`MH`); a state name also matches. A user with no or unrecognised state is skipped (`skippedNoStation`), never an error.
+- **One fetch per station per run**, shared by every user mapped to it (≤ 36 upstream calls however many users). A failed station fails only its own users, keeps their previous forecast, and is reported in `failures`.
+- **Scheduling rides the existing `IngestionSchedulerBackgroundService`** (so `IngestionScheduler:Enabled` also gates it) but not `IngestionSchedule` rows — those are per `PriceSource`, which weather has none of. After `Imd:DailyRunTimeIst` (default 06:00 IST) it sends `RunWeatherIngestionJobCommand(Scheduled)` at most every `Imd:RetryAfterMinutes` (30). Scheduled runs skip users who already hold today's forecast, so restarts and several API instances never repeat work; the admin run always refetches. There is no `DataIngestionJob` row for weather (that entity requires a `PriceSource`) — the run's outcome is the response counts and the log line `Weather refresh: …`.
+- **`ImdHttpClient`** (`IWeatherForecastSource`): named client `imd` with the standard resilience handler — 3 retries, exponential backoff, 15 s per attempt. Missing key / 401 / 403 / bad status / unparseable body → an honest failure, never fabricated data. **IMD's response schema is matched leniently** (several spellings per field; list under `forecast`/`data`/`forecasts`/`days` or a bare array) because it was not verifiable at build time — confirm `Imd:ForecastPathTemplate`, `Imd:ApiKeyHeader` and the mapping against IMD's API reference before going live, and fill `Imd:StationCodeMap` where IMD's station id differs from our slug.
+- **Setup**: `dotnet user-secrets set "Imd:ApiKey" "<key>"` (or env `Imd__ApiKey`). Development: `Imd:UseMockData=true` serves `SampleData/imd-sample.json` re-dated from today; it fails startup outside Development.
 
 ## Localization module (data-driven terminology; keys used across modules)
 

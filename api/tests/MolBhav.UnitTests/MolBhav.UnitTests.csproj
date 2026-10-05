@@ -16,6 +16,11 @@
   <ItemGroup>
     <ProjectReference Include="..\..\src\MolBhav.Application\MolBhav.Application.csproj" />
     <ProjectReference Include="..\..\src\MolBhav.Infrastructure\MolBhav.Infrastructure.csproj" />
+    <ProjectReference Include="..\..\src\MolBhav.Api\MolBhav.Api.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <FrameworkReference Include="Microsoft.AspNetCore.App" />
   </ItemGroup>
 
   <ItemGroup>

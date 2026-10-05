@@ -19,6 +19,7 @@ using MolBhav.Domain.Billing;
 namespace MolBhav.Api.Controllers.V1;
 
 /// <summary>Plan and subscription administration (BRD §23/§25). Admin role only.</summary>
+[EvictReferenceDataCache] // edits here change cached catalog / market / plan / translation responses
 [ApiVersion("1.0")]
 [Route("api/v{version:apiVersion}/admin/billing")]
 [Authorize(Policy = AuthorizationPolicies.Admin)]

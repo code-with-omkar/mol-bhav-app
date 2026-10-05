@@ -1,6 +1,8 @@
 import 'package:dio/dio.dart';
 import 'package:injectable/injectable.dart';
 
+import '../../../core/cache/cached_api_call.dart';
+import '../../../core/cache/response_cache.dart';
 import '../../../core/error/result.dart';
 import '../../../core/network/api_call.dart';
 import '../../../core/network/json.dart';
@@ -94,27 +96,38 @@ class DioAlertsRemoteDataSource implements AlertsRemoteDataSource {
 
 @LazySingleton(as: AlertsRepository)
 class AlertsRepositoryImpl implements AlertsRepository {
-  AlertsRepositoryImpl(this._remote, this._catalog);
+  AlertsRepositoryImpl(this._remote, this._catalog, this._cache);
 
   final AlertsRemoteDataSource _remote;
   final CatalogRepository _catalog;
+  final ResponseCache _cache;
 
+  static const alertsKey = 'alerts.list';
+  static const rulesKey = 'alerts.rules';
+  static const mandisKey = 'alerts.mandis.v1';
+
+  /// One cached page for every filter: the filters are applied on the device.
   @override
-  Future<Result<List<AlertItem>>> getAlerts(AlertFilter filter) =>
-      runApiCall(() async {
-        final items = parseList(await _remote.getAlerts(1, 50), _alertItem);
-        return switch (filter) {
-          AlertFilter.all => items,
-          AlertFilter.signals => [
-            for (final a in items)
-              if (a.kind != AlertKind.opportunity) a,
-          ],
-          AlertFilter.opportunities => [
-            for (final a in items)
-              if (a.kind == AlertKind.opportunity) a,
-          ],
-        };
-      });
+  Stream<Result<List<AlertItem>>> watchAlerts(AlertFilter filter) =>
+      watchCachedApiCall(
+        cache: _cache,
+        key: alertsKey,
+        fetch: () => _remote.getAlerts(1, 50),
+        parse: (json) {
+          final items = parseList(json as List<dynamic>, _alertItem);
+          return switch (filter) {
+            AlertFilter.all => items,
+            AlertFilter.signals => [
+              for (final a in items)
+                if (a.kind != AlertKind.opportunity) a,
+            ],
+            AlertFilter.opportunities => [
+              for (final a in items)
+                if (a.kind == AlertKind.opportunity) a,
+            ],
+          };
+        },
+      );
 
   /// Every catalog product tagged with the category it was fetched under, plus
   /// the mandi master. `CreateAlertCubit` narrows the products to the user's
@@ -128,16 +141,33 @@ class AlertsRepositoryImpl implements AlertsRepository {
     };
   }
 
-  Future<Result<AlertOptions>> _options(List<CatalogCategory> categories) =>
-      runApiCall(() async {
-        final (products, mandis) = await (
-          Future.wait([
-            for (final category in categories)
-              _catalog.getProducts(category.code),
-          ]),
-          _remote.getMandis(),
-        ).wait;
-        return AlertOptions(
+  Future<Result<AlertOptions>> _options(
+    List<CatalogCategory> categories,
+  ) async {
+    final (products, mandis) = await (
+      Future.wait([
+        for (final category in categories) _catalog.getProducts(category.code),
+      ]),
+      // Mandi master changes rarely: a day-old copy opens the form at once.
+      runCachedApiCall<List<AlertMarket>>(
+        cache: _cache,
+        key: mandisKey,
+        ttl: referenceDataTtl,
+        fetch: _remote.getMandis,
+        parse: (json) => [
+          for (final m in json as List<dynamic>)
+            AlertMarket(
+              id: (m as Map<String, dynamic>).str('id'),
+              name: m.str('name'),
+              stateName: m.strOrNull('stateName') ?? '',
+            ),
+        ],
+      ),
+    ).wait;
+    return switch (mandis) {
+      Err(:final failure) => Err(failure),
+      Ok(value: final markets) => Ok(
+        AlertOptions(
           products: [
             for (final (i, page) in products.indexed)
               for (final product in page.fold(
@@ -151,16 +181,11 @@ class AlertsRepositoryImpl implements AlertsRepository {
                   unit: product.defaultUnit.symbol,
                 ),
           ],
-          markets: [
-            for (final m in mandis)
-              AlertMarket(
-                id: (m as Map<String, dynamic>).str('id'),
-                name: m.str('name'),
-                stateName: m.strOrNull('stateName') ?? '',
-              ),
-          ],
-        );
-      });
+          markets: markets,
+        ),
+      ),
+    };
+  }
 
   @override
   Future<Result<CurrentPrice>> getCurrentPrice(
@@ -187,16 +212,17 @@ class AlertsRepositoryImpl implements AlertsRepository {
   });
 
   @override
-  Future<Result<void>> create(NewAlert alert) => runApiCall(
+  Future<Result<void>> create(NewAlert alert) => _thenDropRules(
     () => _remote.create({
       'productId': alert.commodityId,
       'locationKind': 'Mandi',
       'mandiId': alert.marketId,
-      // Rupee conditions are price-level rules; only "changes by %" is a percent one.
+      // Rupee conditions are price-level rules; "changes by %" fires on a move
+      // either way (it used to be sent as PriceDrop, so rises never alerted).
       'thresholdType': switch (alert.condition) {
         PriceCondition.below => 'PriceBelow',
         PriceCondition.above => 'PriceAbove',
-        PriceCondition.percent => 'PriceDrop',
+        PriceCondition.percent => 'PriceChange',
       },
       if (alert.condition == PriceCondition.percent)
         'thresholdPercent': alert.value
@@ -206,13 +232,16 @@ class AlertsRepositoryImpl implements AlertsRepository {
   );
 
   @override
-  Future<Result<List<AlertRule>>> getAlertRules() => runApiCall(
-    () async => parseList(await _remote.getAlertRules(), _alertRule),
+  Stream<Result<List<AlertRule>>> watchAlertRules() => watchCachedApiCall(
+    cache: _cache,
+    key: rulesKey,
+    fetch: _remote.getAlertRules,
+    parse: (json) => parseList(json as List<dynamic>, _alertRule),
   );
 
   @override
   Future<Result<void>> updateAlertRule(String id, UpdateAlertRuleRequest req) =>
-      runApiCall(
+      _thenDropRules(
         () => _remote.updateAlertRule(id, {
           'thresholdType': _thresholdTypeName(req.thresholdType),
           if (req.thresholdPercent != null)
@@ -224,19 +253,28 @@ class AlertsRepositoryImpl implements AlertsRepository {
 
   @override
   Future<Result<void>> deleteAlertRule(String id) =>
-      runApiCall(() => _remote.deleteAlertRule(id));
+      _thenDropRules(() => _remote.deleteAlertRule(id));
+
+  /// Runs a rule change, then drops the saved rules so screens reload live.
+  Future<Result<void>> _thenDropRules(Future<void> Function() change) async {
+    final result = await runApiCall(change);
+    if (result is Ok<void>) await _cache.invalidate(const [rulesKey]);
+    return result;
+  }
 
   static String _thresholdTypeName(AlertThresholdType type) => switch (type) {
     AlertThresholdType.priceDrop => 'PriceDrop',
     AlertThresholdType.priceSpike => 'PriceSpike',
     AlertThresholdType.priceBelow => 'PriceBelow',
     AlertThresholdType.priceAbove => 'PriceAbove',
+    AlertThresholdType.priceChange => 'PriceChange',
   };
 
   static AlertThresholdType _thresholdTypeFrom(String s) => switch (s) {
     'PriceSpike' => AlertThresholdType.priceSpike,
     'PriceBelow' => AlertThresholdType.priceBelow,
     'PriceAbove' => AlertThresholdType.priceAbove,
+    'PriceChange' => AlertThresholdType.priceChange,
     _ => AlertThresholdType.priceDrop,
   };
 
@@ -261,14 +299,19 @@ class AlertsRepositoryImpl implements AlertsRepository {
     final product = a.obj('product');
     final thresholdType = a.strOrNull('thresholdType') ?? '';
     final location = a.strOrNull('locationName');
+    final percentChange = a.numberOrNull('percentChange') ?? 0;
     return AlertItem(
       id: a.str('id'),
-      kind: thresholdType == 'PriceSpike' || thresholdType == 'PriceAbove'
+      // An either-way rule takes its kind from the move itself.
+      kind:
+          thresholdType == 'PriceSpike' ||
+              thresholdType == 'PriceAbove' ||
+              (thresholdType == 'PriceChange' && percentChange > 0)
           ? AlertKind.spike
           : AlertKind.signal,
       isUnread: !(a.flag('isRead')),
       productName: product.str('name'),
-      percentChange: a.numberOrNull('percentChange') ?? 0,
+      percentChange: percentChange,
       previousPrice: a.numberOrNull('previousPrice') ?? 0,
       newPrice: a.numberOrNull('newPrice') ?? 0,
       locationName: location != null && location.isNotEmpty ? location : null,

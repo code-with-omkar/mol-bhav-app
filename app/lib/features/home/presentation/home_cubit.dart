@@ -8,20 +8,28 @@ import '../../../core/error/failure.dart';
 import '../../../core/locale/locale_cubit.dart';
 import '../../../core/utils/data_state.dart';
 import '../../../core/utils/statuses.dart';
+import '../../../core/weather/weather_service.dart';
 import '../../account/domain/account.dart';
 import '../../account/presentation/profile_cubit.dart';
 import '../../catalog/domain/catalog.dart';
 import '../../watchlist/domain/watchlist.dart';
 import '../../watchlist/presentation/watchlist_cubit.dart';
 import '../domain/home_entities.dart';
+import 'home_prefetcher.dart';
 
 /// Home = the shared profile + the shared watchlist + the user's categories.
 /// Rebuilds whenever either shared cubit changes, so an edited profile or a
 /// starred product shows here without a manual refresh.
 @injectable
 class HomeCubit extends Cubit<DataState<HomeDashboard>> {
-  HomeCubit(this._profile, this._watchlist, this._catalog, LocaleCubit locale)
-    : super(const DataState()) {
+  HomeCubit(
+    this._profile,
+    this._watchlist,
+    this._catalog,
+    this._weatherService,
+    LocaleCubit locale, [
+    this._prefetcher,
+  ]) : super(const DataState()) {
     _subs = [
       _profile.stream.listen((_) => _onProfile()),
       _watchlist.stream.listen((_) => _rebuild()),
@@ -35,6 +43,10 @@ class HomeCubit extends Cubit<DataState<HomeDashboard>> {
   final ProfileCubit _profile;
   final WatchlistCubit _watchlist;
   final CatalogRepository _catalog;
+  final WeatherService _weatherService;
+  final HomePrefetcher? _prefetcher;
+  StreamSubscription<CurrentWeather>? _weatherSub;
+  CurrentWeather? _weather;
   late final List<StreamSubscription<Object?>> _subs;
 
   List<CatalogCategory>? _categories;
@@ -46,16 +58,40 @@ class HomeCubit extends Cubit<DataState<HomeDashboard>> {
 
   Future<void> load() async {
     _rebuild();
+    // Not awaited: the location prompt and the network never hold up the
+    // dashboard.
+    watchCurrentWeather();
     await Future.wait([
       _profile.ensureLoaded(),
       _watchlist.ensureLoaded(),
       if (_categories == null) _loadCategories(),
     ]);
+    // Home is on screen: warm the cache for the tabs opened next.
+    _prefetcher?.warm();
+  }
+
+  /// Current weather: cached reading at once, then the live one. Starts once;
+  /// a denied permission or a failure just leaves the badge hidden.
+  void watchCurrentWeather() {
+    if (_weatherSub != null) return;
+    _weatherSub = _weatherService.watchCurrentWeather().listen(
+      (weather) {
+        _weather = weather;
+        _rebuild();
+      },
+      onError: (Object _) {},
+      onDone: () => _weatherSub = null,
+    );
   }
 
   /// Pull-to-refresh: everything from the API again.
-  Future<void> refresh() =>
-      Future.wait([_profile.load(), _watchlist.load(), _loadCategories()]);
+  Future<void> refresh() async {
+    await _weatherService.clearCache();
+    await _weatherSub?.cancel();
+    _weatherSub = null;
+    watchCurrentWeather();
+    await Future.wait([_profile.load(), _watchlist.load(), _loadCategories()]);
+  }
 
   Future<void> retry() => refresh();
 
@@ -101,7 +137,12 @@ class HomeCubit extends Cubit<DataState<HomeDashboard>> {
       );
       return;
     }
-    final dashboard = _dashboard(profile, categories, _watchlist.state.items);
+    final dashboard = _dashboard(
+      profile,
+      categories,
+      _watchlist.state.items,
+      _weather,
+    );
     final revalidating =
         profileState.isLoading ||
         _watchlist.state.data.isLoading ||
@@ -117,9 +158,11 @@ class HomeCubit extends Cubit<DataState<HomeDashboard>> {
     AccountProfile profile,
     List<CatalogCategory> categories,
     List<WatchlistItem> watchlist,
+    CurrentWeather? weather,
   ) {
     final codes = profile.categoryCodes.toSet();
     return HomeDashboard(
+      weather: weather,
       userName: profile.name,
       businessType: profile.businessTypeName,
       districtName: profile.districtName,
@@ -148,6 +191,7 @@ class HomeCubit extends Cubit<DataState<HomeDashboard>> {
 
   @override
   Future<void> close() {
+    _weatherSub?.cancel();
     for (final sub in _subs) {
       sub.cancel();
     }

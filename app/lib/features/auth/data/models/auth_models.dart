@@ -43,15 +43,24 @@ class OtpVerifyResponse {
 
 /// `GET /auth/methods` → after envelope unwrap: `{ otp, password }`
 class LoginMethodsResponse {
-  const LoginMethodsResponse({required this.otp, required this.password});
+  const LoginMethodsResponse({
+    required this.otp,
+    required this.password,
+    this.google = false,
+    this.googleClientId,
+  });
 
   factory LoginMethodsResponse.fromJson(Map<String, dynamic> json) {
     return LoginMethodsResponse(
       otp: json['otp'] as bool? ?? false,
       password: json['password'] as bool? ?? false,
+      google: json['google'] as bool? ?? false,
+      googleClientId: json['googleClientId'] as String?,
     );
   }
 
   final bool otp;
   final bool password;
+  final bool google;
+  final String? googleClientId;
 }

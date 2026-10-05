@@ -7,9 +7,11 @@ environment:
   sdk: ^3.13.2
 
 dependencies:
+  cached_network_image: ^3.4.1
   crypto: ^3.0.6
   dio: ^5.11.1
   equatable: ^3.0.0
+  file_picker: ^13.1.0
   flutter:
     sdk: flutter
   flutter_bloc: ^9.1.1
@@ -22,6 +24,8 @@ dependencies:
   go_router: ^18.0.1
   google_fonts: ^8.2.1
   google_mobile_ads: ^9.1.0
+  google_sign_in: ^7.2.0
+  google_sign_in_web: ^1.1.0
   injectable: ^3.0.0
   intl: ^0.20.3
   open_filex: ^4.7.0
@@ -29,6 +33,9 @@ dependencies:
   package_info_plus: ^10.2.1
   share_plus: ^13.3.0
   shared_preferences: ^2.5.5
+  geolocator: ^14.0.2
+  permission_handler: ^11.4.4
+  http: ^1.6.0
   firebase_core: ^3.0.0
   firebase_messaging: ^15.0.0
   sms_autofill: ^2.4.0

@@ -10,6 +10,8 @@ using MolBhav.Application.Features.Market.GetMandis;
 using MolBhav.Application.Features.Market.GetStates;
 using MolBhav.Application.Features.Market.GetSuppliers;
 using MolBhav.Application.Features.Market.Models;
+using Microsoft.AspNetCore.OutputCaching;
+using MolBhav.Api.Setup;
 
 namespace MolBhav.Api.Controllers.V1;
 
@@ -17,6 +19,7 @@ namespace MolBhav.Api.Controllers.V1;
 [ApiVersion("1.0")]
 [Route("api/v{version:apiVersion}/market")]
 [AllowAnonymous]
+[OutputCache(PolicyName = ResponseCachingSetup.ReferenceDataPolicy)] // same for every caller; evicted on admin edits
 public sealed class MarketController(ISender sender) : ApiControllerBase(sender)
 {
     [HttpGet("states")]

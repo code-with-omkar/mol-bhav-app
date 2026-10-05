@@ -81,6 +81,10 @@ class AccountRepositoryImpl implements AccountRepository {
       pushEnabled: j.flag('pushEnabled'),
       whatsappEnabled: j.flag('whatsAppEnabled'),
       isAdmin: j.flag('isAdmin'),
+      // Older cached bodies lack these: assume a password, nothing linked.
+      hasPassword: j['hasPassword'] as bool? ?? true,
+      hasGoogleLogin: j.flag('hasGoogleLogin'),
+      googleEmail: j.strOrNull('googleEmail'),
     );
   }
 

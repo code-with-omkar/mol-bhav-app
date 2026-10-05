@@ -10,6 +10,12 @@ public interface IProcurementCategoryRepository : IRepository<ProcurementCategor
     Task<bool> CodeExistsAsync(ProcurementCategoryCode code, CancellationToken cancellationToken = default);
 
     Task<bool> SubCategoryExistsAsync(Guid subCategoryId, CancellationToken cancellationToken = default);
+
+    /// <summary>Id of the active category with this code; null when unknown or deactivated.</summary>
+    Task<Guid?> GetActiveIdByCodeAsync(ProcurementCategoryCode code, CancellationToken cancellationToken = default);
+
+    /// <summary>Every sub-category id (active or not) under the category — ingestion uses it to reject products from another category.</summary>
+    Task<IReadOnlySet<Guid>> GetSubCategoryIdsAsync(Guid categoryId, CancellationToken cancellationToken = default);
 }
 
 /// <summary><see cref="IRepository{TAggregate,TId}.GetByIdAsync"/> loads the product with all its variants and translations.</summary>

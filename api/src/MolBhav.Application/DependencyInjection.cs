@@ -30,6 +30,7 @@ public static class DependencyInjection
         services.AddScoped<SubscriptionActivationService>();
         services.AddScoped<IEntitlementService, EntitlementService>();
         services.AddScoped<Features.Promotions.Admin.CampaignInputResolver>();
+        services.AddScoped<Features.Ingestion.Common.IngestionRecordWriter>();
 
         return services;
     }

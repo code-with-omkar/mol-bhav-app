@@ -17,4 +17,10 @@ internal sealed class UserRepository(MolBhavDbContext dbContext) : Repository<Us
 
         return Set.SingleOrDefaultAsync(u => u.PhoneNumber == phoneNumber, cancellationToken);
     }
+
+    public Task<User?> GetByExternalLoginAsync(
+        ExternalLoginProvider provider, string subject, CancellationToken cancellationToken = default) =>
+        Set.SingleOrDefaultAsync(
+            u => u.ExternalLogins.Any(l => l.Provider == provider && l.Subject == subject),
+            cancellationToken);
 }

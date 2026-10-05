@@ -36,9 +36,11 @@ class AlertsCubit extends Cubit<AlertsState> {
         data: DataState.loading(data: state.data.data),
       ),
     );
-    final result = await _getAlerts(filter);
-    if (isClosed || state.filter != filter) return;
-    emit(AlertsState(filter: filter, data: DataState.fromResult(result)));
+    // Saved alerts show at once; the live list replaces them when it lands.
+    await for (final result in _getAlerts(filter)) {
+      if (isClosed || state.filter != filter) return;
+      emit(AlertsState(filter: filter, data: DataState.fromResult(result)));
+    }
   }
 
   Future<void> selectFilter(AlertFilter filter) {

@@ -240,7 +240,7 @@ namespace MolBhav.Infrastructure.Persistence.Migrations
                         {
                             t.HasCheckConstraint("ck_alert_rules_location", "(location_kind IS NULL AND mandi_id IS NULL AND supplier_id IS NULL) OR (location_kind = 'Mandi' AND mandi_id IS NOT NULL AND supplier_id IS NULL) OR (location_kind = 'Supplier' AND supplier_id IS NOT NULL AND mandi_id IS NULL)");
 
-                            t.HasCheckConstraint("ck_alert_rules_threshold", "(threshold_type IN ('PriceDrop', 'PriceSpike') AND threshold_percent IS NOT NULL AND threshold_price IS NULL) OR (threshold_type IN ('PriceBelow', 'PriceAbove') AND threshold_price IS NOT NULL AND threshold_percent IS NULL)");
+                            t.HasCheckConstraint("ck_alert_rules_threshold", "(threshold_type IN ('PriceDrop', 'PriceSpike', 'PriceChange') AND threshold_percent IS NOT NULL AND threshold_price IS NULL) OR (threshold_type IN ('PriceBelow', 'PriceAbove') AND threshold_price IS NOT NULL AND threshold_percent IS NULL)");
                         });
                 });
 
@@ -1148,6 +1148,10 @@ namespace MolBhav.Infrastructure.Persistence.Migrations
                         .HasColumnType("uuid")
                         .HasColumnName("id");
 
+                    b.Property<DateOnly?>("AsOfDate")
+                        .HasColumnType("date")
+                        .HasColumnName("as_of_date");
+
                     b.Property<DateTimeOffset?>("CompletedAtUtc")
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("completed_at_utc");
@@ -1180,6 +1184,12 @@ namespace MolBhav.Infrastructure.Persistence.Migrations
                     b.Property<int>("RecordsPersisted")
                         .HasColumnType("integer")
                         .HasColumnName("records_persisted");
+
+                    b.Property<int>("RecordsUnchanged")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasDefaultValue(0)
+                        .HasColumnName("records_unchanged");
 
                     b.Property<DateTimeOffset>("StartedAtUtc")
                         .HasColumnType("timestamp with time zone")
@@ -2119,6 +2129,10 @@ namespace MolBhav.Infrastructure.Persistence.Migrations
                         .HasColumnType("uuid")
                         .HasColumnName("id");
 
+                    b.Property<Guid>("CategoryId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("category_id");
+
                     b.Property<string>("Code")
                         .IsRequired()
                         .HasMaxLength(40)
@@ -2159,6 +2173,9 @@ namespace MolBhav.Infrastructure.Persistence.Migrations
 
                     b.HasKey("Id")
                         .HasName("pk_price_sources");
+
+                    b.HasIndex("CategoryId")
+                        .HasDatabaseName("ix_price_sources_category_id");
 
                     b.HasIndex("Code")
                         .IsUnique()
@@ -2913,6 +2930,67 @@ namespace MolBhav.Infrastructure.Persistence.Migrations
                     b.ToTable("watchlist_items", "watchlist");
                 });
 
+            modelBuilder.Entity("MolBhav.Domain.Weather.WeatherForecast", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<DateTimeOffset>("CreatedAtUtc")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at_utc");
+
+                    b.Property<Guid?>("CreatedBy")
+                        .HasColumnType("uuid")
+                        .HasColumnName("created_by");
+
+                    b.Property<string>("Days")
+                        .IsRequired()
+                        .HasColumnType("jsonb")
+                        .HasColumnName("days");
+
+                    b.Property<DateTimeOffset>("FetchedAtUtc")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("fetched_at_utc");
+
+                    b.Property<DateOnly>("ForecastDate")
+                        .HasColumnType("date")
+                        .HasColumnName("forecast_date");
+
+                    b.Property<string>("StationCode")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)")
+                        .HasColumnName("station_code");
+
+                    b.Property<DateTimeOffset?>("UpdatedAtUtc")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at_utc");
+
+                    b.Property<Guid?>("UpdatedBy")
+                        .HasColumnType("uuid")
+                        .HasColumnName("updated_by");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("user_id");
+
+                    b.Property<uint>("xmin")
+                        .IsConcurrencyToken()
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("xid")
+                        .HasColumnName("xmin");
+
+                    b.HasKey("Id")
+                        .HasName("pk_imd_forecasts");
+
+                    b.HasIndex("UserId")
+                        .IsUnique()
+                        .HasDatabaseName("ix_imd_forecasts_user_id");
+
+                    b.ToTable("imd_forecasts", "weather");
+                });
+
             modelBuilder.Entity("MolBhav.Infrastructure.Messaging.Outbox.OutboxMessage", b =>
                 {
                     b.Property<Guid>("Id")
@@ -3341,6 +3419,44 @@ namespace MolBhav.Infrastructure.Persistence.Migrations
 
             modelBuilder.Entity("MolBhav.Domain.Identity.User", b =>
                 {
+                    b.OwnsMany("MolBhav.Domain.Identity.UserExternalLogin", "ExternalLogins", b1 =>
+                        {
+                            b1.Property<string>("Provider")
+                                .HasMaxLength(20)
+                                .HasColumnType("character varying(20)")
+                                .HasColumnName("provider");
+
+                            b1.Property<string>("Subject")
+                                .HasMaxLength(255)
+                                .HasColumnType("character varying(255)")
+                                .HasColumnName("subject");
+
+                            b1.Property<string>("Email")
+                                .HasMaxLength(320)
+                                .HasColumnType("character varying(320)")
+                                .HasColumnName("email");
+
+                            b1.Property<DateTimeOffset>("LinkedAtUtc")
+                                .HasColumnType("timestamp with time zone")
+                                .HasColumnName("linked_at_utc");
+
+                            b1.Property<Guid>("UserId")
+                                .HasColumnType("uuid")
+                                .HasColumnName("user_id");
+
+                            b1.HasKey("Provider", "Subject")
+                                .HasName("pk_user_external_logins");
+
+                            b1.HasIndex("UserId")
+                                .HasDatabaseName("ix_user_external_logins_user_id");
+
+                            b1.ToTable("user_external_logins", "identity");
+
+                            b1.WithOwner()
+                                .HasForeignKey("UserId")
+                                .HasConstraintName("fk_user_external_logins_users_user_id");
+                        });
+
                     b.OwnsOne("MolBhav.Domain.Identity.UserProfile", "Profile", b1 =>
                         {
                             b1.Property<Guid>("UserId")
@@ -3405,6 +3521,8 @@ namespace MolBhav.Infrastructure.Persistence.Migrations
                         });
 
                     b.Navigation("Categories");
+
+                    b.Navigation("ExternalLogins");
 
                     b.Navigation("Profile")
                         .IsRequired();
@@ -3618,6 +3736,16 @@ namespace MolBhav.Infrastructure.Persistence.Migrations
                         .HasConstraintName("fk_price_records_product_variants_variant_id");
                 });
 
+            modelBuilder.Entity("MolBhav.Domain.Pricing.PriceSource", b =>
+                {
+                    b.HasOne("MolBhav.Domain.Catalog.ProcurementCategory", null)
+                        .WithMany()
+                        .HasForeignKey("CategoryId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("fk_price_sources_procurement_categories_category_id");
+                });
+
             modelBuilder.Entity("MolBhav.Domain.Procurement.ProcurementOpportunity", b =>
                 {
                     b.HasOne("MolBhav.Domain.Procurement.ProcurementRequirement", null)
@@ -3762,6 +3890,16 @@ namespace MolBhav.Infrastructure.Persistence.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired()
                         .HasConstraintName("fk_watchlist_items_users_user_id");
+                });
+
+            modelBuilder.Entity("MolBhav.Domain.Weather.WeatherForecast", b =>
+                {
+                    b.HasOne("MolBhav.Domain.Identity.User", null)
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_imd_forecasts_users_user_id");
                 });
 
             modelBuilder.Entity("MolBhav.Infrastructure.Reporting.ReportFile", b =>

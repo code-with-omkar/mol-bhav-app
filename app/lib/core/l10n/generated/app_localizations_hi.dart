@@ -1472,4 +1472,278 @@ class AppLocalizationsHi extends AppLocalizations {
 
   @override
   String get runCompleted => 'चलना पूरा हुआ। कार्ड पर पिछली बार देखें।';
+
+  @override
+  String get backfillAction => 'पिछले दिनों का डेटा लाएँ';
+
+  @override
+  String get backfillPickerTitle => 'कौन से बाज़ार दिन लाने हैं';
+
+  @override
+  String backfillTooLong(String max) {
+    return 'एक बार में ज़्यादा से ज़्यादा $max दिन चुनें।';
+  }
+
+  @override
+  String backfillQueued(String days) {
+    return '$days दिन कतार में हैं। पूरे होने पर नीचे खींचकर रीफ़्रेश करें।';
+  }
+
+  @override
+  String jobMarketDay(String date) {
+    return 'बाज़ार दिन: $date';
+  }
+
+  @override
+  String jobUnchanged(String count) {
+    return '$count बिना बदलाव';
+  }
+
+  @override
+  String get uploadCsvAction => 'CSV अपलोड करें';
+
+  @override
+  String get uploadCompleted => 'CSV आयात हो गया। कार्ड पर पिछली बार देखें।';
+
+  @override
+  String get uploadTooLarge =>
+      'फ़ाइल 10 MB से बड़ी है। इसे तारीख या राज्य के हिसाब से बाँटें।';
+
+  @override
+  String get jobFromUpload => 'CSV अपलोड से';
+
+  @override
+  String get adminAllCategories => 'सभी';
+
+  @override
+  String get runAllAction => 'सभी चलाएँ';
+
+  @override
+  String categoryRunQueued(String count) {
+    return '$count स्रोत कतार में। पूरा होने पर देखने के लिए नीचे खींचें।';
+  }
+
+  @override
+  String get addSourceAction => 'स्रोत जोड़ें';
+
+  @override
+  String get editSourceAction => 'स्रोत बदलें';
+
+  @override
+  String get sourceCodeLabel => 'कोड';
+
+  @override
+  String get sourceCodeHint => 'जैसे cpwd-dsr. बाद में बदला नहीं जा सकता।';
+
+  @override
+  String get sourceCodeInvalid =>
+      'छोटे अंग्रेज़ी अक्षर, अंक और हाइफ़न लिखें, शुरुआत अक्षर से।';
+
+  @override
+  String get sourceNameLabel => 'नाम';
+
+  @override
+  String get sourceNameRequired => 'नाम दर्ज करें।';
+
+  @override
+  String get sourceCategoryLabel => 'श्रेणी';
+
+  @override
+  String get sourceActiveLabel => 'सक्रिय';
+
+  @override
+  String get saveSourceAction => 'स्रोत सहेजें';
+
+  @override
+  String get sourceCreated => 'स्रोत जोड़ा गया।';
+
+  @override
+  String get sourceUpdated => 'स्रोत अपडेट हुआ।';
+
+  @override
+  String get categoryNoSources => 'इस श्रेणी में अभी कोई स्रोत नहीं है।';
+
+  @override
+  String get csvTemplateAction => 'CSV प्रारूप';
+
+  @override
+  String get csvTemplateTitle => 'CSV टेम्पलेट';
+
+  @override
+  String get csvTemplateBody =>
+      'हर स्रोत ऐसी CSV लेता है जिसकी पहली पंक्ति यह हेडर हो। MolBhav उत्पाद कोड और मंडी या सप्लायर कोड लिखें; location_kind में mandi या supplier; तारीख yyyy-MM-dd में। स्रोत की श्रेणी से बाहर के उत्पादों की पंक्तियाँ अस्वीकार होती हैं। Agmarknet, data.gov.in और पोर्टल की फ़ाइलें भी लेता है।';
+
+  @override
+  String get csvTemplateCopied => 'हेडर कॉपी हुआ।';
+
+  @override
+  String get weatherTitle => 'मौसम';
+
+  @override
+  String get weatherToday => 'आज';
+
+  @override
+  String get weatherTomorrow => 'कल';
+
+  @override
+  String get weatherSevenDay => '7 दिन का पूर्वानुमान';
+
+  @override
+  String get weatherSelectDay => 'दिन चुनें';
+
+  @override
+  String weatherStation(String station) {
+    return 'IMD · $station';
+  }
+
+  @override
+  String weatherRainChance(String percent) {
+    return '$percent% बारिश';
+  }
+
+  @override
+  String get weatherHumidity => 'नमी';
+
+  @override
+  String get weatherWind => 'हवा';
+
+  @override
+  String weatherWindValue(String speed) {
+    return '$speed किमी/घं';
+  }
+
+  @override
+  String weatherTempRange(String min, String max) {
+    return '$min° / $max°';
+  }
+
+  @override
+  String weatherTempDegrees(String temp) {
+    return '$temp°';
+  }
+
+  @override
+  String weatherUpdated(String time) {
+    return 'अपडेट: $time';
+  }
+
+  @override
+  String get weatherClear => 'साफ़';
+
+  @override
+  String get weatherPartlyCloudy => 'आंशिक बादल';
+
+  @override
+  String get weatherCloudy => 'बादल';
+
+  @override
+  String get weatherRain => 'बारिश';
+
+  @override
+  String get weatherThunderstorm => 'आंधी-तूफ़ान';
+
+  @override
+  String get weatherPermissionTitle => 'अपने इलाके का मौसम दिखाएँ?';
+
+  @override
+  String get weatherPermissionBody =>
+      'MolBhav सबसे नज़दीकी IMD मौसम केंद्र खोजने के लिए एक बार आपकी अनुमानित लोकेशन का उपयोग करता है। वह इसी डिवाइस पर रहती है।';
+
+  @override
+  String get weatherAllow => 'अनुमति दें';
+
+  @override
+  String get weatherNotNow => 'अभी नहीं';
+
+  @override
+  String get weatherEnableLocation => 'लोकेशन चालू करें';
+
+  @override
+  String get weatherOpenSettings => 'सेटिंग खोलें';
+
+  @override
+  String get weatherNoForecast => 'पूर्वानुमान नहीं';
+
+  @override
+  String get weatherNoForecastBody =>
+      'अपने इलाके का मौसम देखने के लिए लोकेशन की अनुमति दें।';
+
+  @override
+  String get weatherServiceOff =>
+      'लोकेशन बंद है। अपने इलाके का मौसम देखने के लिए इसे चालू करें।';
+
+  @override
+  String get weatherDeniedForever =>
+      'लोकेशन की अनुमति बंद है। मौसम देखने के लिए सेटिंग में अनुमति दें।';
+
+  @override
+  String get weatherOutOfCoverage => 'आपके पास कोई IMD मौसम केंद्र नहीं है।';
+
+  @override
+  String get weatherUnavailable => 'आपकी लोकेशन नहीं मिल सकी।';
+
+  @override
+  String alertRuleConditionChange(String percent) {
+    return '$percent% बदलाव (ऊपर या नीचे)';
+  }
+
+  @override
+  String get savePasswordLabel => 'पासवर्ड सेव करें';
+
+  @override
+  String get savePasswordHint =>
+      'इस फ़ोन पर सुरक्षित रूप से रखा जाता है। साझा फ़ोन पर बंद करें।';
+
+  @override
+  String get continueWithGoogle => 'Google से जारी रखें';
+
+  @override
+  String get orDivider => 'या';
+
+  @override
+  String get googlePhoneTitle => 'बस एक कदम और';
+
+  @override
+  String get googlePhoneSubtitle =>
+      'अपना मोबाइल नंबर दर्ज करें। इसका उपयोग WhatsApp भाव अलर्ट और सहायता के लिए होता है।';
+
+  @override
+  String get googlePhoneContinue => 'खाता बनाएँ';
+
+  @override
+  String get googleAccountExists =>
+      'इस मोबाइल नंबर का खाता पहले से है। पासवर्ड से लॉग इन करें, फिर More में Google जोड़ें।';
+
+  @override
+  String get googleSignInFailed =>
+      'Google से साइन-इन नहीं हुआ। फिर से कोशिश करें।';
+
+  @override
+  String get googleSignInTitle => 'Google साइन-इन';
+
+  @override
+  String get googleLinked => 'जुड़ा हुआ';
+
+  @override
+  String googleLinkedAs(String email) {
+    return 'जुड़ा: $email';
+  }
+
+  @override
+  String get googleUnlinkAction => 'हटाएँ';
+
+  @override
+  String get googleLinkAction => 'Google खाता जोड़ें';
+
+  @override
+  String get googleLinkHint =>
+      'अगली बार पासवर्ड की जगह Google से साइन-इन करें।';
+
+  @override
+  String get googleLinkedElsewhere =>
+      'यह Google खाता किसी दूसरे MolBhav खाते से जुड़ा है।';
+
+  @override
+  String get googleLastSignInMethod =>
+      'Google हटाने से पहले पासवर्ड सेट करें — साइन-इन का यही एक तरीका है।';
 }

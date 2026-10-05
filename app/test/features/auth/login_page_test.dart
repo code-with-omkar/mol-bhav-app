@@ -15,6 +15,7 @@ import 'package:mol_bhav/features/auth/domain/entities/mobile_number.dart';
 import 'package:mol_bhav/features/auth/domain/entities/otp_challenge.dart';
 import 'package:mol_bhav/features/auth/domain/usecases/password_auth.dart';
 import 'package:mol_bhav/features/auth/domain/usecases/request_otp.dart';
+import 'package:mol_bhav/features/auth/presentation/cubit/google_login_cubit.dart';
 import 'package:mol_bhav/features/auth/presentation/cubit/login_cubit.dart';
 import 'package:mol_bhav/features/auth/presentation/cubit/login_methods_cubit.dart';
 import 'package:mol_bhav/features/auth/presentation/cubit/password_login_cubit.dart';
@@ -33,6 +34,8 @@ class _MockLoginMethodsCubit extends MockCubit<LoginMethodsState>
 class _MockLoginWithPassword extends Mock implements LoginWithPassword {}
 
 class _MockRegisterWithPassword extends Mock implements RegisterWithPassword {}
+
+class _MockLoginWithGoogle extends Mock implements LoginWithGoogle {}
 
 const _otpOnly = LoginMethodsState(
   methods: LoginMethods(otp: true, password: false),
@@ -92,6 +95,9 @@ void main() {
                     PasswordLoginCubit(loginWithPassword, registerWithPassword),
               ),
               BlocProvider<LocaleCubit>.value(value: localeCubit),
+              BlocProvider(
+                create: (_) => GoogleLoginCubit(_MockLoginWithGoogle()),
+              ),
             ],
             child: const LoginPage(),
           ),

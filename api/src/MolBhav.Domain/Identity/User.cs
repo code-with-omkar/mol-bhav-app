@@ -27,6 +27,7 @@ public sealed class User : AggregateRoot<Guid>, IAuditableEntity, ISoftDeletable
     public static readonly TimeSpan PasswordLockoutDuration = TimeSpan.FromMinutes(15);
 
     private readonly List<UserProfileCategory> _categories = [];
+    private readonly List<UserExternalLogin> _externalLogins = [];
 
     private User(Guid id, PhoneNumber phoneNumber)
         : base(id)
@@ -81,6 +82,11 @@ public sealed class User : AggregateRoot<Guid>, IAuditableEntity, ISoftDeletable
     /// <summary>True once the onboarding screen has been completed (at least one category chosen).</summary>
     public bool IsOnboarded => _categories.Count > 0;
 
+    /// <summary>Linked third-party sign-ins (e.g. Google). Owned; loaded with the user.</summary>
+    public IReadOnlyCollection<UserExternalLogin> ExternalLogins => _externalLogins.AsReadOnly();
+
+    public bool HasExternalLogin(ExternalLoginProvider provider) => _externalLogins.Any(l => l.Provider == provider);
+
     public DateTimeOffset CreatedAtUtc { get; private set; }
 
     public Guid? CreatedBy { get; private set; }
@@ -112,6 +118,76 @@ public sealed class User : AggregateRoot<Guid>, IAuditableEntity, ISoftDeletable
         user.SetPassword(passwordHash);
         return user;
     }
+
+    /// <summary>
+    /// Registration through a third-party sign-in (e.g. Google). The mobile number stays the account's identity and is
+    /// still required (WhatsApp alerts, support); like password sign-up it is not verified on this path. The provider's
+    /// name pre-fills the display name when it fits the rules.
+    /// </summary>
+    public static User RegisterWithExternalLogin(
+        PhoneNumber phoneNumber,
+        ExternalLoginProvider provider,
+        string subject,
+        string? email,
+        string? displayName,
+        DateTimeOffset nowUtc)
+    {
+        var user = Register(phoneNumber);
+        user._externalLogins.Add(UserExternalLogin.Create(provider, subject, email, nowUtc));
+
+        var name = NormaliseDisplayName(displayName);
+        if (name is not null && name.Length is >= DisplayNameMinLength and <= DisplayNameMaxLength)
+        {
+            user.DisplayName = name;
+        }
+
+        return user;
+    }
+
+    /// <summary>
+    /// Links a third-party account to this (signed-in) user. One account per provider; the caller guarantees the
+    /// provider account is not linked to anyone else (the (provider, subject) primary key is the race-proof backstop).
+    /// </summary>
+    public void LinkExternalLogin(ExternalLoginProvider provider, string subject, string? email, DateTimeOffset nowUtc)
+    {
+        var existing = _externalLogins.FirstOrDefault(l => l.Provider == provider);
+        if (existing is not null)
+        {
+            if (existing.Subject == subject)
+            {
+                existing.RefreshEmail(email); // linking the same account again is a no-op
+                return;
+            }
+
+            throw new DomainException("User.ExternalLoginAlreadyLinked", $"A different {provider} account is already linked. Unlink it first.");
+        }
+
+        _externalLogins.Add(UserExternalLogin.Create(provider, subject, email, nowUtc));
+    }
+
+    /// <summary>
+    /// Removes a linked sign-in, unless it is the only way back in: an account must keep a password (or another
+    /// provider) so the user is never locked out.
+    /// </summary>
+    public void UnlinkExternalLogin(ExternalLoginProvider provider)
+    {
+        var login = _externalLogins.FirstOrDefault(l => l.Provider == provider);
+        if (login is null)
+        {
+            return;
+        }
+
+        if (!HasPassword && _externalLogins.Count == 1)
+        {
+            throw new DomainException("User.LastSignInMethod", "Set a password before removing your only sign-in method.");
+        }
+
+        _externalLogins.Remove(login);
+    }
+
+    /// <summary>Called on each provider sign-in so the email shown on the profile stays current.</summary>
+    public void RefreshExternalLoginEmail(ExternalLoginProvider provider, string? email) =>
+        _externalLogins.FirstOrDefault(l => l.Provider == provider)?.RefreshEmail(email);
 
     /// <summary>Any successful login (OTP or password) clears the brute-force counters.</summary>
     public void RecordLogin(DateTimeOffset nowUtc)

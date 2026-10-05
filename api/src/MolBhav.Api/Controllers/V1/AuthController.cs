@@ -9,11 +9,14 @@ using MolBhav.Api.Contracts.Identity;
 using MolBhav.Api.Setup;
 using MolBhav.Application.Features.Identity;
 using MolBhav.Application.Features.Identity.GetLoginMethods;
+using MolBhav.Application.Features.Identity.GoogleLogin;
+using MolBhav.Application.Features.Identity.LinkGoogle;
 using MolBhav.Application.Features.Identity.Logout;
 using MolBhav.Application.Features.Identity.PasswordLogin;
 using MolBhav.Application.Features.Identity.RefreshToken;
 using MolBhav.Application.Features.Identity.RegisterWithPassword;
 using MolBhav.Application.Features.Identity.RequestOtp;
+using MolBhav.Application.Features.Identity.UnlinkGoogle;
 using MolBhav.Application.Features.Identity.VerifyOtp;
 using MolBhav.Domain.Identity;
 
@@ -37,7 +40,7 @@ public sealed class AuthController(ISender sender, TimeProvider timeProvider) : 
         var result = await Sender.Send(new GetLoginMethodsQuery(), cancellationToken);
 
         return result.IsSuccess
-            ? Ok(ApiResponse.Ok(new LoginMethodsDto(result.Value.Otp, result.Value.Password)))
+            ? Ok(ApiResponse.Ok(new LoginMethodsDto(result.Value.Otp, result.Value.Password, result.Value.Google, result.Value.GoogleClientId)))
             : ToProblem(result.Error);
     }
 
@@ -96,6 +99,56 @@ public sealed class AuthController(ISender sender, TimeProvider timeProvider) : 
             _ => ToProblem(IdentityErrors.InvalidCredentials),
         };
     }
+
+    /// <summary>"Continue with Google". A linked Google account logs in; a new one needs <c>phoneNumber</c> on a second call.</summary>
+    /// <response code="200">Logged in (or registered — <c>isNewUser</c>).</response>
+    /// <response code="400">The Google token did not verify (<c>Auth.GoogleTokenInvalid</c>) or invalid mobile number.</response>
+    /// <response code="403">Google sign-in is off (<c>Auth.MethodDisabled</c>) or the account is suspended.</response>
+    /// <response code="409">The mobile number already has an account (<c>Auth.AccountExists</c>) — log in with password and link Google.</response>
+    /// <response code="422">New Google account: send the mobile number too (<c>Auth.PhoneRequired</c>).</response>
+    [HttpPost("google")]
+    [AllowAnonymous]
+    [EnableRateLimiting(RateLimitPolicies.PasswordLogin)]
+    [Consumes(MediaTypeNames.Application.Json)]
+    [ProducesResponseType<ApiResponse<LoginResponse>>(StatusCodes.Status200OK)]
+    [ProducesResponseType<ValidationProblemDetails>(StatusCodes.Status400BadRequest, MediaTypeNames.Application.ProblemJson)]
+    [ProducesResponseType<ProblemDetails>(StatusCodes.Status403Forbidden, MediaTypeNames.Application.ProblemJson)]
+    [ProducesResponseType<ProblemDetails>(StatusCodes.Status409Conflict, MediaTypeNames.Application.ProblemJson)]
+    [ProducesResponseType<ProblemDetails>(StatusCodes.Status422UnprocessableEntity, MediaTypeNames.Application.ProblemJson)]
+    public async Task<IActionResult> LoginWithGoogle([FromBody] GoogleLoginRequest request, CancellationToken cancellationToken)
+    {
+        var result = await Sender.Send(
+            new LoginWithGoogleCommand(request.IdToken ?? string.Empty, request.PhoneNumber),
+            cancellationToken);
+
+        return result.IsSuccess ? Ok(ApiResponse.Ok(ToLoginResponse(result.Value))) : ToProblem(result.Error);
+    }
+
+    /// <summary>Links a Google account to the signed-in user, so they can also sign in with Google.</summary>
+    /// <response code="200">Linked.</response>
+    /// <response code="409">That Google account belongs to another user, or a different one is already linked.</response>
+    [HttpPost("google/link")]
+    [Authorize]
+    [EnableRateLimiting(RateLimitPolicies.PasswordLogin)]
+    [Consumes(MediaTypeNames.Application.Json)]
+    [ProducesResponseType<ApiResponse<LinkedGoogleDto>>(StatusCodes.Status200OK)]
+    [ProducesResponseType<ValidationProblemDetails>(StatusCodes.Status400BadRequest, MediaTypeNames.Application.ProblemJson)]
+    [ProducesResponseType<ProblemDetails>(StatusCodes.Status409Conflict, MediaTypeNames.Application.ProblemJson)]
+    public async Task<IActionResult> LinkGoogle([FromBody] GoogleLinkRequest request, CancellationToken cancellationToken)
+    {
+        var result = await Sender.Send(new LinkGoogleCommand(request.IdToken ?? string.Empty), cancellationToken);
+        return result.IsSuccess ? Ok(ApiResponse.Ok(new LinkedGoogleDto(result.Value.Email))) : ToProblem(result.Error);
+    }
+
+    /// <summary>Removes the Google sign-in from the signed-in user.</summary>
+    /// <response code="204">Unlinked (or nothing was linked).</response>
+    /// <response code="422">Google is the only way to sign in — set a password first (<c>User.LastSignInMethod</c>).</response>
+    [HttpDelete("google/link")]
+    [Authorize]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType<ProblemDetails>(StatusCodes.Status422UnprocessableEntity, MediaTypeNames.Application.ProblemJson)]
+    public async Task<IActionResult> UnlinkGoogle(CancellationToken cancellationToken) =>
+        NoContentOrProblem(await Sender.Send(new UnlinkGoogleCommand(), cancellationToken));
 
     /// <summary>Sends a 6-digit login code to the mobile number. Creates no account.</summary>
     /// <response code="200">Code sent; valid until <c>expiresAtUtc</c>.</response>

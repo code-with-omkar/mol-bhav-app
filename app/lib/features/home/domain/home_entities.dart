@@ -1,5 +1,7 @@
 import 'package:equatable/equatable.dart';
 
+import '../../../core/weather/weather_service.dart';
+
 /// Everything the Home dashboard shows, in one response.
 class HomeDashboard extends Equatable {
   const HomeDashboard({
@@ -11,6 +13,7 @@ class HomeDashboard extends Equatable {
     required this.categories,
     required this.topOpportunity,
     required this.watchlist,
+    this.weather,
   });
 
   /// Empty until the user enters a name.
@@ -27,6 +30,9 @@ class HomeDashboard extends Equatable {
   /// First few watchlist items.
   final List<WatchlistPreview> watchlist;
 
+  /// Current weather at the device; `null` until known or when unavailable.
+  final CurrentWeather? weather;
+
   @override
   List<Object?> get props => [
     userName,
@@ -37,6 +43,7 @@ class HomeDashboard extends Equatable {
     categories,
     topOpportunity,
     watchlist,
+    weather,
   ];
 }
 

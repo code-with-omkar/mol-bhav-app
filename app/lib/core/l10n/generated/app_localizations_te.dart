@@ -1471,4 +1471,278 @@ class AppLocalizationsTe extends AppLocalizations {
 
   @override
   String get runCompleted => 'Run finished. See the last run on the card.';
+
+  @override
+  String get backfillAction => 'Pull past days';
+
+  @override
+  String get backfillPickerTitle => 'Market days to pull';
+
+  @override
+  String backfillTooLong(String max) {
+    return 'Pick at most $max days at a time.';
+  }
+
+  @override
+  String backfillQueued(String days) {
+    return '$days day(s) queued. Pull down to refresh as they finish.';
+  }
+
+  @override
+  String jobMarketDay(String date) {
+    return 'Market day: $date';
+  }
+
+  @override
+  String jobUnchanged(String count) {
+    return '$count unchanged';
+  }
+
+  @override
+  String get uploadCsvAction => 'Upload CSV';
+
+  @override
+  String get uploadCompleted => 'CSV imported. See the last run on the card.';
+
+  @override
+  String get uploadTooLarge =>
+      'The file is larger than 10 MB. Split it by date or state.';
+
+  @override
+  String get jobFromUpload => 'from CSV upload';
+
+  @override
+  String get adminAllCategories => 'All';
+
+  @override
+  String get runAllAction => 'Run all';
+
+  @override
+  String categoryRunQueued(String count) {
+    return '$count source(s) queued. Pull down to refresh as they finish.';
+  }
+
+  @override
+  String get addSourceAction => 'Add source';
+
+  @override
+  String get editSourceAction => 'Edit source';
+
+  @override
+  String get sourceCodeLabel => 'Code';
+
+  @override
+  String get sourceCodeHint => 'e.g. cpwd-dsr. Cannot be changed later.';
+
+  @override
+  String get sourceCodeInvalid =>
+      'Use lowercase letters, digits and hyphens, starting with a letter.';
+
+  @override
+  String get sourceNameLabel => 'Name';
+
+  @override
+  String get sourceNameRequired => 'Enter a name.';
+
+  @override
+  String get sourceCategoryLabel => 'Category';
+
+  @override
+  String get sourceActiveLabel => 'Active';
+
+  @override
+  String get saveSourceAction => 'Save source';
+
+  @override
+  String get sourceCreated => 'Source added.';
+
+  @override
+  String get sourceUpdated => 'Source updated.';
+
+  @override
+  String get categoryNoSources => 'No sources in this category yet.';
+
+  @override
+  String get csvTemplateAction => 'CSV format';
+
+  @override
+  String get csvTemplateTitle => 'CSV template';
+
+  @override
+  String get csvTemplateBody =>
+      'Every source accepts a CSV whose first line is this header. Use MolBhav product codes and mandi or supplier codes; location_kind is mandi or supplier; dates as yyyy-MM-dd. Rows for products outside the source\'s category are rejected. Agmarknet also accepts the data.gov.in and portal exports.';
+
+  @override
+  String get csvTemplateCopied => 'Header copied.';
+
+  @override
+  String get weatherTitle => 'Weather';
+
+  @override
+  String get weatherToday => 'Today';
+
+  @override
+  String get weatherTomorrow => 'Tomorrow';
+
+  @override
+  String get weatherSevenDay => '7-day forecast';
+
+  @override
+  String get weatherSelectDay => 'Select day';
+
+  @override
+  String weatherStation(String station) {
+    return 'IMD · $station';
+  }
+
+  @override
+  String weatherRainChance(String percent) {
+    return '$percent% rain';
+  }
+
+  @override
+  String get weatherHumidity => 'Humidity';
+
+  @override
+  String get weatherWind => 'Wind';
+
+  @override
+  String weatherWindValue(String speed) {
+    return '$speed km/h';
+  }
+
+  @override
+  String weatherTempRange(String min, String max) {
+    return '$min° / $max°';
+  }
+
+  @override
+  String weatherTempDegrees(String temp) {
+    return '$temp°';
+  }
+
+  @override
+  String weatherUpdated(String time) {
+    return 'Updated $time';
+  }
+
+  @override
+  String get weatherClear => 'Clear';
+
+  @override
+  String get weatherPartlyCloudy => 'Partly cloudy';
+
+  @override
+  String get weatherCloudy => 'Cloudy';
+
+  @override
+  String get weatherRain => 'Rain';
+
+  @override
+  String get weatherThunderstorm => 'Thunderstorm';
+
+  @override
+  String get weatherPermissionTitle => 'Show weather for your area?';
+
+  @override
+  String get weatherPermissionBody =>
+      'MolBhav uses your approximate location once to find the nearest IMD weather station. It stays on this device.';
+
+  @override
+  String get weatherAllow => 'Allow';
+
+  @override
+  String get weatherNotNow => 'Not now';
+
+  @override
+  String get weatherEnableLocation => 'Enable location';
+
+  @override
+  String get weatherOpenSettings => 'Open settings';
+
+  @override
+  String get weatherNoForecast => 'No forecast';
+
+  @override
+  String get weatherNoForecastBody =>
+      'Allow location to see the weather for your area.';
+
+  @override
+  String get weatherServiceOff =>
+      'Location is turned off. Turn it on to see the weather for your area.';
+
+  @override
+  String get weatherDeniedForever =>
+      'Location permission is blocked. Allow it in settings to see the weather.';
+
+  @override
+  String get weatherOutOfCoverage => 'No IMD weather station near you.';
+
+  @override
+  String get weatherUnavailable => 'Could not find your location.';
+
+  @override
+  String alertRuleConditionChange(String percent) {
+    return 'Changes by $percent% (up or down)';
+  }
+
+  @override
+  String get savePasswordLabel => 'Save password';
+
+  @override
+  String get savePasswordHint =>
+      'Stored securely on this phone. Turn off on shared phones.';
+
+  @override
+  String get continueWithGoogle => 'Continue with Google';
+
+  @override
+  String get orDivider => 'or';
+
+  @override
+  String get googlePhoneTitle => 'One more step';
+
+  @override
+  String get googlePhoneSubtitle =>
+      'Enter your mobile number. We use it for WhatsApp price alerts and support.';
+
+  @override
+  String get googlePhoneContinue => 'Create account';
+
+  @override
+  String get googleAccountExists =>
+      'This mobile number already has an account. Log in with your password, then link Google from More.';
+
+  @override
+  String get googleSignInFailed =>
+      'Google sign-in did not work. Please try again.';
+
+  @override
+  String get googleSignInTitle => 'Google sign-in';
+
+  @override
+  String get googleLinked => 'Linked';
+
+  @override
+  String googleLinkedAs(String email) {
+    return 'Linked: $email';
+  }
+
+  @override
+  String get googleUnlinkAction => 'Unlink';
+
+  @override
+  String get googleLinkAction => 'Link Google account';
+
+  @override
+  String get googleLinkHint =>
+      'Sign in with Google next time instead of your password.';
+
+  @override
+  String get googleLinkedElsewhere =>
+      'This Google account is already linked to another MolBhav account.';
+
+  @override
+  String get googleLastSignInMethod =>
+      'Set a password before unlinking Google — it is your only way to sign in.';
 }

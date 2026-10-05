@@ -8,5 +8,9 @@ internal sealed class GetLoginMethodsQueryHandler(ILoginMethods loginMethods)
     : IQueryHandler<GetLoginMethodsQuery, LoginMethodsResponse>
 {
     public Task<Result<LoginMethodsResponse>> Handle(GetLoginMethodsQuery request, CancellationToken cancellationToken) =>
-        Task.FromResult(Result.Success(new LoginMethodsResponse(loginMethods.OtpEnabled, loginMethods.PasswordEnabled)));
+        Task.FromResult(Result.Success(new LoginMethodsResponse(
+            loginMethods.OtpEnabled,
+            loginMethods.PasswordEnabled,
+            loginMethods.GoogleEnabled,
+            loginMethods.GoogleEnabled ? loginMethods.GoogleServerClientId : null)));
 }

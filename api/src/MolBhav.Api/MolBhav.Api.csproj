@@ -6,6 +6,10 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <InternalsVisibleTo Include="MolBhav.UnitTests" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\MolBhav.Application\MolBhav.Application.csproj" />
     <ProjectReference Include="..\MolBhav.Infrastructure\MolBhav.Infrastructure.csproj" />
   </ItemGroup>

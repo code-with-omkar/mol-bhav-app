@@ -3,8 +3,10 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:injectable/injectable.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../cache/response_cache.dart';
 import '../locale/locale_repository.dart';
 import '../network/api_config.dart';
+import '../network/etag_interceptor.dart';
 import '../network/interceptors.dart';
 import '../session/session_manager.dart';
 import '../session/token_refresher.dart';
@@ -24,6 +26,7 @@ abstract class RegisterModule {
     TokenRefresher refresher,
     SessionManager session,
     LocaleRepository locale,
+    ResponseCache cache,
   ) {
     final dio = Dio(
       BaseOptions(
@@ -39,6 +42,8 @@ abstract class RegisterModule {
         EnvelopeInterceptor(),
         LanguageInterceptor(locale),
         AuthInterceptor(tokens, refresher, session, dio),
+        // After the envelope is unwrapped and auth has retried any 401.
+        ETagInterceptor(cache),
       ]);
   }
 }

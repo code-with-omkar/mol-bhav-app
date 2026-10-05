@@ -22,11 +22,13 @@ internal static class WebApplicationExtensions
         app.UseHttpsRedirection();
         app.UseMiddleware<SecurityHeadersMiddleware>();
         app.UseSerilogRequestLogging();
+        app.UseApiResponseCompression();   // Brotli/gzip (not /auth) + ETag/304 for JSON GETs
         app.UseRequestLocalization();
         app.UseCors(CorsSettings.PolicyName);
         app.UseAuthentication();
         app.UseRateLimiter();               // after authentication: partitions by user id
         app.UseAuthorization();
+        app.UseOutputCache();               // after auth: reference-data endpoints only (see ResponseCachingSetup)
 
         app.MapControllers();
 

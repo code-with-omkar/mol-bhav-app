@@ -716,3 +716,25 @@ Authorization: Bearer {{accessToken}}
 ### 96. Admin — advertisers with their active campaign count
 GET {{host}}/api/v1/admin/promotions/advertisers
 Authorization: Bearer {{accessToken}}
+
+### --- Weather (IMD) ---
+
+### 97. My 7-day forecast for the IMD station of my profile state (404 Weather.ForecastNotFound until the first refresh)
+GET {{host}}/api/v1/weather/forecast
+Authorization: Bearer {{accessToken}}
+
+### 98. Admin — refetch forecasts for every eligible user now (Development: Imd:UseMockData serves the fixture; elsewhere needs Imd:ApiKey)
+# @name runWeather
+POST {{host}}/api/v1/admin/weather/run
+Authorization: Bearer {{accessToken}}
+
+# Paste any user id (identity.users.id) — e.g. your own, from the access token's `sub` claim
+@adminUserId = 00000000-0000-0000-0000-000000000000
+
+### 99. Admin — refetch for one user (404 Weather.UserNotEligible if unknown, inactive, or no state)
+POST {{host}}/api/v1/admin/weather/run?userId={{adminUserId}}
+Authorization: Bearer {{accessToken}}
+
+### 100. Admin — one user's stored forecast
+GET {{host}}/api/v1/admin/weather/users/{{adminUserId}}/forecast
+Authorization: Bearer {{accessToken}}

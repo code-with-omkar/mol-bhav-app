@@ -21,6 +21,7 @@ namespace MolBhav.Api.Controllers.V1;
 /// Keys are immutable once created — other modules reference them by string, so nothing is ever deleted, only
 /// its translations and description are edited.
 /// </summary>
+[EvictReferenceDataCache] // edits here change cached catalog / market / plan / translation responses
 [ApiVersion("1.0")]
 [Route("api/v{version:apiVersion}/admin/localization/texts")]
 [Authorize(Policy = AuthorizationPolicies.Admin)]

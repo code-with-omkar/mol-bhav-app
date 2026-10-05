@@ -24,7 +24,7 @@ internal sealed class AlertRuleConfiguration : IEntityTypeConfiguration<AlertRul
             // Mirrors AlertRule.ValidateThreshold: a percent type carries exactly a percent, a price type exactly a price.
             t.HasCheckConstraint(
                 "ck_alert_rules_threshold",
-                "(threshold_type IN ('PriceDrop', 'PriceSpike') AND threshold_percent IS NOT NULL AND threshold_price IS NULL) OR " +
+                "(threshold_type IN ('PriceDrop', 'PriceSpike', 'PriceChange') AND threshold_percent IS NOT NULL AND threshold_price IS NULL) OR " +
                 "(threshold_type IN ('PriceBelow', 'PriceAbove') AND threshold_price IS NOT NULL AND threshold_percent IS NULL)");
         });
 

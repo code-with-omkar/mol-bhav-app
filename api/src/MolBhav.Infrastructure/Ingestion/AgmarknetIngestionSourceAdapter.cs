@@ -3,11 +3,9 @@ using System.Net;
 using System.Net.Http.Json;
 using System.Text.Json;
 using System.Text.Json.Serialization;
-using System.Text.RegularExpressions;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using MolBhav.Application.Abstractions.Ingestion;
-using MolBhav.Domain.Pricing;
 
 namespace MolBhav.Infrastructure.Ingestion;
 
@@ -157,127 +155,48 @@ internal sealed partial class AgmarknetIngestionSourceAdapter(
         var records = (response?.Records ?? [])
             .Select(raw => MapRecord(raw, request.AsOfDate, opts))
             .OfType<IngestedPriceRecord>()
-            .Select(r => r with { RecordDate = request.AsOfDate })
+            .Select(r => VaryForDay(r with { RecordDate = request.AsOfDate }))
             .ToList();
 
         LogMockUsed(logger, request.SourceCode, path, records.Count);
         return IngestionFetchResult.Success(records);
     }
 
+    /// <summary>
+    /// Mock prices move from day to day (deterministically, −12%…+12% per product and location) so alerts, trends and
+    /// "unchanged" counts can be exercised in Development. The same day always yields the same figures, so re-running a
+    /// day stays idempotent. Never used outside mock mode.
+    /// </summary>
+    internal static IngestedPriceRecord VaryForDay(IngestedPriceRecord price)
+    {
+        var key = $"{price.ProductCode}|{price.VariantCode}|{price.LocationCode}|{price.RecordDate.DayNumber}";
+        var hash = 17u;
+        foreach (var c in key)
+        {
+            hash = unchecked((hash * 31u) + c);
+        }
+
+        var factor = 1m + (((int)(hash % 25u) - 12) / 100m);
+
+        decimal Scale(decimal value) => decimal.Round(value * factor, 0, MidpointRounding.AwayFromZero);
+
+        return price with
+        {
+            MinPrice = price.MinPrice is { } min ? Scale(min) : null,
+            MaxPrice = price.MaxPrice is { } max ? Scale(max) : null,
+            ModalPrice = Scale(price.ModalPrice),
+        };
+    }
+
     // -----------------------------------------------------------------------
     // Mapping
     // -----------------------------------------------------------------------
 
-    private static IngestedPriceRecord? MapRecord(AgmarknetRecord raw, DateOnly fallbackDate, AgmarknetOptions opts)
-    {
-        // commodity → ProductCode, variety → VariantCode, market → LocationCode
-        var productCode = Remap(ToCode(raw.Commodity), opts.CommodityCodeMap);
-        if (string.IsNullOrEmpty(productCode))
-        {
-            return null;
-        }
-
-        var variantCode = ToCodeOrNull(raw.Variety);
-        var locationCode = Remap(ToCode(raw.Market), opts.MarketCodeMap);
-        if (string.IsNullOrEmpty(locationCode))
-        {
-            return null;
-        }
-
-        // Parse prices — all are string decimals from the API ("1000.00").
-        if (!TryParseDecimal(raw.ModalPrice, out var modal))
-        {
-            return null; // modal_price is mandatory.
-        }
-
-        var min = ParsePositiveOrNull(raw.MinPrice);
-        var max = ParsePositiveOrNull(raw.MaxPrice);
-        var qty = ParsePositiveOrNull(raw.ArrivalQty);
-
-        var recordDate = ParseArrivalDate(raw.ArrivalDate) ?? fallbackDate;
-
-        return new IngestedPriceRecord(
-            ProductCode: productCode,
-            VariantCode: variantCode,
-            LocationKind: LocationKind.Mandi, // Agmarknet is always mandis.
-            LocationCode: locationCode,
-            MinPrice: min,
-            MaxPrice: max,
-            ModalPrice: modal,
-            ArrivalQuantity: qty,
-            RecordDate: recordDate);
-    }
-
-    /// <summary>
-    /// Converts a free-text Agmarknet field to a lowercase slug matching our CatalogCode/MarketCode format
-    /// (e.g. "Onion" → "onion", "Red Onion (Large)" → "red-onion-large", "Azadpur Mandi" → "azadpur-mandi").
-    /// Admins must use the same convention when creating products/mandis so codes resolve correctly.
-    /// </summary>
-    private static string ToCode(string? value)
-    {
-        if (string.IsNullOrWhiteSpace(value))
-        {
-            return string.Empty;
-        }
-
-        // Lowercase → collapse non-alphanumeric runs to a single hyphen → strip leading/trailing hyphens.
-        var slug = SlugNonAlpha().Replace(value.Trim().ToLowerInvariant(), "-").Trim('-');
-        return slug;
-    }
-
-    /// <summary>Applies an admin-configured override (slugged Agmarknet name → our code); unmapped values pass through unchanged.</summary>
-    private static string Remap(string code, Dictionary<string, string> map) =>
-        code.Length > 0 && map.TryGetValue(code, out var mapped) && !string.IsNullOrWhiteSpace(mapped) ? mapped.Trim() : code;
-
-    private static string? ToCodeOrNull(string? value)
-    {
-        if (string.IsNullOrWhiteSpace(value))
-        {
-            return null;
-        }
-
-        // Agmarknet sometimes sends these generic variety labels — treat as no-variant.
-        var trimmed = value.Trim();
-        if (trimmed.Equals("faq", StringComparison.OrdinalIgnoreCase)
-            || trimmed.Equals("unclassified", StringComparison.OrdinalIgnoreCase)
-            || trimmed.Equals("other", StringComparison.OrdinalIgnoreCase)
-            || trimmed.Equals("-", StringComparison.OrdinalIgnoreCase))
-        {
-            return null;
-        }
-
-        return ToCode(trimmed);
-    }
-
-    private static bool TryParseDecimal(string? value, out decimal result)
-    {
-        result = 0;
-        return !string.IsNullOrWhiteSpace(value)
-               && decimal.TryParse(value.Trim(), NumberStyles.Number, CultureInfo.InvariantCulture, out result);
-    }
-
-    private static decimal? ParsePositiveOrNull(string? value) =>
-        TryParseDecimal(value, out var parsed) && parsed > 0 ? parsed : null;
-
-    private static DateOnly? ParseArrivalDate(string? value)
-    {
-        if (string.IsNullOrWhiteSpace(value))
-        {
-            return null;
-        }
-
-        // Agmarknet returns "DD/MM/YYYY"; some responses use "DD-MM-YYYY".
-        Span<string> formats = ["dd/MM/yyyy", "d/M/yyyy", "dd-MM-yyyy", "d-M-yyyy"];
-        foreach (var fmt in formats)
-        {
-            if (DateOnly.TryParseExact(value.Trim(), fmt, CultureInfo.InvariantCulture, DateTimeStyles.None, out var date))
-            {
-                return date;
-            }
-        }
-
-        return null;
-    }
+    private static IngestedPriceRecord? MapRecord(AgmarknetRecord raw, DateOnly fallbackDate, AgmarknetOptions opts) =>
+        // API rows that cannot be mapped are skipped (the request is already filtered to one date); uploads report them.
+        AgmarknetRowMapper.Map(
+            raw.Commodity, raw.Variety, raw.Market, raw.MinPrice, raw.MaxPrice, raw.ModalPrice, raw.ArrivalQty,
+            raw.ArrivalDate, fallbackDate, opts, out _);
 
     // -----------------------------------------------------------------------
     // URL building
@@ -294,8 +213,6 @@ internal sealed partial class AgmarknetIngestionSourceAdapter(
     // Compiled regex
     // -----------------------------------------------------------------------
 
-    [GeneratedRegex(@"[^a-z0-9]+")]
-    private static partial Regex SlugNonAlpha();
 
     // -----------------------------------------------------------------------
     // Structured logging

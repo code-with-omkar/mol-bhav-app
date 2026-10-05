@@ -16,7 +16,7 @@ namespace MolBhav.Infrastructure.Notifications;
 /// MSG91 reports most failures (bad template, DLT mismatch, IP not whitelisted, invalid authkey) as HTTP 200 with
 /// <c>{"type":"error","message":"..."}</c>, so the body is inspected as well as the status code.
 /// </remarks>
-internal sealed class Msg91OtpSender(
+internal sealed partial class Msg91OtpSender(
     IHttpClientFactory httpClientFactory,
     IOptions<Msg91Options> options,
     ILogger<Msg91OtpSender> logger) : IOtpSender
@@ -53,14 +53,16 @@ internal sealed class Msg91OtpSender(
         using var response = await client.SendAsync(request, cancellationToken);
         var body = await response.Content.ReadAsStringAsync(cancellationToken);
 
+        // Masked once up front: both outcomes log it, and a plain local keeps CA1873 quiet.
+        var maskedMobile = MaskMobile(mobile);
+
         if (!response.IsSuccessStatusCode || !IsSuccessBody(body))
         {
-            logger.LogError("MSG91 OTP delivery failed for {Mobile} (HTTP {StatusCode}): {Body}",
-                MaskMobile(mobile), (int)response.StatusCode, body);
+            LogDeliveryFailed(logger, maskedMobile, (int)response.StatusCode, body);
             throw new OtpDeliveryException((int)response.StatusCode, body);
         }
 
-        logger.LogInformation("MSG91 accepted OTP for {Mobile}: {Body}", MaskMobile(mobile), body);
+        LogAccepted(logger, maskedMobile, body);
     }
 
     private static bool IsSuccessBody(string body)
@@ -83,4 +85,10 @@ internal sealed class Msg91OtpSender(
 
     private static string MaskMobile(string mobile) =>
         mobile.Length <= 4 ? "****" : new string('*', mobile.Length - 4) + mobile[^4..];
+
+    [LoggerMessage(Level = LogLevel.Error, Message = "MSG91 OTP delivery failed for {Mobile} (HTTP {StatusCode}): {Body}")]
+    private static partial void LogDeliveryFailed(ILogger logger, string mobile, int statusCode, string body);
+
+    [LoggerMessage(Level = LogLevel.Information, Message = "MSG91 accepted OTP for {Mobile}: {Body}")]
+    private static partial void LogAccepted(ILogger logger, string mobile, string body);
 }

@@ -55,6 +55,9 @@ public static class Schemas
     /// <summary>Direct-sold sponsored campaigns: advertisers, campaigns, targets, daily delivery counts.</summary>
     public const string Promotions = "promotions";
 
+    /// <summary>Per-user IMD weather forecasts (replaced daily, no history).</summary>
+    public const string Weather = "weather";
+
     /// <summary>Transactional outbox.</summary>
     public const string Messaging = "messaging";
 }

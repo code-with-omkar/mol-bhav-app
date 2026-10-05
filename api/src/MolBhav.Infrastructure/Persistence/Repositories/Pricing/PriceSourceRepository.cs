@@ -12,4 +12,11 @@ internal sealed class PriceSourceRepository(MolBhavDbContext dbContext) : Reposi
 
     public async Task<IReadOnlyList<PriceSource>> GetActiveAsync(CancellationToken cancellationToken = default) =>
         await Set.AsNoTracking().Where(s => s.IsActive).ToArrayAsync(cancellationToken);
+
+    public async Task<IReadOnlyList<Guid>> GetActiveIdsByCategoryAsync(Guid categoryId, CancellationToken cancellationToken = default) =>
+        await Set.AsNoTracking()
+            .Where(s => s.CategoryId == categoryId && s.IsActive)
+            .OrderBy(s => s.Name)
+            .Select(s => s.Id)
+            .ToArrayAsync(cancellationToken);
 }

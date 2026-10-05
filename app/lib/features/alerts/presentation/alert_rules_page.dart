@@ -211,6 +211,9 @@ String _conditionSummary(BuildContext context, AlertRule rule) {
     AlertThresholdType.priceSpike => l10n.alertRuleConditionSpike(
       formatPercent(rule.thresholdPercent ?? 0),
     ),
+    AlertThresholdType.priceChange => l10n.alertRuleConditionChange(
+      formatPercent(rule.thresholdPercent ?? 0),
+    ),
   };
 }
 
@@ -247,7 +250,8 @@ class _EditSheetState extends State<_EditSheet> {
 
   bool get _isPercent =>
       widget.rule.thresholdType == AlertThresholdType.priceDrop ||
-      widget.rule.thresholdType == AlertThresholdType.priceSpike;
+      widget.rule.thresholdType == AlertThresholdType.priceSpike ||
+      widget.rule.thresholdType == AlertThresholdType.priceChange;
 
   @override
   void initState() {

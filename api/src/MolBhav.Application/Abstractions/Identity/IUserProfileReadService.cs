@@ -27,6 +27,9 @@ public sealed record UserProfileReadModel(
     bool PushEnabled,
     bool WhatsAppEnabled,
     DateTimeOffset? LastLoginAtUtc,
-    DateTimeOffset CreatedAtUtc);
+    DateTimeOffset CreatedAtUtc,
+    bool HasPassword,
+    bool HasGoogleLogin,
+    string? GoogleEmail);
 
 public sealed record ProfileCategoryReadModel(string Code, string Name);

@@ -27,6 +27,7 @@ namespace MolBhav.Api.Controllers.V1;
 /// Market/location administration (BRD §22): states, districts, mandis, suppliers/hubs. Admin role only.
 /// Nothing is deleted — items are deactivated (<c>isActive: false</c>) because prices reference them. Codes are immutable.
 /// </summary>
+[EvictReferenceDataCache] // edits here change cached catalog / market / plan / translation responses
 [ApiVersion("1.0")]
 [Route("api/v{version:apiVersion}/admin/market")]
 [Authorize(Policy = AuthorizationPolicies.Admin)]

@@ -39,7 +39,7 @@ internal sealed class RegisterWithPasswordCommandHandler(
             user = User.RegisterWithPassword(phone, passwordHasher.Hash(request.Password));
             users.Add(user);
         }
-        else if (!user.HasPassword && loginMethods.AllowClaimingPasswordlessAccounts)
+        else if (!user.HasPassword && user.ExternalLogins.Count == 0 && loginMethods.AllowClaimingPasswordlessAccounts)
         {
             if (user.Status != UserStatus.Active)
             {

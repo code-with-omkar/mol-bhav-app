@@ -15,4 +15,13 @@ public interface ILoginMethods
     /// startup outside Development, because without OTP nothing proves the caller owns that number.
     /// </summary>
     bool AllowClaimingPasswordlessAccounts { get; }
+
+    /// <summary>"Sign in with Google" — needs <see cref="GoogleServerClientId"/>.</summary>
+    bool GoogleEnabled { get; }
+
+    /// <summary>
+    /// The Google OAuth <i>web</i> client id. Public (it ships in every app build); the app passes it to Google Sign-In
+    /// so the ID token it receives is issued for this backend. Null when Google sign-in is off.
+    /// </summary>
+    string? GoogleServerClientId { get; }
 }

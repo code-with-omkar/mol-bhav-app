@@ -7,6 +7,7 @@ internal sealed class CreateCampaignCommandValidator : AbstractValidator<CreateC
     public CreateCampaignCommandValidator()
     {
         RuleFor(x => x.AdvertiserId).NotEmpty();
-        RuleFor(x => x.Input).NotNull().SetValidator(new CampaignInputValidator());
+        // `!` only narrows the type for SetValidator; NotNull still reports a missing input (and child rules skip null).
+        RuleFor(x => x.Input!).NotNull().SetValidator(new CampaignInputValidator());
     }
 }

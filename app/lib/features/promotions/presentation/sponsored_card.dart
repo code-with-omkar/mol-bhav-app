@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:visibility_detector/visibility_detector.dart';
@@ -118,11 +119,15 @@ class _SponsoredCardState extends State<SponsoredCard> {
                     borderRadius: BorderRadius.circular(MbRadius.md),
                     child: AspectRatio(
                       aspectRatio: 16 / 9,
-                      child: Image.network(
-                        image.toString(),
+                      // Disk-cached: a sponsor's banner downloads once, not on
+                      // every Home visit.
+                      child: CachedNetworkImage(
+                        imageUrl: image.toString(),
                         fit: BoxFit.cover,
+                        placeholder: (_, _) =>
+                            ColoredBox(color: c.surfaceGreenSoft),
                         // A broken image must not leave a hole in the card.
-                        errorBuilder: (_, _, _) =>
+                        errorWidget: (_, _, _) =>
                             ColoredBox(color: c.surfaceGreenSoft),
                       ),
                     ),

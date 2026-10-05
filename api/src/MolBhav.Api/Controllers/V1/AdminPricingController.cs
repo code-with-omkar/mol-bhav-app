@@ -38,6 +38,7 @@ public sealed class AdminPricingController(ISender sender) : ApiControllerBase(s
         OkEnvelope(await Sender.Send(new GetAdminPriceSourcesQuery(), cancellationToken));
 
     /// <response code="409">Code already used (<c>PriceSource.CodeTaken</c>).</response>
+    /// <response code="400">Invalid input or unknown category (<c>PriceSource.CategoryNotFound</c>).</response>
     [HttpPost(SourcesPath)]
     [Consumes(MediaTypeNames.Application.Json)]
     [ProducesResponseType<ApiResponse<CreatedResponse>>(StatusCodes.Status201Created)]
@@ -45,7 +46,7 @@ public sealed class AdminPricingController(ISender sender) : ApiControllerBase(s
     [ProducesResponseType<ProblemDetails>(StatusCodes.Status409Conflict, MediaTypeNames.Application.ProblemJson)]
     public async Task<IActionResult> CreateSource([FromBody] CreatePriceSourceRequest request, CancellationToken cancellationToken)
     {
-        var command = new CreatePriceSourceCommand(request.Code ?? string.Empty, request.Name ?? string.Empty);
+        var command = new CreatePriceSourceCommand(request.Code ?? string.Empty, request.Name ?? string.Empty, request.CategoryCode ?? string.Empty);
         return CreatedEnvelope(await Sender.Send(command, cancellationToken), CollectionLocation(SourcesPath));
     }
 
@@ -56,7 +57,7 @@ public sealed class AdminPricingController(ISender sender) : ApiControllerBase(s
     [ProducesResponseType<ProblemDetails>(StatusCodes.Status404NotFound, MediaTypeNames.Application.ProblemJson)]
     public async Task<IActionResult> UpdateSource(Guid priceSourceId, [FromBody] UpdatePriceSourceRequest request, CancellationToken cancellationToken)
     {
-        var command = new UpdatePriceSourceCommand(priceSourceId, request.Name ?? string.Empty, request.IsActive);
+        var command = new UpdatePriceSourceCommand(priceSourceId, request.Name ?? string.Empty, request.IsActive, request.CategoryCode ?? string.Empty);
         return NoContentOrProblem(await Sender.Send(command, cancellationToken));
     }
 

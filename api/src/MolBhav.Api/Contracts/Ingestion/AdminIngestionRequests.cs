@@ -14,3 +14,6 @@ public sealed record UpdateIngestionScheduleRequest(
     string? TimeOfDay,
     DayOfWeek? DayOfWeek,
     int? IntervalHours);
+
+/// <summary>Pull past days: one run per date, inclusive, at most 31 days. Dates are IST calendar dates (<c>yyyy-MM-dd</c>).</summary>
+public sealed record BackfillIngestionRequest(DateOnly? FromDate, DateOnly? ToDate);

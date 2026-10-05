@@ -11,6 +11,7 @@ abstract final class AppRoutes {
   // Bottom-nav tabs.
   static const home = '/home';
   static const markets = '/markets';
+  static const weather = '/home/weather';
   static const watchlist = '/watchlist';
   static const alerts = '/alerts';
   static const more = '/more';

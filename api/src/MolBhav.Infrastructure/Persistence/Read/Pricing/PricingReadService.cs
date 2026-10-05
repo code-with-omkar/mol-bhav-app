@@ -25,6 +25,7 @@ internal sealed class PricingReadService(IDbConnectionFactory connectionFactory)
     private const string Suppliers = Schemas.Market + "." + SupplierConfiguration.TableName;
     private const string Districts = Schemas.Market + "." + DistrictConfiguration.TableName;
     private const string States = Schemas.Market + "." + StateConfiguration.TableName;
+    private const string Categories = Schemas.Catalog + "." + ProcurementCategoryConfiguration.TableName;
     private const string PriceSources = Schemas.Pricing + "." + PriceSourceConfiguration.TableName;
     private const string PriceRecords = Schemas.Pricing + "." + PriceRecordConfiguration.TableName;
 
@@ -140,7 +141,10 @@ internal sealed class PricingReadService(IDbConnectionFactory connectionFactory)
         """;
 
     private const string AdminPriceSourcesSql = $"""
-        SELECT s.id, s.code, s.name, s.is_active FROM {PriceSources} s ORDER BY s.name;
+        SELECT s.id, s.code, s.name, s.is_active, c.code AS category_code
+        FROM {PriceSources} s
+        JOIN {Categories} c ON c.id = s.category_id
+        ORDER BY c.display_order, s.name;
         """;
 
     private const string AdminPriceRecordListFrom = $"""
@@ -272,7 +276,7 @@ internal sealed class PricingReadService(IDbConnectionFactory connectionFactory)
     {
         await using var connection = await connectionFactory.OpenConnectionAsync(cancellationToken);
         var rows = await connection.QueryAsync<AdminPriceSourceRow>(Command(AdminPriceSourcesSql, null, cancellationToken));
-        return rows.Select(s => new AdminPriceSourceResponse(s.Id, s.Code, s.Name, s.IsActive)).ToArray();
+        return rows.Select(s => new AdminPriceSourceResponse(s.Id, s.Code, s.Name, s.IsActive, s.CategoryCode)).ToArray();
     }
 
     public async Task<PagedResult<AdminPriceRecordResponse>> GetAdminPriceRecordsAsync(AdminPriceRecordFilter filter, CancellationToken cancellationToken = default)
@@ -384,6 +388,8 @@ internal sealed class PricingReadService(IDbConnectionFactory connectionFactory)
         public string Name { get; init; } = string.Empty;
 
         public bool IsActive { get; init; }
+
+        public string CategoryCode { get; init; } = string.Empty;
     }
 
     private sealed class AdminPriceRecordRow
