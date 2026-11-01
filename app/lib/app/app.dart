@@ -17,6 +17,8 @@ import '../features/billing/presentation/subscription_tier_sync.dart';
 import '../core/session/admin_mode.dart';
 import '../features/app_features/presentation/feature_switches_cubit.dart';
 import '../features/app_notice/presentation/app_notice_cubit.dart';
+import '../features/app_version/presentation/app_version_cubit.dart';
+import '../features/app_version/presentation/update_gate.dart';
 import '../features/price_status/presentation/price_data_status_cubit.dart';
 import '../features/watchlist/presentation/watchlist_cubit.dart';
 import '../features/weather/presentation/weather_cubit.dart';
@@ -43,12 +45,18 @@ class _MolBhavAppState extends State<MolBhavApp> with WidgetsBindingObserver {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
+    // Before anything else: is this build still allowed to run?
+    getIt<AppVersionCubit>().load();
   }
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
-    // A Pro subscription may have lapsed while the app was in the background.
-    if (state == AppLifecycleState.resumed) _tierSync.recheck();
+    if (state == AppLifecycleState.resumed) {
+      // A Pro subscription may have lapsed while the app was in the background.
+      _tierSync.recheck();
+      // An admin may have raised the minimum version meanwhile.
+      getIt<AppVersionCubit>().load();
+    }
   }
 
   @override
@@ -71,6 +79,7 @@ class _MolBhavAppState extends State<MolBhavApp> with WidgetsBindingObserver {
         BlocProvider.value(value: getIt<PriceDataStatusCubit>()),
         BlocProvider.value(value: getIt<AppNoticeCubit>()),
         BlocProvider.value(value: getIt<FeatureSwitchesCubit>()),
+        BlocProvider.value(value: getIt<AppVersionCubit>()),
       ],
       child: BlocBuilder<LocaleCubit, AppLanguage>(
         builder: (context, language) => MaterialApp.router(
@@ -87,6 +96,11 @@ class _MolBhavAppState extends State<MolBhavApp> with WidgetsBindingObserver {
             GlobalCupertinoLocalizations.delegate,
           ],
           routerConfig: _router,
+          // Over every screen, sign-in included.
+          builder: (context, child) => UpdateGate(
+            session: getIt<SessionManager>(),
+            child: child ?? const SizedBox.shrink(),
+          ),
         ),
       ),
     );

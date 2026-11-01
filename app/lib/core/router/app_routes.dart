@@ -17,6 +17,7 @@ abstract final class AppRoutes {
   static const adminHistory = '/admin/app/history';
   static const adminAppNotice = '/admin/app/notice';
   static const adminAppFeatures = '/admin/app/features';
+  static const adminAppVersion = '/admin/app/version';
 
   // Bottom-nav tabs.
   static const home = '/home';

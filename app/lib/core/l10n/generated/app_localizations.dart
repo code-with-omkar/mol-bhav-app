@@ -2512,6 +2512,78 @@ abstract class AppLocalizations {
   /// **'Ads'**
   String get adminTabAds;
 
+  /// No description provided for @appVersionTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Please update MolBhav'**
+  String get appVersionTitle;
+
+  /// No description provided for @appVersionBody.
+  ///
+  /// In en, this message translates to:
+  /// **'This version of the app is no longer supported. Update to keep using MolBhav.'**
+  String get appVersionBody;
+
+  /// No description provided for @appVersionYours.
+  ///
+  /// In en, this message translates to:
+  /// **'Your version {installed} · needed {minimum} or newer'**
+  String appVersionYours(String installed, String minimum);
+
+  /// No description provided for @appVersionUpdate.
+  ///
+  /// In en, this message translates to:
+  /// **'Update now'**
+  String get appVersionUpdate;
+
+  /// No description provided for @adminVersionTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Minimum app version'**
+  String get adminVersionTitle;
+
+  /// No description provided for @adminVersionSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Make old builds update before they can be used'**
+  String get adminVersionSubtitle;
+
+  /// No description provided for @adminVersionIntro.
+  ///
+  /// In en, this message translates to:
+  /// **'Builds older than this show an update page instead of the app. Leave the version empty to allow every build. Admins are never blocked, so a mistake can always be undone.'**
+  String get adminVersionIntro;
+
+  /// No description provided for @adminVersionThisApp.
+  ///
+  /// In en, this message translates to:
+  /// **'This app is version {version}.'**
+  String adminVersionThisApp(String version);
+
+  /// No description provided for @adminVersionMinimum.
+  ///
+  /// In en, this message translates to:
+  /// **'Minimum version'**
+  String get adminVersionMinimum;
+
+  /// No description provided for @adminVersionLink.
+  ///
+  /// In en, this message translates to:
+  /// **'Update link'**
+  String get adminVersionLink;
+
+  /// No description provided for @adminVersionInvalid.
+  ///
+  /// In en, this message translates to:
+  /// **'Use a version like 1.2.0.'**
+  String get adminVersionInvalid;
+
+  /// No description provided for @adminVersionLinkInvalid.
+  ///
+  /// In en, this message translates to:
+  /// **'Use a web address starting with https://.'**
+  String get adminVersionLinkInvalid;
+
   /// No description provided for @adminFeaturesTitle.
   ///
   /// In en, this message translates to:

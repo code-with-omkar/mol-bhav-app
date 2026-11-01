@@ -1394,6 +1394,50 @@ class AppLocalizationsMr extends AppLocalizations {
   String get adminTabAds => 'जाहिराती';
 
   @override
+  String get appVersionTitle => 'कृपया MolBhav अपडेट करा';
+
+  @override
+  String get appVersionBody =>
+      'अ‍ॅपची ही आवृत्ती आता समर्थित नाही. MolBhav वापरणे सुरू ठेवण्यासाठी अपडेट करा.';
+
+  @override
+  String appVersionYours(String installed, String minimum) {
+    return 'तुमची आवृत्ती $installed · आवश्यक $minimum किंवा नवीन';
+  }
+
+  @override
+  String get appVersionUpdate => 'आता अपडेट करा';
+
+  @override
+  String get adminVersionTitle => 'किमान अ‍ॅप आवृत्ती';
+
+  @override
+  String get adminVersionSubtitle =>
+      'जुन्या बिल्डना वापरण्याआधी अपडेट करायला लावा';
+
+  @override
+  String get adminVersionIntro =>
+      'यापेक्षा जुन्या बिल्डमध्ये अ‍ॅपऐवजी अपडेट पेज दिसते. प्रत्येक बिल्डला परवानगी देण्यासाठी आवृत्ती रिकामी ठेवा. अ‍ॅडमिन कधीही ब्लॉक होत नाहीत, त्यामुळे चूक नेहमी सुधारता येते.';
+
+  @override
+  String adminVersionThisApp(String version) {
+    return 'हे अ‍ॅप आवृत्ती $version आहे.';
+  }
+
+  @override
+  String get adminVersionMinimum => 'किमान आवृत्ती';
+
+  @override
+  String get adminVersionLink => 'अपडेट लिंक';
+
+  @override
+  String get adminVersionInvalid => '1.2.0 सारखी आवृत्ती लिहा.';
+
+  @override
+  String get adminVersionLinkInvalid =>
+      'https:// ने सुरू होणारा वेब पत्ता लिहा.';
+
+  @override
   String get adminFeaturesTitle => 'फीचर स्विच';
 
   @override

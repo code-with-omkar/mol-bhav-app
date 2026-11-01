@@ -10,6 +10,8 @@ import '../../features/admin/presentation/admin_ads_cubit.dart';
 import '../../features/admin/domain/admin_ads.dart';
 import '../../features/admin/presentation/admin_ads_page.dart';
 import '../../features/admin/presentation/admin_features_cubit.dart';
+import '../../features/admin/presentation/admin_version_cubit.dart';
+import '../../features/admin/presentation/admin_version_page.dart';
 import '../../features/admin/presentation/admin_features_page.dart';
 import '../../features/admin/presentation/admin_notice_cubit.dart';
 import '../../features/admin/presentation/admin_notice_page.dart';
@@ -513,6 +515,13 @@ GoRouter createAppRouter(SessionManager session, AdminMode adminMode) {
                   child: const AdminAppPage(),
                 ),
                 routes: [
+                  GoRoute(
+                    path: 'version',
+                    builder: (context, state) => BlocProvider(
+                      create: (_) => getIt<AdminVersionCubit>()..load(),
+                      child: const AdminVersionPage(),
+                    ),
+                  ),
                   GoRoute(
                     path: 'features',
                     builder: (context, state) => BlocProvider(

@@ -1396,6 +1396,50 @@ class AppLocalizationsTa extends AppLocalizations {
   String get adminTabAds => 'Ads';
 
   @override
+  String get appVersionTitle => 'Please update MolBhav';
+
+  @override
+  String get appVersionBody =>
+      'This version of the app is no longer supported. Update to keep using MolBhav.';
+
+  @override
+  String appVersionYours(String installed, String minimum) {
+    return 'Your version $installed · needed $minimum or newer';
+  }
+
+  @override
+  String get appVersionUpdate => 'Update now';
+
+  @override
+  String get adminVersionTitle => 'Minimum app version';
+
+  @override
+  String get adminVersionSubtitle =>
+      'Make old builds update before they can be used';
+
+  @override
+  String get adminVersionIntro =>
+      'Builds older than this show an update page instead of the app. Leave the version empty to allow every build. Admins are never blocked, so a mistake can always be undone.';
+
+  @override
+  String adminVersionThisApp(String version) {
+    return 'This app is version $version.';
+  }
+
+  @override
+  String get adminVersionMinimum => 'Minimum version';
+
+  @override
+  String get adminVersionLink => 'Update link';
+
+  @override
+  String get adminVersionInvalid => 'Use a version like 1.2.0.';
+
+  @override
+  String get adminVersionLinkInvalid =>
+      'Use a web address starting with https://.';
+
+  @override
   String get adminFeaturesTitle => 'Feature switches';
 
   @override

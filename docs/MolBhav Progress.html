@@ -304,13 +304,13 @@
 <div class="overview">
   <div class="ov-card">
     <div class="ov-label">API</div>
-    <div class="ov-value c-api">342</div>
+    <div class="ov-value c-api">361</div>
     <div class="ov-sub">unit tests passing · 38 migrations · live Agmarknet pulls working</div>
     <div class="ov-bar"><div class="ov-bar-fill f-api" style="width:100%"></div></div>
   </div>
   <div class="ov-card">
     <div class="ov-label">Flutter app</div>
-    <div class="ov-value c-app">345</div>
+    <div class="ov-value c-app">365</div>
     <div class="ov-sub">tests passing · analyze clean</div>
     <div class="ov-bar"><div class="ov-bar-fill f-app" style="width:100%"></div></div>
   </div>
@@ -340,7 +340,7 @@
       <div class="blocker-item"><div class="blocker-dot dot-warn"></div><div><strong>Check on the phone</strong> — Ads (campaign detail, comparison, placements), Users suspend / reinstate, Pull history, App message (note, maintenance), Feature switches.</div></div>
       <div class="blocker-item"><div class="blocker-dot dot-warn"></div><div><strong>Review Hindi + Marathi</strong> — all new admin and notice strings were written by Claude and need a native check.</div></div>
       <div class="blocker-item"><div class="blocker-dot dot-warn"></div><div><strong>Ads not visible</strong> — both accounts are on Pro, which gets no ads by design. Decide whether to switch a test account to Free.</div></div>
-      <div class="blocker-item"><div class="blocker-dot dot-warn"></div><div><strong>Push the commit</strong> — everything is committed locally (7fa50ec on payment-integration); it is not pushed to GitHub yet.</div></div>
+      <div class="blocker-item"><div class="blocker-dot dot-ok"></div><div><strong>Pushed to GitHub</strong> — e8c16a8 on payment-integration (1 Nov). Credential files in docs/ (Google client secrets, WhatsApp Token.txt) are git-ignored and stay local only.</div></div>
     </div>
   </div>
   <div class="blocker-card">
@@ -378,11 +378,11 @@
         <li class="task-item done"><span class="task-icon">✓</span>App notice (public GET, admin PUT) + migration</li>
         <li class="task-item done"><span class="task-icon">✓</span>Feature switches (public GET, admin PUT) + migration</li>
         <li class="task-item pending"><span class="task-icon">○</span>Ads switch enforced on the server (today the app hides slots only)</li>
-        <li class="task-item pending"><span class="task-icon">○</span>Minimum app version endpoint</li>
+        <li class="task-item done"><span class="task-icon">✓</span>Minimum app version (public GET, admin PUT) + migration</li>
       </ul>
       <div class="cell-mini-bar">
-        <div class="mini-bar"><div class="mini-bar-fill" style="width:80%;background:var(--done)"></div></div>
-        <div class="mini-pct">4 of 6 tracked items done</div>
+        <div class="mini-bar"><div class="mini-bar-fill" style="width:83%;background:var(--done)"></div></div>
+        <div class="mini-pct">5 of 6 tracked items done</div>
       </div>
     </div>
     <div class="tl-cell">
@@ -396,11 +396,11 @@
         <li class="task-item done"><span class="task-icon">✓</span>App message editor + banner + maintenance page for users</li>
         <li class="task-item done"><span class="task-icon">✓</span>Feature switches editor; Ads / Reports / Estimator hidden when off</li>
         <li class="task-item warn"><span class="task-icon">!</span>Verify all of the above on the phone</li>
-        <li class="task-item pending"><span class="task-icon">○</span>"Update required" screen (minimum version)</li>
+        <li class="task-item done"><span class="task-icon">✓</span>Minimum version editor + "Please update" page (admins never blocked)</li>
       </ul>
       <div class="cell-mini-bar">
-        <div class="mini-bar"><div class="mini-bar-fill" style="width:80%;background:var(--partial)"></div></div>
-        <div class="mini-pct">4 of 6 tracked items done · phone check pending</div>
+        <div class="mini-bar"><div class="mini-bar-fill" style="width:83%;background:var(--partial)"></div></div>
+        <div class="mini-pct">5 of 6 tracked items done · phone check pending</div>
       </div>
     </div>
   </div>
@@ -441,8 +441,8 @@
 <div class="next-steps">
   <div class="ns-card">
     <div class="ns-num">SUGGESTED 1</div>
-    <div class="ns-title">Push the commit</div>
-    <div class="ns-detail">Committed locally as 7fa50ec on branch <code style="font-family:monospace;font-size:11px">payment-integration</code> (1 Nov). Pushing to GitHub backs it up off this PC. Claude pushes only when asked.</div>
+    <div class="ns-title">Commit and push after each feature</div>
+    <div class="ns-detail">Last push: e8c16a8 on branch <code style="font-family:monospace;font-size:11px">payment-integration</code> (1 Nov). Claude commits and pushes only when asked, and checks for credential files first.</div>
     <div class="ns-tag">safety</div>
   </div>
   <div class="ns-card">
@@ -453,8 +453,8 @@
   </div>
   <div class="ns-card">
     <div class="ns-num">SUGGESTED 3</div>
-    <div class="ns-title">Minimum app version</div>
-    <div class="ns-detail">An "update required" screen for old builds, driven from the admin app, like the maintenance message.</div>
+    <div class="ns-title">Ads enforced on the server</div>
+    <div class="ns-detail">The Ads switch is applied by the app only, so older builds still show ads. Make the API return no sponsored cards when it is off. (Minimum app version is built: set it in Admin → App and check on the phone.)</div>
     <div class="ns-tag app">app + api</div>
   </div>
   <div class="ns-card">

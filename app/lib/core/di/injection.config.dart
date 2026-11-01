@@ -69,6 +69,8 @@ import 'package:mol_bhav/features/admin/presentation/admin_user_detail_cubit.dar
     as _i453;
 import 'package:mol_bhav/features/admin/presentation/admin_users_cubit.dart'
     as _i90;
+import 'package:mol_bhav/features/admin/presentation/admin_version_cubit.dart'
+    as _i697;
 import 'package:mol_bhav/features/admin/presentation/pull_history_cubit.dart'
     as _i582;
 import 'package:mol_bhav/features/admin/presentation/pull_job_cubit.dart'
@@ -90,6 +92,11 @@ import 'package:mol_bhav/features/app_notice/data/app_notice_data.dart'
 import 'package:mol_bhav/features/app_notice/domain/app_notice.dart' as _i260;
 import 'package:mol_bhav/features/app_notice/presentation/app_notice_cubit.dart'
     as _i513;
+import 'package:mol_bhav/features/app_version/data/app_version_data.dart'
+    as _i126;
+import 'package:mol_bhav/features/app_version/domain/app_version.dart' as _i540;
+import 'package:mol_bhav/features/app_version/presentation/app_version_cubit.dart'
+    as _i990;
 import 'package:mol_bhav/features/auth/data/datasources/auth_remote_data_source.dart'
     as _i875;
 import 'package:mol_bhav/features/auth/data/repositories/auth_repository_impl.dart'
@@ -225,6 +232,9 @@ extension GetItInjectableX on _i174.GetIt {
     gh.lazySingleton<_i411.TokenStorage>(
       () => _i411.TokenStorage(gh<_i558.FlutterSecureStorage>()),
     );
+    gh.lazySingleton<_i540.InstalledVersion>(
+      () => _i126.PackageInfoInstalledVersion(),
+    );
     gh.lazySingleton<_i550.TokenRenewal>(
       () => _i550.TokenRenewal(
         gh<_i411.TokenStorage>(),
@@ -345,6 +355,9 @@ extension GetItInjectableX on _i174.GetIt {
     gh.lazySingleton<_i260.AppNoticeRepository>(
       () => _i930.AppNoticeRepositoryImpl(gh<_i361.Dio>()),
     );
+    gh.lazySingleton<_i540.AppVersionRepository>(
+      () => _i126.AppVersionRepositoryImpl(gh<_i361.Dio>()),
+    );
     gh.lazySingleton<_i908.AdminAdsRepository>(
       () => _i580.AdminAdsRepositoryImpl(gh<_i361.Dio>()),
     );
@@ -396,6 +409,12 @@ extension GetItInjectableX on _i174.GetIt {
       () => _i405.OpportunitiesRepositoryImpl(
         gh<_i405.OpportunitiesRemoteDataSource>(),
         gh<_i756.ResponseCache>(),
+      ),
+    );
+    gh.lazySingleton<_i990.AppVersionCubit>(
+      () => _i990.AppVersionCubit(
+        gh<_i540.AppVersionRepository>(),
+        gh<_i540.InstalledVersion>(),
       ),
     );
     gh.lazySingleton<_i17.EstimatorRepository>(
@@ -499,6 +518,12 @@ extension GetItInjectableX on _i174.GetIt {
     );
     gh.factory<_i297.CompleteUnlockWithoutAds>(
       () => _i297.CompleteUnlockWithoutAds(gh<_i297.MonetizationRepository>()),
+    );
+    gh.factory<_i697.AdminVersionCubit>(
+      () => _i697.AdminVersionCubit(
+        gh<_i540.AppVersionRepository>(),
+        gh<_i990.AppVersionCubit>(),
+      ),
     );
     gh.lazySingleton<_i695.AccountRepository>(
       () => _i968.AccountRepositoryImpl(
