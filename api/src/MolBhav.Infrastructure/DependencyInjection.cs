@@ -385,6 +385,8 @@ public static class DependencyInjection
             .Validate(o => o.MaxRetryDelaySeconds is >= 0 and <= 600, "Agmarknet:MaxRetryDelaySeconds must be between 0 and 600.")
             .ValidateOnStart();
 
+        services.AddSingleton<IFeedMarketCodes, AgmarknetFeedMarketCodes>();
+
         services.AddHttpClient(AgmarknetIngestionSourceAdapter.HttpClientName, client =>
         {
             client.BaseAddress = new Uri(AgmarknetIngestionSourceAdapter.BaseAddress);

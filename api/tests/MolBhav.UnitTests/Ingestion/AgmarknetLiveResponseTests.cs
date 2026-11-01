@@ -50,7 +50,8 @@ public sealed class AgmarknetLiveResponseTests
 
         var names = result.FeedNames!;
         Assert.Equal(["Onion", "Potato"], names.Commodities.Order().ToArray());
-        Assert.Equal(new MolBhav.Domain.Ingestion.FeedMarket("APMC Pune", "Maharashtra"), Assert.Single(names.Markets));
+        // The district the feed puts the market in is kept too, so the market can be added to the catalog.
+        Assert.Equal(new MolBhav.Domain.Ingestion.FeedMarket("APMC Pune", "Maharashtra", "Pune"), Assert.Single(names.Markets));
     }
 
     [Fact]

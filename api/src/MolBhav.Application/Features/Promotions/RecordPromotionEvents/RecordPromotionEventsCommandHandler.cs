@@ -1,20 +1,23 @@
 using MolBhav.Application.Abstractions.Authentication;
+using MolBhav.Application.Abstractions.FeatureSwitches;
 using MolBhav.Application.Abstractions.Messaging;
 using MolBhav.Application.Abstractions.Promotions;
 using MolBhav.Application.Features.Monetization;
 using MolBhav.Application.Features.Promotions.Models;
 using MolBhav.Domain.Common.Results;
+using MolBhav.Domain.FeatureSwitches;
 
 namespace MolBhav.Application.Features.Promotions.RecordPromotionEvents;
 
 /// <summary>
 /// Counts are client-reported, so they are bounded three ways: at most <see cref="MaxImpressionsPerCampaign"/>
 /// impressions and <see cref="MaxClicksPerCampaign"/> clicks per campaign per request, a per-user daily allowance per
-/// campaign enforced by the writer, and the per-user rate limit. Pro users are never served sponsors, so their
-/// reports are ignored.
+/// campaign enforced by the writer, and the per-user rate limit. Pro users are never served sponsors, and nobody is
+/// while the Ads feature is switched off, so those reports are ignored.
 /// </summary>
 internal sealed class RecordPromotionEventsCommandHandler(
     IPromotionStatsWriter writer,
+    IFeatureSwitchRepository featureSwitches,
     ICurrentUser currentUser,
     TimeProvider timeProvider)
     : ICommandHandler<RecordPromotionEventsCommand>
@@ -24,7 +27,8 @@ internal sealed class RecordPromotionEventsCommandHandler(
 
     public async Task<Result> Handle(RecordPromotionEventsCommand request, CancellationToken cancellationToken)
     {
-        if (string.Equals(currentUser.SubscriptionTier, SubscriptionTiers.Pro, StringComparison.OrdinalIgnoreCase))
+        if (string.Equals(currentUser.SubscriptionTier, SubscriptionTiers.Pro, StringComparison.OrdinalIgnoreCase)
+            || !await featureSwitches.IsEnabledAsync(AppFeature.Ads, cancellationToken))
         {
             return Result.Success();
         }

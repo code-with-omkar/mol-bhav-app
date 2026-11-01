@@ -456,6 +456,8 @@ void main() {
 
       expect(find.text('Price data'), findsOneWidget);
       expect(find.text('Delayed'), findsOneWidget);
+      // The hub has grown past one screen: scroll down to the last entries.
+      await tester.scrollUntilVisible(find.text('Pull history'), 200);
       expect(find.text('Data pull schedules'), findsOneWidget);
       expect(find.text('Pull history'), findsOneWidget);
     });

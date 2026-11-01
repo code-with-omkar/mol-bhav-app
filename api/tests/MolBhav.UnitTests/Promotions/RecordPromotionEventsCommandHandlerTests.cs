@@ -1,4 +1,6 @@
 using MolBhav.Application.Abstractions.Authentication;
+using MolBhav.Application.Abstractions.FeatureSwitches;
+using MolBhav.Domain.FeatureSwitches;
 using MolBhav.Application.Abstractions.Promotions;
 using MolBhav.Application.Features.Promotions.Models;
 using MolBhav.Application.Features.Promotions.RecordPromotionEvents;
@@ -14,11 +16,13 @@ public sealed class RecordPromotionEventsCommandHandlerTests
 
     private readonly IPromotionStatsWriter _writer = Substitute.For<IPromotionStatsWriter>();
     private readonly ICurrentUser _user = Substitute.For<ICurrentUser>();
+    private readonly IFeatureSwitchRepository _features = Substitute.For<IFeatureSwitchRepository>();
     private readonly RecordPromotionEventsCommandHandler _handler;
     private IReadOnlyList<PromotionDelivery>? _written;
 
     public RecordPromotionEventsCommandHandlerTests()
     {
+        _features.IsEnabledAsync(AppFeature.Ads, Arg.Any<CancellationToken>()).Returns(true);
         _user.GetRequiredUserId().Returns(UserId);
         _user.SubscriptionTier.Returns(SubscriptionTiers.Free);
         _writer
@@ -29,7 +33,7 @@ public sealed class RecordPromotionEventsCommandHandlerTests
                 Arg.Do<IReadOnlyList<PromotionDelivery>>(d => _written = d),
                 Arg.Any<CancellationToken>())
             .Returns(Task.CompletedTask);
-        _handler = new RecordPromotionEventsCommandHandler(_writer, _user, new FixedTimeProvider(Now));
+        _handler = new RecordPromotionEventsCommandHandler(_writer, _features, _user, new FixedTimeProvider(Now));
     }
 
     private static PromotionEventInput[] Events(Guid campaign, PromotionEventType type, int count) =>
@@ -81,6 +85,19 @@ public sealed class RecordPromotionEventsCommandHandlerTests
 
         var result = await _handler.Handle(
             new RecordPromotionEventsCommand(Events(Guid.NewGuid(), PromotionEventType.Impression, 1)),
+            CancellationToken.None);
+
+        Assert.True(result.IsSuccess);
+        await _writer.DidNotReceiveWithAnyArgs().RecordAsync(default, default, default, default!, default);
+    }
+
+    [Fact]
+    public async Task Handle_AdsSwitchedOff_IsIgnored()
+    {
+        _features.IsEnabledAsync(AppFeature.Ads, Arg.Any<CancellationToken>()).Returns(false);
+
+        var result = await _handler.Handle(
+            new RecordPromotionEventsCommand(Events(Guid.NewGuid(), PromotionEventType.Click, 1)),
             CancellationToken.None);
 
         Assert.True(result.IsSuccess);

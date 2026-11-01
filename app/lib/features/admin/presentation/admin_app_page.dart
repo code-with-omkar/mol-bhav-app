@@ -54,6 +54,12 @@ class AdminAppPage extends StatelessWidget {
               },
             ),
             _Entry(
+              title: l10n.adminMarketsTitle,
+              subtitle: l10n.adminMarketsSubtitle,
+              onTap: () => context.go(AppRoutes.adminAppMarkets),
+            ),
+            const SizedBox(height: MbSpacing.s2),
+            _Entry(
               title: l10n.adminVersionTitle,
               subtitle: l10n.adminVersionSubtitle,
               onTap: () => context.go(AppRoutes.adminAppVersion),

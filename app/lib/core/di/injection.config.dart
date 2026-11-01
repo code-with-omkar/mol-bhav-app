@@ -49,11 +49,13 @@ import 'package:mol_bhav/features/admin/data/admin_dashboard_data.dart'
 import 'package:mol_bhav/features/admin/data/admin_ingestion_data.dart'
     as _i688;
 import 'package:mol_bhav/features/admin/data/admin_jobs_data.dart' as _i651;
+import 'package:mol_bhav/features/admin/data/admin_markets_data.dart' as _i414;
 import 'package:mol_bhav/features/admin/data/admin_users_data.dart' as _i799;
 import 'package:mol_bhav/features/admin/domain/admin_ads.dart' as _i908;
 import 'package:mol_bhav/features/admin/domain/admin_dashboard.dart' as _i602;
 import 'package:mol_bhav/features/admin/domain/admin_ingestion.dart' as _i919;
 import 'package:mol_bhav/features/admin/domain/admin_jobs.dart' as _i798;
+import 'package:mol_bhav/features/admin/domain/admin_markets.dart' as _i530;
 import 'package:mol_bhav/features/admin/domain/admin_users.dart' as _i322;
 import 'package:mol_bhav/features/admin/presentation/admin_ads_cubit.dart'
     as _i1072;
@@ -63,6 +65,8 @@ import 'package:mol_bhav/features/admin/presentation/admin_dashboard_cubit.dart'
     as _i83;
 import 'package:mol_bhav/features/admin/presentation/admin_features_cubit.dart'
     as _i1012;
+import 'package:mol_bhav/features/admin/presentation/admin_markets_cubit.dart'
+    as _i313;
 import 'package:mol_bhav/features/admin/presentation/admin_notice_cubit.dart'
     as _i239;
 import 'package:mol_bhav/features/admin/presentation/admin_user_detail_cubit.dart'
@@ -399,6 +403,9 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i756.ResponseCache>(),
       ),
     );
+    gh.lazySingleton<_i530.AdminMarketsRepository>(
+      () => _i414.AdminMarketsRepositoryImpl(gh<_i361.Dio>()),
+    );
     gh.lazySingleton<_i339.SupportRepository>(
       () => _i551.SupportRepositoryImpl(
         gh<_i361.Dio>(),
@@ -557,6 +564,12 @@ extension GetItInjectableX on _i174.GetIt {
       () => _i735.WeatherRepositoryImpl(
         gh<_i321.WeatherRemoteDataSource>(),
         gh<_i756.ResponseCache>(),
+      ),
+    );
+    gh.factory<_i313.AdminMarketsCubit>(
+      () => _i313.AdminMarketsCubit(
+        gh<_i919.AdminIngestionRepository>(),
+        gh<_i530.AdminMarketsRepository>(),
       ),
     );
     gh.factoryParam<_i245.OtpCubit, _i769.OtpChallenge, dynamic>(

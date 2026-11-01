@@ -18,6 +18,7 @@ abstract final class AppRoutes {
   static const adminAppNotice = '/admin/app/notice';
   static const adminAppFeatures = '/admin/app/features';
   static const adminAppVersion = '/admin/app/version';
+  static const adminAppMarkets = '/admin/app/markets';
 
   // Bottom-nav tabs.
   static const home = '/home';

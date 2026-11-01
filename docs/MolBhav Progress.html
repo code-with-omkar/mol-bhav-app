@@ -304,13 +304,13 @@
 <div class="overview">
   <div class="ov-card">
     <div class="ov-label">API</div>
-    <div class="ov-value c-api">361</div>
+    <div class="ov-value c-api">375</div>
     <div class="ov-sub">unit tests passing · 38 migrations · live Agmarknet pulls working</div>
     <div class="ov-bar"><div class="ov-bar-fill f-api" style="width:100%"></div></div>
   </div>
   <div class="ov-card">
     <div class="ov-label">Flutter app</div>
-    <div class="ov-value c-app">365</div>
+    <div class="ov-value c-app">377</div>
     <div class="ov-sub">tests passing · analyze clean</div>
     <div class="ov-bar"><div class="ov-bar-fill f-app" style="width:100%"></div></div>
   </div>
@@ -377,12 +377,14 @@
         <li class="task-item done"><span class="task-icon">✓</span>Ingestion: schedules, filtered runs, feed options</li>
         <li class="task-item done"><span class="task-icon">✓</span>App notice (public GET, admin PUT) + migration</li>
         <li class="task-item done"><span class="task-icon">✓</span>Feature switches (public GET, admin PUT) + migration</li>
-        <li class="task-item pending"><span class="task-icon">○</span>Ads switch enforced on the server (today the app hides slots only)</li>
+        <li class="task-item done"><span class="task-icon">✓</span>Ads switch enforced on the server (no sponsored cards or event counting while off)</li>
         <li class="task-item done"><span class="task-icon">✓</span>Minimum app version (public GET, admin PUT) + migration</li>
+        <li class="task-item done"><span class="task-icon">✓</span>Add markets from the feed list to the catalog (state, district, mandi)</li>
+        <li class="task-item pending"><span class="task-icon">○</span>Admin audit log (who changed what)</li>
       </ul>
       <div class="cell-mini-bar">
-        <div class="mini-bar"><div class="mini-bar-fill" style="width:83%;background:var(--done)"></div></div>
-        <div class="mini-pct">5 of 6 tracked items done</div>
+        <div class="mini-bar"><div class="mini-bar-fill" style="width:88%;background:var(--done)"></div></div>
+        <div class="mini-pct">7 of 8 tracked items done</div>
       </div>
     </div>
     <div class="tl-cell">
@@ -397,10 +399,12 @@
         <li class="task-item done"><span class="task-icon">✓</span>Feature switches editor; Ads / Reports / Estimator hidden when off</li>
         <li class="task-item warn"><span class="task-icon">!</span>Verify all of the above on the phone</li>
         <li class="task-item done"><span class="task-icon">✓</span>Minimum version editor + "Please update" page (admins never blocked)</li>
+        <li class="task-item done"><span class="task-icon">✓</span>Add markets screen (state, markets, Select all, result summary)</li>
+        <li class="task-item pending"><span class="task-icon">○</span>Support tickets, campaign editing and coupons in the admin app (API exists)</li>
       </ul>
       <div class="cell-mini-bar">
-        <div class="mini-bar"><div class="mini-bar-fill" style="width:83%;background:var(--partial)"></div></div>
-        <div class="mini-pct">5 of 6 tracked items done · phone check pending</div>
+        <div class="mini-bar"><div class="mini-bar-fill" style="width:75%;background:var(--partial)"></div></div>
+        <div class="mini-pct">6 of 8 tracked items done · phone check pending</div>
       </div>
     </div>
   </div>
@@ -453,8 +457,8 @@
   </div>
   <div class="ns-card">
     <div class="ns-num">SUGGESTED 3</div>
-    <div class="ns-title">Ads enforced on the server</div>
-    <div class="ns-detail">The Ads switch is applied by the app only, so older builds still show ads. Make the API return no sponsored cards when it is off. (Minimum app version is built: set it in Admin → App and check on the phone.)</div>
+    <div class="ns-title">Verify the new admin controls on the phone</div>
+    <div class="ns-detail">Ads switch (now also enforced by the API), minimum app version and app message are built; confirm each one on the phone before release.</div>
     <div class="ns-tag app">app + api</div>
   </div>
   <div class="ns-card">

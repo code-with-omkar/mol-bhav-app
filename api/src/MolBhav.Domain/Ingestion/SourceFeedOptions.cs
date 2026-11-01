@@ -4,8 +4,12 @@ using MolBhav.Domain.Common.Results;
 
 namespace MolBhav.Domain.Ingestion;
 
-/// <summary>A market as the source spells it, with the state it sits in (so the app can offer markets per state).</summary>
-public sealed record FeedMarket(string Name, string State);
+/// <summary>
+/// A market as the source spells it, with the state it sits in (so the app can offer markets per state) and the
+/// district the source puts it in (so a market can be added to the catalog). The district is empty on snapshots saved
+/// before it was recorded.
+/// </summary>
+public sealed record FeedMarket(string Name, string State, string District = "");
 
 /// <summary>
 /// The names a source's feed actually contains — its states (derived from the markets), markets and commodities, spelled
@@ -70,7 +74,7 @@ public sealed class SourceFeedOptions : AggregateRoot<Guid>, IAuditableEntity
             .ToArray();
 
         Markets = markets
-            .Select(m => new FeedMarket(m.Name?.Trim() ?? string.Empty, m.State?.Trim() ?? string.Empty))
+            .Select(m => new FeedMarket(m.Name?.Trim() ?? string.Empty, m.State?.Trim() ?? string.Empty, m.District?.Trim() ?? string.Empty))
             .Where(m => m.Name.Length > 0 && m.State.Length > 0)
             .DistinctBy(m => (m.State.ToUpperInvariant(), m.Name.ToUpperInvariant()))
             .OrderBy(m => m.State, StringComparer.OrdinalIgnoreCase)

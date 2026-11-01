@@ -78,6 +78,15 @@ void main() {
       },
     );
 
+    test('a release build ignores a saved server', () async {
+      await ApiConfig.save(prefs, 'http://192.168.1.14:5189/api/v1');
+
+      ApiConfig.restore(prefs, debug: false);
+
+      expect(ApiConfig.baseUrl, ApiConfig.defaultBaseUrl);
+      expect(ApiConfig.isOverridden, isFalse);
+    });
+
     test('resetting goes back to the build default', () async {
       await ApiConfig.save(prefs, 'http://192.168.1.14:5189/api/v1');
 

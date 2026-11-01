@@ -2512,6 +2512,120 @@ abstract class AppLocalizations {
   /// **'Ads'**
   String get adminTabAds;
 
+  /// No description provided for @selectAllAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Select all'**
+  String get selectAllAction;
+
+  /// No description provided for @adminMarketsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Add markets'**
+  String get adminMarketsTitle;
+
+  /// No description provided for @adminMarketsSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Add markets from the price feed to the catalog'**
+  String get adminMarketsSubtitle;
+
+  /// No description provided for @adminMarketsIntro.
+  ///
+  /// In en, this message translates to:
+  /// **'Pick a state and its markets from the last full pull. Each one is added to the catalog with its district, so its prices can be saved at the next pull. Prices appear only for products already in the catalog.'**
+  String get adminMarketsIntro;
+
+  /// No description provided for @adminMarketsNoFeed.
+  ///
+  /// In en, this message translates to:
+  /// **'The markets in the price feed have not been recorded yet. Run a full pull (Run now with no filters) on a day the feed has data, then come back.'**
+  String get adminMarketsNoFeed;
+
+  /// No description provided for @adminMarketsOpenSchedules.
+  ///
+  /// In en, this message translates to:
+  /// **'Open data pulls'**
+  String get adminMarketsOpenSchedules;
+
+  /// No description provided for @adminMarketsState.
+  ///
+  /// In en, this message translates to:
+  /// **'State'**
+  String get adminMarketsState;
+
+  /// No description provided for @adminMarketsMarkets.
+  ///
+  /// In en, this message translates to:
+  /// **'Markets'**
+  String get adminMarketsMarkets;
+
+  /// No description provided for @adminMarketsChoose.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose markets'**
+  String get adminMarketsChoose;
+
+  /// No description provided for @adminMarketsChooseState.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose a state'**
+  String get adminMarketsChooseState;
+
+  /// No description provided for @adminMarketsAdd.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =0{Add markets} =1{Add 1 market} other{Add {count} markets}}'**
+  String adminMarketsAdd(int count);
+
+  /// No description provided for @adminMarketsAdded.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =0{No markets were added} =1{Added 1 market} other{Added {count} markets}}'**
+  String adminMarketsAdded(int count);
+
+  /// No description provided for @adminMarketsAddedHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Their prices will be saved from the next pull.'**
+  String get adminMarketsAddedHint;
+
+  /// No description provided for @adminMarketsNotAdded.
+  ///
+  /// In en, this message translates to:
+  /// **'Not added'**
+  String get adminMarketsNotAdded;
+
+  /// No description provided for @adminMarketsSkipNotInFeed.
+  ///
+  /// In en, this message translates to:
+  /// **'Not in the feed list for this state'**
+  String get adminMarketsSkipNotInFeed;
+
+  /// No description provided for @adminMarketsSkipAlreadyInCatalog.
+  ///
+  /// In en, this message translates to:
+  /// **'Already in the catalog'**
+  String get adminMarketsSkipAlreadyInCatalog;
+
+  /// No description provided for @adminMarketsSkipCodeInvalid.
+  ///
+  /// In en, this message translates to:
+  /// **'The name cannot be used as a code (it must start with a letter)'**
+  String get adminMarketsSkipCodeInvalid;
+
+  /// No description provided for @adminMarketsSkipDistrictUnknown.
+  ///
+  /// In en, this message translates to:
+  /// **'The feed gave no district. Run a full pull again.'**
+  String get adminMarketsSkipDistrictUnknown;
+
+  /// No description provided for @adminMarketsSkipNameInvalid.
+  ///
+  /// In en, this message translates to:
+  /// **'Refused by the catalog name rules'**
+  String get adminMarketsSkipNameInvalid;
+
   /// No description provided for @appVersionTitle.
   ///
   /// In en, this message translates to:
@@ -4029,12 +4143,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Search markets'**
   String get searchMarketsHint;
-
-  /// No description provided for @selectAllAction.
-  ///
-  /// In en, this message translates to:
-  /// **'Select all'**
-  String get selectAllAction;
 
   /// No description provided for @clearSelectionAction.
   ///

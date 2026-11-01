@@ -48,7 +48,7 @@ internal static partial class AgmarknetRowMapper
             return null;
         }
 
-        var locationCode = Remap(ToCode(market), options.MarketCodeMap);
+        var locationCode = ToMarketCode(market, options);
         if (locationCode.Length == 0)
         {
             failureReason = "Market is missing.";
@@ -93,6 +93,13 @@ internal static partial class AgmarknetRowMapper
             ArrivalQuantity: ParsePositiveOrNull(arrivalQuantity),
             RecordDate: recordDate);
     }
+
+    /// <summary>
+    /// The mandi code a feed market name resolves to: its slug, unless the admin-configured market map says otherwise.
+    /// A mandi added to the catalog for a feed market must use exactly this code for its prices to land.
+    /// </summary>
+    public static string ToMarketCode(string? market, AgmarknetOptions options) =>
+        Remap(ToCode(market), options.MarketCodeMap);
 
     /// <summary>"Red Onion (Large)" → "red-onion-large" — the slug format admins use for product and mandi codes.</summary>
     public static string ToCode(string? value) =>

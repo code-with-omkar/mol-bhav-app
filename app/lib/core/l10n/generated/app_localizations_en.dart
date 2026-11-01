@@ -1393,6 +1393,87 @@ class AppLocalizationsEn extends AppLocalizations {
   String get adminTabAds => 'Ads';
 
   @override
+  String get selectAllAction => 'Select all';
+
+  @override
+  String get adminMarketsTitle => 'Add markets';
+
+  @override
+  String get adminMarketsSubtitle =>
+      'Add markets from the price feed to the catalog';
+
+  @override
+  String get adminMarketsIntro =>
+      'Pick a state and its markets from the last full pull. Each one is added to the catalog with its district, so its prices can be saved at the next pull. Prices appear only for products already in the catalog.';
+
+  @override
+  String get adminMarketsNoFeed =>
+      'The markets in the price feed have not been recorded yet. Run a full pull (Run now with no filters) on a day the feed has data, then come back.';
+
+  @override
+  String get adminMarketsOpenSchedules => 'Open data pulls';
+
+  @override
+  String get adminMarketsState => 'State';
+
+  @override
+  String get adminMarketsMarkets => 'Markets';
+
+  @override
+  String get adminMarketsChoose => 'Choose markets';
+
+  @override
+  String get adminMarketsChooseState => 'Choose a state';
+
+  @override
+  String adminMarketsAdd(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Add $count markets',
+      one: 'Add 1 market',
+      zero: 'Add markets',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String adminMarketsAdded(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Added $count markets',
+      one: 'Added 1 market',
+      zero: 'No markets were added',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get adminMarketsAddedHint =>
+      'Their prices will be saved from the next pull.';
+
+  @override
+  String get adminMarketsNotAdded => 'Not added';
+
+  @override
+  String get adminMarketsSkipNotInFeed => 'Not in the feed list for this state';
+
+  @override
+  String get adminMarketsSkipAlreadyInCatalog => 'Already in the catalog';
+
+  @override
+  String get adminMarketsSkipCodeInvalid =>
+      'The name cannot be used as a code (it must start with a letter)';
+
+  @override
+  String get adminMarketsSkipDistrictUnknown =>
+      'The feed gave no district. Run a full pull again.';
+
+  @override
+  String get adminMarketsSkipNameInvalid => 'Refused by the catalog name rules';
+
+  @override
   String get appVersionTitle => 'Please update MolBhav';
 
   @override
@@ -2265,9 +2346,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get searchMarketsHint => 'Search markets';
-
-  @override
-  String get selectAllAction => 'Select all';
 
   @override
   String get clearSelectionAction => 'Clear';

@@ -1395,6 +1395,85 @@ class AppLocalizationsHi extends AppLocalizations {
   String get adminTabAds => 'विज्ञापन';
 
   @override
+  String get selectAllAction => 'सभी चुनें';
+
+  @override
+  String get adminMarketsTitle => 'बाज़ार जोड़ें';
+
+  @override
+  String get adminMarketsSubtitle => 'प्राइस फ़ीड के बाज़ार कैटलॉग में जोड़ें';
+
+  @override
+  String get adminMarketsIntro =>
+      'पिछले पूरे पुल से एक राज्य और उसके बाज़ार चुनें। हर बाज़ार अपने ज़िले के साथ कैटलॉग में जुड़ता है, ताकि अगले पुल में उसके भाव सहेजे जा सकें। भाव केवल कैटलॉग में पहले से मौजूद उत्पादों के दिखते हैं।';
+
+  @override
+  String get adminMarketsNoFeed =>
+      'प्राइस फ़ीड के बाज़ार अभी दर्ज नहीं हुए हैं। जिस दिन फ़ीड में डेटा हो उस दिन पूरा पुल (बिना फ़िल्टर के अभी चलाएँ) चलाएँ, फिर लौटें।';
+
+  @override
+  String get adminMarketsOpenSchedules => 'डेटा पुल खोलें';
+
+  @override
+  String get adminMarketsState => 'राज्य';
+
+  @override
+  String get adminMarketsMarkets => 'बाज़ार';
+
+  @override
+  String get adminMarketsChoose => 'बाज़ार चुनें';
+
+  @override
+  String get adminMarketsChooseState => 'राज्य चुनें';
+
+  @override
+  String adminMarketsAdd(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count बाज़ार जोड़ें',
+      one: '1 बाज़ार जोड़ें',
+      zero: 'बाज़ार जोड़ें',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String adminMarketsAdded(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count बाज़ार जुड़े',
+      one: '1 बाज़ार जुड़ा',
+      zero: 'कोई बाज़ार नहीं जुड़ा',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get adminMarketsAddedHint => 'उनके भाव अगले पुल से सहेजे जाएँगे।';
+
+  @override
+  String get adminMarketsNotAdded => 'नहीं जुड़े';
+
+  @override
+  String get adminMarketsSkipNotInFeed => 'इस राज्य की फ़ीड सूची में नहीं है';
+
+  @override
+  String get adminMarketsSkipAlreadyInCatalog => 'कैटलॉग में पहले से है';
+
+  @override
+  String get adminMarketsSkipCodeInvalid =>
+      'नाम कोड के रूप में उपयोग नहीं हो सकता (अक्षर से शुरू होना चाहिए)';
+
+  @override
+  String get adminMarketsSkipDistrictUnknown =>
+      'फ़ीड ने ज़िला नहीं दिया। पूरा पुल दोबारा चलाएँ।';
+
+  @override
+  String get adminMarketsSkipNameInvalid => 'कैटलॉग के नाम नियमों से अस्वीकृत';
+
+  @override
   String get appVersionTitle => 'कृपया MolBhav अपडेट करें';
 
   @override
@@ -2266,9 +2345,6 @@ class AppLocalizationsHi extends AppLocalizations {
 
   @override
   String get searchMarketsHint => 'बाज़ार खोजें';
-
-  @override
-  String get selectAllAction => 'सभी चुनें';
 
   @override
   String get clearSelectionAction => 'हटाएँ';

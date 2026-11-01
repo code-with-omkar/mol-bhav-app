@@ -15,6 +15,7 @@ using MolBhav.Application.Features.Market.Admin.CreateSupplier;
 using MolBhav.Application.Features.Market.Admin.GetAdminMandis;
 using MolBhav.Application.Features.Market.Admin.GetAdminStates;
 using MolBhav.Application.Features.Market.Admin.GetAdminSuppliers;
+using MolBhav.Application.Features.Market.Admin.ImportFeedMarkets;
 using MolBhav.Application.Features.Market.Admin.UpdateDistrict;
 using MolBhav.Application.Features.Market.Admin.UpdateMandi;
 using MolBhav.Application.Features.Market.Admin.UpdateState;
@@ -183,6 +184,20 @@ public sealed class AdminMarketController(ISender sender) : ApiControllerBase(se
 
         return NoContentOrProblem(await Sender.Send(command, cancellationToken));
     }
+
+    /// <summary>
+    /// Adds markets from a price source's saved feed list to the catalog as mandis (and their districts when missing),
+    /// using the code ingestion looks prices up under. Markets already in the catalog, or not in the feed list, are
+    /// reported in <c>skipped</c> with a reason rather than failing the request.
+    /// </summary>
+    /// <response code="400">No feed list saved for that state yet, or the state is not in the catalog.</response>
+    [HttpPost("feed-markets/import")]
+    [Consumes(MediaTypeNames.Application.Json)]
+    [ProducesResponseType<ApiResponse<ImportFeedMarketsResponse>>(StatusCodes.Status200OK)]
+    [ProducesResponseType<ValidationProblemDetails>(StatusCodes.Status400BadRequest, MediaTypeNames.Application.ProblemJson)]
+    [ProducesResponseType<ProblemDetails>(StatusCodes.Status404NotFound, MediaTypeNames.Application.ProblemJson)]
+    public async Task<IActionResult> ImportFeedMarkets([FromBody] ImportFeedMarketsRequest request, CancellationToken cancellationToken) =>
+        OkEnvelope(await Sender.Send(new ImportFeedMarketsCommand(request.PriceSourceId, request.State, request.Markets), cancellationToken));
 
     private string CollectionLocation(string path) => $"{Request.PathBase}/api/v1/admin/market/{path}";
 }

@@ -1,4 +1,6 @@
 using MolBhav.Application.Abstractions.Authentication;
+using MolBhav.Application.Abstractions.FeatureSwitches;
+using MolBhav.Domain.FeatureSwitches;
 using MolBhav.Application.Abstractions.Promotions;
 using MolBhav.Application.Features.Promotions.GetPromotion;
 using MolBhav.Application.Features.Promotions.Models;
@@ -14,12 +16,27 @@ public sealed class GetPromotionQueryHandlerTests
 
     private readonly IPromotionReadService _reads = Substitute.For<IPromotionReadService>();
     private readonly ICurrentUser _user = Substitute.For<ICurrentUser>();
+    private readonly IFeatureSwitchRepository _features = Substitute.For<IFeatureSwitchRepository>();
     private readonly GetPromotionQueryHandler _handler;
 
     public GetPromotionQueryHandlerTests()
     {
+        _features.IsEnabledAsync(AppFeature.Ads, Arg.Any<CancellationToken>()).Returns(true);
         _user.GetRequiredUserId().Returns(UserId);
-        _handler = new GetPromotionQueryHandler(_reads, _user, new FixedTimeProvider(Now));
+        _handler = new GetPromotionQueryHandler(_reads, _features, _user, new FixedTimeProvider(Now));
+    }
+
+    [Fact]
+    public async Task Handle_AdsSwitchedOff_ReturnsEmptySlotWithoutQuerying()
+    {
+        _user.SubscriptionTier.Returns(SubscriptionTiers.Free);
+        _features.IsEnabledAsync(AppFeature.Ads, Arg.Any<CancellationToken>()).Returns(false);
+
+        var result = await _handler.Handle(new GetPromotionQuery(PromotionPlacement.HomeFeed), CancellationToken.None);
+
+        Assert.True(result.IsSuccess);
+        Assert.Null(result.Value.Promotion);
+        await _reads.DidNotReceiveWithAnyArgs().FindForUserAsync(default, default, default, default, default);
     }
 
     [Fact]

@@ -1394,6 +1394,85 @@ class AppLocalizationsMr extends AppLocalizations {
   String get adminTabAds => 'जाहिराती';
 
   @override
+  String get selectAllAction => 'सर्व निवडा';
+
+  @override
+  String get adminMarketsTitle => 'बाजार जोडा';
+
+  @override
+  String get adminMarketsSubtitle => 'प्राइस फीडमधील बाजार कॅटलॉगमध्ये जोडा';
+
+  @override
+  String get adminMarketsIntro =>
+      'मागील संपूर्ण पुलमधून एक राज्य आणि त्याचे बाजार निवडा. प्रत्येक बाजार त्याच्या जिल्ह्यासह कॅटलॉगमध्ये जोडला जातो, म्हणजे पुढील पुलमध्ये त्याचे भाव जतन होऊ शकतात. भाव फक्त कॅटलॉगमध्ये आधीपासून असलेल्या उत्पादनांचे दिसतात.';
+
+  @override
+  String get adminMarketsNoFeed =>
+      'प्राइस फीडमधील बाजार अजून नोंदवलेले नाहीत. फीडमध्ये डेटा असलेल्या दिवशी संपूर्ण पुल (फिल्टरशिवाय आता चालवा) चालवा, मग परत या.';
+
+  @override
+  String get adminMarketsOpenSchedules => 'डेटा पुल उघडा';
+
+  @override
+  String get adminMarketsState => 'राज्य';
+
+  @override
+  String get adminMarketsMarkets => 'बाजार';
+
+  @override
+  String get adminMarketsChoose => 'बाजार निवडा';
+
+  @override
+  String get adminMarketsChooseState => 'राज्य निवडा';
+
+  @override
+  String adminMarketsAdd(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count बाजार जोडा',
+      one: '1 बाजार जोडा',
+      zero: 'बाजार जोडा',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String adminMarketsAdded(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count बाजार जोडले',
+      one: '1 बाजार जोडला',
+      zero: 'एकही बाजार जोडला नाही',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get adminMarketsAddedHint => 'त्यांचे भाव पुढील पुलपासून जतन होतील.';
+
+  @override
+  String get adminMarketsNotAdded => 'जोडले नाहीत';
+
+  @override
+  String get adminMarketsSkipNotInFeed => 'या राज्याच्या फीड यादीत नाही';
+
+  @override
+  String get adminMarketsSkipAlreadyInCatalog => 'कॅटलॉगमध्ये आधीच आहे';
+
+  @override
+  String get adminMarketsSkipCodeInvalid =>
+      'नाव कोड म्हणून वापरता येत नाही (अक्षराने सुरू व्हायला हवे)';
+
+  @override
+  String get adminMarketsSkipDistrictUnknown =>
+      'फीडने जिल्हा दिला नाही. संपूर्ण पुल पुन्हा चालवा.';
+
+  @override
+  String get adminMarketsSkipNameInvalid => 'कॅटलॉगच्या नाव नियमांनी नाकारले';
+
+  @override
   String get appVersionTitle => 'कृपया MolBhav अपडेट करा';
 
   @override
@@ -2265,9 +2344,6 @@ class AppLocalizationsMr extends AppLocalizations {
 
   @override
   String get searchMarketsHint => 'बाजार शोधा';
-
-  @override
-  String get selectAllAction => 'सर्व निवडा';
 
   @override
   String get clearSelectionAction => 'काढा';

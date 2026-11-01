@@ -10,6 +10,9 @@ internal sealed class FeatureSwitchRepository(MolBhavDbContext dbContext)
     public Task<FeatureSwitch?> GetByFeatureAsync(AppFeature feature, CancellationToken cancellationToken = default) =>
         Set.SingleOrDefaultAsync(f => f.Feature == feature, cancellationToken);
 
+    public async Task<bool> IsEnabledAsync(AppFeature feature, CancellationToken cancellationToken = default) =>
+        !await Set.AsNoTracking().AnyAsync(f => f.Feature == feature && !f.IsEnabled, cancellationToken);
+
     public async Task<IReadOnlyList<FeatureSwitch>> ListAsync(CancellationToken cancellationToken = default) =>
         await Set.AsNoTracking().ToListAsync(cancellationToken);
 }

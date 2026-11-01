@@ -6,6 +6,9 @@ namespace MolBhav.Application.Abstractions.Market;
 /// <summary><see cref="IRepository{TAggregate,TId}.GetByIdAsync"/> loads the state with all its districts.</summary>
 public interface IStateRepository : IRepository<State, Guid>
 {
+    /// <summary>The state with this name (ignoring case) with its districts, tracked; null when there is none.</summary>
+    Task<State?> GetByNameAsync(string name, CancellationToken cancellationToken = default);
+
     Task<bool> NameExistsAsync(string name, CancellationToken cancellationToken = default);
 
     Task<bool> CodeExistsAsync(string code, CancellationToken cancellationToken = default);

@@ -9,8 +9,10 @@ import 'mb_icon.dart';
 import 'mb_text_field.dart';
 
 /// A dropdown that picks several entries from a searchable list: tap the
-/// field, tick entries, Apply. Nothing selected means "All". Disabled when
-/// [options] is empty or [enabled] is false.
+/// field, tick entries, Apply. Nothing selected means "All" (a filter), unless
+/// [emptyLabel] says what it means instead (e.g. "Choose markets" when nothing
+/// selected means nothing is done). Disabled when [options] is empty or
+/// [enabled] is false.
 class MbMultiSelectField extends StatelessWidget {
   const MbMultiSelectField({
     super.key,
@@ -19,12 +21,16 @@ class MbMultiSelectField extends StatelessWidget {
     required this.selected,
     required this.onChanged,
     this.enabled = true,
+    this.emptyLabel,
   });
 
   final String label;
   final List<String> options;
   final Set<String> selected;
   final bool enabled;
+
+  /// Shown instead of "All" while nothing is selected.
+  final String? emptyLabel;
 
   /// The new selection; empty = all.
   final ValueChanged<Set<String>> onChanged;
@@ -38,7 +44,7 @@ class MbMultiSelectField extends StatelessWidget {
     final t = context.mbText;
 
     final summary = selected.isEmpty
-        ? l10n.filterAllOption
+        ? emptyLabel ?? l10n.filterAllOption
         : selected.length <= 2
         ? selected.join(', ')
         : l10n.filterSelectedCount(selected.length);
@@ -77,8 +83,12 @@ class MbMultiSelectField extends StatelessWidget {
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(MbRadius.lg)),
       ),
-      builder: (_) =>
-          _MultiSelectSheet(title: label, options: options, initial: selected),
+      builder: (_) => _MultiSelectSheet(
+        title: label,
+        options: options,
+        initial: selected,
+        emptyLabel: emptyLabel,
+      ),
     );
     if (result != null) onChanged(result);
   }
@@ -89,11 +99,13 @@ class _MultiSelectSheet extends StatefulWidget {
     required this.title,
     required this.options,
     required this.initial,
+    this.emptyLabel,
   });
 
   final String title;
   final List<String> options;
   final Set<String> initial;
+  final String? emptyLabel;
 
   @override
   State<_MultiSelectSheet> createState() => _MultiSelectSheetState();
@@ -152,7 +164,7 @@ class _MultiSelectSheetState extends State<_MultiSelectSheet> {
                   ),
                   Text(
                     _selected.isEmpty
-                        ? l10n.filterAllOption
+                        ? widget.emptyLabel ?? l10n.filterAllOption
                         : l10n.filterSelectedCount(_selected.length),
                     style: t.caption.copyWith(color: c.inkMuted),
                   ),
@@ -172,6 +184,13 @@ class _MultiSelectSheetState extends State<_MultiSelectSheet> {
               padding: const EdgeInsets.symmetric(horizontal: MbSpacing.s2),
               child: Row(
                 children: [
+                  // Adds every entry the search currently shows.
+                  TextButton(
+                    onPressed: visible.isEmpty
+                        ? null
+                        : () => setState(() => _selected.addAll(visible)),
+                    child: Text(l10n.selectAllAction),
+                  ),
                   TextButton(
                     onPressed: _selected.isEmpty
                         ? null

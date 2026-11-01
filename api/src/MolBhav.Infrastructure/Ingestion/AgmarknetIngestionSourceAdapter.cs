@@ -110,7 +110,7 @@ internal sealed partial class AgmarknetIngestionSourceAdapter(
                     {
                         if (marketsSeen is not null && !string.IsNullOrWhiteSpace(raw.Market) && !string.IsNullOrWhiteSpace(raw.State))
                         {
-                            marketsSeen.Add(new FeedMarket(raw.Market.Trim(), raw.State.Trim()));
+                            marketsSeen.Add(new FeedMarket(raw.Market.Trim(), raw.State.Trim(), raw.District?.Trim() ?? string.Empty));
                         }
 
                         if (commoditiesSeen is not null && !string.IsNullOrWhiteSpace(raw.Commodity))

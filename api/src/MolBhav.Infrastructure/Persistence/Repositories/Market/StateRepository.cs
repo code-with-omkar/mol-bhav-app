@@ -12,6 +12,14 @@ internal sealed class StateRepository(MolBhavDbContext dbContext) : Repository<S
             .AsSplitQuery()
             .SingleOrDefaultAsync(s => s.Id == id, cancellationToken);
 
+    public Task<State?> GetByNameAsync(string name, CancellationToken cancellationToken = default)
+    {
+        var lowered = name.Trim().ToLower();
+        return Set.Include(s => s.Districts)
+            .AsSplitQuery()
+            .FirstOrDefaultAsync(s => s.Name.ToLower() == lowered, cancellationToken);
+    }
+
     public Task<bool> NameExistsAsync(string name, CancellationToken cancellationToken = default) =>
         Set.AnyAsync(s => s.Name == name, cancellationToken);
 

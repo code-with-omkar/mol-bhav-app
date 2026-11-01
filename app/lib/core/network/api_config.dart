@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 /// Backend configuration. The default is set at build time:
@@ -23,8 +24,10 @@ abstract final class ApiConfig {
   static bool get isOverridden => _override != null;
 
   /// Reads the saved choice at startup, before any HTTP client is created.
-  static void restore(SharedPreferences prefs) {
-    _override = prefs.getString(_prefsKey);
+  /// Only debug builds have the setting, so a release build ignores whatever
+  /// is saved: it always talks to the server it was built for.
+  static void restore(SharedPreferences prefs, {bool debug = kDebugMode}) {
+    _override = debug ? prefs.getString(_prefsKey) : null;
   }
 
   /// Saves [baseUrl] (already normalised); `null` goes back to the default.
