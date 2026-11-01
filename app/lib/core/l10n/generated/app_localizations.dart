@@ -2512,11 +2512,95 @@ abstract class AppLocalizations {
   /// **'Ads'**
   String get adminTabAds;
 
-  /// No description provided for @selectAllAction.
+  /// No description provided for @adminTicketsTitle.
   ///
   /// In en, this message translates to:
-  /// **'Select all'**
-  String get selectAllAction;
+  /// **'Support tickets'**
+  String get adminTicketsTitle;
+
+  /// No description provided for @adminSupportSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Read and reply to tickets from users'**
+  String get adminSupportSubtitle;
+
+  /// No description provided for @adminSupportEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No tickets here.'**
+  String get adminSupportEmpty;
+
+  /// No description provided for @adminSupportTicketTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Ticket'**
+  String get adminSupportTicketTitle;
+
+  /// No description provided for @adminSupportStatus.
+  ///
+  /// In en, this message translates to:
+  /// **'Status'**
+  String get adminSupportStatus;
+
+  /// No description provided for @adminSupportAuthorUser.
+  ///
+  /// In en, this message translates to:
+  /// **'User'**
+  String get adminSupportAuthorUser;
+
+  /// No description provided for @adminSupportClosedNotice.
+  ///
+  /// In en, this message translates to:
+  /// **'This ticket is closed. It cannot be replied to or opened again.'**
+  String get adminSupportClosedNotice;
+
+  /// No description provided for @adminSupportCloseTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Close this ticket?'**
+  String get adminSupportCloseTitle;
+
+  /// No description provided for @adminSupportCloseBody.
+  ///
+  /// In en, this message translates to:
+  /// **'A closed ticket is final: nobody can reply to it or open it again. Mark it Resolved instead if the user may still write back.'**
+  String get adminSupportCloseBody;
+
+  /// No description provided for @adminSupportCloseConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Close ticket'**
+  String get adminSupportCloseConfirm;
+
+  /// No description provided for @adminAuditTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Activity log'**
+  String get adminAuditTitle;
+
+  /// No description provided for @adminAuditSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Who changed what in the admin app, and when'**
+  String get adminAuditSubtitle;
+
+  /// No description provided for @adminAuditEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'Nothing has been recorded yet. Admin changes will appear here.'**
+  String get adminAuditEmpty;
+
+  /// No description provided for @adminAuditBy.
+  ///
+  /// In en, this message translates to:
+  /// **'by {actor}'**
+  String adminAuditBy(String actor);
+
+  /// No description provided for @adminAuditUnknownActor.
+  ///
+  /// In en, this message translates to:
+  /// **'an account that no longer exists'**
+  String get adminAuditUnknownActor;
 
   /// No description provided for @adminMarketsTitle.
   ///
@@ -4143,6 +4227,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Search markets'**
   String get searchMarketsHint;
+
+  /// No description provided for @selectAllAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Select all'**
+  String get selectAllAction;
 
   /// No description provided for @clearSelectionAction.
   ///

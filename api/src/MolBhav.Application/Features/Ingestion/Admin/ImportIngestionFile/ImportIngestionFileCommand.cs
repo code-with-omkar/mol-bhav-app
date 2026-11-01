@@ -1,3 +1,4 @@
+using MolBhav.Application.Abstractions.Audit;
 using MolBhav.Application.Abstractions.Messaging;
 using MolBhav.Application.Features.Catalog.Models;
 
@@ -13,4 +14,12 @@ public sealed record ImportIngestionFileCommand(
     Guid UploadedByUserId,
     string FileName,
     long FileLength,
-    Stream Content) : ICommand<CreatedResponse>;
+    Stream Content) : ICommand<CreatedResponse>, IAuditedCommand
+{
+    // The drop-folder importer runs this with no signed-in user, so only an admin's upload is recorded.
+    string IAuditedCommand.AuditAction => "Ingestion.Upload";
+
+    string? IAuditedCommand.AuditTarget => PriceSourceId.ToString();
+
+    string IAuditedCommand.AuditSummary => "Uploaded a price file";
+}

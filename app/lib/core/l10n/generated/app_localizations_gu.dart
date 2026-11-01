@@ -1394,7 +1394,55 @@ class AppLocalizationsGu extends AppLocalizations {
   String get adminTabAds => 'Ads';
 
   @override
-  String get selectAllAction => 'Select all';
+  String get adminTicketsTitle => 'Support tickets';
+
+  @override
+  String get adminSupportSubtitle => 'Read and reply to tickets from users';
+
+  @override
+  String get adminSupportEmpty => 'No tickets here.';
+
+  @override
+  String get adminSupportTicketTitle => 'Ticket';
+
+  @override
+  String get adminSupportStatus => 'Status';
+
+  @override
+  String get adminSupportAuthorUser => 'User';
+
+  @override
+  String get adminSupportClosedNotice =>
+      'This ticket is closed. It cannot be replied to or opened again.';
+
+  @override
+  String get adminSupportCloseTitle => 'Close this ticket?';
+
+  @override
+  String get adminSupportCloseBody =>
+      'A closed ticket is final: nobody can reply to it or open it again. Mark it Resolved instead if the user may still write back.';
+
+  @override
+  String get adminSupportCloseConfirm => 'Close ticket';
+
+  @override
+  String get adminAuditTitle => 'Activity log';
+
+  @override
+  String get adminAuditSubtitle =>
+      'Who changed what in the admin app, and when';
+
+  @override
+  String get adminAuditEmpty =>
+      'Nothing has been recorded yet. Admin changes will appear here.';
+
+  @override
+  String adminAuditBy(String actor) {
+    return 'by $actor';
+  }
+
+  @override
+  String get adminAuditUnknownActor => 'an account that no longer exists';
 
   @override
   String get adminMarketsTitle => 'Add markets';
@@ -2347,6 +2395,9 @@ class AppLocalizationsGu extends AppLocalizations {
 
   @override
   String get searchMarketsHint => 'Search markets';
+
+  @override
+  String get selectAllAction => 'Select all';
 
   @override
   String get clearSelectionAction => 'Clear';

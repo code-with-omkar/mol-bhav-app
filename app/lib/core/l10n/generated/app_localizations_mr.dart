@@ -1394,7 +1394,55 @@ class AppLocalizationsMr extends AppLocalizations {
   String get adminTabAds => 'जाहिराती';
 
   @override
-  String get selectAllAction => 'सर्व निवडा';
+  String get adminTicketsTitle => 'सपोर्ट तिकिटे';
+
+  @override
+  String get adminSupportSubtitle =>
+      'वापरकर्त्यांची तिकिटे वाचा आणि उत्तर द्या';
+
+  @override
+  String get adminSupportEmpty => 'येथे एकही तिकीट नाही.';
+
+  @override
+  String get adminSupportTicketTitle => 'तिकीट';
+
+  @override
+  String get adminSupportStatus => 'स्थिती';
+
+  @override
+  String get adminSupportAuthorUser => 'वापरकर्ता';
+
+  @override
+  String get adminSupportClosedNotice =>
+      'हे तिकीट बंद आहे. यावर उत्तर देता येत नाही आणि ते पुन्हा उघडता येत नाही.';
+
+  @override
+  String get adminSupportCloseTitle => 'हे तिकीट बंद करायचे?';
+
+  @override
+  String get adminSupportCloseBody =>
+      'बंद तिकीट अंतिम असते: कोणीही त्यावर उत्तर देऊ शकत नाही किंवा ते पुन्हा उघडू शकत नाही. वापरकर्ता पुन्हा लिहू शकत असेल तर ते निराकरण झालेले म्हणून चिन्हांकित करा.';
+
+  @override
+  String get adminSupportCloseConfirm => 'तिकीट बंद करा';
+
+  @override
+  String get adminAuditTitle => 'क्रियाकलाप नोंद';
+
+  @override
+  String get adminAuditSubtitle => 'अ‍ॅडमिन अ‍ॅपमध्ये कोणी काय आणि कधी बदलले';
+
+  @override
+  String get adminAuditEmpty =>
+      'अजून काहीही नोंदवलेले नाही. अ‍ॅडमिनचे बदल येथे दिसतील.';
+
+  @override
+  String adminAuditBy(String actor) {
+    return '$actor यांनी';
+  }
+
+  @override
+  String get adminAuditUnknownActor => 'आता अस्तित्वात नसलेले खाते';
 
   @override
   String get adminMarketsTitle => 'बाजार जोडा';
@@ -2344,6 +2392,9 @@ class AppLocalizationsMr extends AppLocalizations {
 
   @override
   String get searchMarketsHint => 'बाजार शोधा';
+
+  @override
+  String get selectAllAction => 'सर्व निवडा';
 
   @override
   String get clearSelectionAction => 'काढा';

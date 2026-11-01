@@ -19,6 +19,8 @@ abstract final class AppRoutes {
   static const adminAppFeatures = '/admin/app/features';
   static const adminAppVersion = '/admin/app/version';
   static const adminAppMarkets = '/admin/app/markets';
+  static const adminAppActivity = '/admin/app/activity';
+  static const adminAppSupport = '/admin/app/support';
 
   // Bottom-nav tabs.
   static const home = '/home';
@@ -65,6 +67,10 @@ abstract final class AppRoutes {
   /// One ad campaign's daily delivery in the admin app.
   static String adminCampaign(String campaignId) =>
       '$adminAds/${Uri.encodeComponent(campaignId)}';
+
+  /// One support ticket in the admin app.
+  static String adminTicket(String ticketId) =>
+      '$adminAppSupport/${Uri.encodeComponent(ticketId)}';
 
   /// One user in the admin app.
   static String adminUser(String userId) =>

@@ -10,6 +10,12 @@ import '../../features/admin/presentation/admin_ads_cubit.dart';
 import '../../features/admin/domain/admin_ads.dart';
 import '../../features/admin/presentation/admin_ads_page.dart';
 import '../../features/admin/presentation/admin_features_cubit.dart';
+import '../../features/admin/presentation/admin_audit_cubit.dart';
+import '../../features/admin/presentation/admin_ticket_thread_cubit.dart';
+import '../../features/admin/presentation/admin_ticket_thread_page.dart';
+import '../../features/admin/presentation/admin_tickets_cubit.dart';
+import '../../features/admin/presentation/admin_tickets_page.dart';
+import '../../features/admin/presentation/admin_audit_page.dart';
 import '../../features/admin/presentation/admin_markets_cubit.dart';
 import '../../features/admin/presentation/admin_markets_page.dart';
 import '../../features/admin/presentation/admin_version_cubit.dart';
@@ -517,6 +523,33 @@ GoRouter createAppRouter(SessionManager session, AdminMode adminMode) {
                   child: const AdminAppPage(),
                 ),
                 routes: [
+                  GoRoute(
+                    path: 'support',
+                    builder: (context, state) => BlocProvider(
+                      create: (_) => getIt<AdminTicketsCubit>()..load(),
+                      child: const AdminTicketsPage(),
+                    ),
+                    routes: [
+                      GoRoute(
+                        path: ':id',
+                        builder: (context, state) {
+                          final id = state.pathParameters['id']!;
+                          return BlocProvider(
+                            create: (_) =>
+                                getIt<AdminTicketThreadCubit>()..load(id),
+                            child: AdminTicketThreadPage(ticketId: id),
+                          );
+                        },
+                      ),
+                    ],
+                  ),
+                  GoRoute(
+                    path: 'activity',
+                    builder: (context, state) => BlocProvider(
+                      create: (_) => getIt<AdminAuditCubit>()..load(),
+                      child: const AdminAuditPage(),
+                    ),
+                  ),
                   GoRoute(
                     path: 'markets',
                     builder: (context, state) => BlocProvider(

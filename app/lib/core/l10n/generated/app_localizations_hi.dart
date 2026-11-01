@@ -1395,7 +1395,54 @@ class AppLocalizationsHi extends AppLocalizations {
   String get adminTabAds => 'विज्ञापन';
 
   @override
-  String get selectAllAction => 'सभी चुनें';
+  String get adminTicketsTitle => 'सपोर्ट टिकट';
+
+  @override
+  String get adminSupportSubtitle => 'उपयोगकर्ताओं के टिकट पढ़ें और जवाब दें';
+
+  @override
+  String get adminSupportEmpty => 'यहाँ कोई टिकट नहीं है।';
+
+  @override
+  String get adminSupportTicketTitle => 'टिकट';
+
+  @override
+  String get adminSupportStatus => 'स्थिति';
+
+  @override
+  String get adminSupportAuthorUser => 'उपयोगकर्ता';
+
+  @override
+  String get adminSupportClosedNotice =>
+      'यह टिकट बंद है। इस पर जवाब नहीं दिया जा सकता और इसे दोबारा खोला नहीं जा सकता।';
+
+  @override
+  String get adminSupportCloseTitle => 'यह टिकट बंद करें?';
+
+  @override
+  String get adminSupportCloseBody =>
+      'बंद टिकट अंतिम होता है: कोई उस पर जवाब नहीं दे सकता और उसे दोबारा नहीं खोल सकता। अगर उपयोगकर्ता फिर लिख सकता है तो उसे सुलझा हुआ चिह्नित करें।';
+
+  @override
+  String get adminSupportCloseConfirm => 'टिकट बंद करें';
+
+  @override
+  String get adminAuditTitle => 'गतिविधि लॉग';
+
+  @override
+  String get adminAuditSubtitle => 'एडमिन ऐप में किसने क्या और कब बदला';
+
+  @override
+  String get adminAuditEmpty =>
+      'अभी कुछ दर्ज नहीं हुआ है। एडमिन के बदलाव यहाँ दिखेंगे।';
+
+  @override
+  String adminAuditBy(String actor) {
+    return '$actor द्वारा';
+  }
+
+  @override
+  String get adminAuditUnknownActor => 'ऐसा खाता जो अब मौजूद नहीं';
 
   @override
   String get adminMarketsTitle => 'बाज़ार जोड़ें';
@@ -2345,6 +2392,9 @@ class AppLocalizationsHi extends AppLocalizations {
 
   @override
   String get searchMarketsHint => 'बाज़ार खोजें';
+
+  @override
+  String get selectAllAction => 'सभी चुनें';
 
   @override
   String get clearSelectionAction => 'हटाएँ';

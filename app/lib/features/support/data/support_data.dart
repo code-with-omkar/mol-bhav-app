@@ -79,13 +79,13 @@ class SupportRepositoryImpl implements SupportRepository {
             queryParameters: {'pageSize': _pageSize},
           )).data ??
           const [],
-      _summary,
+      parseSummary,
     ),
   );
 
   @override
   Future<Result<SupportTicketThread>> getTicket(String ticketId) => runApiCall(
-    () async => _thread(
+    () async => parseThread(
       (await _dio.get<Map<String, dynamic>>(
         '/support/tickets/${Uri.encodeComponent(ticketId)}',
       )).data!,
@@ -113,23 +113,23 @@ class SupportRepositoryImpl implements SupportRepository {
     ),
   );
 
-  static SupportTicketSummary _summary(Map<String, dynamic> j) =>
+  static SupportTicketSummary parseSummary(Map<String, dynamic> j) =>
       SupportTicketSummary(
         id: j.str('id'),
-        category: _category(j.strOrNull('category')),
+        category: parseCategory(j.strOrNull('category')),
         subject: j.str('subject'),
-        status: _status(j.strOrNull('status')),
+        status: parseStatus(j.strOrNull('status')),
         messageCount: j.integer('messageCount'),
         createdAt: j.date('createdAtUtc'),
         lastActivityAt: j.date('lastActivityAtUtc'),
       );
 
-  static SupportTicketThread _thread(Map<String, dynamic> j) =>
+  static SupportTicketThread parseThread(Map<String, dynamic> j) =>
       SupportTicketThread(
         id: j.str('id'),
-        category: _category(j.strOrNull('category')),
+        category: parseCategory(j.strOrNull('category')),
         subject: j.str('subject'),
-        status: _status(j.strOrNull('status')),
+        status: parseStatus(j.strOrNull('status')),
         createdAt: j.date('createdAtUtc'),
         lastActivityAt: j.date('lastActivityAtUtc'),
         messages: j.list(
@@ -153,7 +153,7 @@ class SupportRepositoryImpl implements SupportRepository {
   };
 
   /// `null` for a category this app version does not know.
-  static TicketCategory? _category(String? value) => switch (value) {
+  static TicketCategory? parseCategory(String? value) => switch (value) {
     'Account' => TicketCategory.account,
     'Payment' => TicketCategory.payment,
     'Data' => TicketCategory.data,
@@ -161,7 +161,7 @@ class SupportRepositoryImpl implements SupportRepository {
     _ => null,
   };
 
-  static TicketStatus _status(String? value) => switch (value) {
+  static TicketStatus parseStatus(String? value) => switch (value) {
     'InProgress' => TicketStatus.inProgress,
     'Resolved' => TicketStatus.resolved,
     'Closed' => TicketStatus.closed,

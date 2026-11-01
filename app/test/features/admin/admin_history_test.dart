@@ -480,6 +480,8 @@ void main() {
         );
 
         expect(find.text('Price data'), findsNothing);
+        // The hub is longer than one screen: scroll down to the last entries.
+        await tester.scrollUntilVisible(find.text('Pull history'), 200);
         expect(find.text('Data pull schedules'), findsOneWidget);
         expect(find.text('Pull history'), findsOneWidget);
       },

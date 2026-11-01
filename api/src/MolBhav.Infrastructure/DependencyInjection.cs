@@ -11,6 +11,7 @@ using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using MolBhav.Application.Abstractions.Alerting;
 using MolBhav.Application.Abstractions.AppNotices;
+using MolBhav.Application.Abstractions.Audit;
 using MolBhav.Application.Abstractions.AppVersions;
 using MolBhav.Application.Abstractions.FeatureSwitches;
 using MolBhav.Application.Abstractions.Authentication;
@@ -49,6 +50,7 @@ using MolBhav.Infrastructure.Persistence.Read.Billing;
 using MolBhav.Infrastructure.Persistence.Read.Catalog;
 using MolBhav.Infrastructure.Persistence.Read.Identity;
 using MolBhav.Infrastructure.Persistence.Read.Admin;
+using MolBhav.Infrastructure.Persistence.Read.Audit;
 using MolBhav.Infrastructure.Persistence.Read.Ingestion;
 using MolBhav.Infrastructure.Persistence.Read.Localization;
 using MolBhav.Infrastructure.Persistence.Read.Market;
@@ -66,6 +68,7 @@ using MolBhav.Infrastructure.Persistence.Read.Weather;
 using MolBhav.Infrastructure.Persistence.Repositories.Alerting;
 using MolBhav.Infrastructure.Persistence.Repositories.AppNotices;
 using MolBhav.Infrastructure.Persistence.Repositories.AppVersions;
+using MolBhav.Infrastructure.Persistence.Repositories.Audit;
 using MolBhav.Infrastructure.Persistence.Repositories.FeatureSwitches;
 using MolBhav.Infrastructure.Persistence.Repositories.Billing;
 using MolBhav.Infrastructure.Persistence.Repositories.Catalog;
@@ -373,6 +376,8 @@ public static class DependencyInjection
         services.AddScoped<IIngestionReadService, IngestionReadService>();
         services.AddScoped<IAdminDashboardReadService, AdminDashboardReadService>();
         services.AddScoped<IAdminUserReadService, AdminUserReadService>();
+        services.AddScoped<IAuditReadService, AuditReadService>();
+        services.AddScoped<IAuditEntryRepository, AuditEntryRepository>();
 
         // Keyed per PriceSource.Code; unknown codes fall back to the stub (construction sources until a feed exists).
         services.AddOptions<AgmarknetOptions>()

@@ -1,3 +1,4 @@
+using MolBhav.Application.Abstractions.Audit;
 using MolBhav.Application.Abstractions.Messaging;
 using MolBhav.Domain.Ingestion;
 
@@ -14,4 +15,13 @@ public sealed record UpdateIngestionScheduleCommand(
     IngestionScheduleFrequency? Frequency,
     string? TimeOfDay,
     DayOfWeek? DayOfWeek,
-    int? IntervalHours) : ICommand;
+    int? IntervalHours) : ICommand, IAuditedCommand
+{
+    string IAuditedCommand.AuditAction => "Ingestion.SaveSchedule";
+
+    string? IAuditedCommand.AuditTarget => PriceSourceId.ToString();
+
+    string IAuditedCommand.AuditSummary => IsEnabled == false
+        ? "Saved a price pull schedule (switched off)"
+        : $"Saved a price pull schedule ({Frequency?.ToString() ?? "unchanged frequency"})";
+}

@@ -21,6 +21,8 @@ public static class DependencyInjection
             config.AddOpenBehavior(typeof(RequestLoggingBehavior<,>));
             config.AddOpenBehavior(typeof(ValidationBehavior<,>));
             config.AddOpenBehavior(typeof(UnitOfWorkBehavior<,>));
+            // Inside the unit of work: the audit entry commits with the change it describes.
+            config.AddOpenBehavior(typeof(AuditBehavior<,>));
         });
 
         services.AddValidatorsFromAssembly(assembly, ServiceLifetime.Scoped, includeInternalTypes: true);

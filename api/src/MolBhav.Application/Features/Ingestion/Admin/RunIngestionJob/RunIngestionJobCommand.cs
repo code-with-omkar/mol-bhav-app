@@ -1,3 +1,4 @@
+using MolBhav.Application.Abstractions.Audit;
 using MolBhav.Application.Abstractions.Messaging;
 using MolBhav.Application.Features.Catalog.Models;
 using MolBhav.Domain.Ingestion;
@@ -17,4 +18,15 @@ public sealed record RunIngestionJobCommand(
     DateOnly? AsOfDate = null,
     IReadOnlyList<string>? States = null,
     IReadOnlyList<string>? Commodities = null,
-    IReadOnlyList<string>? Markets = null) : ICommand<CreatedResponse>;
+    IReadOnlyList<string>? Markets = null) : ICommand<CreatedResponse>, IAuditedCommand
+{
+    // Scheduled and background runs have no signed-in user, so only an admin's "Run now" is recorded.
+    string IAuditedCommand.AuditAction => "Ingestion.Run";
+
+    string? IAuditedCommand.AuditTarget => PriceSourceId.ToString();
+
+    string IAuditedCommand.AuditSummary =>
+        States is { Count: > 0 } || Commodities is { Count: > 0 } || Markets is { Count: > 0 }
+            ? "Started a filtered price pull"
+            : "Started a full price pull";
+}
