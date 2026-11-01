@@ -196,6 +196,13 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String get priceDataDelayed =>
+      'Market prices may be delayed — our data source is having trouble.';
+
+  @override
+  String get priceDataDismiss => 'Dismiss';
+
+  @override
   String get greetingMorning => 'Good Morning,';
 
   @override
@@ -360,7 +367,7 @@ class AppLocalizationsEn extends AppLocalizations {
     String quantity,
     String total,
   ) {
-    return '($reference − $best) × $quantity = $total. Freight and handling are not included yet.';
+    return '($reference − $best) × $quantity = $total. Prices from other districts include transport and handling.';
   }
 
   @override
@@ -1354,6 +1361,13 @@ class AppLocalizationsEn extends AppLocalizations {
       'Show ads based on how you use MolBhav. Off: ads still appear but aren\'t based on you.';
 
   @override
+  String get homeWeatherAnimationTitle => 'Home weather animation';
+
+  @override
+  String get homeWeatherAnimationSubtitle =>
+      'Moving clouds, rain and sun behind the Home header. Off: weather still shows on the icon.';
+
+  @override
   String get promotionSponsored => 'Sponsored';
 
   @override
@@ -1362,6 +1376,369 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get adminSchedulesSubtitle =>
       'When government prices are pulled automatically';
+
+  @override
+  String get adminDashboardTitle => 'Admin dashboard';
+
+  @override
+  String get adminAppTitle => 'App management';
+
+  @override
+  String get adminTabDashboard => 'Dashboard';
+
+  @override
+  String get adminTabApp => 'App';
+
+  @override
+  String get adminTabAds => 'Ads';
+
+  @override
+  String get adminFeaturesTitle => 'Feature switches';
+
+  @override
+  String get adminFeaturesSubtitle =>
+      'Turn parts of the app on or off for everyone';
+
+  @override
+  String get adminFeaturesIntro =>
+      'Everything is on by default. A part you switch off disappears for all users within about ten minutes, or when they reopen the app.';
+
+  @override
+  String get adminFeatureAds => 'Ads';
+
+  @override
+  String get adminFeatureAdsHint =>
+      'Sponsored cards and ad slots inside screens. Banner and reward ads are not affected.';
+
+  @override
+  String get adminFeatureReports => 'Reports';
+
+  @override
+  String get adminFeatureReportsHint => 'The Reports screen and its shortcuts';
+
+  @override
+  String get adminFeatureCostEstimator => 'Cost estimator';
+
+  @override
+  String get adminFeatureCostEstimatorHint =>
+      'The cost estimator and its shortcuts';
+
+  @override
+  String get appNoticeDismiss => 'Close message';
+
+  @override
+  String get appNoticeMaintenanceTitle => 'We will be back soon';
+
+  @override
+  String get appNoticeCheckAgain => 'Check again';
+
+  @override
+  String get adminNoticeTitle => 'App message';
+
+  @override
+  String get adminNoticeSubtitle =>
+      'Show a note or a maintenance page to all users';
+
+  @override
+  String get adminNoticeIntro =>
+      'One message that every user of the app sees. Switch it off when it is no longer needed; the text is kept.';
+
+  @override
+  String get adminNoticeShow => 'Show to users';
+
+  @override
+  String get adminNoticeType => 'Type';
+
+  @override
+  String get adminNoticeInfo => 'Note';
+
+  @override
+  String get adminNoticeWarning => 'Warning';
+
+  @override
+  String get adminNoticeMaintenance => 'Maintenance';
+
+  @override
+  String get adminNoticeMaintenanceHint =>
+      'Maintenance replaces the app with a \"back soon\" page until you switch it off. The admin app keeps working.';
+
+  @override
+  String get adminNoticeMessage => 'Message';
+
+  @override
+  String get adminNoticeMessageHint => 'What should users read?';
+
+  @override
+  String get adminNoticePreview => 'Preview';
+
+  @override
+  String get adminNoticeSave => 'Save';
+
+  @override
+  String get adminNoticeSaved => 'Saved';
+
+  @override
+  String get adminNoticeMessageRequired =>
+      'Write the message users should see, or switch it off.';
+
+  @override
+  String get adminHistoryTitle => 'Pull history';
+
+  @override
+  String get adminHistorySubtitle => 'Recent runs and the rows that failed';
+
+  @override
+  String get adminHistoryEmpty => 'No runs yet.';
+
+  @override
+  String get adminTriggerScheduled => 'Scheduled';
+
+  @override
+  String get adminTriggerManual => 'Manual';
+
+  @override
+  String get adminTriggerUpload => 'Upload';
+
+  @override
+  String get adminJobTitle => 'Pull run';
+
+  @override
+  String get adminJobErrorsTitle => 'Rows that failed';
+
+  @override
+  String get adminJobErrorsFailed => 'Couldn\'t load the failed rows.';
+
+  @override
+  String get adminJobShowMore => 'Show more';
+
+  @override
+  String get adminTabUsers => 'Users';
+
+  @override
+  String get cancelAction => 'Cancel';
+
+  @override
+  String get adminUsersSearchHint => 'Search phone number or name';
+
+  @override
+  String get adminUsersEmpty => 'No users match.';
+
+  @override
+  String get adminUserActive => 'Active';
+
+  @override
+  String get adminUserAdminBadge => 'Admin';
+
+  @override
+  String get adminUserDetailTitle => 'User';
+
+  @override
+  String get adminUserPhone => 'Phone';
+
+  @override
+  String get adminUserLocation => 'Location';
+
+  @override
+  String get adminUserBusiness => 'Business';
+
+  @override
+  String get adminUserCategories => 'Categories';
+
+  @override
+  String get adminUserJoined => 'Joined';
+
+  @override
+  String get adminUserLastLogin => 'Last login';
+
+  @override
+  String get adminUserNever => 'Never';
+
+  @override
+  String get adminUserSubscription => 'Latest subscription';
+
+  @override
+  String get adminUserSubscriptionNone => 'None';
+
+  @override
+  String adminUserSubscriptionValue(String plan, String status, String date) {
+    return '$plan · $status until $date';
+  }
+
+  @override
+  String get adminUserTickets => 'Support tickets';
+
+  @override
+  String adminUserTicketsValue(int total, int open) {
+    return '$total total · $open open';
+  }
+
+  @override
+  String get adminUserSuspendAction => 'Suspend account';
+
+  @override
+  String get adminUserReinstateAction => 'Reinstate account';
+
+  @override
+  String get adminUserSuspendTitle => 'Suspend this account?';
+
+  @override
+  String get adminUserSuspendBody =>
+      'They won\'t be able to sign in or renew their session until you reinstate them.';
+
+  @override
+  String get adminUserSuspendConfirm => 'Suspend';
+
+  @override
+  String adminRangeDays(int days) {
+    return '$days days';
+  }
+
+  @override
+  String get adminAdsTotalsTitle => 'Delivery';
+
+  @override
+  String get adminAdsClicks => 'Clicks';
+
+  @override
+  String get adminAdsImpressions => 'Impressions';
+
+  @override
+  String get adminAdsClickRateShort => 'Click rate';
+
+  @override
+  String get adminAdsDailyClicks => 'Clicks per day';
+
+  @override
+  String get adminAdsCampaignsTitle => 'Campaigns';
+
+  @override
+  String get adminAdsNoCampaigns => 'No campaigns yet.';
+
+  @override
+  String adminAdsChangeNote(int days) {
+    return 'Change compared with the previous $days days.';
+  }
+
+  @override
+  String get adminAdsPlacementsTitle => 'Placements';
+
+  @override
+  String adminAdsCampaignCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count campaigns',
+      one: '1 campaign',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get adminAdsChangeNew => 'New';
+
+  @override
+  String adminAdsChangePoints(String value) {
+    return '$value pts';
+  }
+
+  @override
+  String get adminAdsDailyImpressions => 'Impressions per day';
+
+  @override
+  String get adminAdsDailyClickRate => 'Click rate per day';
+
+  @override
+  String get adminCampaignTitle => 'Campaign';
+
+  @override
+  String get adminCampaignNoDelivery =>
+      'No ads were shown for this campaign in this range.';
+
+  @override
+  String get campaignStatusDraft => 'Draft';
+
+  @override
+  String get campaignStatusActive => 'Active';
+
+  @override
+  String get campaignStatusPaused => 'Paused';
+
+  @override
+  String get campaignStatusEnded => 'Ended';
+
+  @override
+  String get adminSwitchToUserView => 'View as user';
+
+  @override
+  String get adminSwitchToAdminView => 'Admin view';
+
+  @override
+  String get adminSwitchToAdminViewSubtitle =>
+      'Dashboard, ads, users and app management';
+
+  @override
+  String get adminUsersTitle => 'Users';
+
+  @override
+  String get adminUsersTotal => 'Total users';
+
+  @override
+  String get adminUsersNew => 'New (7 days)';
+
+  @override
+  String get adminUsersActive => 'Active (7 days)';
+
+  @override
+  String get adminUsersPro => 'Pro';
+
+  @override
+  String get adminUsersFree => 'Free';
+
+  @override
+  String get adminUsersSuspended => 'Suspended';
+
+  @override
+  String get adminAdsTitle => 'Ads';
+
+  @override
+  String get adminAdsClicksToday => 'Clicks today';
+
+  @override
+  String get adminAdsImpressionsToday => 'Impressions today';
+
+  @override
+  String get adminAdsClickRate => 'Click rate (7 days)';
+
+  @override
+  String get adminAdsCampaigns => 'Active campaigns';
+
+  @override
+  String get adminAdsRewarded => 'Rewarded views (7 days)';
+
+  @override
+  String get adminAdsNote =>
+      'Sponsored ads we serve and rewarded views. AdMob banner clicks show in AdMob.';
+
+  @override
+  String get adminFeedsTitle => 'Price data';
+
+  @override
+  String get adminFeedsOk => 'Up to date';
+
+  @override
+  String get adminFeedsDelayed => 'Delayed';
+
+  @override
+  String get adminFeedsLastUpdated => 'Last updated';
+
+  @override
+  String get adminFeedsLastAttempt => 'Last pull';
+
+  @override
+  String get adminSupportTitle => 'Support';
+
+  @override
+  String get adminSupportOpen => 'Open tickets';
 
   @override
   String get adminSchedulesHint =>
@@ -1464,6 +1841,45 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get scheduleEnabledLabel => 'Run automatically';
+
+  @override
+  String get scheduleFilterTitle => 'What to pull';
+
+  @override
+  String get scheduleFilterHint =>
+      'Pick what to pull. Leave a field on All to pull everything.';
+
+  @override
+  String get filterStatesLabel => 'States';
+
+  @override
+  String get filterCommoditiesLabel => 'Commodities';
+
+  @override
+  String get filterMarketsLabel => 'Markets';
+
+  @override
+  String get filterAllOption => 'All';
+
+  @override
+  String filterSelectedCount(int count) {
+    return '$count selected';
+  }
+
+  @override
+  String get filterSearchHint => 'Search';
+
+  @override
+  String get filterOptionsEmpty =>
+      'The lists fill after the first full pull. Run now with everything on All to do that.';
+
+  @override
+  String get filterOptionsError =>
+      'Couldn\'t load the choices. Close this and try again.';
+
+  @override
+  String get runFilterNote =>
+      'Only this run is filtered. Scheduled runs always pull everything.';
 
   @override
   String get scheduleSaved => 'Schedule saved.';
@@ -1744,4 +2160,105 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get googleLastSignInMethod =>
       'Set a password before unlinking Google — it is your only way to sign in.';
+
+  @override
+  String get weatherHomePrompt => 'Tap to see the forecast for your area';
+
+  @override
+  String get weatherHomeLoading => 'Getting the forecast…';
+
+  @override
+  String get notificationPrefsSaveFailed =>
+      'Couldn\'t save your notification settings. Please try again.';
+
+  @override
+  String opportunityTitle(String product, String percent, String market) {
+    return '$product is $percent% cheaper in $market';
+  }
+
+  @override
+  String opportunityHomePrice(String market, String price) {
+    return '$market: $price';
+  }
+
+  @override
+  String opportunityLandedPrice(String price) {
+    return 'Landed price: $price';
+  }
+
+  @override
+  String opportunityMeta(String percent, String market) {
+    return '$percent% cheaper than $market after costs';
+  }
+
+  @override
+  String get adminFindOpportunities => 'Find opportunities now';
+
+  @override
+  String adminOpportunitiesResult(int found, int compared) {
+    return '$found new opportunities ($compared watchlist items compared)';
+  }
+
+  @override
+  String get adminOpportunitiesFailed => 'Couldn\'t run the opportunity scan.';
+
+  @override
+  String get alertRuleDeleteFailed =>
+      'Couldn\'t delete this alert. Please try again.';
+
+  @override
+  String homeOpportunityPosition(int index, int count) {
+    return 'Opportunity $index of $count';
+  }
+
+  @override
+  String comparisonMarketsSelected(int count, int total) {
+    return '$count of $total markets';
+  }
+
+  @override
+  String get comparisonChooseMarkets => 'Choose markets';
+
+  @override
+  String get searchMarketsHint => 'Search markets';
+
+  @override
+  String get selectAllAction => 'Select all';
+
+  @override
+  String get clearSelectionAction => 'Clear';
+
+  @override
+  String get applyAction => 'Apply';
+
+  @override
+  String comparisonShowAll(int count) {
+    return 'Show all $count markets';
+  }
+
+  @override
+  String get comparisonShowFewer => 'Show fewer';
+
+  @override
+  String get opportunitiesEmpty =>
+      'No buying opportunities yet. One appears when a product on your watchlist is at least 10% cheaper in another market after costs.';
+
+  @override
+  String opportunityShareText(
+    String product,
+    String price,
+    String unit,
+    String market,
+    String saving,
+    String quantity,
+    String reference,
+  ) {
+    return '$product: $price/$unit at $market — $saving cheaper on $quantity than $reference (after costs). Found on MolBhav.';
+  }
+
+  @override
+  String get editQuantityTitle => 'Required quantity';
+
+  @override
+  String get editQuantityHelper => 'Recalculates the saving for this quantity.';
 }

@@ -481,7 +481,14 @@ class MbBadge extends StatelessWidget {
             MbIcon(icon!, size: 12, color: fg),
             const SizedBox(width: 4),
           ],
-          Text(label, style: context.mbText.label.copyWith(color: fg)),
+          Flexible(
+            child: Text(
+              label,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: context.mbText.label.copyWith(color: fg),
+            ),
+          ),
         ],
       ),
     );

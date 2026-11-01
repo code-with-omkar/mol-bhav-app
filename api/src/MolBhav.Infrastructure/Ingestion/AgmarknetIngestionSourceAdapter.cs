@@ -6,6 +6,7 @@ using System.Text.Json.Serialization;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using MolBhav.Application.Abstractions.Ingestion;
+using MolBhav.Domain.Ingestion;
 
 namespace MolBhav.Infrastructure.Ingestion;
 
@@ -44,74 +45,100 @@ internal sealed partial class AgmarknetIngestionSourceAdapter(
         var dateFilter = request.AsOfDate.ToString("dd/MM/yyyy", CultureInfo.InvariantCulture);
 
         var allRecords = new List<IngestedPriceRecord>();
-        var offset = 0;
 
         var httpClient = httpClientFactory.CreateClient(HttpClientName);
         httpClient.Timeout = TimeSpan.FromSeconds(opts.RequestTimeoutSeconds);
 
         LogFetchStarted(logger, request.SourceCode, request.AsOfDate);
 
+        // The source's schedule filter: an empty list is "all", otherwise one pass per state × commodity × market
+        // (data.gov.in filters server-side on exact names). No filter = the whole feed in one pass.
+        var filter = request.Filter ?? IngestionFilter.Empty;
+        var passes = (
+            from state in OrAll(filter.States)
+            from commodity in OrAll(filter.Commodities)
+            from market in OrAll(filter.Markets)
+            select (state, commodity, market)).ToList();
+
+        // A full pull sees every row, so it can tell the app which names exist (for the filter dropdowns).
+        var commoditiesSeen = filter.IsEmpty ? new HashSet<string>(StringComparer.OrdinalIgnoreCase) : null;
+        var marketsSeen = filter.IsEmpty ? new HashSet<FeedMarket>() : null;
+
         try
         {
-            while (true)
+            foreach (var (state, commodity, market) in passes)
             {
-                var url = BuildUrl(opts.ApiKey, dateFilter, opts.PageSize, offset);
-                AgmarknetResponse? response;
+                var offset = 0;
+                while (true)
+                {
+                    var url = BuildUrl(opts.ApiKey, dateFilter, state, commodity, market, opts.PageSize, offset);
+                    AgmarknetResponse? response;
 
-                try
-                {
-                    response = await httpClient.GetFromJsonAsync<AgmarknetResponse>(url, cancellationToken);
-                }
-                catch (HttpRequestException ex) when (ex.StatusCode == HttpStatusCode.Unauthorized)
-                {
-                    LogUnauthorized(logger, request.SourceCode);
-                    return IngestionFetchResult.Failed("Agmarknet API key is invalid or unauthorised. Check Agmarknet:ApiKey.");
-                }
-                catch (HttpRequestException ex)
-                {
-                    LogHttpError(logger, request.SourceCode, ex);
-                    return IngestionFetchResult.Failed($"Agmarknet HTTP error: {ex.Message}");
-                }
-                catch (Exception ex) when (ex is not OperationCanceledException)
-                {
-                    LogUnexpectedError(logger, request.SourceCode, ex);
-                    return IngestionFetchResult.Failed($"Agmarknet fetch failed unexpectedly: {ex.Message}");
-                }
-
-                if (response is null || !string.Equals(response.Status, "ok", StringComparison.OrdinalIgnoreCase))
-                {
-                    var msg = response?.Message ?? "Empty or non-ok response";
-                    LogBadResponse(logger, request.SourceCode, msg);
-                    return IngestionFetchResult.Failed($"Agmarknet returned a non-ok response: {msg}");
-                }
-
-                if (response.Records is null || response.Records.Count == 0)
-                {
-                    break; // No more pages.
-                }
-
-                foreach (var raw in response.Records)
-                {
-                    var record = MapRecord(raw, request.AsOfDate, opts);
-                    if (record is not null)
+                    try
                     {
-                        allRecords.Add(record);
+                        response = await GetPageAsync(httpClient, url, request.SourceCode, opts, cancellationToken);
                     }
-                }
+                    catch (HttpRequestException ex) when (ex.StatusCode == HttpStatusCode.Unauthorized)
+                    {
+                        LogUnauthorized(logger, request.SourceCode);
+                        return IngestionFetchResult.Failed("Agmarknet API key is invalid or unauthorised. Check Agmarknet:ApiKey.");
+                    }
+                    catch (HttpRequestException ex)
+                    {
+                        LogHttpError(logger, request.SourceCode, ex);
+                        return IngestionFetchResult.Failed($"Agmarknet HTTP error: {ex.Message}");
+                    }
+                    catch (Exception ex) when (ex is not OperationCanceledException)
+                    {
+                        LogUnexpectedError(logger, request.SourceCode, ex);
+                        return IngestionFetchResult.Failed($"Agmarknet fetch failed unexpectedly: {ex.Message}");
+                    }
 
-                LogPageFetched(logger, request.SourceCode, offset, response.Records.Count, response.Total);
+                    if (response is null || !string.Equals(response.Status, "ok", StringComparison.OrdinalIgnoreCase))
+                    {
+                        var msg = response?.Message ?? "Empty or non-ok response";
+                        LogBadResponse(logger, request.SourceCode, msg);
+                        return IngestionFetchResult.Failed($"Agmarknet returned a non-ok response: {msg}");
+                    }
 
-                // Advance or stop.
-                offset += response.Records.Count;
-                if (response.Records.Count < opts.PageSize || offset >= response.Total)
-                {
-                    break;
-                }
+                    if (response.Records is null || response.Records.Count == 0)
+                    {
+                        break; // No more pages.
+                    }
 
-                // Polite throttle between pages.
-                if (opts.ThrottleDelayMs > 0)
-                {
-                    await Task.Delay(opts.ThrottleDelayMs, cancellationToken);
+                    foreach (var raw in response.Records)
+                    {
+                        if (marketsSeen is not null && !string.IsNullOrWhiteSpace(raw.Market) && !string.IsNullOrWhiteSpace(raw.State))
+                        {
+                            marketsSeen.Add(new FeedMarket(raw.Market.Trim(), raw.State.Trim()));
+                        }
+
+                        if (commoditiesSeen is not null && !string.IsNullOrWhiteSpace(raw.Commodity))
+                        {
+                            commoditiesSeen.Add(raw.Commodity.Trim());
+                        }
+
+                        var record = MapRecord(raw, request.AsOfDate, opts);
+                        if (record is not null)
+                        {
+                            allRecords.Add(record);
+                        }
+                    }
+
+                    LogPageFetched(logger, request.SourceCode, offset, response.Records.Count, response.Total);
+
+                    // Advance or stop.
+                    offset += response.Records.Count;
+                    if (response.Records.Count < opts.PageSize || offset >= response.Total)
+                    {
+                        break;
+                    }
+
+                    // Polite throttle between pages.
+                    if (opts.ThrottleDelayMs > 0)
+                    {
+                        await Task.Delay(opts.ThrottleDelayMs, cancellationToken);
+                    }
                 }
             }
         }
@@ -122,7 +149,9 @@ internal sealed partial class AgmarknetIngestionSourceAdapter(
         }
 
         LogFetchCompleted(logger, request.SourceCode, request.AsOfDate, allRecords.Count);
-        return IngestionFetchResult.Success(allRecords);
+        return IngestionFetchResult.Success(
+            allRecords,
+            marketsSeen is null || commoditiesSeen is null ? null : new FeedNames([.. commoditiesSeen], [.. marketsSeen]));
     }
 
     /// <summary>
@@ -199,14 +228,115 @@ internal sealed partial class AgmarknetIngestionSourceAdapter(
             raw.ArrivalDate, fallbackDate, opts, out _);
 
     // -----------------------------------------------------------------------
+    // HTTP with retry
+    // -----------------------------------------------------------------------
+
+    /// <summary>
+    /// One page, retried after a transient response (429 Too Many Requests, 502/503/504). A throttled pull resumes at the
+    /// page that failed instead of starting over. Anything else non-2xx throws <see cref="HttpRequestException"/> with its status,
+    /// which the caller turns into a failed run.
+    /// </summary>
+    private async Task<AgmarknetResponse?> GetPageAsync(
+        HttpClient httpClient, string url, string sourceCode, AgmarknetOptions opts, CancellationToken cancellationToken)
+    {
+        for (var attempt = 0; ; attempt++)
+        {
+            HttpResponseMessage message;
+            try
+            {
+                message = await httpClient.GetAsync(url, cancellationToken);
+            }
+            catch (Exception ex) when (IsTransientFailure(ex, cancellationToken))
+            {
+                // A stalled request (the client timeout) or a dropped connection: same treatment as a throttled page.
+                var timedOut = ex is not HttpRequestException;
+                if (attempt >= opts.MaxRetries)
+                {
+                    throw new HttpRequestException(
+                        timedOut
+                            ? $"The request timed out ({opts.RequestTimeoutSeconds}s) on {attempt + 1} attempts."
+                            : $"The connection failed on {attempt + 1} attempts: {ex.Message}",
+                        ex,
+                        timedOut ? HttpStatusCode.RequestTimeout : null);
+                }
+
+                var wait = BackoffDelay(attempt, opts);
+                LogRetryingAfterFailure(logger, sourceCode, timedOut ? "timed out" : "connection failed", attempt + 1, opts.MaxRetries, wait.TotalSeconds);
+                await Task.Delay(wait, cancellationToken);
+                continue;
+            }
+
+            using (message)
+            {
+                if (IsTransient(message.StatusCode) && attempt < opts.MaxRetries)
+                {
+                    var delay = RetryDelay(message, attempt, opts);
+                    LogRetrying(logger, sourceCode, (int)message.StatusCode, attempt + 1, opts.MaxRetries, delay.TotalSeconds);
+                    await Task.Delay(delay, cancellationToken);
+                    continue;
+                }
+
+                message.EnsureSuccessStatusCode();
+                return await message.Content.ReadFromJsonAsync<AgmarknetResponse>(cancellationToken);
+            }
+        }
+    }
+
+    /// <summary>The client timeout surfaces as a <see cref="TaskCanceledException"/> the caller never asked for; a connection that drops has no status code.</summary>
+    private static bool IsTransientFailure(Exception ex, CancellationToken cancellationToken) =>
+        (ex is OperationCanceledException && !cancellationToken.IsCancellationRequested)
+        || (ex is HttpRequestException { StatusCode: null });
+
+    private static TimeSpan BackoffDelay(int attempt, AgmarknetOptions opts)
+    {
+        var wait = TimeSpan.FromSeconds(opts.RetryBaseDelaySeconds * Math.Pow(2, attempt));
+        var cap = TimeSpan.FromSeconds(opts.MaxRetryDelaySeconds);
+        return wait > cap ? cap : wait;
+    }
+
+    private static bool IsTransient(HttpStatusCode status) =>
+        status is HttpStatusCode.TooManyRequests or HttpStatusCode.BadGateway or HttpStatusCode.ServiceUnavailable or HttpStatusCode.GatewayTimeout;
+
+    /// <summary>The server's <c>Retry-After</c> when it sends one, else exponential backoff; never longer than <see cref="AgmarknetOptions.MaxRetryDelaySeconds"/>.</summary>
+    private static TimeSpan RetryDelay(HttpResponseMessage message, int attempt, AgmarknetOptions opts)
+    {
+        var retryAfter = message.Headers.RetryAfter;
+        var requested = retryAfter?.Delta
+            ?? (retryAfter?.Date is { } date ? date - DateTimeOffset.UtcNow : (TimeSpan?)null)
+            ?? TimeSpan.FromSeconds(opts.RetryBaseDelaySeconds * Math.Pow(2, attempt));
+
+        var cap = TimeSpan.FromSeconds(opts.MaxRetryDelaySeconds);
+        return requested < TimeSpan.Zero ? TimeSpan.Zero : requested > cap ? cap : requested;
+    }
+
+    // -----------------------------------------------------------------------
     // URL building
     // -----------------------------------------------------------------------
 
-    private static string BuildUrl(string apiKey, string dateFilter, int limit, int offset)
+    /// <summary>An empty filter list means "all": one pass with no constraint (<c>null</c>).</summary>
+    private static IEnumerable<string?> OrAll(IReadOnlyList<string> names) => names.Count == 0 ? [null] : names;
+
+    private static string BuildUrl(string apiKey, string dateFilter, string? state, string? commodity, string? market, int limit, int offset)
     {
         // date filter value contains "/" which must be encoded.
         var encodedDate = Uri.EscapeDataString(dateFilter);
-        return $"/resource/{ResourceId}?api-key={Uri.EscapeDataString(apiKey)}&format=json&limit={limit}&offset={offset}&filters%5Barrival_date%5D={encodedDate}";
+        var url = $"/resource/{ResourceId}?api-key={Uri.EscapeDataString(apiKey)}&format=json&limit={limit}&offset={offset}&filters%5Barrival_date%5D={encodedDate}";
+        if (state is not null)
+        {
+            url += $"&filters%5Bstate.keyword%5D={Uri.EscapeDataString(state)}";
+        }
+
+        if (commodity is not null)
+        {
+            url += $"&filters%5Bcommodity%5D={Uri.EscapeDataString(commodity)}";
+        }
+
+        if (market is not null)
+        {
+            url += $"&filters%5Bmarket%5D={Uri.EscapeDataString(market)}";
+        }
+
+        return url;
     }
 
     // -----------------------------------------------------------------------
@@ -229,6 +359,12 @@ internal sealed partial class AgmarknetIngestionSourceAdapter(
 
     [LoggerMessage(Level = LogLevel.Warning, Message = "[Agmarknet] Unauthorised response for source {SourceCode} — check ApiKey")]
     private static partial void LogUnauthorized(ILogger logger, string sourceCode);
+
+    [LoggerMessage(Level = LogLevel.Warning, Message = "[Agmarknet] Source {SourceCode} answered HTTP {Status}; retry {Attempt}/{MaxRetries} in {DelaySeconds:F0}s")]
+    private static partial void LogRetrying(ILogger logger, string sourceCode, int status, int attempt, int maxRetries, double delaySeconds);
+
+    [LoggerMessage(Level = LogLevel.Warning, Message = "[Agmarknet] Source {SourceCode} request {Problem}; retry {Attempt}/{MaxRetries} in {DelaySeconds:F0}s")]
+    private static partial void LogRetryingAfterFailure(ILogger logger, string sourceCode, string problem, int attempt, int maxRetries, double delaySeconds);
 
     [LoggerMessage(Level = LogLevel.Error, Message = "[Agmarknet] HTTP error for source {SourceCode}")]
     private static partial void LogHttpError(ILogger logger, string sourceCode, Exception exception);
@@ -260,16 +396,21 @@ internal sealed partial class AgmarknetIngestionSourceAdapter(
         [JsonPropertyName("message")]
         public string? Message { get; set; }
 
+        // The live API sends total/count as numbers but limit/offset as strings ("500"); accept both.
         [JsonPropertyName("total")]
+        [JsonNumberHandling(JsonNumberHandling.AllowReadingFromString)]
         public int Total { get; set; }
 
         [JsonPropertyName("count")]
+        [JsonNumberHandling(JsonNumberHandling.AllowReadingFromString)]
         public int Count { get; set; }
 
         [JsonPropertyName("offset")]
+        [JsonNumberHandling(JsonNumberHandling.AllowReadingFromString)]
         public int Offset { get; set; }
 
         [JsonPropertyName("limit")]
+        [JsonNumberHandling(JsonNumberHandling.AllowReadingFromString)]
         public int Limit { get; set; }
 
         [JsonPropertyName("records")]
@@ -299,16 +440,37 @@ internal sealed partial class AgmarknetIngestionSourceAdapter(
         [JsonPropertyName("arrival_date")]
         public string ArrivalDate { get; set; } = string.Empty;
 
+        // Prices arrive as JSON numbers in the live API and as strings in older exports/fixtures.
         [JsonPropertyName("min_price")]
+        [JsonConverter(typeof(StringOrNumberConverter))]
         public string? MinPrice { get; set; }
 
         [JsonPropertyName("max_price")]
+        [JsonConverter(typeof(StringOrNumberConverter))]
         public string? MaxPrice { get; set; }
 
         [JsonPropertyName("modal_price")]
+        [JsonConverter(typeof(StringOrNumberConverter))]
         public string? ModalPrice { get; set; }
 
         [JsonPropertyName("arrival_qty")]
+        [JsonConverter(typeof(StringOrNumberConverter))]
         public string? ArrivalQty { get; set; }
+    }
+
+    /// <summary>Reads a JSON string or number as its text (so <c>5000</c> and <c>"5000"</c> both give "5000").</summary>
+    internal sealed class StringOrNumberConverter : JsonConverter<string?>
+    {
+        public override string? Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options) => reader.TokenType switch
+        {
+            JsonTokenType.String => reader.GetString(),
+            JsonTokenType.Number => reader.TryGetDecimal(out var number)
+                ? number.ToString(CultureInfo.InvariantCulture)
+                : reader.GetDouble().ToString(CultureInfo.InvariantCulture),
+            JsonTokenType.Null => null,
+            _ => throw new JsonException($"Expected a string or number but found {reader.TokenType}."),
+        };
+
+        public override void Write(Utf8JsonWriter writer, string? value, JsonSerializerOptions options) => writer.WriteStringValue(value);
     }
 }

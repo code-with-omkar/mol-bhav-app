@@ -1,4 +1,5 @@
 import 'package:dio/dio.dart';
+import 'package:flutter/foundation.dart';
 import 'package:injectable/injectable.dart';
 
 import '../../../core/cache/cached_api_call.dart';
@@ -7,6 +8,7 @@ import '../../../core/error/result.dart';
 import '../../../core/network/api_call.dart';
 import '../../../core/network/json.dart';
 import '../../catalog/domain/catalog.dart';
+import '../../opportunities/data/opportunities_data.dart';
 import '../domain/alerts.dart';
 
 /// Alert endpoints:
@@ -96,13 +98,20 @@ class DioAlertsRemoteDataSource implements AlertsRemoteDataSource {
 
 @LazySingleton(as: AlertsRepository)
 class AlertsRepositoryImpl implements AlertsRepository {
-  AlertsRepositoryImpl(this._remote, this._catalog, this._cache);
+  AlertsRepositoryImpl(
+    this._remote,
+    this._catalog,
+    this._cache,
+    this._opportunities,
+  );
 
   final AlertsRemoteDataSource _remote;
   final CatalogRepository _catalog;
   final ResponseCache _cache;
+  final OpportunitiesRemoteDataSource _opportunities;
 
-  static const alertsKey = 'alerts.list';
+  /// `{alerts: [...], opportunities: [...]}` — v2 added opportunities.
+  static const alertsKey = 'alerts.list.v2';
   static const rulesKey = 'alerts.rules';
   static const mandisKey = 'alerts.mandis.v1';
 
@@ -112,9 +121,21 @@ class AlertsRepositoryImpl implements AlertsRepository {
       watchCachedApiCall(
         cache: _cache,
         key: alertsKey,
-        fetch: () => _remote.getAlerts(1, 50),
+        fetch: () async {
+          // Both in flight at once; an alerts failure surfaces as itself.
+          final opportunities = _opportunitiesOrNone();
+          final alerts = await _remote.getAlerts(1, 50);
+          return {'alerts': alerts, 'opportunities': await opportunities};
+        },
         parse: (json) {
-          final items = parseList(json as List<dynamic>, _alertItem);
+          final body = json as Map<String, dynamic>;
+          final items = [
+            ...parseList(body['alerts'] as List<dynamic>, _alertItem),
+            ...parseList(
+              body['opportunities'] as List<dynamic>? ?? const [],
+              _opportunityItem,
+            ),
+          ]..sort((a, b) => b.createdAt.compareTo(a.createdAt));
           return switch (filter) {
             AlertFilter.all => items,
             AlertFilter.signals => [
@@ -292,6 +313,38 @@ class AlertsRepositoryImpl implements AlertsRepository {
       unit: r.strOrNull('unit') ?? '',
       isActive: r.flag('isActive'),
       createdAtUtc: r.date('createdAtUtc'),
+    );
+  }
+
+  /// Opportunities are extra: the inbox still loads without them.
+  Future<List<dynamic>> _opportunitiesOrNone() async {
+    try {
+      return await _opportunities.getOpportunities(1, 20);
+    } on Object catch (e) {
+      // Logged, not swallowed silently: an empty Opportunities tab otherwise
+      // looks the same whether there are none or the call failed.
+      debugPrint('Opportunities failed to load: $e');
+      return const [];
+    }
+  }
+
+  /// An opportunity in the inbox: home price → landed price at the cheaper
+  /// market, shown as a negative move.
+  static AlertItem _opportunityItem(Map<String, dynamic> json) {
+    final o = OpportunitiesRepositoryImpl.parseOpportunity(json);
+    return AlertItem(
+      id: o.id,
+      kind: AlertKind.opportunity,
+      isUnread: !o.isRead,
+      productName: o.displayName,
+      percentChange: -o.savingsPercent,
+      previousPrice: o.homePrice,
+      newPrice: o.landedPrice,
+      locationName: o.bestName,
+      homeLocationName: o.homeName,
+      createdAt: o.detectedAt,
+      channel: null,
+      opportunityId: o.id,
     );
   }
 

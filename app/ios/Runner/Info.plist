@@ -70,15 +70,8 @@
 		</array>
 		<key>UIStatusBarHidden</key>
 		<false/>
-<<<<<<< HEAD
 		<!-- Google Mobile Ads. Google's sample id serves test ads only; replace for release. -->
 		<key>GADApplicationIdentifier</key>
 		<string>ca-app-pub-3940256099942544~1458002511</string>
-=======
-		<key>NSLocationWhenInUseUsageDescription</key>
-		<string>MolBhav needs access to your location to show local weather on the home screen.</string>
-		<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
-		<string>MolBhav needs access to your location to show local weather on the home screen.</string>
->>>>>>> 3c0db1a53330c423562aed2a14ec726797682e4f
 	</dict>
 </plist>

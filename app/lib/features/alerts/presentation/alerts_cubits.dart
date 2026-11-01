@@ -16,7 +16,31 @@ class AlertsState extends Equatable {
   });
 
   final AlertFilter filter;
+
+  /// Every alert and opportunity; the tabs filter it on the device, so
+  /// switching tabs is instant and never refetches.
   final DataState<List<AlertItem>> data;
+
+  /// The items for the selected tab, or null while nothing is loaded.
+  List<AlertItem>? get visible {
+    final all = data.data;
+    return all == null ? null : applyFilter(all, filter);
+  }
+
+  int count(AlertFilter f) => applyFilter(data.data ?? const [], f).length;
+
+  static List<AlertItem> applyFilter(List<AlertItem> items, AlertFilter f) =>
+      switch (f) {
+        AlertFilter.all => items,
+        AlertFilter.signals => [
+          for (final a in items)
+            if (a.kind != AlertKind.opportunity) a,
+        ],
+        AlertFilter.opportunities => [
+          for (final a in items)
+            if (a.kind == AlertKind.opportunity) a,
+        ],
+      };
 
   @override
   List<Object?> get props => [filter, data];
@@ -29,24 +53,25 @@ class AlertsCubit extends Cubit<AlertsState> {
   final GetAlerts _getAlerts;
 
   Future<void> load() async {
-    final filter = state.filter;
     emit(
       AlertsState(
-        filter: filter,
+        filter: state.filter,
         data: DataState.loading(data: state.data.data),
       ),
     );
     // Saved alerts show at once; the live list replaces them when it lands.
-    await for (final result in _getAlerts(filter)) {
-      if (isClosed || state.filter != filter) return;
-      emit(AlertsState(filter: filter, data: DataState.fromResult(result)));
+    await for (final result in _getAlerts(AlertFilter.all)) {
+      if (isClosed) return;
+      emit(
+        AlertsState(filter: state.filter, data: DataState.fromResult(result)),
+      );
     }
   }
 
-  Future<void> selectFilter(AlertFilter filter) {
-    if (filter == state.filter) return Future.value();
+  /// Only changes what is shown: the full list is already loaded.
+  void selectFilter(AlertFilter filter) {
+    if (filter == state.filter) return;
     emit(AlertsState(filter: filter, data: state.data));
-    return load();
   }
 }
 

@@ -30,8 +30,9 @@ internal sealed class AlertConfiguration : IEntityTypeConfiguration<Alert>
         builder.Property(a => a.TriggeredAtUtc).IsRequired();
         builder.Property(a => a.IsRead).IsRequired();
 
-        // Restrict, not cascade: an alert is a historical record that must survive the rule being deleted.
-        builder.HasOne<AlertRule>().WithMany().HasForeignKey(a => a.AlertRuleId).OnDelete(DeleteBehavior.Restrict).IsRequired();
+        // Set null, not cascade: an alert is history that must survive the user deleting the rule (which also frees
+        // the rule's free-tier slot). Restrict used to make deleting a rule that had fired fail.
+        builder.HasOne<AlertRule>().WithMany().HasForeignKey(a => a.AlertRuleId).OnDelete(DeleteBehavior.SetNull);
         builder.HasOne<User>().WithMany().HasForeignKey(a => a.UserId).OnDelete(DeleteBehavior.Cascade).IsRequired();
         builder.HasOne<Product>().WithMany().HasForeignKey(a => a.ProductId).OnDelete(DeleteBehavior.Restrict).IsRequired();
         builder.HasOne<ProductVariant>().WithMany().HasForeignKey(a => a.VariantId).OnDelete(DeleteBehavior.Restrict);

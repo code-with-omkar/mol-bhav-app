@@ -7,8 +7,13 @@ import '../../../core/ads/ad_personalisation.dart';
 import '../../../core/di/injection.dart';
 import '../../../core/l10n/l10n.dart';
 import '../../../core/locale/locale_cubit.dart';
+import '../../../core/settings/home_weather_animation_cubit.dart';
 import '../../../core/router/app_routes.dart';
+import '../../../core/session/admin_mode.dart';
 import '../../../core/share/deep_link_config.dart';
+import '../../app_features/domain/app_features.dart';
+import '../../app_features/presentation/feature_switches_cubit.dart';
+import '../../../core/theme/app_theme.dart';
 import '../../../core/theme/mb_dimens.dart';
 import '../../../core/utils/statuses.dart';
 import '../../../shared/widgets/mb_app_bar.dart';
@@ -108,18 +113,20 @@ class _Content extends StatelessWidget {
               title: l10n.languageLabel,
               value: language.nativeName,
             ),
-            MbListItem(
-              icon: MbIcons.report,
-              title: l10n.reportsTitle,
-              onTap: () => context.go(AppRoutes.reports),
-            ),
+            if (context.featureOn(AppFeature.reports))
+              MbListItem(
+                icon: MbIcons.report,
+                title: l10n.reportsTitle,
+                onTap: () => context.go(AppRoutes.reports),
+              ),
             // Not in the design's More list: the design gives the cost
             // estimator no entry point, so it is linked here.
-            MbListItem(
-              icon: MbIcons.estimator,
-              title: l10n.costEstimatorTitle,
-              onTap: () => context.go(AppRoutes.costEstimator),
-            ),
+            if (context.featureOn(AppFeature.costEstimator))
+              MbListItem(
+                icon: MbIcons.estimator,
+                title: l10n.costEstimatorTitle,
+                onTap: () => context.go(AppRoutes.costEstimator),
+              ),
           ],
         ),
         // Link or unlink Google sign-in (hidden while the server has it off).
@@ -129,6 +136,14 @@ class _Content extends StatelessWidget {
           gap,
           MbGroup(
             children: [
+              // The guard sends the user to the admin app as soon as the mode flips.
+              MbListItem(
+                icon: MbIcons.shield,
+                iconTone: MbTone.navy,
+                title: l10n.adminSwitchToAdminView,
+                subtitle: l10n.adminSwitchToAdminViewSubtitle,
+                onTap: () => getIt<AdminMode>().switchToAdminView(),
+              ),
               MbListItem(
                 icon: MbIcons.settings,
                 iconTone: MbTone.navy,
@@ -160,6 +175,22 @@ class _Content extends StatelessWidget {
                   value: personalised,
                   semanticLabel: l10n.adsPersonalisedTitle,
                   onChanged: getIt<AdPersonalisationCubit>().set,
+                ),
+              ),
+            ),
+            // Moving clouds/rain/sun behind the Home header; the weather
+            // button and forecast stay when it is off.
+            BlocBuilder<HomeWeatherAnimationCubit, bool>(
+              bloc: getIt<HomeWeatherAnimationCubit>(),
+              builder: (context, animate) => MbListItem(
+                leading: const _WeatherIconDisc(),
+                title: l10n.homeWeatherAnimationTitle,
+                subtitle: l10n.homeWeatherAnimationSubtitle,
+                showChevron: false,
+                trailing: MbToggle(
+                  value: animate,
+                  semanticLabel: l10n.homeWeatherAnimationTitle,
+                  onChanged: getIt<HomeWeatherAnimationCubit>().set,
                 ),
               ),
             ),
@@ -195,6 +226,27 @@ class _Content extends StatelessWidget {
           ],
         ),
       ],
+    );
+  }
+}
+
+/// Weather icon in the same disc as the design-system list icons (the icon set
+/// has no weather glyph).
+class _WeatherIconDisc extends StatelessWidget {
+  const _WeatherIconDisc();
+
+  @override
+  Widget build(BuildContext context) {
+    final c = context.mbColors;
+    return Container(
+      width: 36,
+      height: 36,
+      alignment: Alignment.center,
+      decoration: BoxDecoration(
+        color: c.surfaceGreenSoft,
+        shape: BoxShape.circle,
+      ),
+      child: Icon(Icons.wb_cloudy_outlined, size: 20, color: c.ink),
     );
   }
 }

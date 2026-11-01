@@ -14,6 +14,7 @@ public sealed class NotificationMessage : AggregateRoot<Guid>, IAuditableEntity
 {
     public const int TitleMaxLength = 150;
     public const int BodyMaxLength = 1000;
+    public const int ProviderMessageIdMaxLength = 200;
 
     private NotificationMessage(Guid id, Guid userId, NotificationChannel channel, string title, string body)
         : base(id)
@@ -45,6 +46,11 @@ public sealed class NotificationMessage : AggregateRoot<Guid>, IAuditableEntity
     public DateTimeOffset? SentAtUtc { get; private set; }
 
     public string? FailureReason { get; private set; }
+
+    /// <summary>The gateway's id for the accepted message (WhatsApp <c>wamid</c>), used to match delivery receipts.</summary>
+    public string? ProviderMessageId { get; private set; }
+
+    public DateTimeOffset? DeliveredAtUtc { get; private set; }
 
     public DateTimeOffset CreatedAtUtc { get; private set; }
 
@@ -80,6 +86,31 @@ public sealed class NotificationMessage : AggregateRoot<Guid>, IAuditableEntity
         SentAtUtc = sentAtUtc;
         FailureReason = null;
     }
+
+    public void AttachProviderMessageId(string providerMessageId)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(providerMessageId);
+
+        ProviderMessageId = providerMessageId.Length > ProviderMessageIdMaxLength
+            ? providerMessageId[..ProviderMessageIdMaxLength]
+            : providerMessageId;
+    }
+
+    /// <summary>A delivered/read receipt. Never overrides a later failure report.</summary>
+    public void MarkDelivered(DateTimeOffset deliveredAtUtc)
+    {
+        if (Status == NotificationStatus.Failed)
+        {
+            return;
+        }
+
+        Status = NotificationStatus.Delivered;
+        DeliveredAtUtc ??= deliveredAtUtc;
+        FailureReason = null;
+    }
+
+    /// <summary>A failure reported by the gateway after it had accepted the message.</summary>
+    public void MarkDeliveryFailed(string reason) => MarkFailed(reason);
 
     public void MarkFailed(string reason)
     {

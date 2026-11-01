@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:injectable/injectable.dart';
@@ -17,12 +19,22 @@ class NotificationService {
   final NotificationDeviceDataSource _deviceDataSource;
 
   String? _currentToken;
+  StreamSubscription<String>? _refreshSub;
 
   /// False on web and whenever Firebase was not configured at startup.
   bool get _firebaseReady => !kIsWeb && Firebase.apps.isNotEmpty;
 
+  /// Asks for notification permission (once; the OS remembers the answer)
+  /// and registers this device. Safe to call again: login, app start with a
+  /// saved session, and turning push on all call it.
   Future<void> initialize() async {
-    if (!_firebaseReady) return;
+    if (!_firebaseReady) {
+      debugPrint(
+        'Push disabled: Firebase is not configured '
+        '(google-services.json / GoogleService-Info.plist missing, or web).',
+      );
+      return;
+    }
     final messaging = FirebaseMessaging.instance;
 
     // Request permission (required on iOS and web; Android grants by default).
@@ -35,7 +47,8 @@ class NotificationService {
     await _registerToken(token);
 
     // Re-register when FCM rotates the token.
-    messaging.onTokenRefresh.listen((newToken) async {
+    await _refreshSub?.cancel();
+    _refreshSub = messaging.onTokenRefresh.listen((newToken) async {
       _currentToken = newToken;
       await _registerToken(newToken);
     });
@@ -48,6 +61,8 @@ class NotificationService {
       await runApiCall(() => _deviceDataSource.unregisterToken(token));
     }
     _currentToken = null;
+    await _refreshSub?.cancel();
+    _refreshSub = null;
     if (!_firebaseReady) return;
     try {
       await FirebaseMessaging.instance.deleteToken();

@@ -1,8 +1,11 @@
+import 'dart:async';
+
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:injectable/injectable.dart';
 
 import '../../../core/error/failure.dart';
+import '../../../core/error/result.dart';
 import '../domain/alerts.dart';
 
 sealed class AlertRulesState extends Equatable {
@@ -45,10 +48,25 @@ class AlertRulesCubit extends Cubit<AlertRulesState> {
     await _watch();
   }
 
-  Future<void> deleteRule(String id) async {
+  /// True when the server deleted it; the list then reloads without it.
+  Future<bool> deleteRule(String id) async {
     final result = await _repository.deleteAlertRule(id);
-    if (isClosed) return;
-    result.fold((_) {}, (_) => _reload());
+    if (isClosed) return result is Ok<void>;
+    if (result is Ok<void>) {
+      // Drop it at once so the swiped tile never reappears, then reload.
+      final current = state;
+      if (current is AlertRulesLoaded) {
+        emit(
+          AlertRulesLoaded([
+            for (final r in current.rules)
+              if (r.id != id) r,
+          ]),
+        );
+      }
+      unawaited(_reload());
+      return true;
+    }
+    return false;
   }
 
   Future<void> updateRule(String id, UpdateAlertRuleRequest req) async {

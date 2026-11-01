@@ -1,15 +1,18 @@
+using Microsoft.Extensions.DependencyInjection;
 using MolBhav.Application.Abstractions.Notifications;
 using MolBhav.Domain.Notification;
 
 namespace MolBhav.Infrastructure.Notifications;
 
 /// <summary>
-/// Routes each <see cref="NotificationMessage"/> to the right channel sender after checking the user's preferences.
-/// Replaces <see cref="LoggingNotificationSender"/> once FCM and WhatsApp are configured.
+/// Routes each <see cref="NotificationMessage"/> to its channel's sender after checking the user's master switch
+/// for that channel. Each channel is registered on its own (keyed by <see cref="NotificationChannel"/>): the real
+/// gateway when its credentials are configured, otherwise <see cref="LoggingNotificationSender"/> — so WhatsApp can
+/// go live before FCM and vice versa.
 /// </summary>
 internal sealed class CompositeNotificationSender(
-    FcmPushSender fcm,
-    WhatsAppCloudSender whatsApp,
+    [FromKeyedServices(NotificationChannel.Push)] INotificationSender push,
+    [FromKeyedServices(NotificationChannel.WhatsApp)] INotificationSender whatsApp,
     INotificationPreferencesRepository preferences) : INotificationSender
 {
     public async Task<bool> SendAsync(NotificationMessage notification, CancellationToken cancellationToken = default)
@@ -21,12 +24,13 @@ internal sealed class CompositeNotificationSender(
         return notification.Channel switch
         {
             NotificationChannel.Push when prefs?.PushEnabled ?? true =>
-                await fcm.SendAsync(notification, cancellationToken),
+                await push.SendAsync(notification, cancellationToken),
 
-            NotificationChannel.WhatsApp when prefs?.WhatsAppEnabled ?? true =>
+            // WhatsApp is opt-in: no saved preferences means off.
+            NotificationChannel.WhatsApp when prefs?.WhatsAppEnabled ?? false =>
                 await whatsApp.SendAsync(notification, cancellationToken),
 
-            // Channel disabled by user preferences — not a delivery failure.
+            // Channel switched off by the user — not a delivery failure.
             _ => true,
         };
     }

@@ -197,6 +197,13 @@ class AppLocalizationsMr extends AppLocalizations {
   }
 
   @override
+  String get priceDataDelayed =>
+      'बाजारभाव येण्यास उशीर होऊ शकतो — आमच्या डेटा स्रोतात अडचण आहे.';
+
+  @override
+  String get priceDataDismiss => 'बंद करा';
+
+  @override
   String get greetingMorning => 'सुप्रभात,';
 
   @override
@@ -361,7 +368,7 @@ class AppLocalizationsMr extends AppLocalizations {
     String quantity,
     String total,
   ) {
-    return '($reference − $best) × $quantity = $total. वाहतूक आणि हाताळणी खर्च अद्याप समाविष्ट नाही.';
+    return '($reference − $best) × $quantity = $total. इतर जिल्ह्यांच्या भावात वाहतूक आणि हाताळणी खर्च समाविष्ट आहे.';
   }
 
   @override
@@ -1356,6 +1363,13 @@ class AppLocalizationsMr extends AppLocalizations {
       'तुम्ही MolBhav कसे वापरता त्यानुसार जाहिराती दाखवा. बंद असताना जाहिराती दिसतील, पण तुमच्यावर आधारित नसतील.';
 
   @override
+  String get homeWeatherAnimationTitle => 'होम हवामान ॲनिमेशन';
+
+  @override
+  String get homeWeatherAnimationSubtitle =>
+      'होम हेडरमागे हलणारे ढग, पाऊस आणि ऊन. बंद असतानाही हवामान आयकॉनवर दिसेल.';
+
+  @override
   String get promotionSponsored => 'प्रायोजित';
 
   @override
@@ -1363,6 +1377,368 @@ class AppLocalizationsMr extends AppLocalizations {
 
   @override
   String get adminSchedulesSubtitle => 'सरकारी भाव आपोआप कधी आणायचे';
+
+  @override
+  String get adminDashboardTitle => 'ॲडमिन डॅशबोर्ड';
+
+  @override
+  String get adminAppTitle => 'ॲप व्यवस्थापन';
+
+  @override
+  String get adminTabDashboard => 'डॅशबोर्ड';
+
+  @override
+  String get adminTabApp => 'ॲप';
+
+  @override
+  String get adminTabAds => 'जाहिराती';
+
+  @override
+  String get adminFeaturesTitle => 'फीचर स्विच';
+
+  @override
+  String get adminFeaturesSubtitle =>
+      'सर्वांसाठी अ‍ॅपचे भाग चालू किंवा बंद करा';
+
+  @override
+  String get adminFeaturesIntro =>
+      'सर्व काही आपोआप चालू असते. तुम्ही बंद केलेला भाग सुमारे दहा मिनिटांत, किंवा अ‍ॅप पुन्हा उघडल्यावर, सर्व वापरकर्त्यांसाठी गायब होतो.';
+
+  @override
+  String get adminFeatureAds => 'जाहिराती';
+
+  @override
+  String get adminFeatureAdsHint =>
+      'स्क्रीनमधील स्पॉन्सर्ड कार्ड आणि जाहिरात जागा. बॅनर आणि रिवॉर्ड जाहिरातींवर परिणाम होत नाही.';
+
+  @override
+  String get adminFeatureReports => 'अहवाल';
+
+  @override
+  String get adminFeatureReportsHint => 'अहवाल स्क्रीन आणि त्याचे शॉर्टकट';
+
+  @override
+  String get adminFeatureCostEstimator => 'खर्च अंदाजक';
+
+  @override
+  String get adminFeatureCostEstimatorHint => 'खर्च अंदाजक आणि त्याचे शॉर्टकट';
+
+  @override
+  String get appNoticeDismiss => 'संदेश बंद करा';
+
+  @override
+  String get appNoticeMaintenanceTitle => 'आम्ही लवकरच परत येऊ';
+
+  @override
+  String get appNoticeCheckAgain => 'पुन्हा तपासा';
+
+  @override
+  String get adminNoticeTitle => 'अ‍ॅप संदेश';
+
+  @override
+  String get adminNoticeSubtitle =>
+      'सर्व वापरकर्त्यांना सूचना किंवा देखभाल पेज दाखवा';
+
+  @override
+  String get adminNoticeIntro =>
+      'अ‍ॅपच्या प्रत्येक वापरकर्त्याला दिसणारा एक संदेश. गरज संपली की तो बंद करा; मजकूर जतन राहतो.';
+
+  @override
+  String get adminNoticeShow => 'वापरकर्त्यांना दाखवा';
+
+  @override
+  String get adminNoticeType => 'प्रकार';
+
+  @override
+  String get adminNoticeInfo => 'सूचना';
+
+  @override
+  String get adminNoticeWarning => 'इशारा';
+
+  @override
+  String get adminNoticeMaintenance => 'देखभाल';
+
+  @override
+  String get adminNoticeMaintenanceHint =>
+      'देखभाल चालू असताना अ‍ॅपच्या जागी \"लवकरच परत\" पेज दिसते, तुम्ही ते बंद करेपर्यंत. अ‍ॅडमिन अ‍ॅप सुरू राहते.';
+
+  @override
+  String get adminNoticeMessage => 'संदेश';
+
+  @override
+  String get adminNoticeMessageHint => 'वापरकर्त्यांनी काय वाचावे?';
+
+  @override
+  String get adminNoticePreview => 'पूर्वावलोकन';
+
+  @override
+  String get adminNoticeSave => 'जतन करा';
+
+  @override
+  String get adminNoticeSaved => 'जतन केले';
+
+  @override
+  String get adminNoticeMessageRequired =>
+      'वापरकर्त्यांसाठी संदेश लिहा, किंवा तो बंद करा.';
+
+  @override
+  String get adminHistoryTitle => 'पुल इतिहास';
+
+  @override
+  String get adminHistorySubtitle => 'अलीकडील रन आणि अयशस्वी झालेल्या ओळी';
+
+  @override
+  String get adminHistoryEmpty => 'अद्याप कोणताही रन नाही.';
+
+  @override
+  String get adminTriggerScheduled => 'वेळापत्रक';
+
+  @override
+  String get adminTriggerManual => 'मॅन्युअल';
+
+  @override
+  String get adminTriggerUpload => 'अपलोड';
+
+  @override
+  String get adminJobTitle => 'पुल रन';
+
+  @override
+  String get adminJobErrorsTitle => 'अयशस्वी ओळी';
+
+  @override
+  String get adminJobErrorsFailed => 'अयशस्वी ओळी लोड करता आल्या नाहीत.';
+
+  @override
+  String get adminJobShowMore => 'आणखी दाखवा';
+
+  @override
+  String get adminTabUsers => 'वापरकर्ते';
+
+  @override
+  String get cancelAction => 'रद्द करा';
+
+  @override
+  String get adminUsersSearchHint => 'फोन नंबर किंवा नाव शोधा';
+
+  @override
+  String get adminUsersEmpty => 'कोणताही वापरकर्ता सापडला नाही.';
+
+  @override
+  String get adminUserActive => 'सक्रिय';
+
+  @override
+  String get adminUserAdminBadge => 'ॲडमिन';
+
+  @override
+  String get adminUserDetailTitle => 'वापरकर्ता';
+
+  @override
+  String get adminUserPhone => 'फोन';
+
+  @override
+  String get adminUserLocation => 'ठिकाण';
+
+  @override
+  String get adminUserBusiness => 'व्यवसाय';
+
+  @override
+  String get adminUserCategories => 'श्रेणी';
+
+  @override
+  String get adminUserJoined => 'सामील झाले';
+
+  @override
+  String get adminUserLastLogin => 'शेवटचा लॉगिन';
+
+  @override
+  String get adminUserNever => 'कधीच नाही';
+
+  @override
+  String get adminUserSubscription => 'शेवटचे सदस्यत्व';
+
+  @override
+  String get adminUserSubscriptionNone => 'काहीही नाही';
+
+  @override
+  String adminUserSubscriptionValue(String plan, String status, String date) {
+    return '$plan · $status · $date पर्यंत';
+  }
+
+  @override
+  String get adminUserTickets => 'मदत तिकिटे';
+
+  @override
+  String adminUserTicketsValue(int total, int open) {
+    return 'एकूण $total · उघडी $open';
+  }
+
+  @override
+  String get adminUserSuspendAction => 'खाते निलंबित करा';
+
+  @override
+  String get adminUserReinstateAction => 'खाते पुन्हा सुरू करा';
+
+  @override
+  String get adminUserSuspendTitle => 'हे खाते निलंबित करायचे?';
+
+  @override
+  String get adminUserSuspendBody =>
+      'तुम्ही पुन्हा सुरू करेपर्यंत त्यांना साइन इन करता येणार नाही आणि सत्र नूतनीकरण करता येणार नाही.';
+
+  @override
+  String get adminUserSuspendConfirm => 'निलंबित करा';
+
+  @override
+  String adminRangeDays(int days) {
+    return '$days दिवस';
+  }
+
+  @override
+  String get adminAdsTotalsTitle => 'डिलिव्हरी';
+
+  @override
+  String get adminAdsClicks => 'क्लिक';
+
+  @override
+  String get adminAdsImpressions => 'इम्प्रेशन';
+
+  @override
+  String get adminAdsClickRateShort => 'क्लिक दर';
+
+  @override
+  String get adminAdsDailyClicks => 'रोजचे क्लिक';
+
+  @override
+  String get adminAdsCampaignsTitle => 'मोहिमा';
+
+  @override
+  String get adminAdsNoCampaigns => 'अद्याप कोणतीही मोहीम नाही.';
+
+  @override
+  String adminAdsChangeNote(int days) {
+    return 'मागील $days दिवसांच्या तुलनेत बदल.';
+  }
+
+  @override
+  String get adminAdsPlacementsTitle => 'प्लेसमेंट';
+
+  @override
+  String adminAdsCampaignCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count मोहिमा',
+      one: '1 मोहीम',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get adminAdsChangeNew => 'नवीन';
+
+  @override
+  String adminAdsChangePoints(String value) {
+    return '$value गुण';
+  }
+
+  @override
+  String get adminAdsDailyImpressions => 'रोजचे इंप्रेशन';
+
+  @override
+  String get adminAdsDailyClickRate => 'रोजचा क्लिक दर';
+
+  @override
+  String get adminCampaignTitle => 'मोहीम';
+
+  @override
+  String get adminCampaignNoDelivery =>
+      'या कालावधीत या मोहिमेची कोणतीही जाहिरात दाखवली गेली नाही.';
+
+  @override
+  String get campaignStatusDraft => 'मसुदा';
+
+  @override
+  String get campaignStatusActive => 'सुरू';
+
+  @override
+  String get campaignStatusPaused => 'थांबवलेली';
+
+  @override
+  String get campaignStatusEnded => 'संपलेली';
+
+  @override
+  String get adminSwitchToUserView => 'वापरकर्त्याप्रमाणे पहा';
+
+  @override
+  String get adminSwitchToAdminView => 'ॲडमिन व्ह्यू';
+
+  @override
+  String get adminSwitchToAdminViewSubtitle =>
+      'डॅशबोर्ड, जाहिराती, वापरकर्ते आणि ॲप व्यवस्थापन';
+
+  @override
+  String get adminUsersTitle => 'वापरकर्ते';
+
+  @override
+  String get adminUsersTotal => 'एकूण वापरकर्ते';
+
+  @override
+  String get adminUsersNew => 'नवीन (7 दिवस)';
+
+  @override
+  String get adminUsersActive => 'सक्रिय (7 दिवस)';
+
+  @override
+  String get adminUsersPro => 'प्रो';
+
+  @override
+  String get adminUsersFree => 'फ्री';
+
+  @override
+  String get adminUsersSuspended => 'निलंबित';
+
+  @override
+  String get adminAdsTitle => 'जाहिराती';
+
+  @override
+  String get adminAdsClicksToday => 'आजचे क्लिक';
+
+  @override
+  String get adminAdsImpressionsToday => 'आजचे इम्प्रेशन';
+
+  @override
+  String get adminAdsClickRate => 'क्लिक दर (7 दिवस)';
+
+  @override
+  String get adminAdsCampaigns => 'सुरू मोहिमा';
+
+  @override
+  String get adminAdsRewarded => 'रिवॉर्ड व्ह्यू (7 दिवस)';
+
+  @override
+  String get adminAdsNote =>
+      'आम्ही दाखवलेल्या स्पॉन्सर्ड जाहिराती आणि रिवॉर्ड व्ह्यू. AdMob बॅनरचे क्लिक AdMob मध्ये दिसतात.';
+
+  @override
+  String get adminFeedsTitle => 'भाव डेटा';
+
+  @override
+  String get adminFeedsOk => 'अद्ययावत';
+
+  @override
+  String get adminFeedsDelayed => 'उशीर';
+
+  @override
+  String get adminFeedsLastUpdated => 'शेवटचे अपडेट';
+
+  @override
+  String get adminFeedsLastAttempt => 'शेवटचा पुल';
+
+  @override
+  String get adminSupportTitle => 'मदत';
+
+  @override
+  String get adminSupportOpen => 'उघडी तिकिटे';
 
   @override
   String get adminSchedulesHint =>
@@ -1465,6 +1841,45 @@ class AppLocalizationsMr extends AppLocalizations {
 
   @override
   String get scheduleEnabledLabel => 'आपोआप चालवा';
+
+  @override
+  String get scheduleFilterTitle => 'काय आणायचे';
+
+  @override
+  String get scheduleFilterHint =>
+      'काय आणायचे ते निवडा. सर्व काही आणण्यासाठी बॉक्स \"सर्व\" वरच ठेवा.';
+
+  @override
+  String get filterStatesLabel => 'राज्ये';
+
+  @override
+  String get filterCommoditiesLabel => 'शेतमाल';
+
+  @override
+  String get filterMarketsLabel => 'बाजार समित्या';
+
+  @override
+  String get filterAllOption => 'सर्व';
+
+  @override
+  String filterSelectedCount(int count) {
+    return '$count निवडले';
+  }
+
+  @override
+  String get filterSearchHint => 'शोधा';
+
+  @override
+  String get filterOptionsEmpty =>
+      'पहिल्या पूर्ण पुलनंतर याद्या भरतात. त्यासाठी सर्व काही \"सर्व\" वर ठेवून आता चालवा.';
+
+  @override
+  String get filterOptionsError =>
+      'पर्याय लोड करता आले नाहीत. हे बंद करून पुन्हा प्रयत्न करा.';
+
+  @override
+  String get runFilterNote =>
+      'फिल्टर फक्त याच वेळेसाठी आहे. वेळापत्रकानुसार होणारे रन नेहमी सर्व काही आणतात.';
 
   @override
   String get scheduleSaved => 'वेळापत्रक सेव्ह झाले.';
@@ -1745,4 +2160,105 @@ class AppLocalizationsMr extends AppLocalizations {
   @override
   String get googleLastSignInMethod =>
       'Google काढण्यापूर्वी पासवर्ड सेट करा — साइन-इनचा हाच एक मार्ग आहे.';
+
+  @override
+  String get weatherHomePrompt => 'तुमच्या भागाचे हवामान पाहण्यासाठी टॅप करा';
+
+  @override
+  String get weatherHomeLoading => 'हवामानाचा अंदाज आणत आहोत…';
+
+  @override
+  String get notificationPrefsSaveFailed =>
+      'तुमची नोटिफिकेशन सेटिंग सेव्ह झाली नाही. कृपया पुन्हा प्रयत्न करा.';
+
+  @override
+  String opportunityTitle(String product, String percent, String market) {
+    return '$product $market मध्ये $percent% स्वस्त आहे';
+  }
+
+  @override
+  String opportunityHomePrice(String market, String price) {
+    return '$market: $price';
+  }
+
+  @override
+  String opportunityLandedPrice(String price) {
+    return 'खर्चासह भाव: $price';
+  }
+
+  @override
+  String opportunityMeta(String percent, String market) {
+    return 'खर्चानंतर $market पेक्षा $percent% स्वस्त';
+  }
+
+  @override
+  String get adminFindOpportunities => 'आता संधी शोधा';
+
+  @override
+  String adminOpportunitiesResult(int found, int compared) {
+    return '$found नवीन संधी ($compared वॉचलिस्ट आयटमची तुलना)';
+  }
+
+  @override
+  String get adminOpportunitiesFailed => 'संधी शोध चालवता आला नाही.';
+
+  @override
+  String get alertRuleDeleteFailed =>
+      'हा अलर्ट हटवता आला नाही. कृपया पुन्हा प्रयत्न करा.';
+
+  @override
+  String homeOpportunityPosition(int index, int count) {
+    return 'संधी $index / $count';
+  }
+
+  @override
+  String comparisonMarketsSelected(int count, int total) {
+    return '$total पैकी $count बाजार';
+  }
+
+  @override
+  String get comparisonChooseMarkets => 'बाजार निवडा';
+
+  @override
+  String get searchMarketsHint => 'बाजार शोधा';
+
+  @override
+  String get selectAllAction => 'सर्व निवडा';
+
+  @override
+  String get clearSelectionAction => 'काढा';
+
+  @override
+  String get applyAction => 'लागू करा';
+
+  @override
+  String comparisonShowAll(int count) {
+    return 'सर्व $count बाजार दाखवा';
+  }
+
+  @override
+  String get comparisonShowFewer => 'कमी दाखवा';
+
+  @override
+  String get opportunitiesEmpty =>
+      'अजून खरेदीची संधी नाही. तुमच्या वॉचलिस्टमधील उत्पादन खर्चानंतर दुसऱ्या बाजारात किमान 10% स्वस्त असेल तेव्हा इथे दिसेल.';
+
+  @override
+  String opportunityShareText(
+    String product,
+    String price,
+    String unit,
+    String market,
+    String saving,
+    String quantity,
+    String reference,
+  ) {
+    return '$product: $market येथे $price/$unit — $quantity वर $reference पेक्षा $saving स्वस्त (खर्चानंतर). MolBhav वर मिळाले.';
+  }
+
+  @override
+  String get editQuantityTitle => 'आवश्यक प्रमाण';
+
+  @override
+  String get editQuantityHelper => 'या प्रमाणासाठी बचत पुन्हा मोजते.';
 }

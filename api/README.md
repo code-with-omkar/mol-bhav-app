@@ -3,6 +3,32 @@
 Backend for **MolBhav — Market & Procurement Intelligence** (Flutter app, Android/iOS).
 .NET 10 · Clean Architecture modular monolith · PostgreSQL · CQRS (MediatR) · EF Core (writes) + Dapper (reads).
 
+## Start the dev stack (API + phone app)
+
+The phone app shows **"No internet connection"** whenever it cannot reach the API. Run this first and read the FAIL lines:
+
+```powershell
+./source/api/scripts/start-dev.ps1              # start the API if needed, then check everything
+./source/api/scripts/start-dev.ps1 -CheckOnly   # check only
+./source/api/scripts/start-dev.ps1 -Restart     # restart the API
+```
+
+It checks, and fixes where it can:
+1. **The API runs with the `lan` profile** (`http://0.0.0.0:5189`). The `http` profile listens only on this PC, so a phone can never reach it. Never start the API for the phone with `--launch-profile http`.
+2. **This PC's Wi-Fi address** (it changes with the network) — printed as the *API address for the app*.
+3. **PostgreSQL** on 5432 (the Windows service, or `docker compose up -d` here).
+4. **The phone is on the same Wi-Fi** as this PC (USB-connected phones are checked automatically).
+
+**Phone app:** a debug build has a **Server** line at the bottom of the Login screen. Tap it, enter the PC's address (`192.168.1.14:5189`), press **Test** (it must say *Connected*), then **Save** — no rebuild when the network changes. A (re)build is only needed for new app code:
+
+```powershell
+cd source/app
+flutter build apk --debug --dart-define=API_BASE_URL=http://<PC address>:5189/api/v1
+adb install -r build/app/outputs/flutter-apk/app-debug.apk
+```
+
+Live data: `Agmarknet:UseMockData=false` in `appsettings.Development.json` (API key in user-secrets). Nothing is pulled until **Run now** in the app or the 06:00 IST schedule.
+
 ## Solution layout
 
 ```
@@ -317,8 +343,12 @@ UPDATE identity.users SET role = 'Admin' WHERE phone_number = '+919876543210';
 - **One bad row never aborts the run**: a record that fails to resolve (unknown product/variant/mandi/supplier code) or fails `PriceRecord` validation becomes a `DataIngestionError` (raw payload + reason kept verbatim) instead of failing the whole job — `DataIngestionJob.Status` ends up `Succeeded`, `PartiallySucceeded`, or `Failed` depending on the mix.
 - **Adapters are keyed by `PriceSource.Code`** (`IngestionAdapterDispatcher`): `agmarknet` → `AgmarknetIngestionSourceAdapter` (live); any other code → `StubIngestionSourceAdapter` (honest failure, never fabricated data). Construction stays manual-entry until a daily feed exists.
 - **Agmarknet adapter**: data.gov.in resource `9ef84268-d588-465a-a308-a864a43d0070`, filtered by `arrival_date` (DD/MM/YYYY), paginated (`Agmarknet:PageSize`, throttled `Agmarknet:ThrottleDelayMs`). Mapping: `commodity` → product code, `variety` → variant code (`FAQ`/`Other`/`Unclassified` → none), `market` → mandi code, prices in ₹/quintal. Codes are slugified (`"Red Onion (Large)"` → `red-onion-large`) — **create products/mandis with those exact codes** or rows land in `ingestion_errors` (the errors list is the mapping to-do list).
+- **Scheduled runs pull the full feed; a manual run can be filtered.** `POST /admin/ingestion/sources/{id}/run` takes an optional JSON body `{ "states": [...], "commodities": [...], "markets": [...] }` (exact data.gov.in spelling, e.g. `["Maharashtra"]`, `["Onion"]`, `["APMC Pune"]`; a missing/empty list = all; no body = the whole feed). Schedules, backfills and "Run all" never filter, and no state is hard-coded in config. The feed is ~19k rows nationwide (~39 pages); one state is ~1.1k rows (3 pages), so a filtered manual run is the quickest live test. One request series runs per state × commodity × market combination (max 30, ≤ 20 names per list; a bad filter is refused before a job is created); a failure in any of them fails the run, so a job never silently holds only part of the data.
+- **Throttling and outages are retried**: a page that gets HTTP 429, 502, 503 or 504 is retried in place (the pull resumes at that page, it does not restart) up to `Agmarknet:MaxRetries` times (default 4). Each wait is the server's `Retry-After` when it sends one, otherwise `RetryBaseDelaySeconds` doubling (5, 10, 20, 40 s), and never longer than `MaxRetryDelaySeconds` (60). Each retry is logged as a warning; once retries run out the job fails with the status in its reason. Other errors (e.g. 401 for a bad key) are not retried. Set `MaxRetries` to 0 to turn it off.
+- **Rows outside the catalog are skipped on API pulls**: the feed covers every commodity in every market in India, so a scheduled or manual run drops rows whose product, mandi or supplier is not in the catalog (or whose name cannot be a code) instead of storing ~15k errors a day — they are only counted in the log (`skipped N of M rows outside the catalog`) and excluded from the job's `fetched` count (`fetched = persisted + unchanged + failed`). **Unknown varieties fall back to the product's no-variant price** on API pulls (a feed names far more varieties than the catalog tracks): after every row that matched a variant or had none is stored, rows with an unknown variety (or one that cannot be a code, e.g. `1st Sort`) are retried as the product's no-variant price at that location/day. The first such row wins; the others are counted as skipped, and a real generic (`Other`/`FAQ`) row is never displaced. Add a variant to the catalog to price that variety separately. Any other failure for a catalog product and location remains an `ingestion_errors` row. **File uploads and the drop folder keep every error, and stay strict about varieties** — there the error list is the admin's mapping to-do list.
 - **Setup**: register at https://data.gov.in → `dotnet user-secrets set "Agmarknet:ApiKey" "<key>"` (or env `Agmarknet__ApiKey`) → create price source with code `agmarknet` → `POST /admin/ingestion/sources/{id}/run`. Missing key = job `Failed` with a clear reason.
 - **Mock mode (Development only)**: `appsettings.Development.json` sets `Agmarknet:UseMockData=true` → serves `SampleData/agmarknet-sample.json` (data.gov.in response shape) through the same mapping/persistence path, re-dated to the run date. Startup fails if enabled outside Development. Set it to `false` once a real key is in user-secrets.
+- **Drop-folder importer** (`IngestionDropFolderBackgroundService`, off by default): the hands-off fallback when the data.gov.in API is down. Enable with `IngestionDropFolder:Enabled=true` and `IngestionDropFolder:UploadAsUserId=<an admin's user id>` (recorded as the uploader — an upload job must name one). Drop a CSV into `<IngestionDropFolder:Path>/<price source code>/` (default `ingestion-drop/agmarknet/`, relative to the app's content root); every `PollIntervalSeconds` it imports files that have been unchanged for `StableSeconds` through the same `ImportIngestionFileCommand` as the admin upload (job trigger `Upload`; re-dropping a day is harmless — unchanged rows are skipped). Handled files move to `<Path>/processed/<code>/`; rejected ones (unknown/inactive source folder, over `MaxFileBytes`, unreadable file) move to `<Path>/failed/<code>/` with a `.error.txt` reason beside them. A transient error (e.g. database down) leaves the file in place to retry. The folder is a write-access trust boundary — anyone who can write to it can feed prices in — so keep it off and permissioned on servers.
 - **Name → code overrides** (`appsettings.json`): `Agmarknet:MarketCodeMap` (slugged market → mandi code, e.g. `"pune": "apmc-pune"`) and `Agmarknet:CommodityCodeMap` (slugged commodity → product code, e.g. `"arhar-tur-red-gram-whole": "tur"`). Unmapped names pass through as their slug. Add an entry for each code reported in `ingestion_errors`.
 - **`IngestionSchedulerBackgroundService`** fulfils BRD §9/§18's "Background Services / scheduled workers": on a configurable interval (`IngestionScheduler:IntervalHours`, default 24h) it runs one ingestion job per active `PriceSource`, each in its own DI scope (mirrors `OutboxProcessor`) so one source's failure never blocks another's. The admin manual-trigger endpoint runs the identical `RunIngestionJobCommand` with `TriggerType.Manual` instead of `Scheduled`.
 - **Ingestion always records at the product's default unit** — cross-unit source feeds are out of scope, the same simplification `ProcurementRequirement` makes (see its doc comment).

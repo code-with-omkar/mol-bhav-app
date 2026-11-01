@@ -52,4 +52,28 @@ public sealed record CampaignTargetResponse(string CategoryCode, Guid? StateId);
 
 public sealed record CampaignDailyStatResponse(DateOnly Day, long Impressions, long Clicks);
 
+/// <summary>One campaign's delivery over a date range. <paramref name="ClickRatePercent"/> is clicks ÷ impressions × 100 (0 when none were shown).</summary>
+public sealed record CampaignPerformanceResponse(
+    Guid Id,
+    string Name,
+    string AdvertiserName,
+    PromotionPlacement Placement,
+    CampaignStatus Status,
+    long Impressions,
+    long Clicks,
+    double ClickRatePercent);
+
+/// <summary>
+/// Sponsored-ad delivery across every campaign for IST days <paramref name="From"/>–<paramref name="To"/>: totals, each
+/// campaign (most clicks first, campaigns with no delivery included) and the daily totals.
+/// </summary>
+public sealed record AdsOverviewResponse(
+    DateOnly From,
+    DateOnly To,
+    long Impressions,
+    long Clicks,
+    double ClickRatePercent,
+    IReadOnlyList<CampaignPerformanceResponse> Campaigns,
+    IReadOnlyList<CampaignDailyStatResponse> Daily);
+
 public sealed record CampaignTargetInput(string? CategoryCode, Guid? StateId);

@@ -1,0 +1,9 @@
+product_code,variant_code,location_kind,location_code,min_price,max_price,modal_price,arrival_qty,record_date
+tmt-steel,fe-500d,supplier,pune-steel-traders,62155,64049,63102,,2026-10-04
+tmt-steel,fe-500d,supplier,nashik-steel-mart,55164,56844,56004,,2026-10-04
+tmt-steel,fe-500d,supplier,mumbai-build-supply,63277,65205,64241,,2026-10-04
+cement-opc-53,,supplier,pune-cement-depot,391,399,395,,2026-10-04
+cement-opc-53,,supplier,mumbai-build-supply,404,412,408,,2026-10-04
+red-brick,,supplier,pune-cement-depot,9,9,9,,2026-10-04
+river-sand,,supplier,satara-sand-co,9198,9670,9434,,2026-10-04
+river-sand,,supplier,pune-cement-depot,11529,12121,11825,,2026-10-04

@@ -1,3 +1,5 @@
+import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
@@ -43,18 +45,21 @@ String weatherDayLabel(BuildContext context, DateTime date) {
 
 /// One day's forecast over drifting cloud and falling rain sprites. [compact]
 /// is the strip in the home header; the full card heads the weather tab.
+/// With [expand] the full card fills the height its parent gives it.
 class WeatherCardWidget extends StatelessWidget {
   const WeatherCardWidget({
     super.key,
     required this.forecast,
     required this.stationName,
     this.compact = false,
+    this.expand = false,
     this.onTap,
   });
 
   final DailyForecast forecast;
   final String stationName;
   final bool compact;
+  final bool expand;
   final VoidCallback? onTap;
 
   @override
@@ -68,10 +73,27 @@ class WeatherCardWidget extends StatelessWidget {
         ? c.marketNavy
         : c.molGreen;
     final radius = BorderRadius.circular(compact ? MbRadius.lg : MbRadius.xl);
+    final tall = expand && !compact;
 
     final temp = Text(
       l10n.weatherTempDegrees(forecast.maxTempC.round().toString()),
-      style: (compact ? t.valueMd : t.display).copyWith(color: onHero),
+      style: (compact ? t.valueMd : t.display).copyWith(
+        color: onHero,
+        fontSize: tall ? 56 : null,
+      ),
+    );
+    final icon = Icon(
+      condition.icon,
+      size: compact
+          ? 32
+          : tall
+          ? 72
+          : 56,
+      color:
+          condition == WeatherCondition.clear ||
+              condition == WeatherCondition.partlyCloudy
+          ? c.bhavAmber
+          : onHero,
     );
     final details = Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -120,11 +142,15 @@ class WeatherCardWidget extends StatelessWidget {
             child: ClipRRect(
               borderRadius: radius,
               child: SizedBox(
-                height: compact ? 72 : 168,
+                height: compact
+                    ? 72
+                    : tall
+                    ? null
+                    : 168,
                 child: Stack(
                   fit: StackFit.expand,
                   children: [
-                    _WeatherSprites(
+                    WeatherSprites(
                       condition: condition,
                       color: onHero,
                       compact: compact,
@@ -134,23 +160,27 @@ class WeatherCardWidget extends StatelessWidget {
                         horizontal: compact ? MbSpacing.s3 : MbSpacing.s5,
                         vertical: compact ? MbSpacing.s2 : MbSpacing.s4,
                       ),
-                      child: Row(
-                        children: [
-                          Icon(
-                            condition.icon,
-                            size: compact ? 32 : 56,
-                            color:
-                                condition == WeatherCondition.clear ||
-                                    condition == WeatherCondition.partlyCloudy
-                                ? c.bhavAmber
-                                : onHero,
-                          ),
-                          const SizedBox(width: MbSpacing.s3),
-                          temp,
-                          const SizedBox(width: MbSpacing.s3),
-                          Expanded(child: details),
-                        ],
-                      ),
+                      child: tall
+                          ? Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                icon,
+                                const SizedBox(height: MbSpacing.s3),
+                                temp,
+                                const SizedBox(height: MbSpacing.s2),
+                                details,
+                              ],
+                            )
+                          : Row(
+                              children: [
+                                icon,
+                                const SizedBox(width: MbSpacing.s3),
+                                temp,
+                                const SizedBox(width: MbSpacing.s3),
+                                Expanded(child: details),
+                              ],
+                            ),
                     ),
                   ],
                 ),
@@ -163,24 +193,32 @@ class WeatherCardWidget extends StatelessWidget {
   }
 }
 
-/// Clouds drifting across and rain streaking down, behind the card content.
-/// The sprite group fades when the condition changes.
-class _WeatherSprites extends StatefulWidget {
-  const _WeatherSprites({
+/// Clouds drifting across and rain streaking down, behind the card content
+/// (also behind the home header). The sprite group fades when the condition
+/// changes.
+class WeatherSprites extends StatefulWidget {
+  const WeatherSprites({
+    super.key,
     required this.condition,
     required this.color,
-    required this.compact,
+    this.compact = false,
+    this.sunColor,
   });
 
   final WeatherCondition condition;
   final Color color;
   final bool compact;
 
+  /// When set, clear and partly cloudy skies get a slowly pulsing sun glow in
+  /// the top-right corner (the home header uses it so a clear day still
+  /// moves).
+  final Color? sunColor;
+
   @override
-  State<_WeatherSprites> createState() => _WeatherSpritesState();
+  State<WeatherSprites> createState() => _WeatherSpritesState();
 }
 
-class _WeatherSpritesState extends State<_WeatherSprites>
+class _WeatherSpritesState extends State<WeatherSprites>
     with SingleTickerProviderStateMixin {
   late final AnimationController _controller = AnimationController(
     vsync: this,
@@ -231,10 +269,38 @@ class _WeatherSpritesState extends State<_WeatherSprites>
             builder: (context, _) {
               final t = _controller.value;
               final w = box.maxWidth, h = box.maxHeight;
-              final cloudSize = widget.compact ? 44.0 : 84.0;
+              final cloudSize = widget.compact
+                  ? 44.0
+                  : (h * 0.5).clamp(84.0, 140.0);
+              final sun = widget.sunColor;
+              final sunny =
+                  condition == WeatherCondition.clear ||
+                  condition == WeatherCondition.partlyCloudy;
+              final glow = 0.5 + 0.5 * math.sin(t * 2 * math.pi * 4);
+              final sunSize = h * 0.9;
               return Stack(
                 clipBehavior: Clip.hardEdge,
                 children: [
+                  if (sun != null && sunny)
+                    Positioned(
+                      right: -sunSize * 0.3,
+                      top: -sunSize * 0.35,
+                      width: sunSize,
+                      height: sunSize,
+                      child: DecoratedBox(
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          gradient: RadialGradient(
+                            colors: [
+                              sun.withValues(alpha: 0.30 + 0.15 * glow),
+                              sun.withValues(alpha: 0.08 + 0.05 * glow),
+                              sun.withValues(alpha: 0),
+                            ],
+                            stops: const [0, 0.45, 1],
+                          ),
+                        ),
+                      ),
+                    ),
                   for (var i = 0; i < clouds; i++)
                     Positioned(
                       left: _drift(t, i / clouds, w + cloudSize) - cloudSize,

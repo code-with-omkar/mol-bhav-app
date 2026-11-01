@@ -93,6 +93,41 @@ internal sealed class IngestionReadService(IDbConnectionFactory connectionFactor
         ORDER BY c.display_order, c.code, s.is_active DESC, s.name;
         """;
 
+    // Adapter runs only (Upload = a person pasting a file, not the feed being up). "Got data in" = Succeeded or
+    // PartiallySucceeded; a Failed job means the adapter itself could not run.
+    private static readonly string FeedHealthSql = $"""
+        SELECT s.id AS price_source_id, s.code AS price_source_code,
+               (SELECT max(j.completed_at_utc)
+                FROM {Jobs} j
+                WHERE j.price_source_id = s.id AND j.trigger_type <> 'Upload' AND j.status IN ('Succeeded', 'PartiallySucceeded')) AS last_success_at_utc,
+               la.status AS last_attempt_status, la.started_at_utc AS last_attempt_at_utc
+        FROM {Sources} s
+        JOIN {Schedules} sc ON sc.price_source_id = s.id AND sc.is_enabled
+        LEFT JOIN LATERAL (
+            SELECT j.status, j.started_at_utc
+            FROM {Jobs} j
+            WHERE j.price_source_id = s.id AND j.trigger_type <> 'Upload'
+            ORDER BY j.started_at_utc DESC
+            LIMIT 1
+        ) la ON TRUE
+        WHERE s.is_active
+        ORDER BY s.code;
+        """;
+
+    public async Task<IReadOnlyList<FeedHealth>> GetScheduledFeedHealthAsync(CancellationToken cancellationToken = default)
+    {
+        await using var connection = await connectionFactory.OpenConnectionAsync(cancellationToken);
+        var rows = await connection.QueryAsync<FeedHealthRow>(Command(FeedHealthSql, null, cancellationToken));
+        return rows
+            .Select(r => new FeedHealth(
+                r.PriceSourceId,
+                r.PriceSourceCode,
+                r.LastSuccessAtUtc,
+                r.LastAttemptStatus is null ? null : Enum.Parse<IngestionJobStatus>(r.LastAttemptStatus),
+                r.LastAttemptAtUtc))
+            .ToArray();
+    }
+
     public async Task<IReadOnlyList<AdminIngestionScheduleResponse>> GetAdminSchedulesAsync(
         AdminIngestionScheduleFilter filter, CancellationToken cancellationToken = default)
     {
@@ -204,6 +239,19 @@ internal sealed class IngestionReadService(IDbConnectionFactory connectionFactor
         new(sql, args, cancellationToken: cancellationToken);
 
 #pragma warning disable CA1812 // Instantiated by Dapper.
+    private sealed class FeedHealthRow
+    {
+        public Guid PriceSourceId { get; init; }
+
+        public string PriceSourceCode { get; init; } = string.Empty;
+
+        public DateTimeOffset? LastSuccessAtUtc { get; init; }
+
+        public string? LastAttemptStatus { get; init; }
+
+        public DateTimeOffset? LastAttemptAtUtc { get; init; }
+    }
+
     private sealed class JobRow
     {
         public Guid Id { get; init; }

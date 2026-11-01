@@ -6,6 +6,7 @@ using MolBhav.Api.Contracts;
 using MolBhav.Application.Common.Models;
 using MolBhav.Application.Features.Pricing.GetLatestByLocation;
 using MolBhav.Application.Features.Pricing.GetLatestPrices;
+using MolBhav.Application.Features.Pricing.GetPriceDataStatus;
 using MolBhav.Application.Features.Pricing.GetPriceHistory;
 using MolBhav.Application.Features.Pricing.Models;
 using MolBhav.Domain.Pricing;
@@ -41,6 +42,15 @@ public sealed class PricingController(ISender sender) : ApiControllerBase(sender
         [FromQuery] int page = 1,
         [FromQuery] int pageSize = PageRequest.DefaultPageSize) =>
         PagedEnvelope(await Sender.Send(new GetLatestByLocationQuery(locationKind, locationId, page, pageSize), cancellationToken));
+
+    /// <summary>
+    /// Whether the automatically refreshed price feeds are keeping up. The app shows a "prices may be delayed" banner
+    /// when <c>isDelayed</c> is true; <c>lastUpdatedAtUtc</c> is when a feed last brought data in.
+    /// </summary>
+    [HttpGet("data-status")]
+    [ProducesResponseType<ApiResponse<PriceDataStatusResponse>>(StatusCodes.Status200OK)]
+    public async Task<IActionResult> GetPriceDataStatus(CancellationToken cancellationToken) =>
+        OkEnvelope(await Sender.Send(new GetPriceDataStatusQuery(), cancellationToken));
 
     /// <summary>Trend sparkline: non-voided prices for a product at one location over a date range.</summary>
     [HttpGet("history")]

@@ -26,22 +26,50 @@ class GoogleIdTokenSource {
       return _initializing!;
     }
     _initializedFor = webClientId;
-    return _initializing = GoogleSignIn.instance.initialize(
-      clientId: kIsWeb ? webClientId : null,
-      serverClientId: kIsWeb ? null : webClientId,
+    debugPrint(
+      'Google sign-in: initializing (web=$kIsWeb, clientId=$webClientId)',
     );
+    return _initializing = GoogleSignIn.instance
+        .initialize(
+          clientId: kIsWeb ? webClientId : null,
+          serverClientId: kIsWeb ? null : webClientId,
+        )
+        .then(
+          (_) => debugPrint(
+            'Google sign-in: initialized '
+            '(canAuthenticate=${GoogleSignIn.instance.supportsAuthenticate()})',
+          ),
+        );
   }
 
   /// False on web, where only Google's rendered button may start sign-in.
   bool get canAuthenticate => GoogleSignIn.instance.supportsAuthenticate();
 
   /// Opens the account picker. Null when the user closes it.
+  ///
+  /// Android reports a misconfiguration (wrong SHA-1 / package name, no Google
+  /// account on the phone) as `canceled` too, so the code is logged; and a
+  /// picker that returns no ID token throws instead of failing silently.
   Future<String?> authenticate() async {
     try {
+      debugPrint('Google sign-in: opening the account picker');
       final account = await GoogleSignIn.instance.authenticate();
-      return account.authentication.idToken;
+      final token = account.authentication.idToken;
+      if (token == null || token.isEmpty) {
+        throw StateError(
+          'Google returned no ID token. The server client id must be the '
+          'OAuth *Web* client id (GET /auth/methods googleClientId).',
+        );
+      }
+      return token;
     } on GoogleSignInException catch (e) {
-      if (e.code == GoogleSignInExceptionCode.canceled) return null;
+      if (e.code == GoogleSignInExceptionCode.canceled) {
+        debugPrint(
+          'Google sign-in closed or no usable account '
+          '(${e.code}): ${e.description}',
+        );
+        return null;
+      }
       rethrow;
     }
   }

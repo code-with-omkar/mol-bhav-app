@@ -15,7 +15,7 @@
       "grade": "FAQ",
       "arrival_date": "01/01/2026",
       "min_price": "1300",
-      "max_price": "2200",
+      "max_price": "2300",
       "modal_price": "1850",
       "arrival_qty": "11000"
     },
@@ -27,7 +27,7 @@
       "variety": "White",
       "grade": "FAQ",
       "arrival_date": "01/01/2026",
-      "min_price": "1400",
+      "min_price": "1500",
       "max_price": "2300",
       "modal_price": "1900",
       "arrival_qty": "2500"
@@ -42,7 +42,7 @@
       "arrival_date": "01/01/2026",
       "min_price": "900",
       "max_price": "1700",
-      "modal_price": "1300",
+      "modal_price": "1200",
       "arrival_qty": "3800"
     },
     {
@@ -53,7 +53,7 @@
       "variety": "Local",
       "grade": "FAQ",
       "arrival_date": "01/01/2026",
-      "min_price": "800",
+      "min_price": "850",
       "max_price": "1500",
       "modal_price": "1150",
       "arrival_qty": "2100"
@@ -67,7 +67,7 @@
       "grade": "FAQ",
       "arrival_date": "01/01/2026",
       "min_price": "1400",
-      "max_price": "2000",
+      "max_price": "3000",
       "modal_price": "1700",
       "arrival_qty": "6500"
     },
@@ -80,7 +80,7 @@
       "grade": "FAQ",
       "arrival_date": "01/01/2026",
       "min_price": "2500",
-      "max_price": "4000",
+      "max_price": "5000",
       "modal_price": "3200",
       "arrival_qty": "900"
     },

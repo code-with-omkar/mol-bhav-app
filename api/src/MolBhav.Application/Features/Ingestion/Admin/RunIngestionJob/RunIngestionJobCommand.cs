@@ -7,9 +7,14 @@ namespace MolBhav.Application.Features.Ingestion.Admin.RunIngestionJob;
 /// <summary>
 /// <paramref name="TriggeredByUserId"/> is set for Manual runs (admin "Run now" or a backfill) and null for Scheduled ones.
 /// <paramref name="AsOfDate"/> is the publication date to pull; null means <see cref="IngestionDates.DefaultAsOf"/> (yesterday, IST).
+/// <paramref name="States"/>, <paramref name="Commodities"/> and <paramref name="Markets"/> narrow a manual run to those names
+/// (exact source spelling; null/empty = all). Scheduled runs and backfills leave them empty and pull everything.
 /// </summary>
 public sealed record RunIngestionJobCommand(
     Guid PriceSourceId,
     IngestionTriggerType TriggerType,
     Guid? TriggeredByUserId,
-    DateOnly? AsOfDate = null) : ICommand<CreatedResponse>;
+    DateOnly? AsOfDate = null,
+    IReadOnlyList<string>? States = null,
+    IReadOnlyList<string>? Commodities = null,
+    IReadOnlyList<string>? Markets = null) : ICommand<CreatedResponse>;

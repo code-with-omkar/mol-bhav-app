@@ -48,6 +48,19 @@ public sealed record AdminIngestionScheduleResponse(
     DateTimeOffset? LastRunAtUtc,
     AdminIngestionLastJobResponse? LastJob);
 
+/// <summary>A market with its state, so the app can offer markets for the states picked.</summary>
+public sealed record FeedMarketResponse(string Name, string State);
+
+/// <summary>
+/// The names a source's last full pull contained, spelled as the source spells them (what a filter must use).
+/// <paramref name="RefreshedAtUtc"/> is null — and the lists empty — until a full pull has run.
+/// </summary>
+public sealed record SourceFeedOptionsResponse(
+    IReadOnlyList<string> States,
+    IReadOnlyList<string> Commodities,
+    IReadOnlyList<FeedMarketResponse> Markets,
+    DateTimeOffset? RefreshedAtUtc);
+
 /// <summary>The source's most recent job, manual or scheduled.</summary>
 public sealed record AdminIngestionLastJobResponse(
     Guid Id,

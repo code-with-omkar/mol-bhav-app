@@ -11,6 +11,7 @@ using MolBhav.Application.Features.Catalog.Models;
 using MolBhav.Application.Features.Promotions.Admin.CreateAdvertiser;
 using MolBhav.Application.Features.Promotions.Admin.CreateCampaign;
 using MolBhav.Application.Features.Promotions.Admin.GetAdminCampaigns;
+using MolBhav.Application.Features.Promotions.Admin.GetAdsOverview;
 using MolBhav.Application.Features.Promotions.Admin.GetAdvertisers;
 using MolBhav.Application.Features.Promotions.Admin.GetCampaignStats;
 using MolBhav.Application.Features.Promotions.Admin.SetCampaignStatus;
@@ -97,6 +98,16 @@ public sealed class AdminPromotionsController(ISender sender) : ApiControllerBas
     [ProducesResponseType<ProblemDetails>(StatusCodes.Status404NotFound, MediaTypeNames.Application.ProblemJson)]
     public async Task<IActionResult> SetStatus(Guid campaignId, [FromBody] SetCampaignStatusRequest request, CancellationToken cancellationToken) =>
         NoContentOrProblem(await Sender.Send(new SetCampaignStatusCommand(campaignId, request.Action), cancellationToken));
+
+    /// <summary>
+    /// Ad delivery across all campaigns (IST days, inclusive; default the last 30 days, at most 366): totals, each
+    /// campaign's impressions, clicks and click rate, and daily totals.
+    /// </summary>
+    [HttpGet("stats")]
+    [ProducesResponseType<ApiResponse<AdsOverviewResponse>>(StatusCodes.Status200OK)]
+    [ProducesResponseType<ValidationProblemDetails>(StatusCodes.Status400BadRequest, MediaTypeNames.Application.ProblemJson)]
+    public async Task<IActionResult> GetOverview([FromQuery] DateOnly? from, [FromQuery] DateOnly? to, CancellationToken cancellationToken) =>
+        OkEnvelope(await Sender.Send(new GetAdsOverviewQuery(from, to), cancellationToken));
 
     /// <summary>Daily delivery (IST days, inclusive). Defaults to the last 30 days; at most 366.</summary>
     [HttpGet("campaigns/{campaignId:guid}/stats")]

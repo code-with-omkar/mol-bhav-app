@@ -109,6 +109,52 @@ internal sealed class PromotionReadService(IDbConnectionFactory connectionFactor
         ORDER BY s.day;
         """;
 
+    private const string CampaignPerformanceSql = $"""
+        SELECT c.id, c.name, a.name AS advertiser_name, c.placement, c.status,
+               COALESCE(sum(s.impressions), 0)::bigint AS impressions, COALESCE(sum(s.clicks), 0)::bigint AS clicks
+        FROM {Campaigns} c
+        JOIN {Advertisers} a ON a.id = c.advertiser_id
+        LEFT JOIN {Stats} s ON s.campaign_id = c.id AND s.day BETWEEN @From AND @To
+        GROUP BY c.id, c.name, a.name, c.placement, c.status
+        ORDER BY clicks DESC, impressions DESC, c.name;
+        """;
+
+    private const string TotalDailyStatsSql = $"""
+        SELECT s.day, sum(s.impressions)::bigint AS impressions, sum(s.clicks)::bigint AS clicks
+        FROM {Stats} s
+        WHERE s.day BETWEEN @From AND @To
+        GROUP BY s.day
+        ORDER BY s.day;
+        """;
+
+    public async Task<IReadOnlyList<CampaignPerformanceResponse>> GetCampaignPerformanceAsync(
+        DateOnly from, DateOnly to, CancellationToken cancellationToken = default)
+    {
+        await using var connection = await connectionFactory.OpenConnectionAsync(cancellationToken);
+        var rows = await connection.QueryAsync<PerformanceRow>(Command(CampaignPerformanceSql, new { From = from, To = to }, cancellationToken));
+
+        return rows
+            .Select(r => new CampaignPerformanceResponse(
+                r.Id,
+                r.Name,
+                r.AdvertiserName,
+                Enum.Parse<PromotionPlacement>(r.Placement),
+                Enum.Parse<CampaignStatus>(r.Status),
+                r.Impressions,
+                r.Clicks,
+                r.Impressions == 0 ? 0 : Math.Round(100d * r.Clicks / r.Impressions, 1)))
+            .ToArray();
+    }
+
+    public async Task<IReadOnlyList<CampaignDailyStatResponse>> GetTotalDailyStatsAsync(
+        DateOnly from, DateOnly to, CancellationToken cancellationToken = default)
+    {
+        await using var connection = await connectionFactory.OpenConnectionAsync(cancellationToken);
+        var rows = await connection.QueryAsync<StatRow>(Command(TotalDailyStatsSql, new { From = from, To = to }, cancellationToken));
+
+        return rows.Select(r => new CampaignDailyStatResponse(r.Day, r.Impressions, r.Clicks)).ToArray();
+    }
+
     public async Task<PromotionResponse?> FindForUserAsync(
         Guid userId,
         PromotionPlacement placement,
@@ -291,6 +337,23 @@ internal sealed class PromotionReadService(IDbConnectionFactory connectionFactor
         public long ImpressionsTotal { get; init; }
 
         public long ClicksTotal { get; init; }
+    }
+
+    private sealed class PerformanceRow
+    {
+        public Guid Id { get; init; }
+
+        public string Name { get; init; } = string.Empty;
+
+        public string AdvertiserName { get; init; } = string.Empty;
+
+        public string Placement { get; init; } = string.Empty;
+
+        public string Status { get; init; } = string.Empty;
+
+        public long Impressions { get; init; }
+
+        public long Clicks { get; init; }
     }
 
     private sealed class TargetRow

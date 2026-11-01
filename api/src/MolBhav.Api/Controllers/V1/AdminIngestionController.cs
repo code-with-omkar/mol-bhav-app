@@ -14,6 +14,7 @@ using MolBhav.Application.Features.Ingestion.Admin.GetAdminIngestionJob;
 using MolBhav.Application.Features.Ingestion.Admin.GetAdminIngestionJobErrors;
 using MolBhav.Application.Features.Ingestion.Admin.GetAdminIngestionJobs;
 using MolBhav.Application.Features.Ingestion.Admin.GetIngestionSchedules;
+using MolBhav.Application.Features.Ingestion.Admin.GetSourceFeedOptions;
 using MolBhav.Application.Features.Ingestion.Admin.ImportIngestionFile;
 using MolBhav.Application.Features.Ingestion.Admin.RunCategoryIngestion;
 using MolBhav.Application.Features.Ingestion.Admin.UpdateIngestionSchedule;
@@ -30,18 +31,35 @@ namespace MolBhav.Api.Controllers.V1;
 [ProducesResponseType<ProblemDetails>(StatusCodes.Status403Forbidden, MediaTypeNames.Application.ProblemJson)]
 public sealed class AdminIngestionController(ISender sender, ICurrentUser currentUser) : ApiControllerBase(sender)
 {
-    /// <summary>Runs the source now. <paramref name="asOfDate"/> (IST, <c>yyyy-MM-dd</c>) defaults to yesterday.</summary>
+    /// <summary>
+    /// Runs the source now. <paramref name="asOfDate"/> (IST, <c>yyyy-MM-dd</c>) defaults to yesterday. The optional body
+    /// narrows this run to some states, commodities and/or markets (exact source spelling); no body = the full feed.
+    /// </summary>
     /// <response code="404">Unknown price source (<c>PriceSource.NotFound</c>).</response>
     [HttpPost("sources/{sourceId:guid}/run")]
     [ProducesResponseType<ApiResponse<CreatedResponse>>(StatusCodes.Status201Created)]
     [ProducesResponseType<ValidationProblemDetails>(StatusCodes.Status400BadRequest, MediaTypeNames.Application.ProblemJson)]
     [ProducesResponseType<ProblemDetails>(StatusCodes.Status404NotFound, MediaTypeNames.Application.ProblemJson)]
-    public async Task<IActionResult> RunJob(Guid sourceId, [FromQuery] DateOnly? asOfDate, CancellationToken cancellationToken)
+    public async Task<IActionResult> RunJob(
+        Guid sourceId, [FromQuery] DateOnly? asOfDate, CancellationToken cancellationToken, [FromBody] RunIngestionRequest? filter = null)
     {
-        var command = new RunIngestionJobCommand(sourceId, IngestionTriggerType.Manual, currentUser.GetRequiredUserId(), asOfDate);
+        var command = new RunIngestionJobCommand(
+            sourceId, IngestionTriggerType.Manual, currentUser.GetRequiredUserId(), asOfDate,
+            filter?.States, filter?.Commodities, filter?.Markets);
         var result = await Sender.Send(command, cancellationToken);
         return CreatedEnvelope(result, $"{Request.PathBase}/api/v1/admin/ingestion/jobs");
     }
+
+    /// <summary>
+    /// The states, markets (with their state) and commodities the source's last full pull contained, spelled as the source
+    /// spells them — the choices for a filtered "Run now". Empty until a full pull has run.
+    /// </summary>
+    /// <response code="404">Unknown price source (<c>PriceSource.NotFound</c>).</response>
+    [HttpGet("sources/{sourceId:guid}/filter-options")]
+    [ProducesResponseType<ApiResponse<SourceFeedOptionsResponse>>(StatusCodes.Status200OK)]
+    [ProducesResponseType<ProblemDetails>(StatusCodes.Status404NotFound, MediaTypeNames.Application.ProblemJson)]
+    public async Task<IActionResult> GetFilterOptions(Guid sourceId, CancellationToken cancellationToken) =>
+        OkEnvelope(await Sender.Send(new GetSourceFeedOptionsQuery(sourceId), cancellationToken));
 
     /// <summary>Queues one run per date (oldest first) and returns at once; each day appears as a job when it finishes.</summary>
     /// <response code="202">Queued.</response>

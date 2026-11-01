@@ -294,71 +294,119 @@
     <div class="logo-circle">M</div>
     <div>
       <div class="project-name">MolBhav</div>
-      <div class="project-sub">Market Intelligence Platform · API + Flutter App</div>
+      <div class="project-sub">Market Intelligence Platform · API + Flutter App + Admin app</div>
     </div>
   </div>
-  <div class="header-date">Updated: 3 Oct 2026</div>
+  <div class="header-date">Updated: 1 Nov 2026</div>
 </div>
 
 <div class="section"><div class="section-title">Overall Progress</div></div>
 <div class="overview">
   <div class="ov-card">
-    <div class="ov-label">API Progress</div>
-    <div class="ov-value c-api">96%</div>
-    <div class="ov-sub">14 / 14 modules built</div>
-    <div class="ov-bar"><div class="ov-bar-fill f-api" style="width:96%"></div></div>
+    <div class="ov-label">API</div>
+    <div class="ov-value c-api">342</div>
+    <div class="ov-sub">unit tests passing · 38 migrations · live Agmarknet pulls working</div>
+    <div class="ov-bar"><div class="ov-bar-fill f-api" style="width:100%"></div></div>
   </div>
   <div class="ov-card">
-    <div class="ov-label">App Progress</div>
-    <div class="ov-value c-app">88%</div>
-    <div class="ov-sub">Phases 0–3 + Phase 5 done</div>
-    <div class="ov-bar"><div class="ov-bar-fill f-app" style="width:88%"></div></div>
+    <div class="ov-label">Flutter app</div>
+    <div class="ov-value c-app">345</div>
+    <div class="ov-sub">tests passing · analyze clean</div>
+    <div class="ov-bar"><div class="ov-bar-fill f-app" style="width:100%"></div></div>
   </div>
   <div class="ov-card">
-    <div class="ov-label">Phases Complete</div>
-    <div class="ov-value c-done">5.5 / 6</div>
-    <div class="ov-sub">Code complete · E2E verify pending</div>
-    <div class="ov-bar"><div class="ov-bar-fill f-done" style="width:92%"></div></div>
+    <div class="ov-label">Admin app</div>
+    <div class="ov-value c-done">4 / 4</div>
+    <div class="ov-sub">tabs built (Dashboard, Ads, Users, App) · phone check pending</div>
+    <div class="ov-bar"><div class="ov-bar-fill f-done" style="width:90%"></div></div>
   </div>
   <div class="ov-card">
-    <div class="ov-label">Blockers</div>
-    <div class="ov-value" style="color:var(--partial)">1</div>
-    <div class="ov-sub">Local build/run verification</div>
-    <div class="ov-bar"><div class="ov-bar-fill" style="width:33%;background:var(--pending)"></div></div>
+    <div class="ov-label">Needs you</div>
+    <div class="ov-value" style="color:var(--partial)">5</div>
+    <div class="ov-sub">items waiting on your action (below)</div>
+    <div class="ov-bar"><div class="ov-bar-fill" style="width:50%;background:var(--partial)"></div></div>
   </div>
 </div>
 
-<div class="section"><div class="section-title">Current Blockers (3 Oct 2026)</div></div>
+<div class="section"><div class="section-title">Needs your action (1 Nov 2026)</div></div>
 <div class="blockers">
   <div class="blocker-card">
     <div class="blocker-head">
       <span class="blocker-icon">🚨</span>
-      <span class="blocker-title">Action Items</span>
+      <span class="blocker-title">Waiting on you</span>
     </div>
     <div class="blocker-list">
-      <div class="blocker-item"><div class="blocker-dot dot-warn"></div><div><strong>Run migration + build</strong> — <code style="font-family:monospace;font-size:11px">dotnet ef migrations add AddSubscriptionExpiryIndex</code>, then build/test API and app (3 Oct code is unbuilt).</div></div>
-      <div class="blocker-item"><div class="blocker-dot dot-warn"></div><div><strong>E2E run</strong> — API <code style="font-family:monospace;font-size:11px">--launch-profile lan</code> + <code style="font-family:monospace;font-size:11px">flutter run -d web-server</code>; login via Msg91 SMS.</div></div>
-      <div class="blocker-item"><div class="blocker-dot dot-warn"></div><div><strong>Msg91 TemplateId</strong> — DLT template with ##OTP##; rotate the key shared in chat.</div></div>
-      <div class="blocker-item"><div class="blocker-dot dot-ok"></div><div><strong>No open decisions</strong> — D1 app.jagtech.in · D4 client-side · D5 closed.</div></div>
+      <div class="blocker-item"><div class="blocker-dot dot-warn"></div><div><strong>Run a full pull</strong> — Admin → App → Data pull schedules → Run now, no filters. Then check Indore prices and that the filter dropdowns fill.</div></div>
+      <div class="blocker-item"><div class="blocker-dot dot-warn"></div><div><strong>Check on the phone</strong> — Ads (campaign detail, comparison, placements), Users suspend / reinstate, Pull history, App message (note, maintenance), Feature switches.</div></div>
+      <div class="blocker-item"><div class="blocker-dot dot-warn"></div><div><strong>Review Hindi + Marathi</strong> — all new admin and notice strings were written by Claude and need a native check.</div></div>
+      <div class="blocker-item"><div class="blocker-dot dot-warn"></div><div><strong>Ads not visible</strong> — both accounts are on Pro, which gets no ads by design. Decide whether to switch a test account to Free.</div></div>
+      <div class="blocker-item"><div class="blocker-dot dot-warn"></div><div><strong>Push the commit</strong> — everything is committed locally (7fa50ec on payment-integration); it is not pushed to GitHub yet.</div></div>
     </div>
   </div>
   <div class="blocker-card">
     <div class="blocker-head">
       <span class="blocker-icon">✅</span>
-      <span class="blocker-title">Built Today (3 Oct)</span>
+      <span class="blocker-title">Built since 3 Oct</span>
     </div>
     <div class="blocker-list">
-      <div class="blocker-item"><div class="blocker-dot dot-ok"></div><div>API: expiry sweep worker + command + partial index + 4 tests</div></div>
-      <div class="blocker-item"><div class="blocker-dot dot-ok"></div><div>App: SubscriptionTierSync on resume (refresh profile, renew token) + 6 tests</div></div>
-      <div class="blocker-item"><div class="blocker-dot dot-ok"></div><div>D4 closed (options already client-side) · D5 "Not downloaded yet" copy</div></div>
-      <div class="blocker-item"><div class="blocker-dot dot-ok"></div><div>Release signing via key.properties + docs/release-signing.md</div></div>
-      <div class="blocker-item"><div class="blocker-dot dot-ok"></div><div>Msg91 configured via user-secrets; CategoryModel test fixed (78/78)</div></div>
-      <div class="blocker-item"><div class="blocker-dot dot-ok"></div><div>Hindi + Marathi: 127 keys each → 352/352 (placeholders machine-checked)</div></div>
+      <div class="blocker-item"><div class="blocker-dot dot-ok"></div><div>Live Agmarknet ingestion: paging, retries (429/503/timeouts), out-of-catalog skip, variety fallback</div></div>
+      <div class="blocker-item"><div class="blocker-dot dot-ok"></div><div>Drop-folder CSV importer; schedules; filtered manual runs with dropdowns</div></div>
+      <div class="blocker-item"><div class="blocker-dot dot-ok"></div><div>Price-delay banner (prices may be delayed) + 10-minute refresh</div></div>
+      <div class="blocker-item"><div class="blocker-dot dot-ok"></div><div>Admin app: Dashboard, Ads (campaign detail, previous-period comparison, placements), Users (suspend / reinstate), App (pull history, schedules)</div></div>
+      <div class="blocker-item"><div class="blocker-dot dot-ok"></div><div>App message: note, warning or full-screen maintenance page, edited from the admin app</div></div>
+      <div class="blocker-item"><div class="blocker-dot dot-ok"></div><div>Feature switches: Ads, Reports, Cost estimator on or off for everyone</div></div>
+      <div class="blocker-item"><div class="blocker-dot dot-ok"></div><div>Dev tooling: <code style="font-family:monospace;font-size:11px">start-dev.ps1</code> + debug-only Server address setting; admin role check fixed (case)</div></div>
     </div>
   </div>
 </div>
 
-<div class="section"><div class="section-title">Phase 4: Razorpay — Development Update</div></div>
+<div class="section"><div class="section-title">Admin app — Development Update</div></div>
+<div class="timeline">
+  <div class="tl-row">
+    <div class="tl-phase">
+      <div class="tl-dot partial">A</div>
+      <div class="tl-phase-lbl">Admin</div>
+    </div>
+    <div class="tl-cell">
+      <div class="cell-header">
+        <span class="cell-badge badge-api">API</span>
+        <span class="cell-title">Admin endpoints</span>
+      </div>
+      <ul class="task-list">
+        <li class="task-item done"><span class="task-icon">✓</span>Dashboard overview, ads stats, users list + suspend / reinstate</li>
+        <li class="task-item done"><span class="task-icon">✓</span>Ingestion: schedules, filtered runs, feed options</li>
+        <li class="task-item done"><span class="task-icon">✓</span>App notice (public GET, admin PUT) + migration</li>
+        <li class="task-item done"><span class="task-icon">✓</span>Feature switches (public GET, admin PUT) + migration</li>
+        <li class="task-item pending"><span class="task-icon">○</span>Ads switch enforced on the server (today the app hides slots only)</li>
+        <li class="task-item pending"><span class="task-icon">○</span>Minimum app version endpoint</li>
+      </ul>
+      <div class="cell-mini-bar">
+        <div class="mini-bar"><div class="mini-bar-fill" style="width:80%;background:var(--done)"></div></div>
+        <div class="mini-pct">4 of 6 tracked items done</div>
+      </div>
+    </div>
+    <div class="tl-cell">
+      <div class="cell-header">
+        <span class="cell-badge badge-app">App</span>
+        <span class="cell-title">Admin app screens</span>
+      </div>
+      <ul class="task-list">
+        <li class="task-item done"><span class="task-icon">✓</span>Dashboard, Ads, Users, App tabs; switch to user view and back</li>
+        <li class="task-item done"><span class="task-icon">✓</span>Ads analytics: campaign detail, comparison, placement breakdown</li>
+        <li class="task-item done"><span class="task-icon">✓</span>App message editor + banner + maintenance page for users</li>
+        <li class="task-item done"><span class="task-icon">✓</span>Feature switches editor; Ads / Reports / Estimator hidden when off</li>
+        <li class="task-item warn"><span class="task-icon">!</span>Verify all of the above on the phone</li>
+        <li class="task-item pending"><span class="task-icon">○</span>"Update required" screen (minimum version)</li>
+      </ul>
+      <div class="cell-mini-bar">
+        <div class="mini-bar"><div class="mini-bar-fill" style="width:80%;background:var(--partial)"></div></div>
+        <div class="mini-pct">4 of 6 tracked items done · phone check pending</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="section"><div class="section-title">Phase 4: Razorpay — status carried over from 3 Oct (not re-checked)</div></div>
 <div class="timeline">
   <div class="tl-row">
     <div class="tl-phase">
@@ -371,17 +419,10 @@
         <span class="cell-title">Razorpay + Subscriptions</span>
       </div>
       <ul class="task-list">
-        <li class="task-item done"><span class="task-icon">✓</span>RazorpayPaymentGateway (HMAC-SHA256)</li>
-        <li class="task-item done"><span class="task-icon">✓</span>Dev-mode webhook bypass (IWebHostEnvironment check)</li>
-        <li class="task-item done"><span class="task-icon">✓</span>API startup verified (no WebhookSecret required in dev)</li>
-        <li class="task-item done"><span class="task-icon">✓</span>RazorpayOptions: WebhookSecret optional</li>
-        <li class="task-item pending"><span class="task-icon">○</span>Payment initialization endpoint testing</li>
+        <li class="task-item done"><span class="task-icon">✓</span>RazorpayPaymentGateway (HMAC-SHA256), dev-mode webhook bypass</li>
+        <li class="task-item pending"><span class="task-icon">○</span>Payment initialisation endpoint testing</li>
         <li class="task-item pending"><span class="task-icon">○</span>Client-side confirmation flow</li>
       </ul>
-      <div class="cell-mini-bar">
-        <div class="mini-bar"><div class="mini-bar-fill" style="width:30%;background:var(--partial)"></div></div>
-        <div class="mini-pct">30% · ⏳ Testing in progress (blocked on mobile connectivity)</div>
-      </div>
     </div>
     <div class="tl-cell">
       <div class="cell-header">
@@ -389,16 +430,9 @@
         <span class="cell-title">Subscription + Billing UI</span>
       </div>
       <ul class="task-list">
-        <li class="task-item pending"><span class="task-icon">○</span>razorpay_flutter ^1.3.7 integration</li>
-        <li class="task-item pending"><span class="task-icon">○</span>PlansPage, CheckoutPage, SuccessPage</li>
-        <li class="task-item pending"><span class="task-icon">○</span>ProBanner + SubscriptionGuard</li>
-        <li class="task-item pending"><span class="task-icon">○</span>API connectivity testing (debug: 10.0.2.2 vs PC IP)</li>
-        <li class="task-item pending"><span class="task-icon">○</span>OTP delivery verification on mobile</li>
+        <li class="task-item pending"><span class="task-icon">○</span>Re-verify plans, checkout and success screens on the phone</li>
+        <li class="task-item pending"><span class="task-icon">○</span>Msg91 DLT TemplateId; rotate the key shared in chat</li>
       </ul>
-      <div class="cell-mini-bar">
-        <div class="mini-bar"><div class="mini-bar-fill" style="width:10%;background:var(--pending)"></div></div>
-        <div class="mini-pct">10% · ⏳ Blocked on mobile diagnostics</div>
-      </div>
     </div>
   </div>
 </div>
@@ -406,38 +440,39 @@
 <div class="section"><div class="section-title">What's Next</div></div>
 <div class="next-steps">
   <div class="ns-card">
-    <div class="ns-num">PRIORITY 1</div>
-    <div class="ns-title">Fix Mobile → API Connectivity</div>
-    <div class="ns-detail">
-      <strong>On PC:</strong> Run <code style="font-family:monospace;font-size:11px">dotnet run</code> in api folder. Verify http://localhost:5189/health works. Check Windows Firewall allows port 5189.<br>
-      <strong>On Mobile/Emulator:</strong> Test http://<PC-IPv4-Address>:5189/health (not 10.0.2.2 for real device).
-    </div>
-    <div class="ns-tag">blocker</div>
+    <div class="ns-num">SUGGESTED 1</div>
+    <div class="ns-title">Push the commit</div>
+    <div class="ns-detail">Committed locally as 7fa50ec on branch <code style="font-family:monospace;font-size:11px">payment-integration</code> (1 Nov). Pushing to GitHub backs it up off this PC. Claude pushes only when asked.</div>
+    <div class="ns-tag">safety</div>
   </div>
   <div class="ns-card">
-    <div class="ns-num">PRIORITY 2</div>
-    <div class="ns-title">Verify OTP Delivery Config</div>
-    <div class="ns-detail">
-      Check if <code style="font-family:monospace;font-size:11px">OtpDelivery:Msg91:AuthKey</code> is set in appsettings.json or environment variables. If not configured, LoggingOtpSender fallback will be used (dev mode). Once configured, re-test OTP on mobile.
-    </div>
-    <div class="ns-tag">blocker</div>
+    <div class="ns-num">SUGGESTED 2</div>
+    <div class="ns-title">Full data pull + more states</div>
+    <div class="ns-detail">Run the full pull and check Indore. The catalog has mandis only for Maharashtra (8) and Madhya Pradesh (1); feed rows for other states are skipped until their mandis are added.</div>
+    <div class="ns-tag">data</div>
   </div>
   <div class="ns-card">
-    <div class="ns-num">NEXT →</div>
-    <div class="ns-title">Test Payment Initialization</div>
-    <div class="ns-detail">Once mobile connects: call <code style="font-family:monospace;font-size:11px">POST /api/v1/billing/orders/initialize</code> from app. Verify order creation in Razorpay. Webhook testing bypassed in dev mode.</div>
-    <div class="ns-tag">phase4-partial</div>
+    <div class="ns-num">SUGGESTED 3</div>
+    <div class="ns-title">Minimum app version</div>
+    <div class="ns-detail">An "update required" screen for old builds, driven from the admin app, like the maintenance message.</div>
+    <div class="ns-tag app">app + api</div>
   </div>
   <div class="ns-card">
-    <div class="ns-num">THEN →</div>
-    <div class="ns-title">Phase 5E — Device Verification</div>
-    <div class="ns-detail">NDK 28.2 ready. Run token refresh scenarios. Resolve D1 (domain) first. Complete deep-link testing on real device.</div>
-    <div class="ns-tag app">Phase 5E</div>
+    <div class="ns-num">THEN</div>
+    <div class="ns-title">Release prep</div>
+    <div class="ns-detail">Signed release build (key.properties), production API URL and hosting (D1 app.jagtech.in), Server setting kept debug-only, Msg91 TemplateId, Razorpay re-check.</div>
+    <div class="ns-tag">release</div>
+  </div>
+  <div class="ns-card">
+    <div class="ns-num">DECIDE</div>
+    <div class="ns-title">Angular admin vs Flutter admin</div>
+    <div class="ns-detail">The Flutter admin app now covers Dashboard, Ads, Users and App. Decide whether the Angular admin stays for catalog and market editing only.</div>
+    <div class="ns-tag">decision</div>
   </div>
 </div>
 
 <footer>
-  MolBhav · JagTech · Last updated 3 Oct 2026 · API + App · Phase 4 Testing Underway
+  MolBhav · JagTech · Last updated 1 Nov 2026 · API + App + Admin app · phone verification and full data pull pending
 </footer>
 
 <script>

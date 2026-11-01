@@ -1,3 +1,4 @@
+using Microsoft.Extensions.Logging.Abstractions;
 using MolBhav.Application.Abstractions.Authentication;
 using MolBhav.Application.Features.Identity;
 using MolBhav.Application.Features.Identity.GoogleLogin;
@@ -26,7 +27,7 @@ public sealed class GoogleSignInTests
     }
 
     private Task<Result<LoginSessionResponse>> Login(string? phone = null) =>
-        new LoginWithGoogleCommandHandler(_ctx.LoginMethods, _verifier, _ctx.Users, _ctx.RefreshTokens, _ctx.Jwt, _ctx.Clock)
+        new LoginWithGoogleCommandHandler(_ctx.LoginMethods, _verifier, _ctx.Users, _ctx.RefreshTokens, _ctx.Jwt, _ctx.Clock, NullLogger<LoginWithGoogleCommandHandler>.Instance)
             .Handle(new LoginWithGoogleCommand(Token, phone), CancellationToken.None);
 
     private User LinkedUser(string? password = Password)
@@ -122,7 +123,7 @@ public sealed class GoogleSignInTests
         _currentUser.GetRequiredUserId().Returns(me.Id);
         _ctx.Users.GetByIdAsync(me.Id, Arg.Any<CancellationToken>()).Returns(me);
 
-        var result = await new LinkGoogleCommandHandler(_ctx.LoginMethods, _verifier, _ctx.Users, _currentUser, _ctx.Clock)
+        var result = await new LinkGoogleCommandHandler(_ctx.LoginMethods, _verifier, _ctx.Users, _currentUser, _ctx.Clock, NullLogger<LinkGoogleCommandHandler>.Instance)
             .Handle(new LinkGoogleCommand(Token), CancellationToken.None);
 
         Assert.Equal("Auth.GoogleLinkedElsewhere", result.Error.Code);
@@ -136,7 +137,7 @@ public sealed class GoogleSignInTests
         _currentUser.GetRequiredUserId().Returns(me.Id);
         _ctx.Users.GetByIdAsync(me.Id, Arg.Any<CancellationToken>()).Returns(me);
 
-        var result = await new LinkGoogleCommandHandler(_ctx.LoginMethods, _verifier, _ctx.Users, _currentUser, _ctx.Clock)
+        var result = await new LinkGoogleCommandHandler(_ctx.LoginMethods, _verifier, _ctx.Users, _currentUser, _ctx.Clock, NullLogger<LinkGoogleCommandHandler>.Instance)
             .Handle(new LinkGoogleCommand(Token), CancellationToken.None);
 
         Assert.Equal("kisan@example.com", result.Value.Email);

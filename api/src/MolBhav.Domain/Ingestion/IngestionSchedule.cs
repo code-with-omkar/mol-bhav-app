@@ -77,7 +77,7 @@ public sealed class IngestionSchedule : AggregateRoot<Guid>, IAuditableEntity
         return configured.IsFailure ? Result.Failure<IngestionSchedule>(configured.Error) : schedule;
     }
 
-    /// <summary>Replaces the whole schedule and recomputes the next run from <paramref name="nowUtc"/>.</summary>
+    /// <summary>Replaces the whole schedule and recomputes the next run from <paramref name="nowUtc"/>. Scheduled runs always pull everything.</summary>
     public Result Configure(
         bool isEnabled,
         IngestionScheduleFrequency frequency,

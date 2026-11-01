@@ -139,7 +139,8 @@ class MbCategoryRow extends StatelessWidget {
   }
 }
 
-/// Category tile for the 2-up grid on Home ("What are you buying today?").
+/// Compact category tile for the 2-up grid on Home ("What are you buying
+/// today?"): icon, name and chevron on one row.
 class MbCategoryTile extends StatelessWidget {
   const MbCategoryTile({
     super.key,
@@ -185,50 +186,47 @@ class MbCategoryTile extends StatelessWidget {
           clipBehavior: Clip.antiAlias,
           child: InkWell(
             onTap: onTap,
-            child: ConstrainedBox(
-              constraints: const BoxConstraints(minHeight: 164),
-              child: Padding(
-                padding: const EdgeInsets.all(MbSpacing.s4),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Container(
-                      width: 44,
-                      height: 44,
-                      alignment: Alignment.center,
-                      decoration: BoxDecoration(
-                        color: discBg,
-                        shape: BoxShape.circle,
-                      ),
-                      child: MbIcon(icon, color: discFg),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(
+                horizontal: MbSpacing.s3,
+                vertical: MbSpacing.s3,
+              ),
+              child: Row(
+                children: [
+                  Container(
+                    width: 36,
+                    height: 36,
+                    alignment: Alignment.center,
+                    decoration: BoxDecoration(
+                      color: discBg,
+                      shape: BoxShape.circle,
                     ),
-                    const SizedBox(height: MbSpacing.s3),
-                    Text(
-                      title,
-                      style: t.title.copyWith(
-                        fontSize: 17,
-                        height: 24 / 17,
-                        color: c.ink,
-                      ),
+                    child: MbIcon(icon, size: 20, color: discFg),
+                  ),
+                  const SizedBox(width: MbSpacing.s2),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text(
+                          title,
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                          style: t.title.copyWith(color: c.ink),
+                        ),
+                        if (subtitle != null)
+                          Text(
+                            subtitle!,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: t.cardSubtitle.copyWith(color: c.inkMuted),
+                          ),
+                      ],
                     ),
-                    if (subtitle != null) ...[
-                      const SizedBox(height: 2),
-                      Text(
-                        subtitle!,
-                        style: t.cardSubtitle.copyWith(color: c.inkMuted),
-                      ),
-                    ],
-                    const SizedBox(height: MbSpacing.s3),
-                    Align(
-                      alignment: Alignment.bottomRight,
-                      child: MbIcon(
-                        MbIcons.chevronRight,
-                        size: 18,
-                        color: c.inkMuted,
-                      ),
-                    ),
-                  ],
-                ),
+                  ),
+                  MbIcon(MbIcons.chevronRight, size: 16, color: c.inkMuted),
+                ],
               ),
             ),
           ),

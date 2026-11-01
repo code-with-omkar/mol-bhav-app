@@ -5,6 +5,7 @@ import 'package:mol_bhav/core/error/result.dart';
 import 'package:mol_bhav/features/alerts/data/alerts_data.dart';
 import 'package:mol_bhav/features/alerts/domain/alerts.dart';
 import 'package:mol_bhav/features/catalog/domain/catalog.dart';
+import 'package:mol_bhav/features/opportunities/data/opportunities_data.dart';
 
 class _MockRemote extends Mock implements AlertsRemoteDataSource {}
 
@@ -12,10 +13,14 @@ class _MockCatalog extends Mock implements CatalogRepository {}
 
 class _MockCache extends Mock implements ResponseCache {}
 
+class _MockOpportunities extends Mock
+    implements OpportunitiesRemoteDataSource {}
+
 void main() {
   late _MockRemote remote;
   late AlertsRepositoryImpl repository;
   late _MockCache cache;
+  late _MockOpportunities opportunities;
 
   setUpAll(() {
     registerFallbackValue(<String, dynamic>{});
@@ -27,7 +32,15 @@ void main() {
   setUp(() {
     remote = _MockRemote();
     cache = _MockCache();
-    repository = AlertsRepositoryImpl(remote, _MockCatalog(), cache);
+    opportunities = _MockOpportunities();
+    repository = AlertsRepositoryImpl(
+      remote,
+      _MockCatalog(),
+      cache,
+      opportunities,
+    );
+    when(() => opportunities.getOpportunities(any(), any()))
+        .thenAnswer((_) async => const []);
     when(() => remote.create(any())).thenAnswer((_) async {});
     when(() => cache.read(any())).thenReturn(null);
     when(() => cache.write(any(), any())).thenAnswer((_) async {});
@@ -109,7 +122,13 @@ void main() {
 
   test('saved alerts are shown first, then the live list', () async {
     when(() => cache.read(AlertsRepositoryImpl.alertsKey)).thenReturn(
-      CachedResponse(data: [_alert('a1')], savedAt: DateTime(2026, 10, 4)),
+      CachedResponse(
+        data: {
+          'alerts': [_alert('a1')],
+          'opportunities': const <dynamic>[],
+        },
+        savedAt: DateTime(2026, 10, 4),
+      ),
     );
     when(() => remote.getAlerts(any(), any()))
         .thenAnswer((_) async => [_alert('a1'), _alert('a2')]);
@@ -118,7 +137,60 @@ void main() {
 
     expect(results.map((r) => (r as Ok<List<AlertItem>>).value.length), [1, 2]);
   });
+
+  test('opportunities join the inbox, newest first', () async {
+    when(() => remote.getAlerts(any(), any()))
+        .thenAnswer((_) async => [_alert('a1')]);
+    when(() => opportunities.getOpportunities(any(), any()))
+        .thenAnswer((_) async => [_opportunity('o1')]);
+
+    final result = await repository.watchAlerts(AlertFilter.all).last;
+
+    final items = (result as Ok<List<AlertItem>>).value;
+    expect(items.map((a) => a.id), ['o1', 'a1']);
+    final o = items.first;
+    expect(o.kind, AlertKind.opportunity);
+    expect(o.opportunityId, 'o1');
+    expect(o.productName, 'Onion (Red)');
+    expect(o.locationName, 'Lasalgaon APMC');
+    expect(o.homeLocationName, 'Pune APMC');
+    expect(o.percentChange, -15.83);
+  });
+
+  test('alerts still load when opportunities fail', () async {
+    when(() => remote.getAlerts(any(), any()))
+        .thenAnswer((_) async => [_alert('a1')]);
+    when(() => opportunities.getOpportunities(any(), any()))
+        .thenThrow(Exception('offline'));
+
+    final result = await repository.watchAlerts(AlertFilter.all).last;
+
+    expect((result as Ok<List<AlertItem>>).value.map((a) => a.id), ['a1']);
+  });
 }
+
+Map<String, dynamic> _opportunity(String id) => {
+  'id': id,
+  'product': {
+    'id': 'p1',
+    'name': 'Onion',
+    'defaultUnit': {'symbol': 'q'},
+  },
+  'variantName': 'Red',
+  'home': {'locationId': 'm1', 'name': 'Pune APMC', 'price': 2400},
+  'best': {
+    'locationId': 'm2',
+    'name': 'Lasalgaon APMC',
+    'districtName': 'Nashik',
+    'price': 2020,
+  },
+  'landedPrice': 2020,
+  'savingsPercent': 15.83,
+  'savingsPerUnit': 380,
+  'priceDate': '2026-10-04',
+  'detectedAtUtc': '2026-10-05T04:30:00Z',
+  'isRead': false,
+};
 
 Map<String, dynamic> _alert(String id) => {
   'id': id,

@@ -3,6 +3,7 @@ import 'package:injectable/injectable.dart';
 
 import '../cache/response_cache.dart';
 import '../storage/token_storage.dart';
+import 'jwt_roles.dart';
 
 enum SessionStatus {
   /// No stored session: the user must log in.
@@ -26,8 +27,13 @@ class SessionManager extends ChangeNotifier {
 
   SessionStatus _status = SessionStatus.signedOut;
   bool _expired = false;
+  bool _isAdmin = false;
 
   SessionStatus get status => _status;
+
+  /// The signed-in user has the Admin role (from the access token), so the
+  /// router can send them to the admin app before any profile has loaded.
+  bool get isAdmin => _isAdmin;
 
   bool get hasSession => _status != SessionStatus.signedOut;
 
@@ -41,6 +47,7 @@ class SessionManager extends ChangeNotifier {
       _status = await _tokens.readOnboarded()
           ? SessionStatus.signedIn
           : SessionStatus.onboarding;
+      _isAdmin = tokenHasRole(await _tokens.readAccessToken(), 'Admin');
     }
   }
 
@@ -52,6 +59,7 @@ class SessionManager extends ChangeNotifier {
     await _tokens.save(accessToken: accessToken, refreshToken: refreshToken);
     await _tokens.saveOnboarded(onboarded);
     _expired = false;
+    _isAdmin = tokenHasRole(accessToken, 'Admin');
     _set(onboarded ? SessionStatus.signedIn : SessionStatus.onboarding);
   }
 
@@ -81,6 +89,7 @@ class SessionManager extends ChangeNotifier {
     // Cached prices belong to the signed-in user.
     await _cache.clear();
     _expired = expired;
+    _isAdmin = false;
     _set(SessionStatus.signedOut);
   }
 

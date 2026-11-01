@@ -1,3 +1,4 @@
+using Microsoft.Extensions.Logging;
 using MolBhav.Application.Abstractions.Authentication;
 using MolBhav.Application.Abstractions.Identity;
 using MolBhav.Application.Abstractions.Messaging;
@@ -12,25 +13,28 @@ namespace MolBhav.Application.Features.Identity.GoogleLogin;
 /// belongs to an account is refused (409): linking Google to an existing account requires being signed in to it
 /// (<c>LinkGoogleCommand</c>), otherwise anyone could attach their Google account to someone else's number.
 /// </summary>
-internal sealed class LoginWithGoogleCommandHandler(
+internal sealed partial class LoginWithGoogleCommandHandler(
     ILoginMethods loginMethods,
     IGoogleIdTokenVerifier verifier,
     IUserRepository users,
     IRefreshTokenRepository refreshTokens,
     IJwtTokenService jwtTokenService,
-    TimeProvider timeProvider)
+    TimeProvider timeProvider,
+    ILogger<LoginWithGoogleCommandHandler> logger)
     : ICommandHandler<LoginWithGoogleCommand, LoginSessionResponse>
 {
     public async Task<Result<LoginSessionResponse>> Handle(LoginWithGoogleCommand request, CancellationToken cancellationToken)
     {
         if (!loginMethods.GoogleEnabled)
         {
+            LogRefused(logger, "Google sign-in is disabled (Authentication:Google:Enabled)");
             return IdentityErrors.LoginMethodDisabled;
         }
 
         var google = await verifier.VerifyAsync(request.IdToken, cancellationToken);
         if (google is null)
         {
+            LogRefused(logger, "the Google ID token could not be verified (see the 'Google ID token rejected' line)");
             return IdentityErrors.GoogleTokenInvalid;
         }
 
@@ -41,6 +45,7 @@ internal sealed class LoginWithGoogleCommandHandler(
         {
             if (user.Status != UserStatus.Active)
             {
+                LogRefused(logger, "the linked account is not active");
                 return IdentityErrors.Suspended;
             }
 
@@ -51,6 +56,7 @@ internal sealed class LoginWithGoogleCommandHandler(
 
         if (string.IsNullOrWhiteSpace(request.PhoneNumber))
         {
+            LogRefused(logger, "no MolBhav account is linked to this Google account yet; asking the app for a mobile number");
             return IdentityErrors.PhoneRequired;
         }
 
@@ -62,6 +68,7 @@ internal sealed class LoginWithGoogleCommandHandler(
 
         if (await users.GetByPhoneNumberAsync(phone.Value, cancellationToken) is not null)
         {
+            LogRefused(logger, "that mobile number already has an account; log in with the password and use Link Google");
             return IdentityErrors.PhoneTakenForGoogle;
         }
 
@@ -77,4 +84,7 @@ internal sealed class LoginWithGoogleCommandHandler(
 
         return UserSessions.Issue(created, isNewUser: true, jwtTokenService, refreshTokens);
     }
+
+    [LoggerMessage(Level = LogLevel.Warning, Message = "Google sign-in refused: {Reason}.")]
+    private static partial void LogRefused(ILogger logger, string reason);
 }

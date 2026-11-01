@@ -8,6 +8,16 @@ abstract final class AppRoutes {
   static const editProfile = '$businessProfile?edit=1';
   static const editCategories = '$selectCategory?edit=1';
 
+  // The admin app (admins only): its own tabs, separate from the user app's.
+  static const admin = '/admin';
+  static const adminAds = '/admin/ads';
+  static const adminUsers = '/admin/users';
+  static const adminApp = '/admin/app';
+  static const adminAppSchedules = '/admin/app/schedules';
+  static const adminHistory = '/admin/app/history';
+  static const adminAppNotice = '/admin/app/notice';
+  static const adminAppFeatures = '/admin/app/features';
+
   // Bottom-nav tabs.
   static const home = '/home';
   static const markets = '/markets';
@@ -45,6 +55,18 @@ abstract final class AppRoutes {
     path: billingCheckout,
     queryParameters: {'plan': planCode},
   ).toString();
+
+  /// One price-feed run in the admin app.
+  static String adminJob(String jobId) =>
+      '$adminHistory/${Uri.encodeComponent(jobId)}';
+
+  /// One ad campaign's daily delivery in the admin app.
+  static String adminCampaign(String campaignId) =>
+      '$adminAds/${Uri.encodeComponent(campaignId)}';
+
+  /// One user in the admin app.
+  static String adminUser(String userId) =>
+      '$adminUsers/${Uri.encodeComponent(userId)}';
 
   static String opportunity(String id) =>
       '/opportunities/${Uri.encodeComponent(id)}';

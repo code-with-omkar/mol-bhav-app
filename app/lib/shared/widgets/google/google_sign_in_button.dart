@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 import '../../../core/auth/google_id_token_source.dart';
@@ -46,8 +47,11 @@ class _GoogleSignInButtonState extends State<GoogleSignInButton> {
     super.initState();
     _ready.then((_) {
       if (!mounted || _source.canAuthenticate) return;
-      _webTokens = _source.webIdTokens.listen(_deliver);
-    }, onError: (Object _) {});
+      _webTokens = _source.webIdTokens.listen(
+        _deliver,
+        onError: (Object e) => _report('web button', e),
+      );
+    }, onError: (Object e) => _report('initialize', e));
   }
 
   @override
@@ -57,19 +61,54 @@ class _GoogleSignInButtonState extends State<GoogleSignInButton> {
   }
 
   void _deliver(String token) {
+    debugPrint('Google sign-in: got an ID token (${token.length} chars)');
     if (!mounted || !widget.enabled) return;
     widget.onIdToken(token);
     unawaited(_source.signOut());
   }
 
   Future<void> _pick() async {
+    debugPrint('Google sign-in: button tapped');
     try {
       await _ready;
       final token = await _source.authenticate();
-      if (token != null) _deliver(token);
-    } on Object {
-      widget.onError?.call();
+      if (token != null) {
+        _deliver(token);
+      } else {
+        _note('no account chosen');
+      }
+    } on Object catch (e) {
+      _report('authenticate', e);
     }
+  }
+
+  /// A closed picker is normal for users, but on Android a wrong SHA-1 or
+  /// client id looks the same: in debug builds say so instead of doing nothing.
+  void _note(String what) {
+    debugPrint('Google sign-in: $what');
+    if (!mounted || !kDebugMode) return;
+    ScaffoldMessenger.maybeOf(context)?.showSnackBar(
+      SnackBar(
+        content: Text(
+          'Google sign-in: $what. If you did not cancel, check the Android '
+          'SHA-1 and the Web client id (see the flutter run log).',
+        ),
+      ),
+    );
+  }
+
+  /// Google errors carry the real cause (wrong SHA-1 / package name, client
+  /// id mismatch, no Google account on the device): always log it, and in
+  /// debug builds show it so a misconfiguration is visible at once.
+  void _report(String step, Object error) {
+    debugPrint('Google sign-in $step failed: $error');
+    if (!mounted) return;
+    if (kDebugMode) {
+      ScaffoldMessenger.maybeOf(context)?.showSnackBar(
+        SnackBar(content: Text('Google sign-in ($step): $error')),
+      );
+    }
+    widget.onError?.call();
   }
 
   @override

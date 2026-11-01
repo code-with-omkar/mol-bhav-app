@@ -10,11 +10,14 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using MolBhav.Application.Abstractions.Alerting;
+using MolBhav.Application.Abstractions.AppNotices;
+using MolBhav.Application.Abstractions.FeatureSwitches;
 using MolBhav.Application.Abstractions.Authentication;
 using MolBhav.Application.Abstractions.Billing;
 using MolBhav.Application.Abstractions.Catalog;
 using MolBhav.Application.Abstractions.Data;
 using MolBhav.Application.Abstractions.Identity;
+using MolBhav.Application.Abstractions.Admin;
 using MolBhav.Application.Abstractions.Ingestion;
 using MolBhav.Application.Abstractions.Localization;
 using MolBhav.Application.Abstractions.Market;
@@ -27,6 +30,7 @@ using MolBhav.Application.Abstractions.Reporting;
 using MolBhav.Application.Abstractions.Support;
 using MolBhav.Application.Abstractions.Watchlist;
 using MolBhav.Application.Abstractions.Weather;
+using MolBhav.Infrastructure.Alerting;
 using MolBhav.Infrastructure.Authentication;
 using MolBhav.Infrastructure.Billing;
 using MolBhav.Infrastructure.Billing.Razorpay;
@@ -34,6 +38,7 @@ using MolBhav.Infrastructure.Ingestion;
 using MolBhav.Infrastructure.Messaging;
 using MolBhav.Infrastructure.Messaging.Outbox;
 using MolBhav.Infrastructure.Monetization;
+using MolBhav.Domain.Notification;
 using MolBhav.Infrastructure.Notifications;
 using MolBhav.Infrastructure.Persistence;
 using MolBhav.Infrastructure.Persistence.Interceptors;
@@ -42,6 +47,7 @@ using MolBhav.Infrastructure.Persistence.Read.Alerting;
 using MolBhav.Infrastructure.Persistence.Read.Billing;
 using MolBhav.Infrastructure.Persistence.Read.Catalog;
 using MolBhav.Infrastructure.Persistence.Read.Identity;
+using MolBhav.Infrastructure.Persistence.Read.Admin;
 using MolBhav.Infrastructure.Persistence.Read.Ingestion;
 using MolBhav.Infrastructure.Persistence.Read.Localization;
 using MolBhav.Infrastructure.Persistence.Read.Market;
@@ -57,6 +63,8 @@ using MolBhav.Infrastructure.Persistence.Read.Support;
 using MolBhav.Infrastructure.Persistence.Read.Watchlist;
 using MolBhav.Infrastructure.Persistence.Read.Weather;
 using MolBhav.Infrastructure.Persistence.Repositories.Alerting;
+using MolBhav.Infrastructure.Persistence.Repositories.AppNotices;
+using MolBhav.Infrastructure.Persistence.Repositories.FeatureSwitches;
 using MolBhav.Infrastructure.Persistence.Repositories.Billing;
 using MolBhav.Infrastructure.Persistence.Repositories.Catalog;
 using MolBhav.Infrastructure.Persistence.Repositories.Identity;
@@ -161,6 +169,8 @@ public static class DependencyInjection
         services.AddScoped<IAlertRuleRepository, AlertRuleRepository>();
         services.AddScoped<IAlertRepository, AlertRepository>();
         services.AddScoped<IAlertingReadService, AlertingReadService>();
+        services.AddScoped<IMarketOpportunityRepository, MarketOpportunityRepository>();
+        services.AddScoped<IMarketOpportunityReadService, MarketOpportunityReadService>();
 
         return services;
     }
@@ -189,7 +199,7 @@ public static class DependencyInjection
         var wa = configuration.GetSection(WhatsAppOptions.SectionName).Get<WhatsAppOptions>() ?? new WhatsAppOptions();
 
         var hasFcm = !string.IsNullOrWhiteSpace(fcm.ServiceAccountJson);
-        var hasWhatsApp = !string.IsNullOrWhiteSpace(wa.AccessToken) && !string.IsNullOrWhiteSpace(wa.PhoneNumberId);
+        var hasWhatsApp = wa.IsConfigured;
 
         if (!environment.IsDevelopment() && (!hasFcm || !hasWhatsApp))
         {
@@ -199,36 +209,50 @@ public static class DependencyInjection
                 "via user-secrets or environment variables.");
         }
 
-        if (hasFcm && hasWhatsApp)
-        {
-            // Real FCM + WhatsApp senders.
-            services.Configure<FcmCredentialOptions>(configuration.GetSection(FcmCredentialOptions.SectionName));
-            services.Configure<WhatsAppOptions>(configuration.GetSection(WhatsAppOptions.SectionName));
+        // Each channel goes live on its own: the real gateway when its credentials are configured, otherwise the
+        // logging stand-in (Development only, enforced above).
+        services.AddScoped<LoggingNotificationSender>();
 
+        if (hasFcm)
+        {
+            services.Configure<FcmCredentialOptions>(configuration.GetSection(FcmCredentialOptions.SectionName));
             services.AddSingleton<FirebaseMessaging>(_ =>
             {
                 var credential = GoogleCredential.FromJson(fcm.ServiceAccountJson);
                 var app = FirebaseApp.Create(new AppOptions { Credential = credential });
                 return FirebaseMessaging.GetMessaging(app);
             });
+            services.AddScoped<FcmPushSender>();
+            services.AddKeyedScoped<INotificationSender>(
+                NotificationChannel.Push, (sp, _) => sp.GetRequiredService<FcmPushSender>());
+        }
+        else
+        {
+            services.AddKeyedScoped<INotificationSender>(
+                NotificationChannel.Push, (sp, _) => sp.GetRequiredService<LoggingNotificationSender>());
+        }
 
+        if (hasWhatsApp)
+        {
+            services.Configure<WhatsAppOptions>(configuration.GetSection(WhatsAppOptions.SectionName));
             services.AddHttpClient(WhatsAppCloudSender.HttpClientName, (sp, client) =>
             {
-                client.BaseAddress = new Uri("https://graph.facebook.com/v19.0/");
+                client.BaseAddress = new Uri("https://graph.facebook.com/");
                 var token = sp.GetRequiredService<IOptions<WhatsAppOptions>>().Value.AccessToken;
                 client.DefaultRequestHeaders.Authorization =
                     new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
             });
-
-            services.AddScoped<FcmPushSender>();
             services.AddScoped<WhatsAppCloudSender>();
-            services.AddScoped<INotificationSender, CompositeNotificationSender>();
+            services.AddKeyedScoped<INotificationSender>(
+                NotificationChannel.WhatsApp, (sp, _) => sp.GetRequiredService<WhatsAppCloudSender>());
         }
         else
         {
-            // Dev fallback: neither key is configured — log only.
-            services.AddScoped<INotificationSender, LoggingNotificationSender>();
+            services.AddKeyedScoped<INotificationSender>(
+                NotificationChannel.WhatsApp, (sp, _) => sp.GetRequiredService<LoggingNotificationSender>());
         }
+
+        services.AddScoped<INotificationSender, CompositeNotificationSender>();
 
         return services;
     }
@@ -343,7 +367,10 @@ public static class DependencyInjection
         services.AddScoped<IDataIngestionJobRepository, DataIngestionJobRepository>();
         services.AddScoped<IDataIngestionErrorRepository, DataIngestionErrorRepository>();
         services.AddScoped<IIngestionScheduleRepository, IngestionScheduleRepository>();
+        services.AddScoped<ISourceFeedOptionsRepository, SourceFeedOptionsRepository>();
         services.AddScoped<IIngestionReadService, IngestionReadService>();
+        services.AddScoped<IAdminDashboardReadService, AdminDashboardReadService>();
+        services.AddScoped<IAdminUserReadService, AdminUserReadService>();
 
         // Keyed per PriceSource.Code; unknown codes fall back to the stub (construction sources until a feed exists).
         services.AddOptions<AgmarknetOptions>()
@@ -351,6 +378,9 @@ public static class DependencyInjection
             .Validate(o => o.PageSize is >= 1 and <= 1000, "Agmarknet:PageSize must be between 1 and 1000.")
             .Validate(o => o.ThrottleDelayMs is >= 0 and <= 10_000, "Agmarknet:ThrottleDelayMs must be between 0 and 10000.")
             .Validate(o => o.RequestTimeoutSeconds is >= 5 and <= 300, "Agmarknet:RequestTimeoutSeconds must be between 5 and 300.")
+            .Validate(o => o.MaxRetries is >= 0 and <= 10, "Agmarknet:MaxRetries must be between 0 and 10.")
+            .Validate(o => o.RetryBaseDelaySeconds is >= 0 and <= 120, "Agmarknet:RetryBaseDelaySeconds must be between 0 and 120.")
+            .Validate(o => o.MaxRetryDelaySeconds is >= 0 and <= 600, "Agmarknet:MaxRetryDelaySeconds must be between 0 and 600.")
             .ValidateOnStart();
 
         services.AddHttpClient(AgmarknetIngestionSourceAdapter.HttpClientName, client =>
@@ -382,6 +412,16 @@ public static class DependencyInjection
         services.AddSingleton<IIngestionBackfillQueue>(sp => sp.GetRequiredService<IngestionBackfillQueue>());
         services.AddHostedService<IngestionBackfillBackgroundService>();
 
+        services.AddOptions<IngestionDropFolderOptions>()
+            .Bind(configuration.GetSection(IngestionDropFolderOptions.SectionName))
+            .Validate(o => !o.Enabled || o.UploadAsUserId != Guid.Empty, "IngestionDropFolder:UploadAsUserId is required when the drop folder is enabled.")
+            .Validate(o => !string.IsNullOrWhiteSpace(o.Path), "IngestionDropFolder:Path must not be empty.")
+            .Validate(o => o.PollIntervalSeconds is >= 1 and <= 3600, "IngestionDropFolder:PollIntervalSeconds must be between 1 and 3600.")
+            .Validate(o => o.StableSeconds is >= 0 and <= 600, "IngestionDropFolder:StableSeconds must be between 0 and 600.")
+            .Validate(o => o.MaxFileBytes is >= 1 and <= 10 * 1024 * 1024, "IngestionDropFolder:MaxFileBytes must be between 1 and 10485760.")
+            .ValidateOnStart();
+        services.AddHostedService<IngestionDropFolderBackgroundService>();
+
         services.AddOptions<SubscriptionExpiryOptions>()
             .Bind(configuration.GetSection(SubscriptionExpiryOptions.SectionName))
             .Validate(o => o.IntervalMinutes is >= 1 and <= 1440, "SubscriptionExpiry:IntervalMinutes must be between 1 and 1440.")
@@ -389,6 +429,17 @@ public static class DependencyInjection
             .ValidateOnStart();
 
         services.AddHostedService<SubscriptionExpiryBackgroundService>();
+
+        services.AddOptions<OpportunityOptions>()
+            .Bind(configuration.GetSection(OpportunityOptions.SectionName))
+            .Validate(o => o.TryGetRunTime(out _), "Opportunities:DailyRunTimeIst must be HH:mm.")
+            .Validate(o => o.PollMinutes is >= 1 and <= 1440, "Opportunities:PollMinutes must be between 1 and 1440.")
+            .Validate(o => o.MinSavingsPercent is > 0 and < 100, "Opportunities:MinSavingsPercent must be between 0 and 100.")
+            .Validate(o => o.FreshnessDays is >= 1 and <= 60, "Opportunities:FreshnessDays must be between 1 and 60.")
+            .Validate(o => o.ReferenceQuantity > 0, "Opportunities:ReferenceQuantity must be positive.")
+            .ValidateOnStart();
+        services.AddSingleton<IOpportunitySettings>(sp => sp.GetRequiredService<IOptions<OpportunityOptions>>().Value);
+        services.AddHostedService<OpportunityScanBackgroundService>();
 
         return services;
     }
@@ -431,6 +482,8 @@ public static class DependencyInjection
     private static IServiceCollection AddPromotionsModule(this IServiceCollection services)
     {
         services.AddScoped<IAdvertiserRepository, AdvertiserRepository>();
+        services.AddScoped<IAppNoticeRepository, AppNoticeRepository>();
+        services.AddScoped<IFeatureSwitchRepository, FeatureSwitchRepository>();
         services.AddScoped<ICampaignRepository, CampaignRepository>();
         services.AddScoped<IPromotionReadService, PromotionReadService>();
         services.AddScoped<IPromotionStatsWriter, PromotionStatsWriter>();

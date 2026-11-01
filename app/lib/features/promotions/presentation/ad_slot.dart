@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 
 import '../../../core/di/injection.dart';
+import '../../app_features/domain/app_features.dart';
+import '../../app_features/presentation/feature_switches_cubit.dart';
 import '../../monetization/presentation/ads/ads_visibility.dart';
 import '../../monetization/presentation/ads/native_ad_slot.dart';
 import '../domain/promotions.dart';
@@ -16,7 +18,8 @@ class AdSlot extends StatelessWidget {
   final PromotionPlacement placement;
 
   @override
-  Widget build(BuildContext context) => context.showsAds
+  Widget build(BuildContext context) =>
+      context.showsAds && context.featureOn(AppFeature.ads)
       ? _AdSlot(placement: placement)
       : const SizedBox.shrink();
 }

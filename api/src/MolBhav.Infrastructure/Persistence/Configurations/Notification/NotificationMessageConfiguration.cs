@@ -21,11 +21,16 @@ internal sealed class NotificationMessageConfiguration : IEntityTypeConfiguratio
         builder.Property(n => n.Body).HasMaxLength(NotificationMessage.BodyMaxLength).IsRequired();
         builder.Property(n => n.Status).IsRequired();
         builder.Property(n => n.FailureReason).HasMaxLength(500);
+        builder.Property(n => n.ProviderMessageId).HasMaxLength(NotificationMessage.ProviderMessageIdMaxLength);
 
         builder.HasOne<User>().WithMany().HasForeignKey(n => n.UserId).OnDelete(DeleteBehavior.Cascade).IsRequired();
 
         // The user's inbox, newest first; admin monitoring filters by status/channel.
         builder.HasIndex(n => new { n.UserId, n.CreatedAtUtc });
         builder.HasIndex(n => n.Status);
+
+        // Delivery receipts arrive keyed by the gateway's message id, so look-ups must not scan the table.
+        // Unique: one gateway message belongs to one notification (PostgreSQL allows many NULLs).
+        builder.HasIndex(n => n.ProviderMessageId).IsUnique();
     }
 }

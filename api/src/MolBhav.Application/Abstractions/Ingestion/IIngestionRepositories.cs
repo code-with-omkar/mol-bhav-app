@@ -11,6 +11,12 @@ public interface IDataIngestionErrorRepository : IRepository<DataIngestionError,
 {
 }
 
+public interface ISourceFeedOptionsRepository : IRepository<SourceFeedOptions, Guid>
+{
+    /// <summary>The names the source's last full pull saw, tracked; null until a full pull has run.</summary>
+    Task<SourceFeedOptions?> GetByPriceSourceIdAsync(Guid priceSourceId, CancellationToken cancellationToken = default);
+}
+
 public interface IIngestionScheduleRepository : IRepository<IngestionSchedule, Guid>
 {
     /// <summary>The schedule for a source, tracked; null when the source has never been scheduled.</summary>

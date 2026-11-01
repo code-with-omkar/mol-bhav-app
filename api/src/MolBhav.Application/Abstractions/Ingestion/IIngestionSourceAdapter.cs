@@ -1,3 +1,4 @@
+using MolBhav.Domain.Ingestion;
 using MolBhav.Domain.Pricing;
 
 namespace MolBhav.Application.Abstractions.Ingestion;
@@ -16,16 +17,29 @@ public interface IIngestionSourceAdapter
 }
 
 /// <summary><paramref name="AsOfDate"/> is the trading/publication date the adapter should fetch — usually "today" for a scheduled run.</summary>
-public sealed record IngestionFetchRequest(string SourceCode, DateOnly AsOfDate);
+/// <param name="SourceCode">The price source being pulled.</param>
+/// <param name="AsOfDate">The market day to pull.</param>
+/// <param name="Filter">What to ask the source for (from the source's schedule); null = everything.</param>
+public sealed record IngestionFetchRequest(string SourceCode, DateOnly AsOfDate, IngestionFilter? Filter = null);
+
+/// <summary>Names seen in a feed, spelled as the source spells them.</summary>
+public sealed record FeedNames(IReadOnlyList<string> Commodities, IReadOnlyList<FeedMarket> Markets);
 
 public sealed record IngestionFetchResult
 {
-    private IngestionFetchResult(bool isSuccess, string? failureReason, IReadOnlyList<IngestedPriceRecord> records)
+    private IngestionFetchResult(bool isSuccess, string? failureReason, IReadOnlyList<IngestedPriceRecord> records, FeedNames? feedNames = null)
     {
         IsSuccess = isSuccess;
         FailureReason = failureReason;
         Records = records;
+        FeedNames = feedNames;
     }
+
+    /// <summary>
+    /// The states/markets/commodities the feed contained, set only by a full (unfiltered) pull that saw the whole feed —
+    /// a filtered pull sees a slice and must not overwrite the full picture. Feeds the admin app's filter dropdowns.
+    /// </summary>
+    public FeedNames? FeedNames { get; }
 
     /// <summary>False when the adapter itself could not run at all (source unreachable, feed format changed, not configured). A partial/empty fetch that did run is still a success with zero records.</summary>
     public bool IsSuccess { get; }
@@ -34,7 +48,8 @@ public sealed record IngestionFetchResult
 
     public IReadOnlyList<IngestedPriceRecord> Records { get; }
 
-    public static IngestionFetchResult Success(IReadOnlyList<IngestedPriceRecord> records) => new(true, null, records);
+    public static IngestionFetchResult Success(IReadOnlyList<IngestedPriceRecord> records, FeedNames? feedNames = null) =>
+        new(true, null, records, feedNames);
 
     public static IngestionFetchResult Failed(string reason) => new(false, reason, []);
 }

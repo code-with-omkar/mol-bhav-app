@@ -39,6 +39,7 @@ class AlertItem extends Equatable {
     required this.createdAt,
     required this.isUnread,
     this.locationName,
+    this.homeLocationName,
     this.opportunityId,
     this.channel,
   });
@@ -52,6 +53,9 @@ class AlertItem extends Equatable {
   final DateTime createdAt;
   final bool isUnread;
   final String? locationName;
+
+  /// Opportunities: the home-district market [previousPrice] is from.
+  final String? homeLocationName;
   final String? opportunityId;
   final AlertChannel? channel;
 
@@ -66,6 +70,7 @@ class AlertItem extends Equatable {
     createdAt,
     isUnread,
     locationName,
+    homeLocationName,
     opportunityId,
     channel,
   ];

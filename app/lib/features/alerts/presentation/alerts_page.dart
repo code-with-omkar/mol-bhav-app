@@ -55,7 +55,7 @@ class AlertsPage extends StatelessWidget {
       body: BlocBuilder<AlertsCubit, AlertsState>(
         builder: (context, state) {
           final cubit = context.read<AlertsCubit>();
-          final alerts = state.data.data;
+          final alerts = state.visible;
           return RefreshIndicator(
             onRefresh: cubit.load,
             child: ListView(
@@ -65,14 +65,30 @@ class AlertsPage extends StatelessWidget {
                   value: state.filter,
                   onChanged: cubit.selectFilter,
                   options: [
-                    MbTabOption(value: AlertFilter.all, label: l10n.filterAll),
+                    // Counts make it obvious what each tab holds.
+                    MbTabOption(
+                      value: AlertFilter.all,
+                      label: _withCount(
+                        l10n.filterAll,
+                        state.count(AlertFilter.all),
+                        alerts,
+                      ),
+                    ),
                     MbTabOption(
                       value: AlertFilter.signals,
-                      label: l10n.filterPriceSignals,
+                      label: _withCount(
+                        l10n.filterPriceSignals,
+                        state.count(AlertFilter.signals),
+                        alerts,
+                      ),
                     ),
                     MbTabOption(
                       value: AlertFilter.opportunities,
-                      label: l10n.filterOpportunities,
+                      label: _withCount(
+                        l10n.filterOpportunities,
+                        state.count(AlertFilter.opportunities),
+                        alerts,
+                      ),
                     ),
                   ],
                 ),
@@ -82,7 +98,11 @@ class AlertsPage extends StatelessWidget {
                 else if (alerts == null)
                   const SizedBox(height: 240, child: MbLoadingView())
                 else if (alerts.isEmpty)
-                  MbEmptyView(message: l10n.alertsEmpty)
+                  MbEmptyView(
+                    message: state.filter == AlertFilter.opportunities
+                        ? l10n.opportunitiesEmpty
+                        : l10n.alertsEmpty,
+                  )
                 else
                   for (final alert in alerts) ...[
                     _AlertTile(alert: alert),
@@ -98,6 +118,10 @@ class AlertsPage extends StatelessWidget {
     );
   }
 }
+
+/// `Opportunities (3)` once loaded; the plain label while loading.
+String _withCount(String label, int count, List<AlertItem>? loaded) =>
+    loaded == null ? label : '$label ($count)';
 
 class _AlertTile extends StatelessWidget {
   const _AlertTile({required this.alert});
@@ -124,17 +148,27 @@ class _AlertTile extends StatelessWidget {
       },
       unread: alert.isUnread,
       time: context.timestamp(alert.createdAt),
-      title: location == null
+      title: alert.kind == AlertKind.opportunity && location != null
+          ? l10n.opportunityTitle(alert.productName, percent, location)
+          : location == null
           ? (rose
                 ? l10n.alertRose(alert.productName, percent)
                 : l10n.alertDropped(alert.productName, percent))
           : rose
           ? l10n.alertRoseIn(alert.productName, percent, location)
           : l10n.alertDroppedIn(alert.productName, percent, location),
-      details: [
-        l10n.alertPreviousPrice(formatInr(alert.previousPrice)),
-        l10n.alertCurrentPrice(formatInr(alert.newPrice)),
-      ],
+      details: alert.kind == AlertKind.opportunity
+          ? [
+              l10n.opportunityHomePrice(
+                alert.homeLocationName ?? '—',
+                formatInr(alert.previousPrice),
+              ),
+              l10n.opportunityLandedPrice(formatInr(alert.newPrice)),
+            ]
+          : [
+              l10n.alertPreviousPrice(formatInr(alert.previousPrice)),
+              l10n.alertCurrentPrice(formatInr(alert.newPrice)),
+            ],
       channel: switch (alert.channel) {
         AlertChannel.whatsapp => l10n.sentOnWhatsApp,
         AlertChannel.push => l10n.sentAsPush,

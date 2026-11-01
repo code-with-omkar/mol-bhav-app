@@ -236,6 +236,77 @@ class ScheduleInput extends Equatable {
   ];
 }
 
+/// A market the feed contains, with its state.
+class FilterMarket extends Equatable {
+  const FilterMarket({required this.name, required this.state});
+
+  final String name;
+  final String state;
+
+  @override
+  List<Object?> get props => [name, state];
+}
+
+/// The names a source's last full pull saw, spelled as the source spells them
+/// — the choices for a filtered "Run now". Empty until a full pull has run.
+class FilterOptions extends Equatable {
+  const FilterOptions({
+    this.states = const [],
+    this.commodities = const [],
+    this.markets = const [],
+    this.refreshedAt,
+  });
+
+  final List<String> states;
+  final List<String> commodities;
+  final List<FilterMarket> markets;
+  final DateTime? refreshedAt;
+
+  /// No full pull has run yet, so there is nothing to choose from.
+  bool get isEmpty => refreshedAt == null;
+
+  /// Market names in the chosen [states] (all markets when none are chosen).
+  List<String> marketsIn(Set<String> states) => [
+    for (final m in markets)
+      if (states.isEmpty || states.contains(m.state)) m.name,
+  ];
+
+  @override
+  List<Object?> get props => [states, commodities, markets, refreshedAt];
+}
+
+/// What one manual run asks the source for: exact source spelling, an empty
+/// list = all. Scheduled runs never filter — they always pull everything.
+class RunFilter extends Equatable {
+  const RunFilter({
+    this.states = const [],
+    this.commodities = const [],
+    this.markets = const [],
+  });
+
+  final List<String> states;
+  final List<String> commodities;
+  final List<String> markets;
+
+  bool get isEmpty => states.isEmpty && commodities.isEmpty && markets.isEmpty;
+
+  Map<String, dynamic> toJson() => {
+    'states': states,
+    'commodities': commodities,
+    'markets': markets,
+  };
+
+  @override
+  List<Object?> get props => [states, commodities, markets];
+}
+
+/// Splits the filter text field (names separated by commas or new lines) into
+/// trimmed, non-blank names. Order is kept; the server removes duplicates.
+List<String> parseFilterNames(String text) => [
+  for (final name in text.split(RegExp(r'[,\n]')))
+    if (name.trim().isNotEmpty) name.trim(),
+];
+
 /// Create / edit a price source. The code is fixed after creation (adapters
 /// and parsers are keyed by it); name, category and active flag can change.
 class PriceSourceInput extends Equatable {
@@ -292,6 +363,20 @@ const standardCsvHeader =
     'min_price,max_price,modal_price,arrival_qty,record_date';
 
 /// Admin ingestion endpoints. Every call returns 403 for a non-admin token.
+/// Result of Admin "Find opportunities now".
+class OpportunityScanSummary extends Equatable {
+  const OpportunityScanSummary({required this.found, required this.compared});
+
+  /// New opportunities created (users already given one today are skipped).
+  final int found;
+
+  /// Watchlist items with a home-district price to compare against.
+  final int compared;
+
+  @override
+  List<Object?> get props => [found, compared];
+}
+
 abstract interface class AdminIngestionRepository {
   /// Every source with its category, grouped by category on the server.
   Future<Result<List<IngestionScheduleItem>>> getSchedules();
@@ -307,11 +392,20 @@ abstract interface class AdminIngestionRepository {
   /// Returns the number of sources queued; runs finish in the background.
   Future<Result<int>> runCategory(String categoryCode);
 
+  /// Runs the market-opportunity scan now (it also runs daily).
+  Future<Result<OpportunityScanSummary>> scanOpportunities();
+
   Future<Result<void>> saveSchedule(String sourceId, ScheduleInput input);
 
+  /// The states, markets and commodities the last full pull saw.
+  Future<Result<FilterOptions>> getFilterOptions(String sourceId);
+
   /// Starts a job now for yesterday's market day; it runs inside the request,
-  /// so this returns when done.
-  Future<Result<void>> runNow(String sourceId);
+  /// so this returns when done. A non-empty [filter] narrows this run only.
+  Future<Result<void>> runNow(
+    String sourceId, {
+    RunFilter filter = const RunFilter(),
+  });
 
   /// Queues one run per day from [from] to [to] (inclusive, at most
   /// [maxBackfillDays]). Returns the number of days queued; the runs happen in

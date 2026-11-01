@@ -6,6 +6,7 @@ namespace MolBhav.Application.Features.Ingestion.Admin.UpdateIngestionSchedule;
 /// <summary>
 /// Creates or replaces a source's schedule. <paramref name="TimeOfDay"/> is IST <c>HH:mm</c>;
 /// <paramref name="DayOfWeek"/> is required for Weekly, <paramref name="IntervalHours"/> for EveryNHours.
+/// Scheduled runs always pull the full feed; a narrower pull is a manual run's filter.
 /// </summary>
 public sealed record UpdateIngestionScheduleCommand(
     Guid PriceSourceId,

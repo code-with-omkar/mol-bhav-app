@@ -438,6 +438,18 @@ abstract class AppLocalizations {
   /// **'Updated {when}'**
   String updatedAt(String when);
 
+  /// No description provided for @priceDataDelayed.
+  ///
+  /// In en, this message translates to:
+  /// **'Market prices may be delayed — our data source is having trouble.'**
+  String get priceDataDelayed;
+
+  /// No description provided for @priceDataDismiss.
+  ///
+  /// In en, this message translates to:
+  /// **'Dismiss'**
+  String get priceDataDismiss;
+
   /// No description provided for @greetingMorning.
   ///
   /// In en, this message translates to:
@@ -717,7 +729,7 @@ abstract class AppLocalizations {
   /// No description provided for @calculationLine.
   ///
   /// In en, this message translates to:
-  /// **'({reference} − {best}) × {quantity} = {total}. Freight and handling are not included yet.'**
+  /// **'({reference} − {best}) × {quantity} = {total}. Prices from other districts include transport and handling.'**
   String calculationLine(
     String reference,
     String best,
@@ -2440,6 +2452,18 @@ abstract class AppLocalizations {
   /// **'Show ads based on how you use MolBhav. Off: ads still appear but aren\'t based on you.'**
   String get adsPersonalisedSubtitle;
 
+  /// No description provided for @homeWeatherAnimationTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Home weather animation'**
+  String get homeWeatherAnimationTitle;
+
+  /// No description provided for @homeWeatherAnimationSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Moving clouds, rain and sun behind the Home header. Off: weather still shows on the icon.'**
+  String get homeWeatherAnimationSubtitle;
+
   /// Label on a paid advertiser's card.
   ///
   /// In en, this message translates to:
@@ -2457,6 +2481,672 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'When government prices are pulled automatically'**
   String get adminSchedulesSubtitle;
+
+  /// No description provided for @adminDashboardTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Admin dashboard'**
+  String get adminDashboardTitle;
+
+  /// No description provided for @adminAppTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'App management'**
+  String get adminAppTitle;
+
+  /// No description provided for @adminTabDashboard.
+  ///
+  /// In en, this message translates to:
+  /// **'Dashboard'**
+  String get adminTabDashboard;
+
+  /// No description provided for @adminTabApp.
+  ///
+  /// In en, this message translates to:
+  /// **'App'**
+  String get adminTabApp;
+
+  /// No description provided for @adminTabAds.
+  ///
+  /// In en, this message translates to:
+  /// **'Ads'**
+  String get adminTabAds;
+
+  /// No description provided for @adminFeaturesTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Feature switches'**
+  String get adminFeaturesTitle;
+
+  /// No description provided for @adminFeaturesSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Turn parts of the app on or off for everyone'**
+  String get adminFeaturesSubtitle;
+
+  /// No description provided for @adminFeaturesIntro.
+  ///
+  /// In en, this message translates to:
+  /// **'Everything is on by default. A part you switch off disappears for all users within about ten minutes, or when they reopen the app.'**
+  String get adminFeaturesIntro;
+
+  /// No description provided for @adminFeatureAds.
+  ///
+  /// In en, this message translates to:
+  /// **'Ads'**
+  String get adminFeatureAds;
+
+  /// No description provided for @adminFeatureAdsHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Sponsored cards and ad slots inside screens. Banner and reward ads are not affected.'**
+  String get adminFeatureAdsHint;
+
+  /// No description provided for @adminFeatureReports.
+  ///
+  /// In en, this message translates to:
+  /// **'Reports'**
+  String get adminFeatureReports;
+
+  /// No description provided for @adminFeatureReportsHint.
+  ///
+  /// In en, this message translates to:
+  /// **'The Reports screen and its shortcuts'**
+  String get adminFeatureReportsHint;
+
+  /// No description provided for @adminFeatureCostEstimator.
+  ///
+  /// In en, this message translates to:
+  /// **'Cost estimator'**
+  String get adminFeatureCostEstimator;
+
+  /// No description provided for @adminFeatureCostEstimatorHint.
+  ///
+  /// In en, this message translates to:
+  /// **'The cost estimator and its shortcuts'**
+  String get adminFeatureCostEstimatorHint;
+
+  /// No description provided for @appNoticeDismiss.
+  ///
+  /// In en, this message translates to:
+  /// **'Close message'**
+  String get appNoticeDismiss;
+
+  /// No description provided for @appNoticeMaintenanceTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'We will be back soon'**
+  String get appNoticeMaintenanceTitle;
+
+  /// No description provided for @appNoticeCheckAgain.
+  ///
+  /// In en, this message translates to:
+  /// **'Check again'**
+  String get appNoticeCheckAgain;
+
+  /// No description provided for @adminNoticeTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'App message'**
+  String get adminNoticeTitle;
+
+  /// No description provided for @adminNoticeSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Show a note or a maintenance page to all users'**
+  String get adminNoticeSubtitle;
+
+  /// No description provided for @adminNoticeIntro.
+  ///
+  /// In en, this message translates to:
+  /// **'One message that every user of the app sees. Switch it off when it is no longer needed; the text is kept.'**
+  String get adminNoticeIntro;
+
+  /// No description provided for @adminNoticeShow.
+  ///
+  /// In en, this message translates to:
+  /// **'Show to users'**
+  String get adminNoticeShow;
+
+  /// No description provided for @adminNoticeType.
+  ///
+  /// In en, this message translates to:
+  /// **'Type'**
+  String get adminNoticeType;
+
+  /// No description provided for @adminNoticeInfo.
+  ///
+  /// In en, this message translates to:
+  /// **'Note'**
+  String get adminNoticeInfo;
+
+  /// No description provided for @adminNoticeWarning.
+  ///
+  /// In en, this message translates to:
+  /// **'Warning'**
+  String get adminNoticeWarning;
+
+  /// No description provided for @adminNoticeMaintenance.
+  ///
+  /// In en, this message translates to:
+  /// **'Maintenance'**
+  String get adminNoticeMaintenance;
+
+  /// No description provided for @adminNoticeMaintenanceHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Maintenance replaces the app with a \"back soon\" page until you switch it off. The admin app keeps working.'**
+  String get adminNoticeMaintenanceHint;
+
+  /// No description provided for @adminNoticeMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Message'**
+  String get adminNoticeMessage;
+
+  /// No description provided for @adminNoticeMessageHint.
+  ///
+  /// In en, this message translates to:
+  /// **'What should users read?'**
+  String get adminNoticeMessageHint;
+
+  /// No description provided for @adminNoticePreview.
+  ///
+  /// In en, this message translates to:
+  /// **'Preview'**
+  String get adminNoticePreview;
+
+  /// No description provided for @adminNoticeSave.
+  ///
+  /// In en, this message translates to:
+  /// **'Save'**
+  String get adminNoticeSave;
+
+  /// No description provided for @adminNoticeSaved.
+  ///
+  /// In en, this message translates to:
+  /// **'Saved'**
+  String get adminNoticeSaved;
+
+  /// No description provided for @adminNoticeMessageRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Write the message users should see, or switch it off.'**
+  String get adminNoticeMessageRequired;
+
+  /// No description provided for @adminHistoryTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Pull history'**
+  String get adminHistoryTitle;
+
+  /// No description provided for @adminHistorySubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Recent runs and the rows that failed'**
+  String get adminHistorySubtitle;
+
+  /// No description provided for @adminHistoryEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No runs yet.'**
+  String get adminHistoryEmpty;
+
+  /// No description provided for @adminTriggerScheduled.
+  ///
+  /// In en, this message translates to:
+  /// **'Scheduled'**
+  String get adminTriggerScheduled;
+
+  /// No description provided for @adminTriggerManual.
+  ///
+  /// In en, this message translates to:
+  /// **'Manual'**
+  String get adminTriggerManual;
+
+  /// No description provided for @adminTriggerUpload.
+  ///
+  /// In en, this message translates to:
+  /// **'Upload'**
+  String get adminTriggerUpload;
+
+  /// No description provided for @adminJobTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Pull run'**
+  String get adminJobTitle;
+
+  /// No description provided for @adminJobErrorsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Rows that failed'**
+  String get adminJobErrorsTitle;
+
+  /// No description provided for @adminJobErrorsFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t load the failed rows.'**
+  String get adminJobErrorsFailed;
+
+  /// No description provided for @adminJobShowMore.
+  ///
+  /// In en, this message translates to:
+  /// **'Show more'**
+  String get adminJobShowMore;
+
+  /// No description provided for @adminTabUsers.
+  ///
+  /// In en, this message translates to:
+  /// **'Users'**
+  String get adminTabUsers;
+
+  /// No description provided for @cancelAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel'**
+  String get cancelAction;
+
+  /// No description provided for @adminUsersSearchHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Search phone number or name'**
+  String get adminUsersSearchHint;
+
+  /// No description provided for @adminUsersEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No users match.'**
+  String get adminUsersEmpty;
+
+  /// No description provided for @adminUserActive.
+  ///
+  /// In en, this message translates to:
+  /// **'Active'**
+  String get adminUserActive;
+
+  /// No description provided for @adminUserAdminBadge.
+  ///
+  /// In en, this message translates to:
+  /// **'Admin'**
+  String get adminUserAdminBadge;
+
+  /// No description provided for @adminUserDetailTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'User'**
+  String get adminUserDetailTitle;
+
+  /// No description provided for @adminUserPhone.
+  ///
+  /// In en, this message translates to:
+  /// **'Phone'**
+  String get adminUserPhone;
+
+  /// No description provided for @adminUserLocation.
+  ///
+  /// In en, this message translates to:
+  /// **'Location'**
+  String get adminUserLocation;
+
+  /// No description provided for @adminUserBusiness.
+  ///
+  /// In en, this message translates to:
+  /// **'Business'**
+  String get adminUserBusiness;
+
+  /// No description provided for @adminUserCategories.
+  ///
+  /// In en, this message translates to:
+  /// **'Categories'**
+  String get adminUserCategories;
+
+  /// No description provided for @adminUserJoined.
+  ///
+  /// In en, this message translates to:
+  /// **'Joined'**
+  String get adminUserJoined;
+
+  /// No description provided for @adminUserLastLogin.
+  ///
+  /// In en, this message translates to:
+  /// **'Last login'**
+  String get adminUserLastLogin;
+
+  /// No description provided for @adminUserNever.
+  ///
+  /// In en, this message translates to:
+  /// **'Never'**
+  String get adminUserNever;
+
+  /// No description provided for @adminUserSubscription.
+  ///
+  /// In en, this message translates to:
+  /// **'Latest subscription'**
+  String get adminUserSubscription;
+
+  /// No description provided for @adminUserSubscriptionNone.
+  ///
+  /// In en, this message translates to:
+  /// **'None'**
+  String get adminUserSubscriptionNone;
+
+  /// No description provided for @adminUserSubscriptionValue.
+  ///
+  /// In en, this message translates to:
+  /// **'{plan} · {status} until {date}'**
+  String adminUserSubscriptionValue(String plan, String status, String date);
+
+  /// No description provided for @adminUserTickets.
+  ///
+  /// In en, this message translates to:
+  /// **'Support tickets'**
+  String get adminUserTickets;
+
+  /// No description provided for @adminUserTicketsValue.
+  ///
+  /// In en, this message translates to:
+  /// **'{total} total · {open} open'**
+  String adminUserTicketsValue(int total, int open);
+
+  /// No description provided for @adminUserSuspendAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Suspend account'**
+  String get adminUserSuspendAction;
+
+  /// No description provided for @adminUserReinstateAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Reinstate account'**
+  String get adminUserReinstateAction;
+
+  /// No description provided for @adminUserSuspendTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Suspend this account?'**
+  String get adminUserSuspendTitle;
+
+  /// No description provided for @adminUserSuspendBody.
+  ///
+  /// In en, this message translates to:
+  /// **'They won\'t be able to sign in or renew their session until you reinstate them.'**
+  String get adminUserSuspendBody;
+
+  /// No description provided for @adminUserSuspendConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Suspend'**
+  String get adminUserSuspendConfirm;
+
+  /// No description provided for @adminRangeDays.
+  ///
+  /// In en, this message translates to:
+  /// **'{days} days'**
+  String adminRangeDays(int days);
+
+  /// No description provided for @adminAdsTotalsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Delivery'**
+  String get adminAdsTotalsTitle;
+
+  /// No description provided for @adminAdsClicks.
+  ///
+  /// In en, this message translates to:
+  /// **'Clicks'**
+  String get adminAdsClicks;
+
+  /// No description provided for @adminAdsImpressions.
+  ///
+  /// In en, this message translates to:
+  /// **'Impressions'**
+  String get adminAdsImpressions;
+
+  /// No description provided for @adminAdsClickRateShort.
+  ///
+  /// In en, this message translates to:
+  /// **'Click rate'**
+  String get adminAdsClickRateShort;
+
+  /// No description provided for @adminAdsDailyClicks.
+  ///
+  /// In en, this message translates to:
+  /// **'Clicks per day'**
+  String get adminAdsDailyClicks;
+
+  /// No description provided for @adminAdsCampaignsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Campaigns'**
+  String get adminAdsCampaignsTitle;
+
+  /// No description provided for @adminAdsNoCampaigns.
+  ///
+  /// In en, this message translates to:
+  /// **'No campaigns yet.'**
+  String get adminAdsNoCampaigns;
+
+  /// No description provided for @adminAdsChangeNote.
+  ///
+  /// In en, this message translates to:
+  /// **'Change compared with the previous {days} days.'**
+  String adminAdsChangeNote(int days);
+
+  /// No description provided for @adminAdsPlacementsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Placements'**
+  String get adminAdsPlacementsTitle;
+
+  /// No description provided for @adminAdsCampaignCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 campaign} other{{count} campaigns}}'**
+  String adminAdsCampaignCount(int count);
+
+  /// No description provided for @adminAdsChangeNew.
+  ///
+  /// In en, this message translates to:
+  /// **'New'**
+  String get adminAdsChangeNew;
+
+  /// No description provided for @adminAdsChangePoints.
+  ///
+  /// In en, this message translates to:
+  /// **'{value} pts'**
+  String adminAdsChangePoints(String value);
+
+  /// No description provided for @adminAdsDailyImpressions.
+  ///
+  /// In en, this message translates to:
+  /// **'Impressions per day'**
+  String get adminAdsDailyImpressions;
+
+  /// No description provided for @adminAdsDailyClickRate.
+  ///
+  /// In en, this message translates to:
+  /// **'Click rate per day'**
+  String get adminAdsDailyClickRate;
+
+  /// No description provided for @adminCampaignTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Campaign'**
+  String get adminCampaignTitle;
+
+  /// No description provided for @adminCampaignNoDelivery.
+  ///
+  /// In en, this message translates to:
+  /// **'No ads were shown for this campaign in this range.'**
+  String get adminCampaignNoDelivery;
+
+  /// No description provided for @campaignStatusDraft.
+  ///
+  /// In en, this message translates to:
+  /// **'Draft'**
+  String get campaignStatusDraft;
+
+  /// No description provided for @campaignStatusActive.
+  ///
+  /// In en, this message translates to:
+  /// **'Active'**
+  String get campaignStatusActive;
+
+  /// No description provided for @campaignStatusPaused.
+  ///
+  /// In en, this message translates to:
+  /// **'Paused'**
+  String get campaignStatusPaused;
+
+  /// No description provided for @campaignStatusEnded.
+  ///
+  /// In en, this message translates to:
+  /// **'Ended'**
+  String get campaignStatusEnded;
+
+  /// No description provided for @adminSwitchToUserView.
+  ///
+  /// In en, this message translates to:
+  /// **'View as user'**
+  String get adminSwitchToUserView;
+
+  /// No description provided for @adminSwitchToAdminView.
+  ///
+  /// In en, this message translates to:
+  /// **'Admin view'**
+  String get adminSwitchToAdminView;
+
+  /// No description provided for @adminSwitchToAdminViewSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Dashboard, ads, users and app management'**
+  String get adminSwitchToAdminViewSubtitle;
+
+  /// No description provided for @adminUsersTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Users'**
+  String get adminUsersTitle;
+
+  /// No description provided for @adminUsersTotal.
+  ///
+  /// In en, this message translates to:
+  /// **'Total users'**
+  String get adminUsersTotal;
+
+  /// No description provided for @adminUsersNew.
+  ///
+  /// In en, this message translates to:
+  /// **'New (7 days)'**
+  String get adminUsersNew;
+
+  /// No description provided for @adminUsersActive.
+  ///
+  /// In en, this message translates to:
+  /// **'Active (7 days)'**
+  String get adminUsersActive;
+
+  /// No description provided for @adminUsersPro.
+  ///
+  /// In en, this message translates to:
+  /// **'Pro'**
+  String get adminUsersPro;
+
+  /// No description provided for @adminUsersFree.
+  ///
+  /// In en, this message translates to:
+  /// **'Free'**
+  String get adminUsersFree;
+
+  /// No description provided for @adminUsersSuspended.
+  ///
+  /// In en, this message translates to:
+  /// **'Suspended'**
+  String get adminUsersSuspended;
+
+  /// No description provided for @adminAdsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Ads'**
+  String get adminAdsTitle;
+
+  /// No description provided for @adminAdsClicksToday.
+  ///
+  /// In en, this message translates to:
+  /// **'Clicks today'**
+  String get adminAdsClicksToday;
+
+  /// No description provided for @adminAdsImpressionsToday.
+  ///
+  /// In en, this message translates to:
+  /// **'Impressions today'**
+  String get adminAdsImpressionsToday;
+
+  /// No description provided for @adminAdsClickRate.
+  ///
+  /// In en, this message translates to:
+  /// **'Click rate (7 days)'**
+  String get adminAdsClickRate;
+
+  /// No description provided for @adminAdsCampaigns.
+  ///
+  /// In en, this message translates to:
+  /// **'Active campaigns'**
+  String get adminAdsCampaigns;
+
+  /// No description provided for @adminAdsRewarded.
+  ///
+  /// In en, this message translates to:
+  /// **'Rewarded views (7 days)'**
+  String get adminAdsRewarded;
+
+  /// No description provided for @adminAdsNote.
+  ///
+  /// In en, this message translates to:
+  /// **'Sponsored ads we serve and rewarded views. AdMob banner clicks show in AdMob.'**
+  String get adminAdsNote;
+
+  /// No description provided for @adminFeedsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Price data'**
+  String get adminFeedsTitle;
+
+  /// No description provided for @adminFeedsOk.
+  ///
+  /// In en, this message translates to:
+  /// **'Up to date'**
+  String get adminFeedsOk;
+
+  /// No description provided for @adminFeedsDelayed.
+  ///
+  /// In en, this message translates to:
+  /// **'Delayed'**
+  String get adminFeedsDelayed;
+
+  /// No description provided for @adminFeedsLastUpdated.
+  ///
+  /// In en, this message translates to:
+  /// **'Last updated'**
+  String get adminFeedsLastUpdated;
+
+  /// No description provided for @adminFeedsLastAttempt.
+  ///
+  /// In en, this message translates to:
+  /// **'Last pull'**
+  String get adminFeedsLastAttempt;
+
+  /// No description provided for @adminSupportTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Support'**
+  String get adminSupportTitle;
+
+  /// No description provided for @adminSupportOpen.
+  ///
+  /// In en, this message translates to:
+  /// **'Open tickets'**
+  String get adminSupportOpen;
 
   /// No description provided for @adminSchedulesHint.
   ///
@@ -2631,6 +3321,72 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Run automatically'**
   String get scheduleEnabledLabel;
+
+  /// No description provided for @scheduleFilterTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'What to pull'**
+  String get scheduleFilterTitle;
+
+  /// No description provided for @scheduleFilterHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Pick what to pull. Leave a field on All to pull everything.'**
+  String get scheduleFilterHint;
+
+  /// No description provided for @filterStatesLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'States'**
+  String get filterStatesLabel;
+
+  /// No description provided for @filterCommoditiesLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Commodities'**
+  String get filterCommoditiesLabel;
+
+  /// No description provided for @filterMarketsLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Markets'**
+  String get filterMarketsLabel;
+
+  /// No description provided for @filterAllOption.
+  ///
+  /// In en, this message translates to:
+  /// **'All'**
+  String get filterAllOption;
+
+  /// No description provided for @filterSelectedCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} selected'**
+  String filterSelectedCount(int count);
+
+  /// No description provided for @filterSearchHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Search'**
+  String get filterSearchHint;
+
+  /// No description provided for @filterOptionsEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'The lists fill after the first full pull. Run now with everything on All to do that.'**
+  String get filterOptionsEmpty;
+
+  /// No description provided for @filterOptionsError.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t load the choices. Close this and try again.'**
+  String get filterOptionsError;
+
+  /// No description provided for @runFilterNote.
+  ///
+  /// In en, this message translates to:
+  /// **'Only this run is filtered. Scheduled runs always pull everything.'**
+  String get runFilterNote;
 
   /// No description provided for @scheduleSaved.
   ///
@@ -3111,6 +3867,158 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Set a password before unlinking Google — it is your only way to sign in.'**
   String get googleLastSignInMethod;
+
+  /// No description provided for @weatherHomePrompt.
+  ///
+  /// In en, this message translates to:
+  /// **'Tap to see the forecast for your area'**
+  String get weatherHomePrompt;
+
+  /// No description provided for @weatherHomeLoading.
+  ///
+  /// In en, this message translates to:
+  /// **'Getting the forecast…'**
+  String get weatherHomeLoading;
+
+  /// No description provided for @notificationPrefsSaveFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t save your notification settings. Please try again.'**
+  String get notificationPrefsSaveFailed;
+
+  /// No description provided for @opportunityTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'{product} is {percent}% cheaper in {market}'**
+  String opportunityTitle(String product, String percent, String market);
+
+  /// No description provided for @opportunityHomePrice.
+  ///
+  /// In en, this message translates to:
+  /// **'{market}: {price}'**
+  String opportunityHomePrice(String market, String price);
+
+  /// No description provided for @opportunityLandedPrice.
+  ///
+  /// In en, this message translates to:
+  /// **'Landed price: {price}'**
+  String opportunityLandedPrice(String price);
+
+  /// No description provided for @opportunityMeta.
+  ///
+  /// In en, this message translates to:
+  /// **'{percent}% cheaper than {market} after costs'**
+  String opportunityMeta(String percent, String market);
+
+  /// No description provided for @adminFindOpportunities.
+  ///
+  /// In en, this message translates to:
+  /// **'Find opportunities now'**
+  String get adminFindOpportunities;
+
+  /// No description provided for @adminOpportunitiesResult.
+  ///
+  /// In en, this message translates to:
+  /// **'{found} new opportunities ({compared} watchlist items compared)'**
+  String adminOpportunitiesResult(int found, int compared);
+
+  /// No description provided for @adminOpportunitiesFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t run the opportunity scan.'**
+  String get adminOpportunitiesFailed;
+
+  /// No description provided for @alertRuleDeleteFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t delete this alert. Please try again.'**
+  String get alertRuleDeleteFailed;
+
+  /// No description provided for @homeOpportunityPosition.
+  ///
+  /// In en, this message translates to:
+  /// **'Opportunity {index} of {count}'**
+  String homeOpportunityPosition(int index, int count);
+
+  /// No description provided for @comparisonMarketsSelected.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} of {total} markets'**
+  String comparisonMarketsSelected(int count, int total);
+
+  /// No description provided for @comparisonChooseMarkets.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose markets'**
+  String get comparisonChooseMarkets;
+
+  /// No description provided for @searchMarketsHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Search markets'**
+  String get searchMarketsHint;
+
+  /// No description provided for @selectAllAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Select all'**
+  String get selectAllAction;
+
+  /// No description provided for @clearSelectionAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear'**
+  String get clearSelectionAction;
+
+  /// No description provided for @applyAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Apply'**
+  String get applyAction;
+
+  /// No description provided for @comparisonShowAll.
+  ///
+  /// In en, this message translates to:
+  /// **'Show all {count} markets'**
+  String comparisonShowAll(int count);
+
+  /// No description provided for @comparisonShowFewer.
+  ///
+  /// In en, this message translates to:
+  /// **'Show fewer'**
+  String get comparisonShowFewer;
+
+  /// No description provided for @opportunitiesEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No buying opportunities yet. One appears when a product on your watchlist is at least 10% cheaper in another market after costs.'**
+  String get opportunitiesEmpty;
+
+  /// No description provided for @opportunityShareText.
+  ///
+  /// In en, this message translates to:
+  /// **'{product}: {price}/{unit} at {market} — {saving} cheaper on {quantity} than {reference} (after costs). Found on MolBhav.'**
+  String opportunityShareText(
+    String product,
+    String price,
+    String unit,
+    String market,
+    String saving,
+    String quantity,
+    String reference,
+  );
+
+  /// No description provided for @editQuantityTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Required quantity'**
+  String get editQuantityTitle;
+
+  /// No description provided for @editQuantityHelper.
+  ///
+  /// In en, this message translates to:
+  /// **'Recalculates the saving for this quantity.'**
+  String get editQuantityHelper;
 }
 
 class _AppLocalizationsDelegate

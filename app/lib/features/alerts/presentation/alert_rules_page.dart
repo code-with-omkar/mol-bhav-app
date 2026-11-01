@@ -92,36 +92,21 @@ class _RuleTile extends StatelessWidget {
         ),
         child: Icon(Icons.delete_outline, color: c.priceDown),
       ),
+      // Removed only once the server has deleted it: a failed delete leaves
+      // the rule in place and says so (it used to vanish and come back).
       confirmDismiss: (_) async {
-        // Optimistically remove; undo within 3 s re-adds via reload.
-        return true;
-      },
-      onDismissed: (_) {
         final messenger = ScaffoldMessenger.of(context);
-        cubit.deleteRule(rule.id);
+        final deleted = await cubit.deleteRule(rule.id);
         messenger
           ..hideCurrentSnackBar()
           ..showSnackBar(
             SnackBar(
-              content: Text(l10n.alertRuleDeleted),
-              duration: const Duration(seconds: 3),
-              action: SnackBarAction(
-                label: l10n.undo,
-                onPressed: () {
-                  // Re-add by restoring via update with same values.
-                  cubit.updateRule(
-                    rule.id,
-                    UpdateAlertRuleRequest(
-                      thresholdType: rule.thresholdType,
-                      thresholdPercent: rule.thresholdPercent,
-                      thresholdPrice: rule.thresholdPrice,
-                      isActive: rule.isActive,
-                    ),
-                  );
-                },
+              content: Text(
+                deleted ? l10n.alertRuleDeleted : l10n.alertRuleDeleteFailed,
               ),
             ),
           );
+        return deleted;
       },
       child: GestureDetector(
         onTap: () => _showEditSheet(context, rule, cubit),

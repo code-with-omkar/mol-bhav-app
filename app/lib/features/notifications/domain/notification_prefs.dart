@@ -50,5 +50,6 @@ class NotificationPrefs extends Equatable {
 abstract interface class NotificationPrefsRepository {
   Future<NotificationPrefs> getPreferences();
 
-  Future<NotificationPrefs> updatePreferences(NotificationPrefs prefs);
+  /// The saved values, or `null` when the save failed.
+  Future<NotificationPrefs?> updatePreferences(NotificationPrefs prefs);
 }

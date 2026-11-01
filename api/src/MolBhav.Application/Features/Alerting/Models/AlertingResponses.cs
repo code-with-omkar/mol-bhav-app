@@ -26,7 +26,7 @@ public sealed record AlertRuleResponse(
 /// <summary>One triggered alert instance, newest first.</summary>
 public sealed record AlertResponse(
     Guid Id,
-    Guid AlertRuleId,
+    Guid? AlertRuleId,
     ProductSummaryResponse Product,
     Guid? VariantId,
     string? VariantName,

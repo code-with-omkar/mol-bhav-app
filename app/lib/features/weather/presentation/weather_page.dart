@@ -66,56 +66,84 @@ class _Forecast extends StatelessWidget {
     final l10n = context.l10n;
     final c = context.mbColors;
     final day = forecast.days[selected];
-    return ListView(
-      physics: const AlwaysScrollableScrollPhysics(),
-      padding: MbSpacing.screenPadding,
-      children: [
-        WeatherCardWidget(forecast: day, stationName: forecast.stationName),
-        const SizedBox(height: MbSpacing.s4),
-        Row(
+    final textScale = MediaQuery.textScalerOf(context).scale(1);
+    final below = <Widget>[
+      const SizedBox(height: MbSpacing.s4),
+      Row(
+        children: [
+          _Stat(label: l10n.weatherHumidity, value: '${day.humidityPercent}%'),
+          const SizedBox(width: MbSpacing.s3),
+          _Stat(
+            label: l10n.weatherWind,
+            value: l10n.weatherWindValue(day.windKmph.round().toString()),
+          ),
+          const SizedBox(width: MbSpacing.s3),
+          _Stat(label: l10n.weatherRain, value: '${day.rainChancePercent}%'),
+        ],
+      ),
+      const SizedBox(height: MbSpacing.s6),
+      MbSectionHeader(title: l10n.weatherSevenDay),
+      const SizedBox(height: MbSpacing.s3),
+      Semantics(
+        label: l10n.weatherSelectDay,
+        child: SizedBox(
+          height: 108,
+          child: ListView.separated(
+            scrollDirection: Axis.horizontal,
+            itemCount: forecast.days.length,
+            separatorBuilder: (_, _) => const SizedBox(width: MbSpacing.s2),
+            itemBuilder: (context, i) => _DayChip(
+              day: forecast.days[i],
+              selected: i == selected,
+              onTap: () => context.read<WeatherCubit>().selectDay(i),
+            ),
+          ),
+        ),
+      ),
+      const SizedBox(height: MbSpacing.s4),
+      Text(
+        l10n.weatherUpdated(
+          TimeOfDay.fromDateTime(forecast.issuedAt).format(context),
+        ),
+        style: context.mbText.caption.copyWith(color: c.inkMuted),
+      ),
+    ];
+    final card = WeatherCardWidget(
+      forecast: day,
+      stationName: forecast.stationName,
+      expand: true,
+    );
+
+    return LayoutBuilder(
+      builder: (context, box) {
+        const padding = MbSpacing.screenPadding;
+        final height = box.maxHeight - padding.vertical;
+        // Everything under the card takes about this much; the card gets
+        // the rest of the screen. Too short (landscape, large text): a
+        // fixed-height card and the page scrolls.
+        final belowHeight = _belowCardHeight * textScale;
+        final fill = height - belowHeight >= _minCardHeight;
+        final column = Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            _Stat(
-              label: l10n.weatherHumidity,
-              value: '${day.humidityPercent}%',
-            ),
-            const SizedBox(width: MbSpacing.s3),
-            _Stat(
-              label: l10n.weatherWind,
-              value: l10n.weatherWindValue(day.windKmph.round().toString()),
-            ),
-            const SizedBox(width: MbSpacing.s3),
-            _Stat(label: l10n.weatherRain, value: '${day.rainChancePercent}%'),
+            if (fill)
+              Expanded(child: card)
+            else
+              SizedBox(height: _minCardHeight, child: card),
+            ...below,
           ],
-        ),
-        const SizedBox(height: MbSpacing.s6),
-        MbSectionHeader(title: l10n.weatherSevenDay),
-        const SizedBox(height: MbSpacing.s3),
-        Semantics(
-          label: l10n.weatherSelectDay,
-          child: SizedBox(
-            height: 108,
-            child: ListView.separated(
-              scrollDirection: Axis.horizontal,
-              itemCount: forecast.days.length,
-              separatorBuilder: (_, _) => const SizedBox(width: MbSpacing.s2),
-              itemBuilder: (context, i) => _DayChip(
-                day: forecast.days[i],
-                selected: i == selected,
-                onTap: () => context.read<WeatherCubit>().selectDay(i),
-              ),
-            ),
-          ),
-        ),
-        const SizedBox(height: MbSpacing.s4),
-        Text(
-          l10n.weatherUpdated(
-            TimeOfDay.fromDateTime(forecast.issuedAt).format(context),
-          ),
-          style: context.mbText.caption.copyWith(color: c.inkMuted),
-        ),
-      ],
+        );
+        return SingleChildScrollView(
+          physics: const AlwaysScrollableScrollPhysics(),
+          padding: padding,
+          child: fill ? SizedBox(height: height, child: column) : column,
+        );
+      },
     );
   }
+
+  static const _minCardHeight = 280.0;
+  static const _belowCardHeight = 330.0;
 }
 
 class _Stat extends StatelessWidget {

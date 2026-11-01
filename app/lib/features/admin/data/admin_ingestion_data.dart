@@ -56,6 +56,19 @@ class AdminIngestionRepositoryImpl implements AdminIngestionRepository {
       );
 
   @override
+  Future<Result<OpportunityScanSummary>> scanOpportunities() =>
+      runApiCall(() async {
+        final body =
+            (await _dio.post<Map<String, dynamic>>('/admin/opportunities/scan'))
+                .data ??
+            const <String, dynamic>{};
+        return OpportunityScanSummary(
+          found: body.integer('found'),
+          compared: body.integer('compared'),
+        );
+      });
+
+  @override
   Future<Result<int>> runCategory(String categoryCode) => runApiCall(() async {
     final body =
         (await _dio.post<Map<String, dynamic>>(
@@ -75,9 +88,31 @@ class AdminIngestionRepositoryImpl implements AdminIngestionRepository {
       );
 
   @override
-  Future<Result<void>> runNow(String sourceId) => runApiCall(
+  Future<Result<FilterOptions>> getFilterOptions(String sourceId) =>
+      runApiCall(() async {
+        final j = (await _dio.get<Map<String, dynamic>>(
+          '/admin/ingestion/sources/$sourceId/filter-options',
+        )).data!;
+        return FilterOptions(
+          states: j.strings('states'),
+          commodities: j.strings('commodities'),
+          markets: j.list(
+            'markets',
+            (m) => FilterMarket(name: m.str('name'), state: m.str('state')),
+          ),
+          refreshedAt: j.dateOrNull('refreshedAtUtc'),
+        );
+      });
+
+  @override
+  Future<Result<void>> runNow(
+    String sourceId, {
+    RunFilter filter = const RunFilter(),
+  }) => runApiCall(
     () => _dio.post<void>(
       '/admin/ingestion/sources/$sourceId/run',
+      // No body = the whole feed; a filter narrows this run only.
+      data: filter.isEmpty ? null : filter.toJson(),
       options: Options(receiveTimeout: _runTimeout),
     ),
   );

@@ -13,6 +13,7 @@ import '../../../shared/widgets/category_visuals.dart';
 import '../../../shared/widgets/mb_app_bar.dart';
 import '../../../shared/widgets/mb_chip_group.dart';
 import '../../../shared/widgets/mb_icons.dart';
+import '../../../shared/widgets/mb_layout.dart';
 import '../../../shared/widgets/mb_panels.dart';
 import '../../../shared/widgets/mb_price.dart';
 import '../../../shared/widgets/mb_select_field.dart';
@@ -22,6 +23,7 @@ import '../../promotions/domain/promotions.dart';
 import '../../promotions/presentation/ad_slot.dart';
 import '../../watchlist/presentation/watch_star.dart';
 import '../../watchlist/presentation/watchlist_cubit.dart';
+import 'market_picker.dart';
 import 'markets_cubits.dart';
 import 'share/price_share.dart';
 import 'share/price_share_data.dart';
@@ -127,62 +129,68 @@ class _Content extends StatelessWidget {
               ],
             ),
             gap,
-            MbChipGroup<String>.multiple(
-              semanticLabel: l10n.marketsLabel,
-              values: comparison.selectedMarketIds.toSet(),
+            MarketPicker(
+              markets: comparison.availableMarkets,
+              selected: comparison.selectedMarketIds.toSet(),
               onChanged: cubit.selectMarkets,
-              options: [
-                for (final m in comparison.availableMarkets)
-                  MbChipOption(value: m.id, label: m.name),
-              ],
             ),
             gap,
             if (comparison.rows.isEmpty)
               MbEmptyView(message: l10n.comparisonEmpty)
             else
-              MbPriceTable(
+              _CollapsibleTable(
                 nameHeader: l10n.columnMarket,
                 priceHeader: l10n.columnPricePer(comparison.unit),
                 changeHeader: l10n.columnChange,
+                // Always visible when collapsed: the best and the user's own
+                // market, and the one a shared link pointed at.
+                pinned: {
+                  ?comparison.bestMarketId,
+                  ?comparison.homeMarketId,
+                  ?state.highlightMarketId,
+                },
                 rows: [
                   for (final row in comparison.rows)
-                    MbPriceRow(
-                      name: row.marketName,
-                      meta: row.arrivals == null
-                          ? null
-                          : l10n.arrivals(row.arrivals!),
-                      price: formatInr(row.price),
-                      change: row.change,
-                      changeCurrency: false,
-                      best: row.marketId == comparison.bestMarketId,
-                      badge: row.marketId == state.highlightMarketId
-                          ? MbBadge(
-                              label: l10n.fromLink,
-                              tone: MbBadgeTone.opportunity,
-                            )
-                          : null,
-                      onShare: () => sharePriceCard(
-                        context,
-                        PriceShareData(
-                          productName: state.commodity?.name ?? '',
-                          mandiName: row.marketName,
-                          minPrice: row.minPrice,
-                          maxPrice: row.maxPrice,
-                          modalPrice: row.price,
-                          unitSymbol: comparison.unit,
-                          recordDate: row.recordDate,
-                          source: row.source,
-                          link: DeepLinkConfig.productLink(
-                            comparison.commodityId,
-                            mandiId: row.marketId,
+                    (
+                      row.marketId,
+                      MbPriceRow(
+                        name: row.marketName,
+                        meta: row.arrivals == null
+                            ? null
+                            : l10n.arrivals(row.arrivals!),
+                        price: formatInr(row.price),
+                        change: row.change,
+                        changeCurrency: false,
+                        best: row.marketId == comparison.bestMarketId,
+                        badge: row.marketId == state.highlightMarketId
+                            ? MbBadge(
+                                label: l10n.fromLink,
+                                tone: MbBadgeTone.opportunity,
+                              )
+                            : null,
+                        onShare: () => sharePriceCard(
+                          context,
+                          PriceShareData(
+                            productName: state.commodity?.name ?? '',
+                            mandiName: row.marketName,
+                            minPrice: row.minPrice,
+                            maxPrice: row.maxPrice,
+                            modalPrice: row.price,
+                            unitSymbol: comparison.unit,
+                            recordDate: row.recordDate,
+                            source: row.source,
+                            link: DeepLinkConfig.productLink(
+                              comparison.commodityId,
+                              mandiId: row.marketId,
+                            ),
                           ),
                         ),
-                      ),
-                      shareLabel: l10n.sharePrice,
-                      onTap: () => context.go(
-                        AppRoutes.trendsFor(
-                          comparison.commodityId,
-                          row.marketId,
+                        shareLabel: l10n.sharePrice,
+                        onTap: () => context.go(
+                          AppRoutes.trendsFor(
+                            comparison.commodityId,
+                            row.marketId,
+                          ),
                         ),
                       ),
                     ),
@@ -213,6 +221,67 @@ class _Content extends StatelessWidget {
           ],
         ),
         if (state.refreshing) const LinearProgressIndicator(minHeight: 2),
+      ],
+    );
+  }
+}
+
+/// The comparison table, limited to the first [_collapsedCount] markets with
+/// a "Show all" link when there are more (pinned markets always stay).
+class _CollapsibleTable extends StatefulWidget {
+  const _CollapsibleTable({
+    required this.nameHeader,
+    required this.priceHeader,
+    required this.changeHeader,
+    required this.rows,
+    required this.pinned,
+  });
+
+  final String nameHeader;
+  final String priceHeader;
+  final String changeHeader;
+  final List<(String, MbPriceRow)> rows;
+  final Set<String> pinned;
+
+  @override
+  State<_CollapsibleTable> createState() => _CollapsibleTableState();
+}
+
+class _CollapsibleTableState extends State<_CollapsibleTable> {
+  static const _collapsedCount = 10;
+
+  bool _expanded = false;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = context.l10n;
+    final rows = widget.rows;
+    final collapsible = rows.length > _collapsedCount;
+    final shown = !collapsible || _expanded
+        ? rows
+        : [
+            for (var i = 0; i < rows.length; i++)
+              if (i < _collapsedCount || widget.pinned.contains(rows[i].$1))
+                rows[i],
+          ];
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        MbPriceTable(
+          nameHeader: widget.nameHeader,
+          priceHeader: widget.priceHeader,
+          changeHeader: widget.changeHeader,
+          rows: [for (final (_, row) in shown) row],
+        ),
+        if (collapsible)
+          Align(
+            child: MbTextLink(
+              label: _expanded
+                  ? l10n.comparisonShowFewer
+                  : l10n.comparisonShowAll(rows.length),
+              onPressed: () => setState(() => _expanded = !_expanded),
+            ),
+          ),
       ],
     );
   }

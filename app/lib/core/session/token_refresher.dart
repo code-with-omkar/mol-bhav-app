@@ -37,6 +37,8 @@ class DioTokenRefresher implements TokenRefresher {
   @override
   Future<TokenPair?> refresh(String refreshToken) async {
     try {
+      // The server can be changed at runtime (debug builds), so read it now.
+      _dio.options.baseUrl = ApiConfig.baseUrl;
       final response = await _dio.post<Map<String, dynamic>>(
         '/auth/token/refresh',
         data: {'refreshToken': refreshToken},

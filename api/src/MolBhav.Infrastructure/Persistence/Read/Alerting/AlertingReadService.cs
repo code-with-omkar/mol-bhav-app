@@ -231,7 +231,7 @@ internal sealed class AlertingReadService(IDbConnectionFactory connectionFactory
     {
         public Guid Id { get; init; }
 
-        public Guid AlertRuleId { get; init; }
+        public Guid? AlertRuleId { get; init; }
 
         public Guid? VariantId { get; init; }
 

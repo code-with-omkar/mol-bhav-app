@@ -14,6 +14,10 @@ import '../core/session/token_renewal.dart';
 import '../core/theme/app_theme.dart';
 import '../features/account/presentation/profile_cubit.dart';
 import '../features/billing/presentation/subscription_tier_sync.dart';
+import '../core/session/admin_mode.dart';
+import '../features/app_features/presentation/feature_switches_cubit.dart';
+import '../features/app_notice/presentation/app_notice_cubit.dart';
+import '../features/price_status/presentation/price_data_status_cubit.dart';
 import '../features/watchlist/presentation/watchlist_cubit.dart';
 import '../features/weather/presentation/weather_cubit.dart';
 
@@ -25,7 +29,10 @@ class MolBhavApp extends StatefulWidget {
 }
 
 class _MolBhavAppState extends State<MolBhavApp> with WidgetsBindingObserver {
-  final GoRouter _router = createAppRouter(getIt<SessionManager>());
+  final GoRouter _router = createAppRouter(
+    getIt<SessionManager>(),
+    getIt<AdminMode>(),
+  );
   final SubscriptionTierSync _tierSync = SubscriptionTierSync(
     getIt<ProfileCubit>(),
     getIt<TokenRenewal>(),
@@ -61,6 +68,9 @@ class _MolBhavAppState extends State<MolBhavApp> with WidgetsBindingObserver {
         BlocProvider.value(value: getIt<ProfileCubit>()),
         BlocProvider.value(value: getIt<WatchlistCubit>()),
         BlocProvider.value(value: getIt<WeatherCubit>()),
+        BlocProvider.value(value: getIt<PriceDataStatusCubit>()),
+        BlocProvider.value(value: getIt<AppNoticeCubit>()),
+        BlocProvider.value(value: getIt<FeatureSwitchesCubit>()),
       ],
       child: BlocBuilder<LocaleCubit, AppLanguage>(
         builder: (context, language) => MaterialApp.router(

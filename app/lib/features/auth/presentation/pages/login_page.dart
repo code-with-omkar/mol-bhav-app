@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -28,6 +29,7 @@ import '../cubit/login_cubit.dart';
 import '../cubit/login_methods_cubit.dart';
 import '../cubit/password_login_cubit.dart';
 import '../widgets/mobile_number_formatter.dart';
+import '../widgets/server_address_tile.dart';
 
 /// Sign-in with the app-language picker up front. Shows password login and/or
 /// mobile OTP, whichever the server enables (`GET /auth/methods`).
@@ -99,6 +101,12 @@ class LoginPage extends StatelessWidget {
                   ),
                 ],
               ),
+              // Debug builds: fix "No internet connection" caused by the PC's
+              // address having changed, without rebuilding the app.
+              if (kDebugMode)
+                ServerAddressTile(
+                  onChanged: () => context.read<LoginMethodsCubit>().load(),
+                ),
             ],
           ),
         ),

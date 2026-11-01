@@ -16,3 +16,10 @@ public interface IAlertRuleRepository : IRepository<AlertRule, Guid>
 public interface IAlertRepository : IRepository<Alert, Guid>
 {
 }
+
+public interface IMarketOpportunityRepository : IRepository<MarketOpportunity, Guid>
+{
+    /// <summary>The (user, product) pairs that already have an opportunity on <paramref name="detectedOn"/> — the
+    /// once-a-day limit, checked in one query for the whole scan.</summary>
+    Task<IReadOnlySet<(Guid UserId, Guid ProductId)>> GetFoundOnAsync(DateOnly detectedOn, CancellationToken cancellationToken = default);
+}

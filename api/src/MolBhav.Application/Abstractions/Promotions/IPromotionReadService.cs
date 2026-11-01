@@ -24,6 +24,14 @@ public interface IPromotionReadService
 
     Task<IReadOnlyList<CampaignDailyStatResponse>> GetDailyStatsAsync(
         Guid campaignId, DateOnly from, DateOnly to, CancellationToken cancellationToken = default);
+
+    /// <summary>Every campaign's delivery over the range (campaigns with none included), most clicks first.</summary>
+    Task<IReadOnlyList<CampaignPerformanceResponse>> GetCampaignPerformanceAsync(
+        DateOnly from, DateOnly to, CancellationToken cancellationToken = default);
+
+    /// <summary>Delivery summed across all campaigns, one row per day that had any.</summary>
+    Task<IReadOnlyList<CampaignDailyStatResponse>> GetTotalDailyStatsAsync(
+        DateOnly from, DateOnly to, CancellationToken cancellationToken = default);
 }
 
 public sealed record PromotionDelivery(Guid CampaignId, int Impressions, int Clicks);

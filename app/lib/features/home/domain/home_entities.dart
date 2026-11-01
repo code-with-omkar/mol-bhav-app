@@ -1,7 +1,5 @@
 import 'package:equatable/equatable.dart';
 
-import '../../../core/weather/weather_service.dart';
-
 /// Everything the Home dashboard shows, in one response.
 class HomeDashboard extends Equatable {
   const HomeDashboard({
@@ -11,9 +9,8 @@ class HomeDashboard extends Equatable {
     required this.stateName,
     required this.hasUnreadAlerts,
     required this.categories,
-    required this.topOpportunity,
+    required this.topOpportunities,
     required this.watchlist,
-    this.weather,
   });
 
   /// Empty until the user enters a name.
@@ -25,13 +22,13 @@ class HomeDashboard extends Equatable {
 
   /// The user's selected procurement categories.
   final List<HomeCategory> categories;
-  final TopOpportunity? topOpportunity;
+
+  /// Best current opportunities for watched products, biggest saving first
+  /// (at most five).
+  final List<TopOpportunity> topOpportunities;
 
   /// First few watchlist items.
   final List<WatchlistPreview> watchlist;
-
-  /// Current weather at the device; `null` until known or when unavailable.
-  final CurrentWeather? weather;
 
   @override
   List<Object?> get props => [
@@ -41,9 +38,8 @@ class HomeDashboard extends Equatable {
     stateName,
     hasUnreadAlerts,
     categories,
-    topOpportunity,
+    topOpportunities,
     watchlist,
-    weather,
   ];
 }
 
@@ -75,6 +71,9 @@ class TopOpportunity extends Equatable {
     required this.percent,
     required this.trend,
     required this.bestMarketName,
+    this.opportunityId,
+    this.referenceMarketName,
+    this.savingsPercent,
   });
 
   final String commodityId;
@@ -91,6 +90,15 @@ class TopOpportunity extends Equatable {
   final List<num> trend;
   final String? bestMarketName;
 
+  /// Set for a market opportunity: opens its detail screen.
+  final String? opportunityId;
+
+  /// The home-district market the saving is measured against.
+  final String? referenceMarketName;
+
+  /// Saving after costs, in percent of the reference price.
+  final num? savingsPercent;
+
   @override
   List<Object?> get props => [
     commodityId,
@@ -104,6 +112,9 @@ class TopOpportunity extends Equatable {
     percent,
     trend,
     bestMarketName,
+    opportunityId,
+    referenceMarketName,
+    savingsPercent,
   ];
 }
 

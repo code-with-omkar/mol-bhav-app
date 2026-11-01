@@ -15,5 +15,14 @@ public sealed record UpdateIngestionScheduleRequest(
     DayOfWeek? DayOfWeek,
     int? IntervalHours);
 
+/// <summary>
+/// Optional body of a manual run: narrow what is pulled to these names (exact data.gov.in spelling). Each list that is
+/// missing or empty means "all". Scheduled runs and backfills always pull everything.
+/// </summary>
+public sealed record RunIngestionRequest(
+    IReadOnlyList<string>? States = null,
+    IReadOnlyList<string>? Commodities = null,
+    IReadOnlyList<string>? Markets = null);
+
 /// <summary>Pull past days: one run per date, inclusive, at most 31 days. Dates are IST calendar dates (<c>yyyy-MM-dd</c>).</summary>
 public sealed record BackfillIngestionRequest(DateOnly? FromDate, DateOnly? ToDate);

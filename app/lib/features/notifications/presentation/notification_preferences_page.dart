@@ -16,7 +16,14 @@ class NotificationPreferencesPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
-    return BlocBuilder<NotificationPrefsCubit, NotificationPrefsState>(
+    return BlocConsumer<NotificationPrefsCubit, NotificationPrefsState>(
+      listenWhen: (_, next) =>
+          next is NotificationPrefsLoaded && next.saveFailed,
+      listener: (context, _) => ScaffoldMessenger.of(context)
+        ..hideCurrentSnackBar()
+        ..showSnackBar(
+          SnackBar(content: Text(context.l10n.notificationPrefsSaveFailed)),
+        ),
       builder: (context, state) => Scaffold(
         appBar: MbAppBar(title: l10n.notificationSettingsTitle),
         body: switch (state) {

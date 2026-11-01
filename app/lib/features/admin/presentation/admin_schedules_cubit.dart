@@ -157,6 +157,10 @@ class AdminSchedulesCubit extends Cubit<AdminSchedulesState> {
     );
   }
 
+  /// Admin "Find opportunities now"; the page shows the outcome itself.
+  Future<Result<OpportunityScanSummary>> scanOpportunities() =>
+      _repository.scanOpportunities();
+
   void selectCategory(String? categoryCode) =>
       emit(state.copyWith(selectedCategory: () => categoryCode));
 
@@ -233,8 +237,18 @@ class AdminSchedulesCubit extends Cubit<AdminSchedulesState> {
   Future<void> setEnabled(IngestionScheduleItem item, bool enabled) =>
       save(item.sourceId, item.toInput().copyWith(isEnabled: enabled));
 
-  Future<void> runNow(String sourceId) =>
-      _act(sourceId, AdminActionKind.ran, () => _repository.runNow(sourceId));
+  /// The choices for the Run now dropdowns (from the last full pull).
+  Future<Result<FilterOptions>> loadFilterOptions(String sourceId) =>
+      _repository.getFilterOptions(sourceId);
+
+  Future<void> runNow(
+    String sourceId, {
+    RunFilter filter = const RunFilter(),
+  }) => _act(
+    sourceId,
+    AdminActionKind.ran,
+    () => _repository.runNow(sourceId, filter: filter),
+  );
 
   /// Imports a CSV; the import runs inside the request, so the list is
   /// reloaded afterwards to show the upload as the last run.

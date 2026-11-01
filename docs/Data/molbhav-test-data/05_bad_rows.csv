@@ -1,0 +1,13 @@
+product_code,variant_code,location_kind,location_code,min_price,max_price,modal_price,arrival_qty,record_date
+onion,red,mandi,apmc-pune,,,2210,,2026-10-03
+onion,red | white,mandi,apmc-pune,,,2200,,2026-10-03
+onionx,,mandi,apmc-pune,,,2200,,2026-10-03
+onion,pink,mandi,apmc-pune,,,2200,,2026-10-03
+onion,red,market,apmc-pune,,,2200,,2026-10-03
+onion,red,mandi,apmc-goa,,,2200,,2026-10-03
+onion,red,mandi,apmc-pune,,,0,,2026-10-03
+onion,red,mandi,apmc-pune,,,abc,,2026-10-03
+onion,red,mandi,apmc-pune,,,2200,,31-31-2026
+tmt-steel,fe-500d,supplier,pune-steel-traders,,,62000,,2026-10-03
+wheat,,mandi,apmc-pune,,,2760,,2026-10-03
+wheat,,mandi,apmc-pune,,,2770,,2026-10-03

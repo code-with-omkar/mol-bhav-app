@@ -52,7 +52,8 @@ public sealed class Alert : AggregateRoot<Guid>, IAuditableEntity
     {
     }
 
-    public Guid AlertRuleId { get; private set; }
+    /// <summary>The rule that fired it; null once the user deletes that rule (the alert stays as history).</summary>
+    public Guid? AlertRuleId { get; private set; }
 
     public Guid UserId { get; private set; }
 
@@ -132,7 +133,7 @@ public sealed class Alert : AggregateRoot<Guid>, IAuditableEntity
         alert.RaiseDomainEvent(new AlertTriggeredDomainEvent(
             alert.Id,
             alert.UserId,
-            alert.AlertRuleId,
+            rule.Id,
             alert.ProductId,
             alert.VariantId,
             alert.LocationKind,

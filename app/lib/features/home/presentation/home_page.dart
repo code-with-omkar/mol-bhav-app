@@ -9,48 +9,26 @@ import '../../../core/theme/mb_dimens.dart';
 import '../../../core/utils/data_state.dart';
 import '../../../core/utils/formatters.dart';
 import '../../../core/utils/statuses.dart';
-import '../../../core/utils/timestamps.dart';
-import '../../../core/weather/weather_models.dart';
 import '../../../shared/widgets/category_visuals.dart';
-import '../../../shared/widgets/mb_cards.dart';
 import '../../../shared/widgets/mb_category_card.dart';
 import '../../../shared/widgets/mb_hero_header.dart';
 import '../../../shared/widgets/mb_icon.dart';
 import '../../../shared/widgets/mb_panels.dart';
 import '../../../shared/widgets/mb_price.dart';
 import '../../../shared/widgets/mb_state_views.dart';
-<<<<<<< HEAD
+import '../../app_features/domain/app_features.dart';
+import '../../app_features/presentation/feature_switches_cubit.dart';
 import '../../promotions/domain/promotions.dart';
 import '../../promotions/presentation/ad_slot.dart';
 import '../domain/home_entities.dart';
+import '../../weather/presentation/weather_cubit.dart';
 import 'home_cubit.dart';
-import 'weather_badge_widget.dart';
-import '../../../core/weather/weather_service.dart';
-=======
-import '../../../shared/widgets/weather_badge.dart';
-import '../domain/home_entities.dart';
-import 'home_cubit.dart';
-import 'weather_cubit.dart';
->>>>>>> 3c0db1a53330c423562aed2a14ec726797682e4f
+import 'home_opportunity_slider.dart';
+import 'home_weather.dart';
 
 /// Category-aware dashboard: Market → Compare → Opportunity → Action.
-/// Initializes WeatherCubit and requests location permission on first load.
-class HomePage extends StatefulWidget {
+class HomePage extends StatelessWidget {
   const HomePage({super.key});
-
-  @override
-  State<HomePage> createState() => _HomePageState();
-}
-
-class _HomePageState extends State<HomePage> {
-  @override
-  void initState() {
-    super.initState();
-    // Request location permission and fetch weather on home load.
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      context.read<WeatherCubit>().watchWeather();
-    });
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -62,7 +40,7 @@ class _HomePageState extends State<HomePage> {
             _ when data != null => MbRevalidating(
               active: state.isRevalidating,
               child: RefreshIndicator(
-                onRefresh: context.read<HomeCubit>().refresh,
+                onRefresh: () => _refresh(context),
                 child: _Dashboard(data: data),
               ),
             ),
@@ -78,41 +56,15 @@ class _HomePageState extends State<HomePage> {
       },
     );
   }
-}
 
-/// The header with the weather badge floating on its greeting line. The badge
-/// shows once the weather is known; tapping the location chip toggles it.
-class _WeatherHero extends StatefulWidget {
-  const _WeatherHero({required this.weather, required this.builder});
-
-  final CurrentWeather? weather;
-  final Widget Function(VoidCallback onChipTap) builder;
-
-  @override
-  State<_WeatherHero> createState() => _WeatherHeroState();
-}
-
-class _WeatherHeroState extends State<_WeatherHero> {
-  bool _shown = true;
-
-  @override
-  Widget build(BuildContext context) {
-    final weather = widget.weather;
-    // Header rows above the greeting: safe area, padding, the 48px top row
-    // and the gap below it.
-    final top =
-        MediaQuery.paddingOf(context).top + MbSpacing.s2 + 48 + MbSpacing.s5;
-    return Stack(
-      children: [
-        widget.builder(() => setState(() => _shown = !_shown)),
-        if (weather != null)
-          Positioned(
-            top: top,
-            right: MbSpacing.s4,
-            child: WeatherBadgeWidget(weather: weather, visible: _shown),
-          ),
-      ],
-    );
+  /// Dashboard plus the forecast, when a station is known (refreshing
+  /// without one would raise the permission prompt from Home).
+  static Future<void> _refresh(BuildContext context) {
+    final weather = context.read<WeatherCubit>();
+    return Future.wait([
+      context.read<HomeCubit>().refresh(),
+      if (weather.state.station != null) weather.refreshWeather(),
+    ]);
   }
 }
 
@@ -145,7 +97,7 @@ class _Dashboard extends StatelessWidget {
   Widget build(BuildContext context) {
     final c = context.mbColors;
     final l10n = context.l10n;
-    final top = data.topOpportunity;
+    final tops = data.topOpportunities;
     const gap = SizedBox(height: MbSpacing.s4);
 
     return SingleChildScrollView(
@@ -153,29 +105,17 @@ class _Dashboard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-<<<<<<< HEAD
-          _WeatherHero(
-            weather: data.weather,
-            builder: (onChipTap) => MbHeroHeader(
+          HomeWeatherHero(
+            onOpenWeather: () => context.go(AppRoutes.weather),
+            header: (background) => MbHeroHeader(
               name: data.userName,
               greeting: _greeting(context),
               chip: _chip(context),
-              onChipTap: data.weather == null ? null : onChipTap,
-              subtitle: l10n.homeSubtitle,
               alertsLabel: l10n.alertsLabel,
               unread: data.hasUnreadAlerts,
               onAlerts: () => context.go(AppRoutes.alerts),
+              background: background,
             ),
-=======
-          MbHeroHeaderWithWeather(
-            name: data.userName,
-            greeting: _greeting(context),
-            chip: _chip(context),
-            subtitle: l10n.homeSubtitle,
-            alertsLabel: l10n.alertsLabel,
-            unread: data.hasUnreadAlerts,
-            onAlerts: () => context.go(AppRoutes.alerts),
->>>>>>> 3c0db1a53330c423562aed2a14ec726797682e4f
           ),
           Transform.translate(
             offset: const Offset(0, -MbHeroHeader.overlap),
@@ -222,31 +162,13 @@ class _Dashboard extends StatelessWidget {
                     onAction: () => context.go(AppRoutes.alerts),
                   ),
                   gap,
-                  if (top == null)
+                  if (tops.isEmpty)
                     Text(
                       l10n.homeNoOpportunity,
                       style: context.mbText.body.copyWith(color: c.inkMuted),
                     )
                   else
-                    MbOpportunityCard(
-                      product: top.product,
-                      meta: top.priceSource,
-                      time: context.timestamp(top.updatedAt),
-                      price: formatInr(top.price),
-                      unit: top.unit,
-                      change: top.change,
-                      percent: top.percent,
-                      trend: top.trend.length > 1 ? top.trend : null,
-                      insight: top.bestMarketName == null
-                          ? null
-                          : l10n.bestPriceIn(top.bestMarketName!),
-                      thumb: categoryIcon(top.categoryCode),
-                      tone: categoryTint(top.categoryCode),
-                      actionLabel: l10n.compareMarkets,
-                      onAction: () => context.go(
-                        AppRoutes.marketsFor(commodityId: top.commodityId),
-                      ),
-                    ),
+                    HomeOpportunitySlider(items: tops),
                   gap,
                   const AdSlot(placement: PromotionPlacement.homeFeed),
                   MbSectionHeader(
@@ -348,12 +270,18 @@ class _QuickActions extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = context.l10n;
     final actions = [
-      (
-        MbIcons.estimator,
-        l10n.quickCostEstimate,
-        () => context.go(AppRoutes.costEstimator),
-      ),
-      (MbIcons.report, l10n.reportsTitle, () => context.go(AppRoutes.reports)),
+      if (context.featureOn(AppFeature.costEstimator))
+        (
+          MbIcons.estimator,
+          l10n.quickCostEstimate,
+          () => context.go(AppRoutes.costEstimator),
+        ),
+      if (context.featureOn(AppFeature.reports))
+        (
+          MbIcons.report,
+          l10n.reportsTitle,
+          () => context.go(AppRoutes.reports),
+        ),
       (
         MbIcons.compare,
         l10n.compareMarkets,
@@ -427,93 +355,6 @@ class _QuickAction extends StatelessWidget {
           ),
         ),
       ),
-    );
-  }
-}
-
-/// MbHeroHeader wrapper that integrates weather badge on the location chip.
-/// Streams weather state and overlays the badge when weather data is available.
-class MbHeroHeaderWithWeather extends StatelessWidget {
-  const MbHeroHeaderWithWeather({
-    super.key,
-    required this.name,
-    required this.greeting,
-    required this.alertsLabel,
-    this.subtitle,
-    this.chip,
-    this.unread = false,
-    this.onAlerts,
-  });
-
-  final String name;
-  final String greeting;
-  final String alertsLabel;
-  final String? subtitle;
-  final String? chip;
-  final bool unread;
-  final VoidCallback? onAlerts;
-
-  @override
-  Widget build(BuildContext context) {
-    // Stream weather state and conditionally render badge.
-    return BlocBuilder<WeatherCubit, DataState<CurrentWeather>>(
-      builder: (context, weatherState) {
-        final hasWeather = weatherState.status == LoadStatus.ready &&
-            weatherState.data != null;
-
-        return MbHeroHeaderWithChip(
-          name: name,
-          greeting: greeting,
-          alertsLabel: alertsLabel,
-          subtitle: subtitle,
-          chip: chip,
-          unread: unread,
-          onAlerts: onAlerts,
-          weather: hasWeather ? weatherState.data : null,
-          showWeatherLoading: weatherState.status == LoadStatus.loading,
-        );
-      },
-    );
-  }
-}
-
-/// Internal hero header with optional weather overlay on chip.
-class MbHeroHeaderWithChip extends StatelessWidget {
-  const MbHeroHeaderWithChip({
-    super.key,
-    required this.name,
-    required this.greeting,
-    required this.alertsLabel,
-    this.subtitle,
-    this.chip,
-    this.unread = false,
-    this.onAlerts,
-    this.weather,
-    this.showWeatherLoading = false,
-  });
-
-  final String name;
-  final String greeting;
-  final String alertsLabel;
-  final String? subtitle;
-  final String? chip;
-  final bool unread;
-  final VoidCallback? onAlerts;
-  final CurrentWeather? weather;
-  final bool showWeatherLoading;
-
-  @override
-  Widget build(BuildContext context) {
-    return MbHeroHeader(
-      name: name,
-      greeting: greeting,
-      alertsLabel: alertsLabel,
-      subtitle: subtitle,
-      chip: chip,
-      unread: unread,
-      onAlerts: onAlerts,
-      weather: weather,
-      showWeatherLoading: showWeatherLoading,
     );
   }
 }

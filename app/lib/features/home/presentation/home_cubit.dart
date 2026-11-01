@@ -5,13 +5,14 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:injectable/injectable.dart';
 
 import '../../../core/error/failure.dart';
+import '../../../core/error/result.dart';
 import '../../../core/locale/locale_cubit.dart';
 import '../../../core/utils/data_state.dart';
 import '../../../core/utils/statuses.dart';
-import '../../../core/weather/weather_service.dart';
 import '../../account/domain/account.dart';
 import '../../account/presentation/profile_cubit.dart';
 import '../../catalog/domain/catalog.dart';
+import '../../opportunities/domain/opportunities.dart';
 import '../../watchlist/domain/watchlist.dart';
 import '../../watchlist/presentation/watchlist_cubit.dart';
 import '../domain/home_entities.dart';
@@ -26,7 +27,7 @@ class HomeCubit extends Cubit<DataState<HomeDashboard>> {
     this._profile,
     this._watchlist,
     this._catalog,
-    this._weatherService,
+    this._opportunities,
     LocaleCubit locale, [
     this._prefetcher,
   ]) : super(const DataState()) {
@@ -40,13 +41,18 @@ class HomeCubit extends Cubit<DataState<HomeDashboard>> {
 
   static const _previewSize = 5;
 
+  /// Opportunities in the Home slider.
+  static const maxTopOpportunities = 5;
+
+  /// An opportunity older than this is no longer shown on Home.
+  static const _opportunityShelfLife = Duration(days: 3);
+
   final ProfileCubit _profile;
   final WatchlistCubit _watchlist;
   final CatalogRepository _catalog;
-  final WeatherService _weatherService;
+  final OpportunitiesRepository _opportunities;
   final HomePrefetcher? _prefetcher;
-  StreamSubscription<CurrentWeather>? _weatherSub;
-  CurrentWeather? _weather;
+  List<MarketOpportunity> _recentOpportunities = const [];
   late final List<StreamSubscription<Object?>> _subs;
 
   List<CatalogCategory>? _categories;
@@ -58,39 +64,34 @@ class HomeCubit extends Cubit<DataState<HomeDashboard>> {
 
   Future<void> load() async {
     _rebuild();
-    // Not awaited: the location prompt and the network never hold up the
-    // dashboard.
-    watchCurrentWeather();
     await Future.wait([
       _profile.ensureLoaded(),
       _watchlist.ensureLoaded(),
       if (_categories == null) _loadCategories(),
+      _loadOpportunities(),
     ]);
     // Home is on screen: warm the cache for the tabs opened next.
     _prefetcher?.warm();
   }
 
-  /// Current weather: cached reading at once, then the live one. Starts once;
-  /// a denied permission or a failure just leaves the badge hidden.
-  void watchCurrentWeather() {
-    if (_weatherSub != null) return;
-    _weatherSub = _weatherService.watchCurrentWeather().listen(
-      (weather) {
-        _weather = weather;
-        _rebuild();
-      },
-      onError: (Object _) {},
-      onDone: () => _weatherSub = null,
-    );
-  }
-
   /// Pull-to-refresh: everything from the API again.
   Future<void> refresh() async {
-    await _weatherService.clearCache();
-    await _weatherSub?.cancel();
-    _weatherSub = null;
-    watchCurrentWeather();
-    await Future.wait([_profile.load(), _watchlist.load(), _loadCategories()]);
+    await Future.wait([
+      _profile.load(),
+      _watchlist.load(),
+      _loadCategories(),
+      _loadOpportunities(),
+    ]);
+  }
+
+  /// Best effort: Home works the same without opportunities.
+  Future<void> _loadOpportunities() async {
+    final result = await _opportunities.getRecent();
+    if (isClosed) return;
+    if (result case Ok(:final value)) {
+      _recentOpportunities = value;
+      _rebuild();
+    }
   }
 
   Future<void> retry() => refresh();
@@ -141,7 +142,7 @@ class HomeCubit extends Cubit<DataState<HomeDashboard>> {
       profile,
       categories,
       _watchlist.state.items,
-      _weather,
+      _recentOpportunities,
     );
     final revalidating =
         profileState.isLoading ||
@@ -158,11 +159,10 @@ class HomeCubit extends Cubit<DataState<HomeDashboard>> {
     AccountProfile profile,
     List<CatalogCategory> categories,
     List<WatchlistItem> watchlist,
-    CurrentWeather? weather,
+    List<MarketOpportunity> opportunities,
   ) {
     final codes = profile.categoryCodes.toSet();
     return HomeDashboard(
-      weather: weather,
       userName: profile.name,
       businessType: profile.businessTypeName,
       districtName: profile.districtName,
@@ -173,7 +173,7 @@ class HomeCubit extends Cubit<DataState<HomeDashboard>> {
           if (codes.isEmpty || codes.contains(c.code))
             HomeCategory(code: c.code, name: c.name, highlights: const []),
       ],
-      topOpportunity: null,
+      topOpportunities: topOpportunities(opportunities, watchlist),
       watchlist: [
         for (final i in watchlist.take(_previewSize))
           WatchlistPreview(
@@ -189,9 +189,51 @@ class HomeCubit extends Cubit<DataState<HomeDashboard>> {
     );
   }
 
+  /// Recent opportunities for products still on the watchlist: the newest
+  /// one per product, biggest saving first, at most [maxTopOpportunities].
+  @visibleForTesting
+  static List<TopOpportunity> topOpportunities(
+    List<MarketOpportunity> opportunities,
+    List<WatchlistItem> watchlist, {
+    DateTime? now,
+  }) {
+    final cutoff = (now ?? DateTime.now()).subtract(_opportunityShelfLife);
+    final newestFirst = [...opportunities]
+      ..sort((a, b) => b.detectedAt.compareTo(a.detectedAt));
+    final seen = <String>{};
+    final picked = <(MarketOpportunity, WatchlistItem)>[];
+    for (final o in newestFirst) {
+      if (o.detectedAt.isBefore(cutoff) || !seen.add(o.productId)) continue;
+      final watched = watchlist
+          .where((w) => w.commodityId == o.productId)
+          .firstOrNull;
+      if (watched == null) continue;
+      picked.add((o, watched));
+    }
+    picked.sort((a, b) => b.$1.savingsPercent.compareTo(a.$1.savingsPercent));
+    return [
+      for (final (o, watched) in picked.take(maxTopOpportunities))
+        TopOpportunity(
+          commodityId: o.productId,
+          product: o.displayName,
+          categoryCode: watched.categoryCode,
+          priceSource: o.bestDistrict,
+          updatedAt: o.priceDate,
+          price: o.bestPrice,
+          unit: o.unit,
+          change: -o.savingsPerUnit,
+          percent: -o.savingsPercent.toDouble(),
+          trend: const [],
+          bestMarketName: o.bestName,
+          opportunityId: o.id,
+          referenceMarketName: o.homeName,
+          savingsPercent: o.savingsPercent,
+        ),
+    ];
+  }
+
   @override
   Future<void> close() {
-    _weatherSub?.cancel();
     for (final sub in _subs) {
       sub.cancel();
     }

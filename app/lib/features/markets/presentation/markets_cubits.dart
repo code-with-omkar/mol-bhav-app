@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:equatable/equatable.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -97,12 +99,41 @@ class MarketComparisonCubit extends Cubit<MarketComparisonState> {
     this._getComparison,
     this._catalog,
     this._profile,
-  ) : super(const MarketComparisonState());
+  ) : super(const MarketComparisonState()) {
+    // The Markets tab stays alive between visits: follow profile category
+    // changes instead of showing the categories it was first opened with.
+    _profileSub = _profile.stream.listen((_) => _onProfile());
+  }
 
   final GetCommodities _getCommodities;
   final GetMarketComparison _getComparison;
   final CatalogRepository _catalog;
   final ProfileCubit _profile;
+  late final StreamSubscription<Object?> _profileSub;
+
+  /// The profile's categories the chips were last built from.
+  List<String>? _loadedCodes;
+
+  void _onProfile() {
+    final codes = _profile.state.data?.categoryCodes;
+    final loaded = _loadedCodes;
+    if (codes == null || loaded == null || listEquals(codes, loaded)) return;
+    // Keep the open product only while its category is still the user's.
+    final current = state.commodity;
+    unawaited(
+      load(
+        commodityId: current != null && codes.contains(current.categoryCode)
+            ? current.id
+            : null,
+      ),
+    );
+  }
+
+  @override
+  Future<void> close() {
+    _profileSub.cancel();
+    return super.close();
+  }
 
   /// Opens on [commodityId], else the first commodity of [categoryCode],
   /// else the first commodity of the user's own first category.
@@ -138,6 +169,7 @@ class MarketComparisonCubit extends Cubit<MarketComparisonState> {
       (_) => const <CatalogCategory>[],
       (list) => list,
     );
+    _loadedCodes = _profile.state.data?.categoryCodes;
     final requested = commodities.where((c) => c.id == commodityId).firstOrNull;
     // Only the user's own categories — plus whatever a deep link or Home tile
     // explicitly opened, so a shared price still lands on that price. Without
@@ -325,5 +357,12 @@ class BuyingOpportunityCubit extends Cubit<DataState<BuyingOpportunity>> {
 
   Future<void> retry() async {
     if (_id != null) await load(_id!);
+  }
+
+  /// Recalculates the saving for another order size (on this screen only).
+  void setQuantity(num quantity) {
+    final current = state.data;
+    if (current == null || quantity <= 0) return;
+    emit(DataState.ready(current.withQuantity(quantity)));
   }
 }

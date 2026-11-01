@@ -1,10 +1,15 @@
+import 'dart:async';
+
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_native_splash/flutter_native_splash.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import 'app/boot_splash.dart';
 import 'core/di/injection.dart';
+import 'core/network/api_config.dart';
+import 'core/notifications/notification_service.dart';
 import 'core/session/session_manager.dart';
 
 void main() {
@@ -24,9 +29,16 @@ Future<void> _boot() async {
   await _initFirebase();
   if (!_dependenciesReady) {
     await configureDependencies();
+    // Before any HTTP client exists: a server address saved in a debug build.
+    ApiConfig.restore(getIt<SharedPreferences>());
     _dependenciesReady = true;
   }
   await getIt<SessionManager>().restore();
+  // Signed in from an earlier run: register for push (asks for permission
+  // the first time) — login only covered fresh sign-ins.
+  if (getIt<SessionManager>().hasSession) {
+    unawaited(getIt<NotificationService>().initialize());
+  }
 }
 
 /// Push is optional: without `google-services.json` / `GoogleService-Info.plist`

@@ -20,6 +20,15 @@ public sealed class AgmarknetOptions
     /// <summary>HTTP request timeout per page call.</summary>
     public int RequestTimeoutSeconds { get; set; } = 30;
 
+    /// <summary>How many times one page is retried after a transient response (429, 502, 503, 504) before the run fails. 0 disables retries.</summary>
+    public int MaxRetries { get; set; } = 4;
+
+    /// <summary>First retry waits this long, doubling each time (5, 10, 20, 40 s) — unless the server sends <c>Retry-After</c>, which is used instead.</summary>
+    public int RetryBaseDelaySeconds { get; set; } = 5;
+
+    /// <summary>Upper bound on any single retry wait, including a server-supplied <c>Retry-After</c>.</summary>
+    public int MaxRetryDelaySeconds { get; set; } = 60;
+
     /// <summary>Slugged Agmarknet <c>market</c> → our mandi code, for mandis whose code differs (e.g. <c>"pune": "apmc-pune"</c>). Keys are case-insensitive.</summary>
     public Dictionary<string, string> MarketCodeMap { get; set; } = new(StringComparer.OrdinalIgnoreCase);
 

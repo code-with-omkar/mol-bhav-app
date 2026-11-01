@@ -220,6 +220,7 @@ class RelatedMarketPrice extends Equatable {
 class BuyingOpportunity extends Equatable {
   const BuyingOpportunity({
     required this.id,
+    required this.commodityId,
     required this.commodityName,
     required this.categoryCode,
     required this.quantity,
@@ -235,6 +236,7 @@ class BuyingOpportunity extends Equatable {
   });
 
   final String id;
+  final String commodityId;
   final String commodityName;
   final String categoryCode;
   final num quantity;
@@ -253,9 +255,33 @@ class BuyingOpportunity extends Equatable {
   MarketRefPrice? get reference =>
       markets.where((m) => m.marketId == referenceMarketId).firstOrNull;
 
+  /// The same opportunity for another order size: the difference is the
+  /// per-unit saving (reference − best landed price) times [newQuantity].
+  BuyingOpportunity withQuantity(num newQuantity) {
+    final b = best, r = reference;
+    final perUnit = b != null && r != null ? r.price - b.price : 0;
+    return BuyingOpportunity(
+      id: id,
+      commodityId: commodityId,
+      commodityName: commodityName,
+      categoryCode: categoryCode,
+      quantity: newQuantity,
+      quantityUnit: quantityUnit,
+      deliverTo: deliverTo,
+      priceUnit: priceUnit,
+      markets: markets,
+      bestMarketId: bestMarketId,
+      referenceMarketId: referenceMarketId,
+      potentialDifference: (perUnit * newQuantity).round(),
+      source: source,
+      updatedAt: updatedAt,
+    );
+  }
+
   @override
   List<Object?> get props => [
     id,
+    commodityId,
     commodityName,
     categoryCode,
     quantity,

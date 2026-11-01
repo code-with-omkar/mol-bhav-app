@@ -30,7 +30,7 @@ namespace MolBhav.Infrastructure.Persistence.Migrations
                         .HasColumnType("uuid")
                         .HasColumnName("id");
 
-                    b.Property<Guid>("AlertRuleId")
+                    b.Property<Guid?>("AlertRuleId")
                         .HasColumnType("uuid")
                         .HasColumnName("alert_rule_id");
 
@@ -242,6 +242,198 @@ namespace MolBhav.Infrastructure.Persistence.Migrations
 
                             t.HasCheckConstraint("ck_alert_rules_threshold", "(threshold_type IN ('PriceDrop', 'PriceSpike', 'PriceChange') AND threshold_percent IS NOT NULL AND threshold_price IS NULL) OR (threshold_type IN ('PriceBelow', 'PriceAbove') AND threshold_price IS NOT NULL AND threshold_percent IS NULL)");
                         });
+                });
+
+            modelBuilder.Entity("MolBhav.Domain.Alerting.MarketOpportunity", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<string>("BestLocationKind")
+                        .IsRequired()
+                        .HasMaxLength(64)
+                        .HasColumnType("character varying(64)")
+                        .HasColumnName("best_location_kind");
+
+                    b.Property<Guid?>("BestMandiId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("best_mandi_id");
+
+                    b.Property<decimal>("BestPrice")
+                        .HasPrecision(18, 4)
+                        .HasColumnType("numeric(18,4)")
+                        .HasColumnName("best_price");
+
+                    b.Property<Guid?>("BestSupplierId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("best_supplier_id");
+
+                    b.Property<DateTimeOffset>("CreatedAtUtc")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at_utc");
+
+                    b.Property<Guid?>("CreatedBy")
+                        .HasColumnType("uuid")
+                        .HasColumnName("created_by");
+
+                    b.Property<DateTimeOffset>("DetectedAtUtc")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("detected_at_utc");
+
+                    b.Property<DateOnly>("DetectedOn")
+                        .HasColumnType("date")
+                        .HasColumnName("detected_on");
+
+                    b.Property<string>("HomeLocationKind")
+                        .IsRequired()
+                        .HasMaxLength(64)
+                        .HasColumnType("character varying(64)")
+                        .HasColumnName("home_location_kind");
+
+                    b.Property<Guid?>("HomeMandiId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("home_mandi_id");
+
+                    b.Property<decimal>("HomePrice")
+                        .HasPrecision(18, 4)
+                        .HasColumnType("numeric(18,4)")
+                        .HasColumnName("home_price");
+
+                    b.Property<Guid?>("HomeSupplierId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("home_supplier_id");
+
+                    b.Property<bool>("IsRead")
+                        .HasColumnType("boolean")
+                        .HasColumnName("is_read");
+
+                    b.Property<decimal>("LandedPrice")
+                        .HasPrecision(18, 4)
+                        .HasColumnType("numeric(18,4)")
+                        .HasColumnName("landed_price");
+
+                    b.Property<DateOnly>("PriceDate")
+                        .HasColumnType("date")
+                        .HasColumnName("price_date");
+
+                    b.Property<Guid>("ProductId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("product_id");
+
+                    b.Property<decimal>("SavingsPercent")
+                        .HasPrecision(9, 4)
+                        .HasColumnType("numeric(9,4)")
+                        .HasColumnName("savings_percent");
+
+                    b.Property<DateTimeOffset?>("UpdatedAtUtc")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at_utc");
+
+                    b.Property<Guid?>("UpdatedBy")
+                        .HasColumnType("uuid")
+                        .HasColumnName("updated_by");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("user_id");
+
+                    b.Property<Guid?>("VariantId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("variant_id");
+
+                    b.Property<uint>("xmin")
+                        .IsConcurrencyToken()
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("xid")
+                        .HasColumnName("xmin");
+
+                    b.HasKey("Id")
+                        .HasName("pk_market_opportunities");
+
+                    b.HasIndex("BestMandiId")
+                        .HasDatabaseName("ix_market_opportunities_best_mandi_id");
+
+                    b.HasIndex("BestSupplierId")
+                        .HasDatabaseName("ix_market_opportunities_best_supplier_id");
+
+                    b.HasIndex("HomeMandiId")
+                        .HasDatabaseName("ix_market_opportunities_home_mandi_id");
+
+                    b.HasIndex("HomeSupplierId")
+                        .HasDatabaseName("ix_market_opportunities_home_supplier_id");
+
+                    b.HasIndex("ProductId")
+                        .HasDatabaseName("ix_market_opportunities_product_id");
+
+                    b.HasIndex("VariantId")
+                        .HasDatabaseName("ix_market_opportunities_variant_id");
+
+                    b.HasIndex("UserId", "DetectedAtUtc")
+                        .HasDatabaseName("ix_market_opportunities_user_id_detected_at_utc");
+
+                    b.HasIndex("DetectedOn", "UserId", "ProductId")
+                        .IsUnique()
+                        .HasDatabaseName("ix_market_opportunities_detected_on_user_id_product_id");
+
+                    b.ToTable("market_opportunities", "alerting", t =>
+                        {
+                            t.HasCheckConstraint("ck_market_opportunities_best_location", "(best_location_kind = 'Mandi' AND best_mandi_id IS NOT NULL AND best_supplier_id IS NULL) OR (best_location_kind = 'Supplier' AND best_supplier_id IS NOT NULL AND best_mandi_id IS NULL)");
+
+                            t.HasCheckConstraint("ck_market_opportunities_home_location", "(home_location_kind = 'Mandi' AND home_mandi_id IS NOT NULL AND home_supplier_id IS NULL) OR (home_location_kind = 'Supplier' AND home_supplier_id IS NOT NULL AND home_mandi_id IS NULL)");
+
+                            t.HasCheckConstraint("ck_market_opportunities_prices", "home_price > 0 AND best_price > 0 AND landed_price >= best_price AND landed_price < home_price");
+                        });
+                });
+
+            modelBuilder.Entity("MolBhav.Domain.AppNotices.AppNotice", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<DateTimeOffset>("CreatedAtUtc")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at_utc");
+
+                    b.Property<Guid?>("CreatedBy")
+                        .HasColumnType("uuid")
+                        .HasColumnName("created_by");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("boolean")
+                        .HasColumnName("is_active");
+
+                    b.Property<string>("Message")
+                        .IsRequired()
+                        .HasMaxLength(280)
+                        .HasColumnType("character varying(280)")
+                        .HasColumnName("message");
+
+                    b.Property<string>("Severity")
+                        .IsRequired()
+                        .HasMaxLength(64)
+                        .HasColumnType("character varying(64)")
+                        .HasColumnName("severity");
+
+                    b.Property<DateTimeOffset?>("UpdatedAtUtc")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at_utc");
+
+                    b.Property<Guid?>("UpdatedBy")
+                        .HasColumnType("uuid")
+                        .HasColumnName("updated_by");
+
+                    b.Property<uint>("xmin")
+                        .IsConcurrencyToken()
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("xid")
+                        .HasColumnName("xmin");
+
+                    b.HasKey("Id")
+                        .HasName("pk_app_notices");
+
+                    b.ToTable("app_notices", "platform");
                 });
 
             modelBuilder.Entity("MolBhav.Domain.Billing.Coupon", b =>
@@ -844,6 +1036,54 @@ namespace MolBhav.Infrastructure.Persistence.Migrations
                     b.ToTable("units_of_measure", "catalog");
                 });
 
+            modelBuilder.Entity("MolBhav.Domain.FeatureSwitches.FeatureSwitch", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<DateTimeOffset>("CreatedAtUtc")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at_utc");
+
+                    b.Property<Guid?>("CreatedBy")
+                        .HasColumnType("uuid")
+                        .HasColumnName("created_by");
+
+                    b.Property<string>("Feature")
+                        .IsRequired()
+                        .HasMaxLength(64)
+                        .HasColumnType("character varying(64)")
+                        .HasColumnName("feature");
+
+                    b.Property<bool>("IsEnabled")
+                        .HasColumnType("boolean")
+                        .HasColumnName("is_enabled");
+
+                    b.Property<DateTimeOffset?>("UpdatedAtUtc")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at_utc");
+
+                    b.Property<Guid?>("UpdatedBy")
+                        .HasColumnType("uuid")
+                        .HasColumnName("updated_by");
+
+                    b.Property<uint>("xmin")
+                        .IsConcurrencyToken()
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("xid")
+                        .HasColumnName("xmin");
+
+                    b.HasKey("Id")
+                        .HasName("pk_feature_switches");
+
+                    b.HasIndex("Feature")
+                        .IsUnique()
+                        .HasDatabaseName("ix_feature_switches_feature");
+
+                    b.ToTable("feature_switches", "platform");
+                });
+
             modelBuilder.Entity("MolBhav.Domain.Identity.OtpChallenge", b =>
                 {
                     b.Property<Guid>("Id")
@@ -1322,6 +1562,62 @@ namespace MolBhav.Infrastructure.Persistence.Migrations
 
                             t.HasCheckConstraint("ck_ingestion_schedules_next_run", "(is_enabled AND next_run_at_utc IS NOT NULL) OR (NOT is_enabled AND next_run_at_utc IS NULL)");
                         });
+                });
+
+            modelBuilder.Entity("MolBhav.Domain.Ingestion.SourceFeedOptions", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<string>("Commodities")
+                        .IsRequired()
+                        .HasColumnType("jsonb")
+                        .HasColumnName("commodities");
+
+                    b.Property<DateTimeOffset>("CreatedAtUtc")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at_utc");
+
+                    b.Property<Guid?>("CreatedBy")
+                        .HasColumnType("uuid")
+                        .HasColumnName("created_by");
+
+                    b.Property<string>("Markets")
+                        .IsRequired()
+                        .HasColumnType("jsonb")
+                        .HasColumnName("markets");
+
+                    b.Property<Guid>("PriceSourceId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("price_source_id");
+
+                    b.Property<DateTimeOffset>("RefreshedAtUtc")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("refreshed_at_utc");
+
+                    b.Property<DateTimeOffset?>("UpdatedAtUtc")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at_utc");
+
+                    b.Property<Guid?>("UpdatedBy")
+                        .HasColumnType("uuid")
+                        .HasColumnName("updated_by");
+
+                    b.Property<uint>("xmin")
+                        .IsConcurrencyToken()
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("xid")
+                        .HasColumnName("xmin");
+
+                    b.HasKey("Id")
+                        .HasName("pk_source_feed_options");
+
+                    b.HasIndex("PriceSourceId")
+                        .IsUnique()
+                        .HasDatabaseName("ix_source_feed_options_price_source_id");
+
+                    b.ToTable("source_feed_options", "ingestion");
                 });
 
             modelBuilder.Entity("MolBhav.Domain.Localization.LocalizedTextEntry", b =>
@@ -1898,10 +2194,19 @@ namespace MolBhav.Infrastructure.Persistence.Migrations
                         .HasColumnType("uuid")
                         .HasColumnName("created_by");
 
+                    b.Property<DateTimeOffset?>("DeliveredAtUtc")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("delivered_at_utc");
+
                     b.Property<string>("FailureReason")
                         .HasMaxLength(500)
                         .HasColumnType("character varying(500)")
                         .HasColumnName("failure_reason");
+
+                    b.Property<string>("ProviderMessageId")
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)")
+                        .HasColumnName("provider_message_id");
 
                     b.Property<DateTimeOffset?>("SentAtUtc")
                         .HasColumnType("timestamp with time zone")
@@ -1939,6 +2244,10 @@ namespace MolBhav.Infrastructure.Persistence.Migrations
 
                     b.HasKey("Id")
                         .HasName("pk_notifications");
+
+                    b.HasIndex("ProviderMessageId")
+                        .IsUnique()
+                        .HasDatabaseName("ix_notifications_provider_message_id");
 
                     b.HasIndex("Status")
                         .HasDatabaseName("ix_notifications_status");
@@ -3081,8 +3390,7 @@ namespace MolBhav.Infrastructure.Persistence.Migrations
                     b.HasOne("MolBhav.Domain.Alerting.AlertRule", null)
                         .WithMany()
                         .HasForeignKey("AlertRuleId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired()
+                        .OnDelete(DeleteBehavior.SetNull)
                         .HasConstraintName("fk_alerts_alert_rules_alert_rule_id");
 
                     b.HasOne("MolBhav.Domain.Market.Mandi", null)
@@ -3158,6 +3466,53 @@ namespace MolBhav.Infrastructure.Persistence.Migrations
                         .HasForeignKey("VariantId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .HasConstraintName("fk_alert_rules_product_variants_variant_id");
+                });
+
+            modelBuilder.Entity("MolBhav.Domain.Alerting.MarketOpportunity", b =>
+                {
+                    b.HasOne("MolBhav.Domain.Market.Mandi", null)
+                        .WithMany()
+                        .HasForeignKey("BestMandiId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .HasConstraintName("fk_market_opportunities_mandis_best_mandi_id");
+
+                    b.HasOne("MolBhav.Domain.Market.Supplier", null)
+                        .WithMany()
+                        .HasForeignKey("BestSupplierId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .HasConstraintName("fk_market_opportunities_suppliers_best_supplier_id");
+
+                    b.HasOne("MolBhav.Domain.Market.Mandi", null)
+                        .WithMany()
+                        .HasForeignKey("HomeMandiId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .HasConstraintName("fk_market_opportunities_mandis_home_mandi_id");
+
+                    b.HasOne("MolBhav.Domain.Market.Supplier", null)
+                        .WithMany()
+                        .HasForeignKey("HomeSupplierId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .HasConstraintName("fk_market_opportunities_suppliers_home_supplier_id");
+
+                    b.HasOne("MolBhav.Domain.Catalog.Product", null)
+                        .WithMany()
+                        .HasForeignKey("ProductId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("fk_market_opportunities_products_product_id");
+
+                    b.HasOne("MolBhav.Domain.Identity.User", null)
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_market_opportunities_users_user_id");
+
+                    b.HasOne("MolBhav.Domain.Catalog.ProductVariant", null)
+                        .WithMany()
+                        .HasForeignKey("VariantId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .HasConstraintName("fk_market_opportunities_product_variants_variant_id");
                 });
 
             modelBuilder.Entity("MolBhav.Domain.Billing.Subscription", b =>
@@ -3562,6 +3917,16 @@ namespace MolBhav.Infrastructure.Persistence.Migrations
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired()
                         .HasConstraintName("fk_ingestion_schedules_price_sources_price_source_id");
+                });
+
+            modelBuilder.Entity("MolBhav.Domain.Ingestion.SourceFeedOptions", b =>
+                {
+                    b.HasOne("MolBhav.Domain.Pricing.PriceSource", null)
+                        .WithMany()
+                        .HasForeignKey("PriceSourceId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("fk_source_feed_options_price_sources_price_source_id");
                 });
 
             modelBuilder.Entity("MolBhav.Domain.Localization.LocalizedTextEntry", b =>

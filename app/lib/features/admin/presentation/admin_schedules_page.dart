@@ -4,6 +4,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
 
+import '../../../core/error/result.dart';
 import '../../../core/l10n/l10n.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/theme/mb_dimens.dart';
@@ -11,7 +12,9 @@ import '../../../core/utils/formatters.dart';
 import '../../../core/utils/statuses.dart';
 import '../../../shared/widgets/mb_app_bar.dart';
 import '../../../shared/widgets/mb_button.dart';
+import '../../../shared/widgets/mb_icons.dart';
 import '../../../shared/widgets/mb_layout.dart';
+import '../../../shared/widgets/mb_multi_select_field.dart';
 import '../../../shared/widgets/mb_state_views.dart';
 import '../domain/admin_ingestion.dart';
 import 'admin_schedules_cubit.dart';
@@ -22,11 +25,42 @@ import 'admin_schedules_cubit.dart';
 class AdminSchedulesPage extends StatelessWidget {
   const AdminSchedulesPage({super.key});
 
+  /// "Find opportunities now": scans every watchlist and reports the count.
+  static Future<void> _scanOpportunities(BuildContext context) async {
+    final l10n = context.l10n;
+    final messenger = ScaffoldMessenger.of(context);
+    final result = await context
+        .read<AdminSchedulesCubit>()
+        .scanOpportunities();
+    messenger
+      ..hideCurrentSnackBar()
+      ..showSnackBar(
+        SnackBar(
+          content: Text(switch (result) {
+            Ok(:final value) => l10n.adminOpportunitiesResult(
+              value.found,
+              value.compared,
+            ),
+            Err() => l10n.adminOpportunitiesFailed,
+          }),
+        ),
+      );
+  }
+
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
     return Scaffold(
-      appBar: MbAppBar(title: l10n.adminSchedulesTitle),
+      appBar: MbAppBar(
+        title: l10n.adminSchedulesTitle,
+        actions: [
+          MbAppBarAction(
+            icon: MbIcons.opportunity,
+            label: l10n.adminFindOpportunities,
+            onPressed: () => _scanOpportunities(context),
+          ),
+        ],
+      ),
       floatingActionButton:
           BlocBuilder<AdminSchedulesCubit, AdminSchedulesState>(
             buildWhen: (p, n) =>
@@ -100,6 +134,18 @@ class AdminSchedulesPage extends StatelessWidget {
                   l10n.adminSchedulesHint,
                   style: context.mbText.caption.copyWith(
                     color: context.mbColors.inkMuted,
+                  ),
+                ),
+                const SizedBox(height: MbSpacing.s3),
+                // Also in the top bar; here so it is easy to find.
+                Align(
+                  alignment: Alignment.centerLeft,
+                  child: MbButton(
+                    label: l10n.adminFindOpportunities,
+                    icon: MbIcons.opportunity,
+                    variant: MbButtonVariant.secondary,
+                    size: MbButtonSize.sm,
+                    onPressed: () => _scanOpportunities(context),
                   ),
                 ),
                 const SizedBox(height: MbSpacing.s3),
@@ -360,7 +406,7 @@ class _SourceCard extends StatelessWidget {
                   isLoading: busy,
                   onPressed: busy || !item.sourceIsActive
                       ? null
-                      : () => cubit.runNow(item.sourceId),
+                      : () => _openRunSheet(context, item, cubit),
                 ),
               ),
             ],
@@ -782,6 +828,26 @@ void _openEditor(
   );
 }
 
+void _openRunSheet(
+  BuildContext context,
+  IngestionScheduleItem item,
+  AdminSchedulesCubit cubit,
+) {
+  showModalBottomSheet<void>(
+    context: context,
+    isScrollControlled: true,
+    useSafeArea: true,
+    shape: const RoundedRectangleBorder(
+      borderRadius: BorderRadius.vertical(top: Radius.circular(MbRadius.lg)),
+    ),
+    builder: (_) => RunNowSheet(
+      item: item,
+      options: cubit.loadFilterOptions(item.sourceId),
+      onRun: (filter) => cubit.runNow(item.sourceId, filter: filter),
+    ),
+  );
+}
+
 /// Frequency, IST time, weekday or interval, and the on/off switch.
 class ScheduleEditorSheet extends StatefulWidget {
   const ScheduleEditorSheet({
@@ -832,105 +898,248 @@ class _ScheduleEditorSheetState extends State<ScheduleEditorSheet> {
         top: MbSpacing.s5,
         bottom: MediaQuery.of(context).viewInsets.bottom + MbSpacing.s5,
       ),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(widget.item.sourceName, style: t.h2.copyWith(color: c.ink)),
-          const SizedBox(height: MbSpacing.s4),
-          Text(
-            l10n.scheduleFrequencyLabel,
-            style: t.label.copyWith(color: c.inkMuted),
-          ),
-          const SizedBox(height: MbSpacing.s2),
-          Wrap(
-            spacing: MbSpacing.s2,
-            children: [
-              for (final f in ScheduleFrequency.values)
-                ChoiceChip(
-                  label: Text(switch (f) {
-                    ScheduleFrequency.daily => l10n.frequencyDaily,
-                    ScheduleFrequency.weekly => l10n.frequencyWeekly,
-                    ScheduleFrequency.everyNHours => l10n.frequencyEveryNHours,
-                  }),
-                  selected: _input.frequency == f,
-                  onSelected: (_) =>
-                      setState(() => _input = _input.copyWith(frequency: f)),
-                ),
-            ],
-          ),
-          const SizedBox(height: MbSpacing.s4),
-          ListTile(
-            contentPadding: EdgeInsets.zero,
-            title: Text(
-              l10n.scheduleTimeLabel,
-              style: t.body.copyWith(color: c.ink),
+      child: SingleChildScrollView(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(widget.item.sourceName, style: t.h2.copyWith(color: c.ink)),
+            const SizedBox(height: MbSpacing.s4),
+            Text(
+              l10n.scheduleFrequencyLabel,
+              style: t.label.copyWith(color: c.inkMuted),
             ),
-            trailing: Text(
-              _input.timeOfDay,
-              style: t.title.copyWith(color: c.ink),
-            ),
-            onTap: _pickTime,
-          ),
-          if (_input.frequency == ScheduleFrequency.weekly)
-            DropdownButtonFormField<String>(
-              initialValue: _input.dayOfWeek,
-              decoration: InputDecoration(labelText: l10n.scheduleDayLabel),
-              items: [
-                for (final d in scheduleDays)
-                  DropdownMenuItem(value: d, child: Text(dayName(context, d))),
-              ],
-              onChanged: (d) {
-                if (d != null) {
-                  setState(() => _input = _input.copyWith(dayOfWeek: d));
-                }
-              },
-            ),
-          if (_input.frequency == ScheduleFrequency.everyNHours)
-            DropdownButtonFormField<int>(
-              initialValue: _input.intervalHours,
-              decoration: InputDecoration(
-                labelText: l10n.scheduleIntervalLabel,
-              ),
-              items: [
-                for (final h in allowedIntervalHours)
-                  DropdownMenuItem(
-                    value: h,
-                    child: Text(l10n.intervalHoursOption('$h')),
+            const SizedBox(height: MbSpacing.s2),
+            Wrap(
+              spacing: MbSpacing.s2,
+              children: [
+                for (final f in ScheduleFrequency.values)
+                  ChoiceChip(
+                    label: Text(switch (f) {
+                      ScheduleFrequency.daily => l10n.frequencyDaily,
+                      ScheduleFrequency.weekly => l10n.frequencyWeekly,
+                      ScheduleFrequency.everyNHours =>
+                        l10n.frequencyEveryNHours,
+                    }),
+                    selected: _input.frequency == f,
+                    onSelected: (_) =>
+                        setState(() => _input = _input.copyWith(frequency: f)),
                   ),
               ],
-              onChanged: (h) {
-                if (h != null) {
-                  setState(() => _input = _input.copyWith(intervalHours: h));
-                }
+            ),
+            const SizedBox(height: MbSpacing.s4),
+            ListTile(
+              contentPadding: EdgeInsets.zero,
+              title: Text(
+                l10n.scheduleTimeLabel,
+                style: t.body.copyWith(color: c.ink),
+              ),
+              trailing: Text(
+                _input.timeOfDay,
+                style: t.title.copyWith(color: c.ink),
+              ),
+              onTap: _pickTime,
+            ),
+            if (_input.frequency == ScheduleFrequency.weekly)
+              DropdownButtonFormField<String>(
+                initialValue: _input.dayOfWeek,
+                decoration: InputDecoration(labelText: l10n.scheduleDayLabel),
+                items: [
+                  for (final d in scheduleDays)
+                    DropdownMenuItem(
+                      value: d,
+                      child: Text(dayName(context, d)),
+                    ),
+                ],
+                onChanged: (d) {
+                  if (d != null) {
+                    setState(() => _input = _input.copyWith(dayOfWeek: d));
+                  }
+                },
+              ),
+            if (_input.frequency == ScheduleFrequency.everyNHours)
+              DropdownButtonFormField<int>(
+                initialValue: _input.intervalHours,
+                decoration: InputDecoration(
+                  labelText: l10n.scheduleIntervalLabel,
+                ),
+                items: [
+                  for (final h in allowedIntervalHours)
+                    DropdownMenuItem(
+                      value: h,
+                      child: Text(l10n.intervalHoursOption('$h')),
+                    ),
+                ],
+                onChanged: (h) {
+                  if (h != null) {
+                    setState(() => _input = _input.copyWith(intervalHours: h));
+                  }
+                },
+              ),
+            const SizedBox(height: MbSpacing.s3),
+            Row(
+              children: [
+                Expanded(
+                  child: Text(
+                    l10n.scheduleEnabledLabel,
+                    style: t.body.copyWith(color: c.ink),
+                  ),
+                ),
+                Switch(
+                  value: _input.isEnabled,
+                  onChanged: (v) =>
+                      setState(() => _input = _input.copyWith(isEnabled: v)),
+                ),
+              ],
+            ),
+            const SizedBox(height: MbSpacing.s4),
+            MbButton(
+              label: l10n.saveScheduleAction,
+              block: true,
+              onPressed: () {
+                widget.onSave(_input);
+                Navigator.of(context).pop();
               },
             ),
-          const SizedBox(height: MbSpacing.s3),
-          Row(
-            children: [
-              Expanded(
-                child: Text(
-                  l10n.scheduleEnabledLabel,
-                  style: t.body.copyWith(color: c.ink),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+/// "Run now": optionally narrow this one run with dropdowns for states,
+/// commodities and markets (multi-select; nothing selected = All). The choices
+/// are the names the last full pull saw, so they match the source exactly.
+class RunNowSheet extends StatefulWidget {
+  const RunNowSheet({
+    super.key,
+    required this.item,
+    required this.options,
+    required this.onRun,
+  });
+
+  final IngestionScheduleItem item;
+  final Future<Result<FilterOptions>> options;
+  final ValueChanged<RunFilter> onRun;
+
+  @override
+  State<RunNowSheet> createState() => _RunNowSheetState();
+}
+
+class _RunNowSheetState extends State<RunNowSheet> {
+  Set<String> _states = {};
+  Set<String> _commodities = {};
+  Set<String> _markets = {};
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = context.l10n;
+    final c = context.mbColors;
+    final t = context.mbText;
+
+    return Padding(
+      padding: EdgeInsets.only(
+        left: MbSpacing.s5,
+        right: MbSpacing.s5,
+        top: MbSpacing.s5,
+        bottom: MediaQuery.of(context).viewInsets.bottom + MbSpacing.s5,
+      ),
+      child: SingleChildScrollView(
+        child: FutureBuilder<Result<FilterOptions>>(
+          future: widget.options,
+          builder: (context, snapshot) {
+            final result = snapshot.data;
+            final options = switch (result) {
+              Ok<FilterOptions>(:final value) => value,
+              _ => const FilterOptions(),
+            };
+            final loading = snapshot.connectionState != ConnectionState.done;
+            final failed = result is Err<FilterOptions>;
+            final choices = options.marketsIn(_states);
+
+            return Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  widget.item.sourceName,
+                  style: t.h2.copyWith(color: c.ink),
                 ),
-              ),
-              Switch(
-                value: _input.isEnabled,
-                onChanged: (v) =>
-                    setState(() => _input = _input.copyWith(isEnabled: v)),
-              ),
-            ],
-          ),
-          const SizedBox(height: MbSpacing.s4),
-          MbButton(
-            label: l10n.saveScheduleAction,
-            block: true,
-            onPressed: () {
-              widget.onSave(_input);
-              Navigator.of(context).pop();
-            },
-          ),
-        ],
+                const SizedBox(height: MbSpacing.s3),
+                Text(
+                  l10n.scheduleFilterTitle,
+                  style: t.label.copyWith(color: c.inkMuted),
+                ),
+                const SizedBox(height: MbSpacing.s1),
+                Text(
+                  failed
+                      ? l10n.filterOptionsError
+                      : (!loading && options.isEmpty)
+                      ? l10n.filterOptionsEmpty
+                      : l10n.scheduleFilterHint,
+                  style: t.caption.copyWith(color: c.inkMuted),
+                ),
+                const SizedBox(height: MbSpacing.s3),
+                if (loading)
+                  const Padding(
+                    padding: EdgeInsets.symmetric(vertical: MbSpacing.s4),
+                    child: Center(child: CircularProgressIndicator()),
+                  )
+                else ...[
+                  MbMultiSelectField(
+                    label: l10n.filterStatesLabel,
+                    options: options.states,
+                    selected: _states,
+                    onChanged: (v) => setState(() {
+                      _states = v;
+                      // Keep only markets that still belong to the chosen states.
+                      _markets = _markets.intersection(
+                        options.marketsIn(v).toSet(),
+                      );
+                    }),
+                  ),
+                  const SizedBox(height: MbSpacing.s3),
+                  MbMultiSelectField(
+                    label: l10n.filterCommoditiesLabel,
+                    options: options.commodities,
+                    selected: _commodities,
+                    onChanged: (v) => setState(() => _commodities = v),
+                  ),
+                  const SizedBox(height: MbSpacing.s3),
+                  MbMultiSelectField(
+                    label: l10n.filterMarketsLabel,
+                    options: choices,
+                    selected: _markets,
+                    onChanged: (v) => setState(() => _markets = v),
+                  ),
+                ],
+                const SizedBox(height: MbSpacing.s3),
+                Text(
+                  l10n.runFilterNote,
+                  style: t.caption.copyWith(color: c.inkMuted),
+                ),
+                const SizedBox(height: MbSpacing.s4),
+                MbButton(
+                  label: l10n.runNowAction,
+                  block: true,
+                  onPressed: loading
+                      ? null
+                      : () {
+                          widget.onRun(
+                            RunFilter(
+                              states: _states.toList(),
+                              commodities: _commodities.toList(),
+                              markets: _markets.toList(),
+                            ),
+                          );
+                          Navigator.of(context).pop();
+                        },
+                ),
+              ],
+            );
+          },
+        ),
       ),
     );
   }

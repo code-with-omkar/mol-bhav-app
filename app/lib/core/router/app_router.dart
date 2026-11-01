@@ -6,7 +6,28 @@ import '../../app/app_shell.dart';
 import '../../features/account/presentation/account_cubits.dart';
 import '../../features/account/presentation/more_page.dart';
 import '../../features/admin/domain/admin_ingestion.dart';
+import '../../features/admin/presentation/admin_ads_cubit.dart';
+import '../../features/admin/domain/admin_ads.dart';
+import '../../features/admin/presentation/admin_ads_page.dart';
+import '../../features/admin/presentation/admin_features_cubit.dart';
+import '../../features/admin/presentation/admin_features_page.dart';
+import '../../features/admin/presentation/admin_notice_cubit.dart';
+import '../../features/admin/presentation/admin_notice_page.dart';
+import '../../features/admin/presentation/admin_campaign_cubit.dart';
+import '../../features/admin/presentation/admin_campaign_page.dart';
+import '../../features/admin/presentation/admin_app_page.dart';
+import '../../features/admin/presentation/admin_dashboard_cubit.dart';
+import '../../features/admin/presentation/admin_dashboard_page.dart';
 import '../../features/admin/presentation/admin_schedules_cubit.dart';
+import '../../features/admin/presentation/admin_shell.dart';
+import '../../features/admin/presentation/pull_history_cubit.dart';
+import '../../features/admin/presentation/pull_history_page.dart';
+import '../../features/admin/presentation/pull_job_cubit.dart';
+import '../../features/admin/presentation/pull_job_page.dart';
+import '../../features/admin/presentation/admin_user_detail_cubit.dart';
+import '../../features/admin/presentation/admin_user_detail_page.dart';
+import '../../features/admin/presentation/admin_users_cubit.dart';
+import '../../features/admin/presentation/admin_users_page.dart';
 import '../../features/admin/presentation/admin_schedules_page.dart';
 import '../../features/billing/presentation/cubit/coupon_cubit.dart';
 import '../../features/billing/presentation/cubit/plans_cubit.dart';
@@ -55,6 +76,7 @@ import '../../features/tools/presentation/reports_page.dart';
 import '../../features/tools/presentation/tools_cubits.dart';
 import '../../features/watchlist/presentation/watchlist_page.dart';
 import '../../features/watchlist/presentation/watchlist_picker.dart';
+import '../session/admin_mode.dart';
 import '../session/session_manager.dart';
 import '../storage/saved_credentials_store.dart';
 import '../di/injection.dart';
@@ -75,12 +97,13 @@ Widget _screen<C extends StateStreamableSource<Object?>>(
   child: child,
 );
 
-GoRouter createAppRouter(SessionManager session) {
+GoRouter createAppRouter(SessionManager session, AdminMode adminMode) {
   return GoRouter(
     navigatorKey: _rootKey,
     initialLocation: AppRoutes.home,
-    refreshListenable: session,
-    redirect: (context, state) => _guard(session.status, state),
+    // Switching between the admin and user apps re-runs the guard too.
+    refreshListenable: Listenable.merge([session, adminMode]),
+    redirect: (context, state) => _guard(session, adminMode, state),
     routes: [
       // Shared deep link: {DEEP_LINK_BASE}/p/{productId}?mandi={mandiId}.
       // Registered only when a base is configured — an app with no verified
@@ -416,6 +439,128 @@ GoRouter createAppRouter(SessionManager session) {
         path: AppRoutes.billingSuccess,
         builder: (context, state) => const PaymentSuccessPage(),
       ),
+      // The admin app. The guard keeps everyone but admins out of it, and the
+      // API refuses admin calls from anyone else regardless.
+      StatefulShellRoute.indexedStack(
+        builder: (context, state, shell) => AdminShell(shell: shell),
+        branches: [
+          StatefulShellBranch(
+            routes: [
+              GoRoute(
+                path: AppRoutes.admin,
+                builder: (context, state) => BlocProvider(
+                  create: (_) => getIt<AdminDashboardCubit>()..load(),
+                  child: const AdminDashboardPage(),
+                ),
+              ),
+            ],
+          ),
+          StatefulShellBranch(
+            routes: [
+              GoRoute(
+                path: AppRoutes.adminAds,
+                builder: (context, state) => BlocProvider(
+                  create: (_) => getIt<AdminAdsCubit>()..load(),
+                  child: const AdminAdsPage(),
+                ),
+                routes: [
+                  GoRoute(
+                    path: ':id',
+                    builder: (context, state) {
+                      final id = state.pathParameters['id']!;
+                      return BlocProvider(
+                        create: (_) => getIt<AdminCampaignCubit>()..load(id),
+                        child: AdminCampaignPage(
+                          campaignId: id,
+                          campaign: state.extra as CampaignPerformance?,
+                        ),
+                      );
+                    },
+                  ),
+                ],
+              ),
+            ],
+          ),
+          StatefulShellBranch(
+            routes: [
+              GoRoute(
+                path: AppRoutes.adminUsers,
+                builder: (context, state) => BlocProvider(
+                  create: (_) => getIt<AdminUsersCubit>()..load(),
+                  child: const AdminUsersPage(),
+                ),
+                routes: [
+                  GoRoute(
+                    path: ':id',
+                    builder: (context, state) {
+                      final id = state.pathParameters['id']!;
+                      return BlocProvider(
+                        create: (_) => getIt<AdminUserDetailCubit>()..load(id),
+                        child: AdminUserDetailPage(userId: id),
+                      );
+                    },
+                  ),
+                ],
+              ),
+            ],
+          ),
+          StatefulShellBranch(
+            routes: [
+              GoRoute(
+                path: AppRoutes.adminApp,
+                builder: (context, state) => BlocProvider(
+                  create: (_) => getIt<AdminDashboardCubit>()..load(),
+                  child: const AdminAppPage(),
+                ),
+                routes: [
+                  GoRoute(
+                    path: 'features',
+                    builder: (context, state) => BlocProvider(
+                      create: (_) => getIt<AdminFeaturesCubit>()..load(),
+                      child: const AdminFeaturesPage(),
+                    ),
+                  ),
+                  GoRoute(
+                    path: 'notice',
+                    builder: (context, state) => BlocProvider(
+                      create: (_) => getIt<AdminNoticeCubit>()..load(),
+                      child: const AdminNoticePage(),
+                    ),
+                  ),
+                  GoRoute(
+                    path: 'history',
+                    builder: (context, state) => BlocProvider(
+                      create: (_) => getIt<PullHistoryCubit>()..load(),
+                      child: const PullHistoryPage(),
+                    ),
+                    routes: [
+                      GoRoute(
+                        path: ':id',
+                        builder: (context, state) {
+                          final id = state.pathParameters['id']!;
+                          return BlocProvider(
+                            create: (_) => getIt<PullJobCubit>()..load(id),
+                            child: PullJobPage(jobId: id),
+                          );
+                        },
+                      ),
+                    ],
+                  ),
+                  GoRoute(
+                    path: 'schedules',
+                    builder: (context, state) => BlocProvider(
+                      create: (_) =>
+                          AdminSchedulesCubit(getIt<AdminIngestionRepository>())
+                            ..load(),
+                      child: const AdminSchedulesPage(),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ],
+      ),
     ],
   );
 }
@@ -426,16 +571,35 @@ GoRouter createAppRouter(SessionManager session) {
 /// A logged-out visitor who followed a deep link is sent to Login carrying
 /// `?from=<the link>`, and lands on it once signed in instead of on Home — so
 /// a shared price opens the price, not the front door.
-String? _guard(SessionStatus status, GoRouterState state) {
+///
+/// Admins land in the admin app instead of the user's Home, and stay there
+/// until they choose "View as user"; anyone else is kept out of `/admin`.
+String? _guard(
+  SessionManager session,
+  AdminMode adminMode,
+  GoRouterState state,
+) {
   final location = state.matchedLocation;
   final atLogin = location.startsWith(AppRoutes.login);
   final atOnboarding = location.startsWith('/onboarding');
-  return switch (status) {
+  final atAdmin =
+      location == AppRoutes.admin || location.startsWith('${AppRoutes.admin}/');
+  // A shared price link still opens the price, even for an admin.
+  final atDeepLink = location.startsWith('/p/');
+  return switch (session.status) {
     SessionStatus.signedOut when atLogin => null,
     SessionStatus.signedOut => AppRoutes.loginFrom(state.uri.toString()),
     SessionStatus.onboarding => atOnboarding ? null : AppRoutes.businessProfile,
+    SessionStatus.signedIn when atLogin && adminMode.inAdminApp =>
+      AppRoutes.admin,
     SessionStatus.signedIn when atLogin =>
       _continueTo(state.uri.queryParameters['from']) ?? AppRoutes.home,
+    // Not an admin, or an admin who chose "View as user": leave the admin app.
+    SessionStatus.signedIn when atAdmin && !adminMode.inAdminApp =>
+      AppRoutes.home,
+    SessionStatus.signedIn
+        when !atAdmin && !atOnboarding && !atDeepLink && adminMode.inAdminApp =>
+      AppRoutes.admin,
     SessionStatus.signedIn => null,
   };
 }

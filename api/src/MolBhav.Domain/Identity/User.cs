@@ -1,6 +1,7 @@
 using MolBhav.Domain.Common.Abstractions;
 using MolBhav.Domain.Common.Exceptions;
 using MolBhav.Domain.Common.Primitives;
+using MolBhav.Domain.Common.Results;
 using MolBhav.Domain.Identity.Events;
 using MolBhav.Domain.SharedKernel;
 
@@ -142,6 +143,38 @@ public sealed class User : AggregateRoot<Guid>, IAuditableEntity, ISoftDeletable
         }
 
         return user;
+    }
+
+    /// <summary>
+    /// Blocks sign-in and token renewal (an access token already issued lasts until it expires). Admins cannot be
+    /// suspended, so the last way into the admin tools is never cut off by a mis-tap.
+    /// </summary>
+    public Result Suspend()
+    {
+        if (Role == UserRole.Admin)
+        {
+            return Error.Forbidden("User.AdminCannotBeSuspended", "An admin account cannot be suspended.");
+        }
+
+        if (Status == UserStatus.Suspended)
+        {
+            return Error.Conflict("User.AlreadySuspended", "This account is already suspended.");
+        }
+
+        Status = UserStatus.Suspended;
+        return Result.Success();
+    }
+
+    /// <summary>Lets a suspended user sign in again.</summary>
+    public Result Reinstate()
+    {
+        if (Status == UserStatus.Active)
+        {
+            return Error.Conflict("User.NotSuspended", "This account is not suspended.");
+        }
+
+        Status = UserStatus.Active;
+        return Result.Success();
     }
 
     /// <summary>

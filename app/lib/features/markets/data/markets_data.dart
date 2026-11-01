@@ -3,9 +3,9 @@ import 'package:injectable/injectable.dart';
 
 import '../../../core/cache/cached_api_call.dart';
 import '../../../core/cache/response_cache.dart';
-import '../../../core/error/failure.dart';
 import '../../../core/error/result.dart';
 import '../../../core/network/json.dart';
+import '../../opportunities/domain/opportunities.dart';
 import '../domain/markets_entities.dart';
 import '../domain/markets_repository.dart';
 
@@ -16,7 +16,7 @@ import '../domain/markets_repository.dart';
 /// - `GET /pricing/latest?productId=` → `getComparison()`
 /// - `GET /pricing/history?productId=&locationKind=Mandi&locationId=&fromDate=&toDate=`
 ///   → `getTrend()`
-/// - `getOpportunity()` → not supported, returns empty result
+/// - `GET /opportunities/{id}` → `getOpportunity()` (via [OpportunitiesRepository])
 abstract interface class MarketsRemoteDataSource {
   Future<List<dynamic>> getCategories();
 
@@ -80,10 +80,11 @@ class DioMarketsRemoteDataSource implements MarketsRemoteDataSource {
 
 @LazySingleton(as: MarketsRepository)
 class MarketsRepositoryImpl implements MarketsRepository {
-  MarketsRepositoryImpl(this._remote, this._cache);
+  MarketsRepositoryImpl(this._remote, this._cache, this._opportunities);
 
   final MarketsRemoteDataSource _remote;
   final ResponseCache _cache;
+  final OpportunitiesRepository _opportunities;
 
   @override
   Future<Result<List<Commodity>>> getCommodities() => runCachedApiCall(
@@ -248,7 +249,61 @@ class MarketsRepositoryImpl implements MarketsRepository {
 
   @override
   Future<Result<BuyingOpportunity>> getOpportunity(String id) async =>
-      Err(UnexpectedFailure());
+      switch (await _opportunities.getDetail(id)) {
+        Err(:final failure) => Err(failure),
+        Ok(value: final detail) => Ok(_buyingOpportunity(detail)),
+      };
+
+  /// The Buying Opportunity screen: every market's landed price for the
+  /// reference order, the home-district market as the reference.
+  static BuyingOpportunity _buyingOpportunity(OpportunityDetail detail) {
+    final o = detail.opportunity;
+    final quantity = detail.referenceQuantity;
+    final markets = [
+      for (final m in detail.markets)
+        MarketRefPrice(
+          marketId: m.id,
+          marketName: m.name,
+          price: m.landedPrice,
+        ),
+    ];
+    // The stored sides stay visible even when a market has no fresh price now.
+    if (!markets.any((m) => m.marketId == o.homeId)) {
+      markets.add(
+        MarketRefPrice(
+          marketId: o.homeId,
+          marketName: o.homeName,
+          price: o.homePrice,
+        ),
+      );
+    }
+    if (!markets.any((m) => m.marketId == o.bestId)) {
+      markets.insert(
+        0,
+        MarketRefPrice(
+          marketId: o.bestId,
+          marketName: o.bestName,
+          price: o.landedPrice,
+        ),
+      );
+    }
+    return BuyingOpportunity(
+      id: o.id,
+      commodityId: o.productId,
+      commodityName: o.displayName,
+      categoryCode: '',
+      quantity: quantity,
+      quantityUnit: o.unit,
+      deliverTo: o.homeName,
+      priceUnit: o.unit,
+      markets: markets,
+      bestMarketId: o.bestId,
+      referenceMarketId: o.homeId,
+      potentialDifference: (o.savingsPerUnit * quantity).round(),
+      source: '',
+      updatedAt: o.priceDate,
+    );
+  }
 
   static Duration _rangeDuration(TrendRange range) => switch (range) {
     TrendRange.week => const Duration(days: 7),

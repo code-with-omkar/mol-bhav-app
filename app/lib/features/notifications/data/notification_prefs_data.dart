@@ -73,26 +73,25 @@ class NotificationPrefsRepositoryImpl implements NotificationPrefsRepository {
     cache: _cache,
     key: prefsKey,
     ttl: const Duration(days: 1),
-    fetch: () async =>
-        (await _remote.getPreferences())['data'] as Map<String, dynamic>,
+    // EnvelopeInterceptor has already unwrapped `data`.
+    fetch: _remote.getPreferences,
     parse: (json) => _prefs(json as Map<String, dynamic>),
   ).then((r) => r.fold((_) => const NotificationPrefs.defaults(), (v) => v));
 
   @override
-  Future<NotificationPrefs> updatePreferences(NotificationPrefs prefs) =>
+  Future<NotificationPrefs?> updatePreferences(NotificationPrefs prefs) =>
       runApiCall(() async {
-        final json =
-            (await _remote.updatePreferences({
-                  'pushEnabled': prefs.pushEnabled,
-                  'alertPushEnabled': prefs.alertPushEnabled,
-                  'priceUpdatePushEnabled': prefs.priceUpdatePushEnabled,
-                  'whatsAppEnabled': prefs.whatsAppEnabled,
-                  'alertWhatsAppEnabled': prefs.alertWhatsAppEnabled,
-                }))['data']
-                as Map<String, dynamic>;
+        // EnvelopeInterceptor has already unwrapped `data`.
+        final json = await _remote.updatePreferences({
+          'pushEnabled': prefs.pushEnabled,
+          'alertPushEnabled': prefs.alertPushEnabled,
+          'priceUpdatePushEnabled': prefs.priceUpdatePushEnabled,
+          'whatsAppEnabled': prefs.whatsAppEnabled,
+          'alertWhatsAppEnabled': prefs.alertWhatsAppEnabled,
+        });
         await _cache.write(prefsKey, json); // the saved copy is the new truth
         return _prefs(json);
-      }).then((r) => r.fold((_) => prefs, (v) => v));
+      }).then((r) => r.fold((_) => null, (v) => v));
 
   static NotificationPrefs _prefs(Map<String, dynamic> j) => NotificationPrefs(
     pushEnabled: j.flag('pushEnabled'),

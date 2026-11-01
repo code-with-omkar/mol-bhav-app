@@ -82,7 +82,10 @@ internal sealed partial class GoogleIdTokenVerifier : IGoogleIdTokenVerifier
         if (!result.IsValid)
         {
             // A plain local keeps CA1873 quiet (the analyzer flags expressions passed to log calls).
-            var reason = result.Exception?.GetType().Name ?? "unknown";
+            // The message names the audience / issuer / expiry problem; it holds no secrets.
+            var reason = result.Exception is null
+                ? "unknown"
+                : $"{result.Exception.GetType().Name}: {result.Exception.Message}";
             LogRejected(_logger, reason);
             return null;
         }

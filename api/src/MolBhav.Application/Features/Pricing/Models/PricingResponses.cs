@@ -34,3 +34,9 @@ public sealed record LocationLatestPriceResponse(
     string SourceName);
 
 public sealed record PriceHistoryPointResponse(DateOnly RecordDate, decimal? MinPrice, decimal? MaxPrice, decimal ModalPrice);
+
+/// <summary>
+/// Whether the automatically refreshed price feeds are keeping up, for the app's "prices may be delayed" banner.
+/// <paramref name="LastUpdatedAtUtc"/> is when a feed last brought data in (null if none ever has).
+/// </summary>
+public sealed record PriceDataStatusResponse(bool IsDelayed, DateTimeOffset? LastUpdatedAtUtc);
