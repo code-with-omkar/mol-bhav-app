@@ -297,7 +297,7 @@
       <div class="project-sub">Market Intelligence Platform · API + Flutter App + Admin app</div>
     </div>
   </div>
-  <div class="header-date">Updated: 18 Nov 2026</div>
+  <div class="header-date">Updated: 24 Nov 2026</div>
 </div>
 
 <div class="section"><div class="section-title">Overall Progress</div></div>
@@ -322,13 +322,13 @@
   </div>
   <div class="ov-card">
     <div class="ov-label">Needs you</div>
-    <div class="ov-value" style="color:var(--partial)">6</div>
+    <div class="ov-value" style="color:var(--partial)">4</div>
     <div class="ov-sub">items waiting on your action (below)</div>
     <div class="ov-bar"><div class="ov-bar-fill" style="width:50%;background:var(--partial)"></div></div>
   </div>
 </div>
 
-<div class="section"><div class="section-title">Needs your action (18 Nov 2026)</div></div>
+<div class="section"><div class="section-title">Needs your action (24 Nov 2026)</div></div>
 <div class="blockers">
   <div class="blocker-card">
     <div class="blocker-head">
@@ -336,13 +336,13 @@
       <span class="blocker-title">Waiting on you</span>
     </div>
     <div class="blocker-list">
-      <div class="blocker-item"><div class="blocker-dot dot-warn"></div><div><strong>Run a full pull</strong> — Admin → App → Data pull schedules → Run now, no filters. Gov-site timeouts: page timeout is now 120 s, 250 rows a page, 15 s connect timeout (API restarted with them). Then check Indore prices and that the Add commodities / Add markets lists fill.</div></div>
-      <div class="blocker-item"><div class="blocker-dot dot-warn"></div><div><strong>Install the newest build and check on the phone</strong> — the phone's build is older than landed cost and the supplier directory. Check: Ads, Users, Pull history, App message, Feature switches, all catalog and market admin screens, landed cost, More → Suppliers.</div></div>
-      <div class="blocker-item"><div class="blocker-dot dot-warn"></div><div><strong>Run the new tests</strong> — landed cost and supplier directory tests are written but not run (last full run: API 397, app 607, all green).</div></div>
-      <div class="blocker-item"><div class="blocker-dot dot-warn"></div><div><strong>Commit and push</strong> — 103 changed files are uncommitted since 850fcf8. Say the word and Claude lists the files and checks for credentials first.</div></div>
+      <div class="blocker-item"><div class="blocker-dot dot-warn"></div><div><strong>Check the newest build on the phone</strong> — admin catalog and market screens, Add every market, change and reset password, landed cost, More → Suppliers, banners as the normal user (now on the Free plan), prices for states beyond Maharashtra and Madhya Pradesh.</div></div>
+      <div class="blocker-item"><div class="blocker-dot dot-warn"></div><div><strong>Google sign-in on Android</strong> — Google rejects the app: create an Android OAuth client in the same Google Cloud project as the web client (package com.molbhav.mol_bhav, debug SHA-1 from this PC). Then link Google from More first.</div></div>
+      <div class="blocker-item"><div class="blocker-dot dot-warn"></div><div><strong>Hosting decisions</strong> — API address is molbhav-api.jagtech.in (set in the hosting files). Still to arrange: the VPS, Cloudflare DNS and certificate, production keys, and whether the Angular admin stays. See docs/hosting-prerequisites.md.</div></div>
       <div class="blocker-item"><div class="blocker-dot dot-warn"></div><div><strong>Review Hindi + Marathi</strong> — all new admin and notice strings were written by Claude and need a native check.</div></div>
-      <div class="blocker-item"><div class="blocker-dot dot-warn"></div><div><strong>Ads not visible</strong> — both accounts are on Pro, which gets no ads by design. Decide whether to switch a test account to Free.</div></div>
-      <div class="blocker-item"><div class="blocker-dot dot-ok"></div><div><strong>Last push</strong> — 850fcf8 on payment-integration, in sync with GitHub. Credential files in docs/ (Google client secrets, WhatsApp Token.txt) are git-ignored and stay local only.</div></div>
+      <div class="blocker-item"><div class="blocker-dot dot-ok"></div><div><strong>Full pull done (24 Nov)</strong> — 12,323 prices saved for 24 Nov across many states after adding 220 commodities (1,310 mandis were already added). 81 rows failed on bad source data (invalid prices, duplicates). Pull time is about 5 minutes; the gov server answers in about 1 second a page, so the time is our processing.</div></div>
+      <div class="blocker-item"><div class="blocker-dot dot-ok"></div><div><strong>Tests</strong> — API 422 passing; app 628 (full run 626 passed, 1 failed; that one was fixed and re-run, plus 1 new).</div></div>
+      <div class="blocker-item"><div class="blocker-dot dot-ok"></div><div><strong>Last push</strong> — 18054f7 on payment-integration, in sync with GitHub. Credential files in docs/ (Google client secrets, WhatsApp Token.txt) are git-ignored and stay local only.</div></div>
     </div>
   </div>
   <div class="blocker-card">
@@ -471,7 +471,7 @@
   <div class="ns-card">
     <div class="ns-num">SUGGESTED 1</div>
     <div class="ns-title">Commit and push after each feature</div>
-    <div class="ns-detail">Last push: 850fcf8 on branch <code style="font-family:monospace;font-size:11px">payment-integration</code>; 103 files changed since. Claude commits and pushes only when asked, and checks for credential files first.</div>
+    <div class="ns-detail">Last push: 18054f7 on branch <code style="font-family:monospace;font-size:11px">payment-integration</code> (24 Nov). Claude commits and pushes only when asked, and checks for credential files first.</div>
     <div class="ns-tag">safety</div>
   </div>
   <div class="ns-card">
@@ -501,7 +501,7 @@
 </div>
 
 <footer>
-  MolBhav · JagTech · Last updated 18 Nov 2026 · API + App + Admin app · phone verification and full data pull pending
+  MolBhav · JagTech · Last updated 24 Nov 2026 · API + App + Admin app · phone verification and full data pull pending
 </footer>
 
 <script>
