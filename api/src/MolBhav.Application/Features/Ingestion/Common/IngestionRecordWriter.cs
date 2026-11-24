@@ -70,6 +70,22 @@ internal sealed class IngestionRecordWriter(
         var seenThisRun = new HashSet<RecordKey>();
         List<IngestedPriceRecord>? unknownVariety = null;
 
+        // A big batch (a national feed has ~12,000 rows) would otherwise ask the database about every row: remember
+        // each product and location once, and fetch the day's live records in one go.
+        var lookups = new Lookups();
+        if (rows.Count >= PreloadThreshold)
+        {
+            var days = rows.Select(r => r.RecordDate).Distinct().ToList();
+            var active = await records.GetActiveForDaysAsync(job.PriceSourceId, days, cancellationToken);
+            lookups.Existing = new Dictionary<RecordKey, PriceRecord>(active.Count);
+            foreach (var record in active)
+            {
+                lookups.Existing.TryAdd(
+                    new RecordKey(record.ProductId, record.VariantId, record.UnitId, record.LocationKind, record.MandiId, record.SupplierId, record.RecordDate),
+                    record);
+            }
+        }
+
         void Tally(IngestedPriceRecord raw, Result<RowOutcome> outcome, bool fromFallback)
         {
             switch (outcome)
@@ -95,7 +111,7 @@ internal sealed class IngestionRecordWriter(
 
         foreach (var raw in rows)
         {
-            var outcome = await ApplyAsync(raw, job.PriceSourceId, allowedSubCategories, seenThisRun, ignoreVariety: false, cancellationToken);
+            var outcome = await ApplyAsync(raw, job.PriceSourceId, allowedSubCategories, seenThisRun, lookups, ignoreVariety: false, cancellationToken);
             if (fallbackToProductForUnknownVariety && outcome is { IsFailure: true } failure && UnknownVarietyErrors.Contains(failure.Error.Code))
             {
                 (unknownVariety ??= []).Add(raw);
@@ -107,12 +123,28 @@ internal sealed class IngestionRecordWriter(
 
         foreach (var raw in unknownVariety ?? [])
         {
-            var outcome = await ApplyAsync(raw, job.PriceSourceId, allowedSubCategories, seenThisRun, ignoreVariety: true, cancellationToken);
+            var outcome = await ApplyAsync(raw, job.PriceSourceId, allowedSubCategories, seenThisRun, lookups, ignoreVariety: true, cancellationToken);
             Tally(raw, outcome, fromFallback: true);
         }
 
         // Skipped rows are not "fetched" for the job's counts: fetched = persisted + unchanged + failed.
         return new IngestionWriteCounts(rows.Count - skipped, persisted, unchanged, failed, skipped);
+    }
+
+    /// <summary>From this many rows on, the day's live records are loaded once instead of looked up per row.</summary>
+    private const int PreloadThreshold = 200;
+
+    /// <summary>What one write has already looked up, so a batch asks the database once per product, location and day.</summary>
+    private sealed class Lookups
+    {
+        public Dictionary<string, Product?> Products { get; } = new(StringComparer.Ordinal);
+
+        public Dictionary<string, Mandi?> Mandis { get; } = new(StringComparer.Ordinal);
+
+        public Dictionary<string, Supplier?> Suppliers { get; } = new(StringComparer.Ordinal);
+
+        /// <summary>The source's live records for the batch's days, or null for a small batch (looked up per row).</summary>
+        public Dictionary<RecordKey, PriceRecord>? Existing { get; set; }
     }
 
     /// <summary>Failures that mean "the product is ours but this variety is not" (see <c>fallbackToProductForUnknownVariety</c>).</summary>
@@ -163,6 +195,7 @@ internal sealed class IngestionRecordWriter(
         Guid priceSourceId,
         IReadOnlySet<Guid> allowedSubCategories,
         HashSet<RecordKey> seenThisRun,
+        Lookups lookups,
         bool ignoreVariety,
         CancellationToken cancellationToken)
     {
@@ -173,7 +206,12 @@ internal sealed class IngestionRecordWriter(
             return Error.Validation("Ingestion.ProductCodeInvalid", productCode.Error.Description);
         }
 
-        var product = await products.GetByCodeAsync(productCode.Value, cancellationToken);
+        if (!lookups.Products.TryGetValue(raw.ProductCode, out var product))
+        {
+            product = await products.GetByCodeAsync(productCode.Value, cancellationToken);
+            lookups.Products[raw.ProductCode] = product;
+        }
+
         if (product is null)
         {
             return Error.Validation("Ingestion.ProductNotFound", $"No active product with code '{raw.ProductCode}'.");
@@ -214,7 +252,12 @@ internal sealed class IngestionRecordWriter(
         Guid? supplierId = null;
         if (raw.LocationKind == LocationKind.Mandi)
         {
-            var mandi = await mandis.GetByCodeAsync(locationCode.Value, cancellationToken);
+            if (!lookups.Mandis.TryGetValue(raw.LocationCode, out var mandi))
+            {
+                mandi = await mandis.GetByCodeAsync(locationCode.Value, cancellationToken);
+                lookups.Mandis[raw.LocationCode] = mandi;
+            }
+
             if (mandi is null)
             {
                 return Error.Validation("Ingestion.MandiNotFound", $"No active mandi with code '{raw.LocationCode}'.");
@@ -224,7 +267,12 @@ internal sealed class IngestionRecordWriter(
         }
         else
         {
-            var supplier = await suppliers.GetByCodeAsync(locationCode.Value, cancellationToken);
+            if (!lookups.Suppliers.TryGetValue(raw.LocationCode, out var supplier))
+            {
+                supplier = await suppliers.GetByCodeAsync(locationCode.Value, cancellationToken);
+                lookups.Suppliers[raw.LocationCode] = supplier;
+            }
+
             if (supplier is null)
             {
                 return Error.Validation("Ingestion.SupplierNotFound", $"No active supplier with code '{raw.LocationCode}'.");
@@ -237,13 +285,23 @@ internal sealed class IngestionRecordWriter(
         // (same simplification ProcurementRequirement makes; see its doc comment).
         // Not yet saved, so the database cannot see an earlier row from this same fetch — check in memory first.
         // (e.g. Agmarknet lists FAQ and non-FAQ grades of one variety; both map to the same record.)
-        if (!seenThisRun.Add(new RecordKey(product.Id, variantId, product.DefaultUnitId, raw.LocationKind, mandiId, supplierId, raw.RecordDate)))
+        var key = new RecordKey(product.Id, variantId, product.DefaultUnitId, raw.LocationKind, mandiId, supplierId, raw.RecordDate);
+        if (!seenThisRun.Add(key))
         {
             return Error.Conflict("Ingestion.DuplicateInSource", "The source sent this product/location/date more than once; the first row was kept.");
         }
 
-        var existing = await records.FindActiveAsync(
-            product.Id, variantId, product.DefaultUnitId, raw.LocationKind, mandiId, supplierId, priceSourceId, raw.RecordDate, cancellationToken);
+        PriceRecord? existing = null;
+        if (lookups.Existing is not null)
+        {
+            lookups.Existing.TryGetValue(key, out existing);
+        }
+        else
+        {
+            existing = await records.FindActiveAsync(
+                product.Id, variantId, product.DefaultUnitId, raw.LocationKind, mandiId, supplierId, priceSourceId, raw.RecordDate, cancellationToken);
+        }
+
         if (existing is not null && existing.HasSameFigures(raw.MinPrice, raw.MaxPrice, raw.ModalPrice, raw.ArrivalQuantity))
         {
             return RowOutcome.Unchanged;

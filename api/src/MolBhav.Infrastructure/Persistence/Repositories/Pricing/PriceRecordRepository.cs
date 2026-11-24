@@ -51,6 +51,17 @@ internal sealed class PriceRecordRepository(MolBhavDbContext dbContext) : Reposi
                 && !r.IsVoided,
             cancellationToken);
 
+    public async Task<IReadOnlyList<PriceRecord>> GetActiveForDaysAsync(
+        Guid priceSourceId,
+        IReadOnlyCollection<DateOnly> recordDates,
+        CancellationToken cancellationToken = default)
+    {
+        var days = recordDates.ToArray();
+        return await Set
+            .Where(r => r.PriceSourceId == priceSourceId && days.Contains(r.RecordDate) && !r.IsVoided)
+            .ToListAsync(cancellationToken);
+    }
+
     public Task<PriceRecord?> FindActiveAsync(
         Guid productId,
         Guid? variantId,

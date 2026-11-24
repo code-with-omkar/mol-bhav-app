@@ -32,6 +32,15 @@ public interface IPriceRecordRepository : IRepository<PriceRecord, Guid>
         CancellationToken cancellationToken = default);
 
     /// <summary>
+    /// Every live (not voided) record a source has for these days, tracked. A big batch matches its rows against this
+    /// list in memory instead of asking <see cref="FindActiveAsync"/> once per row.
+    /// </summary>
+    Task<IReadOnlyList<PriceRecord>> GetActiveForDaysAsync(
+        Guid priceSourceId,
+        IReadOnlyCollection<DateOnly> recordDates,
+        CancellationToken cancellationToken = default);
+
+    /// <summary>
     /// Friendly pre-check only — nullable variant/mandi/supplier columns mean a plain unique DB index would not catch
     /// every duplicate (Postgres treats NULLs as distinct), so this is the sole guard until the Ingestion module adds
     /// a proper idempotency key per source.
