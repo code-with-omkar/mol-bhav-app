@@ -29,3 +29,6 @@ public sealed record ImportFeedMarketsResponse(int Created, IReadOnlyList<Skippe
 /// <param name="State">The state, spelled as in the feed list.</param>
 /// <param name="Markets">Market names from that state's feed list.</param>
 public sealed record ImportFeedMarketsRequest(Guid PriceSourceId, string? State, IReadOnlyList<string>? Markets);
+
+/// <param name="PriceSourceId">The price source whose saved feed list is added in full (Agmarknet).</param>
+public sealed record ImportAllFeedMarketsRequest(Guid PriceSourceId);

@@ -100,6 +100,52 @@ class Estimate extends Equatable {
   ];
 }
 
+/// What the cheapest option costs delivered: the estimate plus the user's own
+/// freight and handling. Worked out on the device; the API prices goods only.
+class LandedCost extends Equatable {
+  const LandedCost({
+    required this.goods,
+    required this.freight,
+    required this.handling,
+    required this.quantity,
+  });
+
+  factory LandedCost.of(
+    Estimate estimate, {
+    required num freightPerUnit,
+    required num handlingTotal,
+  }) => LandedCost(
+    goods: estimate.estimatedCost,
+    freight: freightPerUnit * estimate.quantity,
+    handling: handlingTotal,
+    quantity: estimate.quantity,
+  );
+
+  final num goods;
+
+  /// Freight for the whole quantity (rate per unit times quantity).
+  final num freight;
+  final num handling;
+  final num quantity;
+
+  num get total => goods + freight + handling;
+
+  /// Delivered cost per unit; 0 when the quantity is not positive.
+  num get perUnit => quantity > 0 ? total / quantity : 0;
+
+  /// Nothing was added, so the panel would only repeat the estimate.
+  bool get isExtra => freight > 0 || handling > 0;
+
+  @override
+  List<Object?> get props => [goods, freight, handling, quantity];
+}
+
+/// Reads an optional money amount typed by the user; blank or invalid is 0.
+num parseExtraCost(String text) {
+  final value = num.tryParse(text.trim());
+  return value == null || value < 0 ? 0 : value;
+}
+
 class Benchmark extends Equatable {
   const Benchmark({
     required this.name,

@@ -1,0 +1,33 @@
+# Builds and tests the API on every push and pull request, and checks that the Docker image builds.
+# It does not deploy anything: deployment needs a server and secrets that are not set up yet.
+name: API CI
+
+on:
+  push:
+    branches: [main, payment-integration]
+    paths: ["api/**", ".github/workflows/api-ci.yml"]
+  pull_request:
+    paths: ["api/**", ".github/workflows/api-ci.yml"]
+
+jobs:
+  build-test:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: api
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          global-json-file: api/global.json
+      - run: dotnet restore
+      - run: dotnet build --no-restore -c Release
+      - run: dotnet test --no-build -c Release
+
+  docker-image:
+    runs-on: ubuntu-latest
+    needs: build-test
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build the API image (not pushed)
+        run: docker build -f api/src/MolBhav.Api/Dockerfile -t molbhav-api:ci api

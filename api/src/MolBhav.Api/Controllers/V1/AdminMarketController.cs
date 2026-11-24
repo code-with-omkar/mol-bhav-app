@@ -15,6 +15,7 @@ using MolBhav.Application.Features.Market.Admin.CreateSupplier;
 using MolBhav.Application.Features.Market.Admin.GetAdminMandis;
 using MolBhav.Application.Features.Market.Admin.GetAdminStates;
 using MolBhav.Application.Features.Market.Admin.GetAdminSuppliers;
+using MolBhav.Application.Features.Market.Admin.ImportAllFeedMarkets;
 using MolBhav.Application.Features.Market.Admin.ImportFeedMarkets;
 using MolBhav.Application.Features.Market.Admin.UpdateDistrict;
 using MolBhav.Application.Features.Market.Admin.UpdateMandi;
@@ -198,6 +199,19 @@ public sealed class AdminMarketController(ISender sender) : ApiControllerBase(se
     [ProducesResponseType<ProblemDetails>(StatusCodes.Status404NotFound, MediaTypeNames.Application.ProblemJson)]
     public async Task<IActionResult> ImportFeedMarkets([FromBody] ImportFeedMarketsRequest request, CancellationToken cancellationToken) =>
         OkEnvelope(await Sender.Send(new ImportFeedMarketsCommand(request.PriceSourceId, request.State, request.Markets), cancellationToken));
+
+    /// <summary>
+    /// Adds every market in the price source's saved feed list: states the catalog lacks are created, then each state's
+    /// markets and districts. Anything already in the catalog is left alone, so it is safe to run again.
+    /// </summary>
+    /// <response code="400">No feed list saved yet (<c>FeedMarkets.NoFeedList</c>) or the source is not supported.</response>
+    [HttpPost("feed-markets/import-all")]
+    [Consumes(MediaTypeNames.Application.Json)]
+    [ProducesResponseType<ApiResponse<ImportAllFeedMarketsResponse>>(StatusCodes.Status200OK)]
+    [ProducesResponseType<ValidationProblemDetails>(StatusCodes.Status400BadRequest, MediaTypeNames.Application.ProblemJson)]
+    [ProducesResponseType<ProblemDetails>(StatusCodes.Status404NotFound, MediaTypeNames.Application.ProblemJson)]
+    public async Task<IActionResult> ImportAllFeedMarkets([FromBody] ImportAllFeedMarketsRequest request, CancellationToken cancellationToken) =>
+        OkEnvelope(await Sender.Send(new ImportAllFeedMarketsCommand(request.PriceSourceId), cancellationToken));
 
     private string CollectionLocation(string path) => $"{Request.PathBase}/api/v1/admin/market/{path}";
 }

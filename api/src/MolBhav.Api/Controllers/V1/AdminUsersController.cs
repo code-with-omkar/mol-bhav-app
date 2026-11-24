@@ -10,6 +10,7 @@ using MolBhav.Application.Common.Models;
 using MolBhav.Application.Features.Admin.GetAdminUser;
 using MolBhav.Application.Features.Admin.GetAdminUsers;
 using MolBhav.Application.Features.Admin.Models;
+using MolBhav.Application.Features.Admin.ResetUserPassword;
 using MolBhav.Application.Features.Admin.SetUserStatus;
 using MolBhav.Domain.Identity;
 
@@ -58,6 +59,19 @@ public sealed class AdminUsersController(ISender sender, ICurrentUser currentUse
     [ProducesResponseType<ProblemDetails>(StatusCodes.Status409Conflict, MediaTypeNames.Application.ProblemJson)]
     public async Task<IActionResult> SetStatus(Guid userId, [FromBody] SetUserStatusRequest request, CancellationToken cancellationToken) =>
         NoContentOrProblem(await Sender.Send(new SetUserStatusCommand(userId, request.Action, currentUser.GetRequiredUserId()), cancellationToken));
+
+    /// <summary>
+    /// Gives a user a new random password and returns it once, for the admin to pass on. Not for admin accounts and not
+    /// for your own (use Change password). The password is never written to the audit log.
+    /// </summary>
+    /// <response code="403">Own account (<c>User.CannotResetOwnPassword</c>) or an admin (<c>User.AdminPasswordNotResettable</c>).</response>
+    /// <response code="404">Unknown user (<c>User.NotFound</c>).</response>
+    [HttpPost("{userId:guid}/password/reset")]
+    [ProducesResponseType<ApiResponse<ResetUserPasswordResponse>>(StatusCodes.Status200OK)]
+    [ProducesResponseType<ProblemDetails>(StatusCodes.Status403Forbidden, MediaTypeNames.Application.ProblemJson)]
+    [ProducesResponseType<ProblemDetails>(StatusCodes.Status404NotFound, MediaTypeNames.Application.ProblemJson)]
+    public async Task<IActionResult> ResetPassword(Guid userId, CancellationToken cancellationToken) =>
+        OkEnvelope(await Sender.Send(new ResetUserPasswordCommand(userId, currentUser.GetRequiredUserId()), cancellationToken));
 }
 
 /// <summary>Body of <c>PUT /admin/users/{id}/status</c>: <c>"Suspend"</c> or <c>"Reinstate"</c>.</summary>

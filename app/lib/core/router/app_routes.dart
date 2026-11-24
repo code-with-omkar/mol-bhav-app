@@ -11,6 +11,8 @@ abstract final class AppRoutes {
   // The admin app (admins only): its own tabs, separate from the user app's.
   static const admin = '/admin';
   static const adminAds = '/admin/ads';
+  static const adminCampaigns = '/admin/ads/campaigns';
+  static const adminCampaignNew = '/admin/ads/campaigns/new';
   static const adminUsers = '/admin/users';
   static const adminApp = '/admin/app';
   static const adminAppSchedules = '/admin/app/schedules';
@@ -19,8 +21,18 @@ abstract final class AppRoutes {
   static const adminAppFeatures = '/admin/app/features';
   static const adminAppVersion = '/admin/app/version';
   static const adminAppMarkets = '/admin/app/markets';
+  static const adminAppCommodities = '/admin/app/commodities';
+  static const adminAppProducts = '/admin/app/products';
+  static const adminAppCategories = '/admin/app/categories';
+  static const adminAppUnits = '/admin/app/units';
+  static const adminAppMandis = '/admin/app/mandis';
+  static const adminAppStates = '/admin/app/states';
+  static const adminAppSuppliers = '/admin/app/suppliers';
   static const adminAppActivity = '/admin/app/activity';
   static const adminAppSupport = '/admin/app/support';
+  static const adminAppPlans = '/admin/app/plans';
+  static const adminAppCoupons = '/admin/app/coupons';
+  static const adminAppSubscriptions = '/admin/app/subscriptions';
 
   // Bottom-nav tabs.
   static const home = '/home';
@@ -36,6 +48,11 @@ abstract final class AppRoutes {
   static const watchlistAdd = '/watchlist/add';
   static const reports = '/more/reports';
   static const costEstimator = '/more/estimator';
+  static const suppliers = '/more/suppliers';
+  static const changePassword = '/more/password';
+
+  /// One-time permissions step on the first launch after install.
+  static const permissions = '/welcome';
   static const adminSchedules = '/more/admin/schedules';
   static const alertRules = '/alerts/rules';
   static const helpSupport = '/more/help';
@@ -67,6 +84,10 @@ abstract final class AppRoutes {
   /// One ad campaign's daily delivery in the admin app.
   static String adminCampaign(String campaignId) =>
       '$adminAds/${Uri.encodeComponent(campaignId)}';
+
+  /// Edit one ad campaign in the admin app.
+  static String adminCampaignEdit(String campaignId) =>
+      '$adminCampaigns/${Uri.encodeComponent(campaignId)}/edit';
 
   /// One support ticket in the admin app.
   static String adminTicket(String ticketId) =>

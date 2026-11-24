@@ -11,6 +11,7 @@ import '../../../core/theme/app_theme.dart';
 import '../../../core/theme/mb_dimens.dart';
 import '../../../core/utils/statuses.dart';
 import '../../../shared/widgets/mb_app_bar.dart';
+import '../../../shared/widgets/mb_button.dart';
 import '../../../shared/widgets/mb_icons.dart';
 import '../../../shared/widgets/mb_layout.dart';
 import '../../../shared/widgets/mb_price.dart';
@@ -110,6 +111,13 @@ class _Content extends StatelessWidget {
     return ListView(
       padding: MbSpacing.screenPadding,
       children: [
+        MbButton(
+          label: l10n.adminCampaignsManage,
+          variant: MbButtonVariant.secondary,
+          block: true,
+          onPressed: () => context.push(AppRoutes.adminCampaigns),
+        ),
+        const SizedBox(height: MbSpacing.s3),
         AdminStatCard(
           title: l10n.adminAdsTotalsTitle,
           stats: [

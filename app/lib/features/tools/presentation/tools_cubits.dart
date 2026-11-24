@@ -26,6 +26,8 @@ class CostEstimatorState extends Equatable {
     this.districts = const DataState(),
     this.districtId,
     this.quantityText = '',
+    this.freightText = '',
+    this.handlingText = '',
     this.estimate = const DataState(),
     this.isSaved = false,
     this.saved = const DataState(),
@@ -44,6 +46,10 @@ class CostEstimatorState extends Equatable {
   /// `null` compares every location with prices.
   final String? districtId;
   final String quantityText;
+
+  /// Optional extras for the landed cost: freight per unit, handling in total.
+  final String freightText;
+  final String handlingText;
   final DataState<Estimate> estimate;
 
   /// The shown estimate is kept in the saved list.
@@ -67,6 +73,19 @@ class CostEstimatorState extends Equatable {
     );
   }
 
+  /// The delivered cost, once the estimate is shown and the user added freight
+  /// or handling; `null` otherwise.
+  LandedCost? get landed {
+    final estimate = this.estimate.data;
+    if (estimate == null) return null;
+    final landed = LandedCost.of(
+      estimate,
+      freightPerUnit: parseExtraCost(freightText),
+      handlingTotal: parseExtraCost(handlingText),
+    );
+    return landed.isExtra ? landed : null;
+  }
+
   bool get canSave =>
       estimate.status == LoadStatus.ready &&
       !isSaved &&
@@ -82,6 +101,8 @@ class CostEstimatorState extends Equatable {
     DataState<List<LocationOption>>? districts,
     ValueGetter<String?>? districtId,
     String? quantityText,
+    String? freightText,
+    String? handlingText,
     DataState<Estimate>? estimate,
     bool? isSaved,
     DataState<List<SavedEstimate>>? saved,
@@ -97,6 +118,8 @@ class CostEstimatorState extends Equatable {
     districts: districts ?? this.districts,
     districtId: districtId != null ? districtId() : this.districtId,
     quantityText: quantityText ?? this.quantityText,
+    freightText: freightText ?? this.freightText,
+    handlingText: handlingText ?? this.handlingText,
     estimate: estimate ?? this.estimate,
     isSaved: isSaved ?? this.isSaved,
     saved: saved ?? this.saved,
@@ -115,6 +138,8 @@ class CostEstimatorState extends Equatable {
     districts,
     districtId,
     quantityText,
+    freightText,
+    handlingText,
     estimate,
     isSaved,
     saved,
@@ -260,6 +285,14 @@ class CostEstimatorCubit extends Cubit<CostEstimatorState> {
     emit(state.copyWith(quantityText: text.trim()));
     _schedule();
   }
+
+  /// Freight and handling only change the landed cost, so the estimate is not
+  /// priced again (and a saved one stays saved).
+  void freightChanged(String text) =>
+      emit(state.copyWith(freightText: text.trim()));
+
+  void handlingChanged(String text) =>
+      emit(state.copyWith(handlingText: text.trim()));
 
   Future<void> retryEstimate() => _estimate();
 

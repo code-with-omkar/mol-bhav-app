@@ -127,6 +127,24 @@ class _Content extends StatelessWidget {
                 title: l10n.costEstimatorTitle,
                 onTap: () => context.go(AppRoutes.costEstimator),
               ),
+            // Regional suppliers and hubs with a Call button (BRD §12).
+            MbListItem(
+              icon: MbIcons.market,
+              title: l10n.suppliersTitle,
+              subtitle: l10n.suppliersSubtitle,
+              onTap: () => context.go(AppRoutes.suppliers),
+            ),
+          ],
+        ),
+        gap,
+        MbGroup(
+          children: [
+            MbListItem(
+              icon: MbIcons.shield,
+              title: l10n.changePasswordTitle,
+              subtitle: l10n.changePasswordSubtitle,
+              onTap: () => context.go(AppRoutes.changePassword),
+            ),
           ],
         ),
         // Link or unlink Google sign-in (hidden while the server has it off).

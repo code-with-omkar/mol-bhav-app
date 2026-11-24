@@ -41,7 +41,7 @@ internal static partial class AgmarknetRowMapper
         ArgumentNullException.ThrowIfNull(options);
         failureReason = null;
 
-        var productCode = Remap(ToCode(commodity), options.CommodityCodeMap);
+        var productCode = ToProductCode(commodity, options);
         if (productCode.Length == 0)
         {
             failureReason = "Commodity is missing.";
@@ -100,6 +100,13 @@ internal static partial class AgmarknetRowMapper
     /// </summary>
     public static string ToMarketCode(string? market, AgmarknetOptions options) =>
         Remap(ToCode(market), options.MarketCodeMap);
+
+    /// <summary>
+    /// The product code a feed commodity name resolves to: its slug, unless the admin-configured commodity map says
+    /// otherwise. A product added to the catalog for a feed commodity must use exactly this code for its prices to land.
+    /// </summary>
+    public static string ToProductCode(string? commodity, AgmarknetOptions options) =>
+        Remap(ToCode(commodity), options.CommodityCodeMap);
 
     /// <summary>"Red Onion (Large)" → "red-onion-large" — the slug format admins use for product and mandi codes.</summary>
     public static string ToCode(string? value) =>

@@ -3,10 +3,15 @@ using System.Net;
 using System.Net.Http.Json;
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using Microsoft.Extensions.Http.Resilience;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using MolBhav.Application.Abstractions.Ingestion;
 using MolBhav.Domain.Ingestion;
+using Polly;
+using Polly.CircuitBreaker;
+using Polly.Retry;
+using Polly.Timeout;
 
 namespace MolBhav.Infrastructure.Ingestion;
 
@@ -47,7 +52,16 @@ internal sealed partial class AgmarknetIngestionSourceAdapter(
         var allRecords = new List<IngestedPriceRecord>();
 
         var httpClient = httpClientFactory.CreateClient(HttpClientName);
-        httpClient.Timeout = TimeSpan.FromSeconds(opts.RequestTimeoutSeconds);
+        // HttpClient.Timeout is one client-wide timer that would cut across the layered timeouts below; they own the limits.
+        httpClient.Timeout = Timeout.InfiniteTimeSpan;
+
+        // One pipeline per run, so its circuit breaker starts closed and judges only this run's requests.
+        var pipeline = BuildPipeline(opts, request.SourceCode);
+
+        // The whole run is bounded too: a slow day ends the run, and the scheduler tries again later.
+        using var runBudget = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
+        runBudget.CancelAfter(TimeSpan.FromSeconds(opts.RunBudgetSeconds));
+        var runToken = runBudget.Token;
 
         LogFetchStarted(logger, request.SourceCode, request.AsOfDate);
 
@@ -76,12 +90,19 @@ internal sealed partial class AgmarknetIngestionSourceAdapter(
 
                     try
                     {
-                        response = await GetPageAsync(httpClient, url, request.SourceCode, opts, cancellationToken);
+                        response = await GetPageAsync(httpClient, pipeline, url, opts, runToken);
                     }
                     catch (HttpRequestException ex) when (ex.StatusCode == HttpStatusCode.Unauthorized)
                     {
                         LogUnauthorized(logger, request.SourceCode);
                         return IngestionFetchResult.Failed("Agmarknet API key is invalid or unauthorised. Check Agmarknet:ApiKey.");
+                    }
+                    catch (BrokenCircuitException)
+                    {
+                        // Several attempts in a row failed: the server is down. Stop now instead of trying every remaining pass.
+                        LogCircuitOpen(logger, request.SourceCode);
+                        return IngestionFetchResult.Failed(
+                            "Agmarknet looks unavailable (several requests failed in a row), so this run stopped early. It will try again at the next scheduled run.");
                     }
                     catch (HttpRequestException ex)
                     {
@@ -137,10 +158,16 @@ internal sealed partial class AgmarknetIngestionSourceAdapter(
                     // Polite throttle between pages.
                     if (opts.ThrottleDelayMs > 0)
                     {
-                        await Task.Delay(opts.ThrottleDelayMs, cancellationToken);
+                        await Task.Delay(opts.ThrottleDelayMs, runToken);
                     }
                 }
             }
+        }
+        catch (OperationCanceledException) when (runBudget.IsCancellationRequested && !cancellationToken.IsCancellationRequested)
+        {
+            LogRunBudgetElapsed(logger, request.SourceCode, opts.RunBudgetSeconds);
+            return IngestionFetchResult.Failed(
+                $"Agmarknet was too slow: the run stopped after {TimeSpan.FromSeconds(opts.RunBudgetSeconds).TotalMinutes:0.#} minutes. It will try again at the next scheduled run.");
         }
         catch (OperationCanceledException)
         {
@@ -228,85 +255,141 @@ internal sealed partial class AgmarknetIngestionSourceAdapter(
             raw.ArrivalDate, fallbackDate, opts, out _);
 
     // -----------------------------------------------------------------------
-    // HTTP with retry
+    // HTTP with timeouts, retries and a circuit breaker
     // -----------------------------------------------------------------------
 
     /// <summary>
-    /// One page, retried after a transient response (429 Too Many Requests, 502/503/504). A throttled pull resumes at the
-    /// page that failed instead of starting over. Anything else non-2xx throws <see cref="HttpRequestException"/> with its status,
-    /// which the caller turns into a failed run.
+    /// One page through the run's resilience pipeline. Layers, outermost first: a total limit for the page, retries with
+    /// jittered backoff, a circuit breaker, and a limit for each single attempt. Anything still failing after the retries
+    /// throws <see cref="HttpRequestException"/> with its status (a 401 is never retried), which the caller turns into a
+    /// failed run; an open breaker throws <see cref="BrokenCircuitException"/>.
     /// </summary>
-    private async Task<AgmarknetResponse?> GetPageAsync(
-        HttpClient httpClient, string url, string sourceCode, AgmarknetOptions opts, CancellationToken cancellationToken)
+    private static async Task<AgmarknetResponse?> GetPageAsync(
+        HttpClient httpClient,
+        ResiliencePipeline<HttpResponseMessage> pipeline,
+        string url,
+        AgmarknetOptions opts,
+        CancellationToken cancellationToken)
     {
-        for (var attempt = 0; ; attempt++)
+        HttpResponseMessage message;
+        try
         {
-            HttpResponseMessage message;
-            try
-            {
-                message = await httpClient.GetAsync(url, cancellationToken);
-            }
-            catch (Exception ex) when (IsTransientFailure(ex, cancellationToken))
-            {
-                // A stalled request (the client timeout) or a dropped connection: same treatment as a throttled page.
-                var timedOut = ex is not HttpRequestException;
-                if (attempt >= opts.MaxRetries)
-                {
-                    throw new HttpRequestException(
-                        timedOut
-                            ? $"The request timed out ({opts.RequestTimeoutSeconds}s) on {attempt + 1} attempts."
-                            : $"The connection failed on {attempt + 1} attempts: {ex.Message}",
-                        ex,
-                        timedOut ? HttpStatusCode.RequestTimeout : null);
-                }
+            message = await pipeline.ExecuteAsync(
+                async ct => await SendAsync(httpClient, url, ct),
+                cancellationToken);
+        }
+        catch (TimeoutRejectedException ex)
+        {
+            throw new HttpRequestException(
+                $"The request timed out (limit {opts.AttemptTimeoutSeconds:0.#}s per attempt, {opts.RequestTimeoutSeconds:0.#}s per page).",
+                ex,
+                HttpStatusCode.RequestTimeout);
+        }
 
-                var wait = BackoffDelay(attempt, opts);
-                LogRetryingAfterFailure(logger, sourceCode, timedOut ? "timed out" : "connection failed", attempt + 1, opts.MaxRetries, wait.TotalSeconds);
-                await Task.Delay(wait, cancellationToken);
-                continue;
-            }
-
-            using (message)
-            {
-                if (IsTransient(message.StatusCode) && attempt < opts.MaxRetries)
-                {
-                    var delay = RetryDelay(message, attempt, opts);
-                    LogRetrying(logger, sourceCode, (int)message.StatusCode, attempt + 1, opts.MaxRetries, delay.TotalSeconds);
-                    await Task.Delay(delay, cancellationToken);
-                    continue;
-                }
-
-                message.EnsureSuccessStatusCode();
-                return await message.Content.ReadFromJsonAsync<AgmarknetResponse>(cancellationToken);
-            }
+        using (message)
+        {
+            message.EnsureSuccessStatusCode();
+            return await message.Content.ReadFromJsonAsync<AgmarknetResponse>(cancellationToken);
         }
     }
 
-    /// <summary>The client timeout surfaces as a <see cref="TaskCanceledException"/> the caller never asked for; a connection that drops has no status code.</summary>
-    private static bool IsTransientFailure(Exception ex, CancellationToken cancellationToken) =>
-        (ex is OperationCanceledException && !cancellationToken.IsCancellationRequested)
-        || (ex is HttpRequestException { StatusCode: null });
-
-    private static TimeSpan BackoffDelay(int attempt, AgmarknetOptions opts)
+    /// <summary>One attempt. The answer is read in full here, so the attempt limit also covers a slow body.</summary>
+    private static async Task<HttpResponseMessage> SendAsync(HttpClient httpClient, string url, CancellationToken cancellationToken)
     {
-        var wait = TimeSpan.FromSeconds(opts.RetryBaseDelaySeconds * Math.Pow(2, attempt));
-        var cap = TimeSpan.FromSeconds(opts.MaxRetryDelaySeconds);
-        return wait > cap ? cap : wait;
+        var response = await httpClient.GetAsync(url, cancellationToken);
+
+        // A gateway error page that arrives as "200 OK" HTML is a server problem, not data: treat it as a 503 so it is retried.
+        if (response.IsSuccessStatusCode
+            && response.Content.Headers.ContentType?.MediaType?.Contains("html", StringComparison.OrdinalIgnoreCase) == true)
+        {
+            response.Dispose();
+            return new HttpResponseMessage(HttpStatusCode.ServiceUnavailable);
+        }
+
+        return response;
     }
 
-    private static bool IsTransient(HttpStatusCode status) =>
-        status is HttpStatusCode.TooManyRequests or HttpStatusCode.BadGateway or HttpStatusCode.ServiceUnavailable or HttpStatusCode.GatewayTimeout;
-
-    /// <summary>The server's <c>Retry-After</c> when it sends one, else exponential backoff; never longer than <see cref="AgmarknetOptions.MaxRetryDelaySeconds"/>.</summary>
-    private static TimeSpan RetryDelay(HttpResponseMessage message, int attempt, AgmarknetOptions opts)
+    private ResiliencePipeline<HttpResponseMessage> BuildPipeline(AgmarknetOptions opts, string sourceCode)
     {
-        var retryAfter = message.Headers.RetryAfter;
-        var requested = retryAfter?.Delta
-            ?? (retryAfter?.Date is { } date ? date - DateTimeOffset.UtcNow : (TimeSpan?)null)
-            ?? TimeSpan.FromSeconds(opts.RetryBaseDelaySeconds * Math.Pow(2, attempt));
+        var builder = new ResiliencePipelineBuilder<HttpResponseMessage>()
+            .AddTimeout(TimeSpan.FromSeconds(opts.RequestTimeoutSeconds));
 
-        var cap = TimeSpan.FromSeconds(opts.MaxRetryDelaySeconds);
-        return requested < TimeSpan.Zero ? TimeSpan.Zero : requested > cap ? cap : requested;
+        if (opts.MaxRetries > 0)
+        {
+            var retry = new HttpRetryStrategyOptions
+            {
+                MaxRetryAttempts = opts.MaxRetries,
+                BackoffType = DelayBackoffType.Exponential,
+                UseJitter = true,
+                Delay = TimeSpan.FromSeconds(opts.RetryBaseDelaySeconds),
+                ShouldRetryAfterHeader = true,
+                ShouldHandle = args => ValueTask.FromResult(ShouldRetry(args.Outcome, args.AttemptNumber, opts)),
+                OnRetry = args =>
+                {
+                    if (args.Outcome.Result is { } failed)
+                    {
+                        LogRetrying(logger, sourceCode, (int)failed.StatusCode, args.AttemptNumber + 1, opts.MaxRetries, args.RetryDelay.TotalSeconds);
+                    }
+                    else
+                    {
+                        var timedOut = args.Outcome.Exception is TimeoutRejectedException;
+                        LogRetryingAfterFailure(logger, sourceCode, timedOut ? "timed out" : "connection failed", args.AttemptNumber + 1, opts.MaxRetries, args.RetryDelay.TotalSeconds);
+                    }
+
+                    args.Outcome.Result?.Dispose();
+                    return default;
+                },
+            };
+
+            if (opts.MaxRetryDelaySeconds > 0)
+            {
+                retry.MaxDelay = TimeSpan.FromSeconds(opts.MaxRetryDelaySeconds);
+            }
+
+            builder.AddRetry(retry);
+        }
+
+        return builder
+            .AddCircuitBreaker(new HttpCircuitBreakerStrategyOptions
+            {
+                SamplingDuration = TimeSpan.FromSeconds(opts.BreakerSamplingSeconds),
+                MinimumThroughput = opts.BreakerMinimumThroughput,
+                FailureRatio = opts.BreakerFailureRatio,
+                BreakDuration = TimeSpan.FromSeconds(opts.BreakerBreakSeconds),
+            })
+            .AddTimeout(TimeSpan.FromSeconds(opts.AttemptTimeoutSeconds))
+            .Build();
+    }
+
+    /// <summary>
+    /// What is worth another try: a throttled or briefly unavailable server (408, 429, 502, 503, 504), a stalled or dropped
+    /// request, and a 500 once (often it is a real error, sometimes overload). Not a rejected key, and not a
+    /// <c>Retry-After</c> longer than <see cref="AgmarknetOptions.MaxRetryAfterSeconds"/>: that is left to the next scheduled run.
+    /// </summary>
+    private static bool ShouldRetry(Outcome<HttpResponseMessage> outcome, int attemptNumber, AgmarknetOptions opts)
+    {
+        if (outcome.Exception is HttpRequestException or TimeoutRejectedException)
+        {
+            return true;
+        }
+
+        if (outcome.Exception is not null || outcome.Result is not { } response)
+        {
+            return false;
+        }
+
+        var retryable = response.StatusCode is HttpStatusCode.RequestTimeout or HttpStatusCode.TooManyRequests
+            or HttpStatusCode.BadGateway or HttpStatusCode.ServiceUnavailable or HttpStatusCode.GatewayTimeout
+            || (response.StatusCode == HttpStatusCode.InternalServerError && attemptNumber == 0);
+        if (!retryable)
+        {
+            return false;
+        }
+
+        var retryAfter = response.Headers.RetryAfter;
+        var requested = retryAfter?.Delta
+            ?? (retryAfter?.Date is { } date ? date - DateTimeOffset.UtcNow : (TimeSpan?)null);
+        return requested is not { } wait || wait <= TimeSpan.FromSeconds(opts.MaxRetryAfterSeconds);
     }
 
     // -----------------------------------------------------------------------
@@ -377,6 +460,15 @@ internal sealed partial class AgmarknetIngestionSourceAdapter(
 
     [LoggerMessage(Level = LogLevel.Debug, Message = "[Agmarknet] Page fetched for {SourceCode}: offset={Offset}, count={Count}, total={Total}")]
     private static partial void LogPageFetched(ILogger logger, string sourceCode, int offset, int count, int total);
+
+    [LoggerMessage(Level = LogLevel.Warning, Message = "[Agmarknet] Circuit breaker open for source {SourceCode}: the server keeps failing, stopping the run early")]
+    private static partial void LogCircuitOpen(ILogger logger, string sourceCode);
+
+    [LoggerMessage(Level = LogLevel.Warning, Message = "[Agmarknet] Run budget of {BudgetSeconds:F0}s elapsed for source {SourceCode}, stopping the run")]
+    private static partial void LogRunBudgetElapsedCore(ILogger logger, double budgetSeconds, string sourceCode);
+
+    private static void LogRunBudgetElapsed(ILogger logger, string sourceCode, double budgetSeconds) =>
+        LogRunBudgetElapsedCore(logger, budgetSeconds, sourceCode);
 
     [LoggerMessage(Level = LogLevel.Warning, Message = "[Agmarknet] Fetch cancelled for source {SourceCode}")]
     private static partial void LogCancelled(ILogger logger, string sourceCode);

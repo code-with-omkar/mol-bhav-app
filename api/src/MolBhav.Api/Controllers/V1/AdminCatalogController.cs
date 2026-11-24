@@ -16,6 +16,7 @@ using MolBhav.Application.Features.Catalog.Admin.GetAdminCategories;
 using MolBhav.Application.Features.Catalog.Admin.GetAdminProduct;
 using MolBhav.Application.Features.Catalog.Admin.GetAdminProducts;
 using MolBhav.Application.Features.Catalog.Admin.GetAdminUnits;
+using MolBhav.Application.Features.Catalog.Admin.ImportFeedProducts;
 using MolBhav.Application.Features.Catalog.Admin.UpdateCategory;
 using MolBhav.Application.Features.Catalog.Admin.UpdateProduct;
 using MolBhav.Application.Features.Catalog.Admin.UpdateSubCategory;
@@ -206,6 +207,21 @@ public sealed class AdminCatalogController(ISender sender) : ApiControllerBase(s
             nameof(GetProduct),
             created => new { productId = created.Id });
     }
+
+    /// <summary>
+    /// Adds commodities from a price source's saved feed list to the catalog as products (English name from the feed,
+    /// code matching what ingestion looks up). Already-catalogued or unknown commodities are reported in <c>skipped</c>.
+    /// </summary>
+    /// <response code="400">No feed list saved yet, or unknown sub-category / unit.</response>
+    [HttpPost("products/import-feed")]
+    [Consumes(MediaTypeNames.Application.Json)]
+    [ProducesResponseType<ApiResponse<ImportFeedProductsResponse>>(StatusCodes.Status200OK)]
+    [ProducesResponseType<ValidationProblemDetails>(StatusCodes.Status400BadRequest, MediaTypeNames.Application.ProblemJson)]
+    [ProducesResponseType<ProblemDetails>(StatusCodes.Status404NotFound, MediaTypeNames.Application.ProblemJson)]
+    public async Task<IActionResult> ImportFeedProducts([FromBody] ImportFeedProductsRequest request, CancellationToken cancellationToken) =>
+        OkEnvelope(await Sender.Send(
+            new ImportFeedProductsCommand(request.PriceSourceId, request.SubCategoryId, request.DefaultUnitId, request.Commodities),
+            cancellationToken));
 
     [HttpPut("products/{productId:guid}")]
     [Consumes(MediaTypeNames.Application.Json)]

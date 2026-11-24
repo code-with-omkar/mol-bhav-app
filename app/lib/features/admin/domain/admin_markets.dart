@@ -40,7 +40,38 @@ class ImportMarketsResult extends Equatable {
   List<Object?> get props => [created, skipped];
 }
 
+/// What adding every market in the feed did.
+class ImportAllMarketsResult extends Equatable {
+  const ImportAllMarketsResult({
+    required this.statesCreated,
+    required this.marketsCreated,
+    required this.alreadyInCatalog,
+    required this.other,
+  });
+
+  final int statesCreated;
+  final int marketsCreated;
+  final int alreadyInCatalog;
+
+  /// Markets that could not be added (no district, a name the catalog rejects).
+  final int other;
+
+  @override
+  List<Object?> get props => [
+    statesCreated,
+    marketsCreated,
+    alreadyInCatalog,
+    other,
+  ];
+}
+
 abstract interface class AdminMarketsRepository {
+  /// Adds every market in the saved feed list of [sourceId], creating the
+  /// states the catalog lacks. Safe to run again: what exists is left alone.
+  Future<Result<ImportAllMarketsResult>> importAllFeedMarkets({
+    required String sourceId,
+  });
+
   /// Adds [markets] of [state] (spelled as in the feed list) to the catalog
   /// as mandis, for the price source [sourceId].
   Future<Result<ImportMarketsResult>> importFeedMarkets({

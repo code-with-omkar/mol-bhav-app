@@ -117,9 +117,35 @@ abstract interface class AccountRepository {
     required bool whatsapp,
   });
 
+  /// Sets a new password. [currentPassword] is required when the account
+  /// already has one; null sets a first password.
+  Future<Result<void>> changePassword({
+    String? currentPassword,
+    required String newPassword,
+  });
+
   /// Clears the stored session.
   Future<void> signOut();
 }
+
+/// The password rules the API enforces (8–128 characters, a letter and a
+/// digit), so the form can say what is wrong before sending.
+enum NewPasswordProblem { tooWeak, sameAsCurrent, mismatch }
+
+Set<NewPasswordProblem> newPasswordProblems({
+  required String current,
+  required String password,
+  required String confirm,
+}) => {
+  if (password.length < 8 ||
+      password.length > 128 ||
+      !password.contains(RegExp(r'[A-Za-zऀ-ॿ]')) ||
+      !password.contains(RegExp(r'[0-9०-९]')))
+    NewPasswordProblem.tooWeak,
+  if (current.isNotEmpty && password == current)
+    NewPasswordProblem.sameAsCurrent,
+  if (password != confirm) NewPasswordProblem.mismatch,
+};
 
 @injectable
 class WatchAccountProfile {

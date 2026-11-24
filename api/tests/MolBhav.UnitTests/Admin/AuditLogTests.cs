@@ -8,11 +8,21 @@ using MolBhav.Application.Features.AppNotices.SetAppNotice;
 using MolBhav.Application.Features.AppVersions.SetAppVersionPolicy;
 using MolBhav.Application.Features.FeatureSwitches.SetFeatureSwitch;
 using MolBhav.Application.Features.Market.Admin.ImportFeedMarkets;
+using MolBhav.Application.Features.Billing.Admin.CreateCoupon;
+using MolBhav.Application.Features.Billing.Admin.CreatePlan;
+using MolBhav.Application.Features.Billing.Admin.ExpireSubscription;
+using MolBhav.Application.Features.Billing.Admin.UpdateCoupon;
+using MolBhav.Application.Features.Billing.Admin.UpdatePlan;
+using MolBhav.Application.Features.Promotions.Admin.CreateAdvertiser;
+using MolBhav.Application.Features.Promotions.Admin.CreateCampaign;
 using MolBhav.Application.Features.Promotions.Admin.SetCampaignStatus;
+using MolBhav.Application.Features.Promotions.Admin.UpdateAdvertiser;
+using MolBhav.Application.Features.Promotions.Admin.UpdateCampaign;
 using MolBhav.Application.Features.Support.Admin.AddAdminTicketMessage;
 using MolBhav.Application.Features.Support.Admin.UpdateTicketStatus;
 using MolBhav.Domain.AppNotices;
 using MolBhav.Domain.Audit;
+using MolBhav.Domain.Billing;
 using MolBhav.Domain.Common.Results;
 using MolBhav.Domain.FeatureSwitches;
 using MolBhav.Domain.Support;
@@ -114,6 +124,16 @@ public sealed class AuditLogTests
             new SetCampaignStatusCommand(campaign, CampaignStatusAction.Pause),
             new AddAdminTicketMessageCommand(campaign, "Your refund for the double payment is on its way"),
             new UpdateTicketStatusCommand(campaign, SupportTicketStatus.Resolved),
+            new CreateCampaignCommand(source, null),
+            new UpdateCampaignCommand(campaign, null),
+            new CreateAdvertiserCommand("Tata Agri Ltd", "A. Contact", "9876543210", "27AAAAA0000A1Z5"),
+            new UpdateAdvertiserCommand(source, "Tata Agri Ltd", "A. Contact", "9876543210", "27AAAAA0000A1Z5"),
+            new CreatePlanCommand("pro-monthly", "Pro monthly", 149m, "INR", BillingPeriod.Monthly),
+            new UpdatePlanCommand(source, "Pro monthly", 199m, false),
+            new CreateCouponCommand("diwali20", DiscountType.Percent, 20, 100, DateTimeOffset.UtcNow, null, null, 0),
+            new CreateCouponCommand("flat50", DiscountType.Fixed, 5000, null, DateTimeOffset.UtcNow, null, "pro-yearly", 0),
+            new UpdateCouponCommand(source, true, null, null),
+            new ExpireSubscriptionCommand(source),
         ];
 
         foreach (var command in commands)
@@ -141,6 +161,22 @@ public sealed class AuditLogTests
         Assert.DoesNotContain("refund", commands[9].AuditSummary);
         Assert.Equal("Support.SetStatus", commands[10].AuditAction);
         Assert.Equal("Set a support ticket to Resolved", commands[10].AuditSummary);
+        Assert.Equal("Campaign.Create", commands[11].AuditAction);
+        Assert.Equal("Campaign.Update", commands[12].AuditAction);
+        Assert.Equal("Advertiser.Create", commands[13].AuditAction);
+        // Contact details and the GST number are never copied into the log.
+        Assert.DoesNotContain("9876543210", commands[13].AuditSummary + commands[13].AuditTarget);
+        Assert.DoesNotContain("27AAAAA", commands[14].AuditSummary + commands[14].AuditTarget);
+        Assert.Equal("Plan.Create", commands[15].AuditAction);
+        Assert.Equal("Plan.Update", commands[16].AuditAction);
+        Assert.Contains("199", commands[16].AuditSummary);
+        Assert.Equal("Coupon.Create", commands[17].AuditAction);
+        Assert.Equal("DIWALI20", commands[17].AuditTarget);
+        Assert.Equal("Created a 20% coupon", commands[17].AuditSummary);
+        // A fixed discount is stored in paise but logged in rupees.
+        Assert.Equal("Created a coupon worth 50 rupees off", commands[18].AuditSummary);
+        Assert.Equal("Coupon.Update", commands[19].AuditAction);
+        Assert.Equal("Subscription.Expire", commands[20].AuditAction);
     }
 
     [Fact]

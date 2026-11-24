@@ -1204,6 +1204,276 @@ abstract class AppLocalizations {
   /// **'Cancel anytime. Prices include GST.'**
   String get cancelAnytime;
 
+  /// No description provided for @freightLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Freight (₹ per {unit})'**
+  String freightLabel(String unit);
+
+  /// No description provided for @handlingLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Loading & handling (₹, total)'**
+  String get handlingLabel;
+
+  /// No description provided for @landedOptionalHelper.
+  ///
+  /// In en, this message translates to:
+  /// **'Optional. Worked out on this phone and not saved with the estimate.'**
+  String get landedOptionalHelper;
+
+  /// No description provided for @landedCostTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Landed cost (delivered)'**
+  String get landedCostTitle;
+
+  /// No description provided for @landedBreakdown.
+  ///
+  /// In en, this message translates to:
+  /// **'Goods {goods} + freight {freight} + handling {handling}'**
+  String landedBreakdown(String goods, String freight, String handling);
+
+  /// No description provided for @suppliersTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Suppliers'**
+  String get suppliersTitle;
+
+  /// No description provided for @suppliersSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Regional suppliers and hubs, with a call button'**
+  String get suppliersSubtitle;
+
+  /// No description provided for @suppliersSearchHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Search suppliers by name'**
+  String get suppliersSearchHint;
+
+  /// No description provided for @suppliersEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No suppliers found.'**
+  String get suppliersEmpty;
+
+  /// No description provided for @supplierCall.
+  ///
+  /// In en, this message translates to:
+  /// **'Call'**
+  String get supplierCall;
+
+  /// No description provided for @supplierCallFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not open the phone app.'**
+  String get supplierCallFailed;
+
+  /// No description provided for @permissionsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Allow a few things'**
+  String get permissionsTitle;
+
+  /// No description provided for @permissionsIntro.
+  ///
+  /// In en, this message translates to:
+  /// **'MolBhav works best with these two permissions. Your phone will ask for each.'**
+  String get permissionsIntro;
+
+  /// No description provided for @permissionsNotificationsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Notifications'**
+  String get permissionsNotificationsTitle;
+
+  /// No description provided for @permissionsNotificationsBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Price alerts and buying opportunities, when they happen.'**
+  String get permissionsNotificationsBody;
+
+  /// No description provided for @permissionsLocationTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Location'**
+  String get permissionsLocationTitle;
+
+  /// No description provided for @permissionsLocationBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Shows the weather for your area. Only an approximate position is used.'**
+  String get permissionsLocationBody;
+
+  /// No description provided for @permissionsAllow.
+  ///
+  /// In en, this message translates to:
+  /// **'Allow'**
+  String get permissionsAllow;
+
+  /// No description provided for @permissionsNotNow.
+  ///
+  /// In en, this message translates to:
+  /// **'Not now'**
+  String get permissionsNotNow;
+
+  /// No description provided for @permissionsChangeLater.
+  ///
+  /// In en, this message translates to:
+  /// **'You can change this any time in your phone\'s settings.'**
+  String get permissionsChangeLater;
+
+  /// No description provided for @adminMarketsAddAll.
+  ///
+  /// In en, this message translates to:
+  /// **'Add every market from the feed'**
+  String get adminMarketsAddAll;
+
+  /// No description provided for @adminMarketsAddAllHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Or add all states and markets in one go. States the catalog does not have are created.'**
+  String get adminMarketsAddAllHint;
+
+  /// No description provided for @adminMarketsAddAllTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Add every market?'**
+  String get adminMarketsAddAllTitle;
+
+  /// No description provided for @adminMarketsAddAllBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Every state and market from the last full pull is added to the catalog, which can be over a thousand markets. What is already there is left alone. This takes a little while.'**
+  String get adminMarketsAddAllBody;
+
+  /// No description provided for @adminMarketsAddAllConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Add all'**
+  String get adminMarketsAddAllConfirm;
+
+  /// No description provided for @adminMarketsAllDone.
+  ///
+  /// In en, this message translates to:
+  /// **'{markets} markets and {states} states added'**
+  String adminMarketsAllDone(int markets, int states);
+
+  /// No description provided for @adminMarketsAllDetail.
+  ///
+  /// In en, this message translates to:
+  /// **'{already} were already there, {other} could not be added (no district or an invalid name).'**
+  String adminMarketsAllDetail(int already, int other);
+
+  /// No description provided for @copyAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Copy'**
+  String get copyAction;
+
+  /// No description provided for @doneAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Done'**
+  String get doneAction;
+
+  /// No description provided for @adminUserResetPasswordAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Reset password'**
+  String get adminUserResetPasswordAction;
+
+  /// No description provided for @adminUserResetPasswordTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Reset this user\'s password?'**
+  String get adminUserResetPasswordTitle;
+
+  /// No description provided for @adminUserResetPasswordBody.
+  ///
+  /// In en, this message translates to:
+  /// **'A new random password is created and the old one stops working. You will see it once. Pass it on to the user and ask them to change it.'**
+  String get adminUserResetPasswordBody;
+
+  /// No description provided for @adminUserResetPasswordConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Reset'**
+  String get adminUserResetPasswordConfirm;
+
+  /// No description provided for @adminUserResetPasswordDone.
+  ///
+  /// In en, this message translates to:
+  /// **'New password'**
+  String get adminUserResetPasswordDone;
+
+  /// No description provided for @adminUserResetPasswordShownOnce.
+  ///
+  /// In en, this message translates to:
+  /// **'Shown only once. Share it with the user in person or by phone.'**
+  String get adminUserResetPasswordShownOnce;
+
+  /// No description provided for @changePasswordTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Change password'**
+  String get changePasswordTitle;
+
+  /// No description provided for @changePasswordSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose a new password for signing in'**
+  String get changePasswordSubtitle;
+
+  /// No description provided for @currentPasswordLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Current password'**
+  String get currentPasswordLabel;
+
+  /// No description provided for @currentPasswordRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter your current password.'**
+  String get currentPasswordRequired;
+
+  /// No description provided for @newPasswordLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'New password'**
+  String get newPasswordLabel;
+
+  /// No description provided for @passwordsDontMatch.
+  ///
+  /// In en, this message translates to:
+  /// **'The passwords do not match.'**
+  String get passwordsDontMatch;
+
+  /// No description provided for @passwordSameAsCurrent.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose a password different from the current one.'**
+  String get passwordSameAsCurrent;
+
+  /// No description provided for @changePasswordAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Change password'**
+  String get changePasswordAction;
+
+  /// No description provided for @passwordChanged.
+  ///
+  /// In en, this message translates to:
+  /// **'Password changed. Please sign in again.'**
+  String get passwordChanged;
+
+  /// No description provided for @landedPerUnit.
+  ///
+  /// In en, this message translates to:
+  /// **'{amount} per {unit} delivered'**
+  String landedPerUnit(String amount, String unit);
+
   /// No description provided for @yourNameLabel.
   ///
   /// In en, this message translates to:
@@ -2572,6 +2842,786 @@ abstract class AppLocalizations {
   /// **'Close ticket'**
   String get adminSupportCloseConfirm;
 
+  /// No description provided for @adminCampaignsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Campaigns'**
+  String get adminCampaignsTitle;
+
+  /// No description provided for @adminCampaignsManage.
+  ///
+  /// In en, this message translates to:
+  /// **'Manage campaigns'**
+  String get adminCampaignsManage;
+
+  /// No description provided for @adminCampaignsNew.
+  ///
+  /// In en, this message translates to:
+  /// **'New campaign'**
+  String get adminCampaignsNew;
+
+  /// No description provided for @adminCampaignsEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No campaigns here.'**
+  String get adminCampaignsEmpty;
+
+  /// No description provided for @adminCampaignEditTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit campaign'**
+  String get adminCampaignEditTitle;
+
+  /// No description provided for @adminPlacementHomeFeed.
+  ///
+  /// In en, this message translates to:
+  /// **'Home feed'**
+  String get adminPlacementHomeFeed;
+
+  /// No description provided for @adminPlacementMandiPrices.
+  ///
+  /// In en, this message translates to:
+  /// **'Mandi prices'**
+  String get adminPlacementMandiPrices;
+
+  /// No description provided for @adminPlacementMarketComparison.
+  ///
+  /// In en, this message translates to:
+  /// **'Market comparison'**
+  String get adminPlacementMarketComparison;
+
+  /// No description provided for @adminCampaignAdvertiser.
+  ///
+  /// In en, this message translates to:
+  /// **'Advertiser'**
+  String get adminCampaignAdvertiser;
+
+  /// No description provided for @adminCampaignChooseAdvertiser.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose an advertiser'**
+  String get adminCampaignChooseAdvertiser;
+
+  /// No description provided for @adminCampaignAddAdvertiser.
+  ///
+  /// In en, this message translates to:
+  /// **'Add an advertiser'**
+  String get adminCampaignAddAdvertiser;
+
+  /// No description provided for @adminCampaignName.
+  ///
+  /// In en, this message translates to:
+  /// **'Campaign name'**
+  String get adminCampaignName;
+
+  /// No description provided for @adminCampaignPlacement.
+  ///
+  /// In en, this message translates to:
+  /// **'Where it appears'**
+  String get adminCampaignPlacement;
+
+  /// No description provided for @adminCampaignAdTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'The ad'**
+  String get adminCampaignAdTitle;
+
+  /// No description provided for @adminCampaignHeadline.
+  ///
+  /// In en, this message translates to:
+  /// **'Headline'**
+  String get adminCampaignHeadline;
+
+  /// No description provided for @adminCampaignText.
+  ///
+  /// In en, this message translates to:
+  /// **'Text'**
+  String get adminCampaignText;
+
+  /// No description provided for @adminCampaignButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Button label'**
+  String get adminCampaignButton;
+
+  /// No description provided for @adminCampaignLink.
+  ///
+  /// In en, this message translates to:
+  /// **'Button link'**
+  String get adminCampaignLink;
+
+  /// No description provided for @adminCampaignImage.
+  ///
+  /// In en, this message translates to:
+  /// **'Image link (optional)'**
+  String get adminCampaignImage;
+
+  /// No description provided for @adminCampaignWhenTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'When it runs'**
+  String get adminCampaignWhenTitle;
+
+  /// No description provided for @adminCampaignStarts.
+  ///
+  /// In en, this message translates to:
+  /// **'Starts'**
+  String get adminCampaignStarts;
+
+  /// No description provided for @adminCampaignEnds.
+  ///
+  /// In en, this message translates to:
+  /// **'Ends'**
+  String get adminCampaignEnds;
+
+  /// No description provided for @adminCampaignPickDate.
+  ///
+  /// In en, this message translates to:
+  /// **'Pick a date'**
+  String get adminCampaignPickDate;
+
+  /// No description provided for @adminCampaignPriority.
+  ///
+  /// In en, this message translates to:
+  /// **'Priority'**
+  String get adminCampaignPriority;
+
+  /// No description provided for @adminCampaignPriorityHint.
+  ///
+  /// In en, this message translates to:
+  /// **'0 to 100. When two campaigns fit, the higher number shows first.'**
+  String get adminCampaignPriorityHint;
+
+  /// No description provided for @adminCampaignCap.
+  ///
+  /// In en, this message translates to:
+  /// **'Daily views limit (optional)'**
+  String get adminCampaignCap;
+
+  /// No description provided for @adminCampaignCapHint.
+  ///
+  /// In en, this message translates to:
+  /// **'The most times it is shown in one day, across all users. Leave empty for no limit.'**
+  String get adminCampaignCapHint;
+
+  /// No description provided for @adminCampaignAudienceTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Who sees it'**
+  String get adminCampaignAudienceTitle;
+
+  /// No description provided for @adminCampaignCategories.
+  ///
+  /// In en, this message translates to:
+  /// **'Categories'**
+  String get adminCampaignCategories;
+
+  /// No description provided for @adminCampaignChooseCategories.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose categories'**
+  String get adminCampaignChooseCategories;
+
+  /// No description provided for @adminCampaignStates.
+  ///
+  /// In en, this message translates to:
+  /// **'States (all states when none chosen)'**
+  String get adminCampaignStates;
+
+  /// No description provided for @adminCampaignPreview.
+  ///
+  /// In en, this message translates to:
+  /// **'Preview'**
+  String get adminCampaignPreview;
+
+  /// No description provided for @adminCampaignStatusTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Status: {status}'**
+  String adminCampaignStatusTitle(String status);
+
+  /// No description provided for @adminCampaignActivate.
+  ///
+  /// In en, this message translates to:
+  /// **'Activate'**
+  String get adminCampaignActivate;
+
+  /// No description provided for @adminCampaignPause.
+  ///
+  /// In en, this message translates to:
+  /// **'Pause'**
+  String get adminCampaignPause;
+
+  /// No description provided for @adminCampaignEnd.
+  ///
+  /// In en, this message translates to:
+  /// **'End campaign'**
+  String get adminCampaignEnd;
+
+  /// No description provided for @adminCampaignEndTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'End this campaign?'**
+  String get adminCampaignEndTitle;
+
+  /// No description provided for @adminCampaignEndBody.
+  ///
+  /// In en, this message translates to:
+  /// **'An ended campaign stops showing for good and cannot be edited or restarted.'**
+  String get adminCampaignEndBody;
+
+  /// No description provided for @adminCampaignEndConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'End campaign'**
+  String get adminCampaignEndConfirm;
+
+  /// No description provided for @adminCampaignEndedNote.
+  ///
+  /// In en, this message translates to:
+  /// **'This campaign has ended. It can no longer be changed.'**
+  String get adminCampaignEndedNote;
+
+  /// No description provided for @adminCampaignTargetsReset.
+  ///
+  /// In en, this message translates to:
+  /// **'This campaign is targeted in more detail than this form can show. Saving sets its audience to the categories and states chosen here.'**
+  String get adminCampaignTargetsReset;
+
+  /// No description provided for @adminCampaignSave.
+  ///
+  /// In en, this message translates to:
+  /// **'Save campaign'**
+  String get adminCampaignSave;
+
+  /// No description provided for @adminCampaignCreated.
+  ///
+  /// In en, this message translates to:
+  /// **'Campaign created as a draft. Activate it to start showing it.'**
+  String get adminCampaignCreated;
+
+  /// No description provided for @adminCampaignErrRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Required'**
+  String get adminCampaignErrRequired;
+
+  /// No description provided for @adminCampaignErrLink.
+  ///
+  /// In en, this message translates to:
+  /// **'Use a web address starting with https://'**
+  String get adminCampaignErrLink;
+
+  /// No description provided for @adminCampaignErrDates.
+  ///
+  /// In en, this message translates to:
+  /// **'The end must not be before the start'**
+  String get adminCampaignErrDates;
+
+  /// No description provided for @adminCampaignErrPriority.
+  ///
+  /// In en, this message translates to:
+  /// **'Use a whole number from 0 to 100'**
+  String get adminCampaignErrPriority;
+
+  /// No description provided for @adminCampaignErrCap.
+  ///
+  /// In en, this message translates to:
+  /// **'Use a whole number of 1 or more'**
+  String get adminCampaignErrCap;
+
+  /// No description provided for @adminCampaignErrCategories.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose at least one category'**
+  String get adminCampaignErrCategories;
+
+  /// No description provided for @adminAdvertiserTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Add an advertiser'**
+  String get adminAdvertiserTitle;
+
+  /// No description provided for @adminAdvertiserName.
+  ///
+  /// In en, this message translates to:
+  /// **'Business name'**
+  String get adminAdvertiserName;
+
+  /// No description provided for @adminAdvertiserContact.
+  ///
+  /// In en, this message translates to:
+  /// **'Contact name (optional)'**
+  String get adminAdvertiserContact;
+
+  /// No description provided for @adminAdvertiserPhone.
+  ///
+  /// In en, this message translates to:
+  /// **'Contact phone (optional)'**
+  String get adminAdvertiserPhone;
+
+  /// No description provided for @adminAdvertiserGst.
+  ///
+  /// In en, this message translates to:
+  /// **'GST number (optional, 15 characters)'**
+  String get adminAdvertiserGst;
+
+  /// No description provided for @adminAdvertiserSave.
+  ///
+  /// In en, this message translates to:
+  /// **'Add'**
+  String get adminAdvertiserSave;
+
+  /// No description provided for @adminPlansTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Plans'**
+  String get adminPlansTitle;
+
+  /// No description provided for @adminPlansSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Prices and on/off for subscription plans'**
+  String get adminPlansSubtitle;
+
+  /// No description provided for @adminPlansIntro.
+  ///
+  /// In en, this message translates to:
+  /// **'Changing a price changes what new subscribers are charged.'**
+  String get adminPlansIntro;
+
+  /// No description provided for @adminPlansNew.
+  ///
+  /// In en, this message translates to:
+  /// **'New plan'**
+  String get adminPlansNew;
+
+  /// No description provided for @adminPlansEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No plans yet.'**
+  String get adminPlansEmpty;
+
+  /// No description provided for @adminPlanEditTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit plan'**
+  String get adminPlanEditTitle;
+
+  /// No description provided for @adminPlanCode.
+  ///
+  /// In en, this message translates to:
+  /// **'Plan code'**
+  String get adminPlanCode;
+
+  /// No description provided for @adminPlanCodeHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Cannot be changed once the plan is created.'**
+  String get adminPlanCodeHint;
+
+  /// No description provided for @adminPlanName.
+  ///
+  /// In en, this message translates to:
+  /// **'Name'**
+  String get adminPlanName;
+
+  /// No description provided for @adminPlanPrice.
+  ///
+  /// In en, this message translates to:
+  /// **'Price (₹)'**
+  String get adminPlanPrice;
+
+  /// No description provided for @adminPlanPeriod.
+  ///
+  /// In en, this message translates to:
+  /// **'Billing'**
+  String get adminPlanPeriod;
+
+  /// No description provided for @adminPlanMonthly.
+  ///
+  /// In en, this message translates to:
+  /// **'Monthly'**
+  String get adminPlanMonthly;
+
+  /// No description provided for @adminPlanYearly.
+  ///
+  /// In en, this message translates to:
+  /// **'Yearly'**
+  String get adminPlanYearly;
+
+  /// No description provided for @adminPlanPerMonth.
+  ///
+  /// In en, this message translates to:
+  /// **'{price} / month'**
+  String adminPlanPerMonth(String price);
+
+  /// No description provided for @adminPlanPerYear.
+  ///
+  /// In en, this message translates to:
+  /// **'{price} / year'**
+  String adminPlanPerYear(String price);
+
+  /// No description provided for @adminPlanActive.
+  ///
+  /// In en, this message translates to:
+  /// **'Available to buy'**
+  String get adminPlanActive;
+
+  /// No description provided for @adminPlanOff.
+  ///
+  /// In en, this message translates to:
+  /// **'Off'**
+  String get adminPlanOff;
+
+  /// No description provided for @adminPlanSave.
+  ///
+  /// In en, this message translates to:
+  /// **'Save plan'**
+  String get adminPlanSave;
+
+  /// No description provided for @adminPlanErrCode.
+  ///
+  /// In en, this message translates to:
+  /// **'Use letters, digits, - or _ (up to 32)'**
+  String get adminPlanErrCode;
+
+  /// No description provided for @adminPlanErrName.
+  ///
+  /// In en, this message translates to:
+  /// **'Required (up to 100 characters)'**
+  String get adminPlanErrName;
+
+  /// No description provided for @adminPlanErrPrice.
+  ///
+  /// In en, this message translates to:
+  /// **'Use a price like 149 or 149.50'**
+  String get adminPlanErrPrice;
+
+  /// No description provided for @adminCouponsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Coupons'**
+  String get adminCouponsTitle;
+
+  /// No description provided for @adminCouponsSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Discount codes for subscriptions'**
+  String get adminCouponsSubtitle;
+
+  /// No description provided for @adminCouponsNew.
+  ///
+  /// In en, this message translates to:
+  /// **'New coupon'**
+  String get adminCouponsNew;
+
+  /// No description provided for @adminCouponsEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No coupons yet.'**
+  String get adminCouponsEmpty;
+
+  /// No description provided for @adminCouponCode.
+  ///
+  /// In en, this message translates to:
+  /// **'Coupon code'**
+  String get adminCouponCode;
+
+  /// No description provided for @adminCouponPercent.
+  ///
+  /// In en, this message translates to:
+  /// **'Percent off'**
+  String get adminCouponPercent;
+
+  /// No description provided for @adminCouponFixed.
+  ///
+  /// In en, this message translates to:
+  /// **'Amount off'**
+  String get adminCouponFixed;
+
+  /// No description provided for @adminCouponValuePercent.
+  ///
+  /// In en, this message translates to:
+  /// **'Percent off (1 to 100)'**
+  String get adminCouponValuePercent;
+
+  /// No description provided for @adminCouponValueFixed.
+  ///
+  /// In en, this message translates to:
+  /// **'Amount off (₹)'**
+  String get adminCouponValueFixed;
+
+  /// No description provided for @adminCouponPlan.
+  ///
+  /// In en, this message translates to:
+  /// **'Works on'**
+  String get adminCouponPlan;
+
+  /// No description provided for @adminCouponAnyPlan.
+  ///
+  /// In en, this message translates to:
+  /// **'Any plan'**
+  String get adminCouponAnyPlan;
+
+  /// No description provided for @adminCouponMin.
+  ///
+  /// In en, this message translates to:
+  /// **'Minimum price (₹, optional)'**
+  String get adminCouponMin;
+
+  /// No description provided for @adminCouponMaxUses.
+  ///
+  /// In en, this message translates to:
+  /// **'Use limit (optional)'**
+  String get adminCouponMaxUses;
+
+  /// No description provided for @adminCouponMaxUsesNote.
+  ///
+  /// In en, this message translates to:
+  /// **'Already used {used} times. Leave empty for no limit.'**
+  String adminCouponMaxUsesNote(int used);
+
+  /// No description provided for @adminCouponStarts.
+  ///
+  /// In en, this message translates to:
+  /// **'Starts'**
+  String get adminCouponStarts;
+
+  /// No description provided for @adminCouponEnds.
+  ///
+  /// In en, this message translates to:
+  /// **'Ends (optional)'**
+  String get adminCouponEnds;
+
+  /// No description provided for @adminCouponNoEnd.
+  ///
+  /// In en, this message translates to:
+  /// **'No end date'**
+  String get adminCouponNoEnd;
+
+  /// No description provided for @adminCouponClearEnd.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove end date'**
+  String get adminCouponClearEnd;
+
+  /// No description provided for @adminCouponActive.
+  ///
+  /// In en, this message translates to:
+  /// **'Switched on'**
+  String get adminCouponActive;
+
+  /// No description provided for @adminCouponSave.
+  ///
+  /// In en, this message translates to:
+  /// **'Save coupon'**
+  String get adminCouponSave;
+
+  /// No description provided for @adminCouponOff.
+  ///
+  /// In en, this message translates to:
+  /// **'Off'**
+  String get adminCouponOff;
+
+  /// No description provided for @adminCouponExpired.
+  ///
+  /// In en, this message translates to:
+  /// **'Expired'**
+  String get adminCouponExpired;
+
+  /// No description provided for @adminCouponUsedUp.
+  ///
+  /// In en, this message translates to:
+  /// **'Used up'**
+  String get adminCouponUsedUp;
+
+  /// No description provided for @adminCouponPercentOff.
+  ///
+  /// In en, this message translates to:
+  /// **'{percent}% off'**
+  String adminCouponPercentOff(int percent);
+
+  /// No description provided for @adminCouponAmountOff.
+  ///
+  /// In en, this message translates to:
+  /// **'{amount} off'**
+  String adminCouponAmountOff(String amount);
+
+  /// No description provided for @adminCouponMinNote.
+  ///
+  /// In en, this message translates to:
+  /// **'from {amount}'**
+  String adminCouponMinNote(String amount);
+
+  /// No description provided for @adminCouponFrom.
+  ///
+  /// In en, this message translates to:
+  /// **'From {date}'**
+  String adminCouponFrom(String date);
+
+  /// No description provided for @adminCouponUsed.
+  ///
+  /// In en, this message translates to:
+  /// **'Used {used}'**
+  String adminCouponUsed(int used);
+
+  /// No description provided for @adminCouponUsedOf.
+  ///
+  /// In en, this message translates to:
+  /// **'Used {used} of {max}'**
+  String adminCouponUsedOf(int used, int max);
+
+  /// No description provided for @adminCouponErrCode.
+  ///
+  /// In en, this message translates to:
+  /// **'Use letters, digits, - or _ (up to 50)'**
+  String get adminCouponErrCode;
+
+  /// No description provided for @adminCouponErrPercent.
+  ///
+  /// In en, this message translates to:
+  /// **'Use a whole number from 1 to 100'**
+  String get adminCouponErrPercent;
+
+  /// No description provided for @adminCouponErrAmount.
+  ///
+  /// In en, this message translates to:
+  /// **'Use an amount like 50 or 49.50'**
+  String get adminCouponErrAmount;
+
+  /// No description provided for @adminCouponErrMaxUses.
+  ///
+  /// In en, this message translates to:
+  /// **'Use a whole number of 1 or more'**
+  String get adminCouponErrMaxUses;
+
+  /// No description provided for @adminCouponErrMaxUsesBelow.
+  ///
+  /// In en, this message translates to:
+  /// **'Use a whole number, not below the {used} already used'**
+  String adminCouponErrMaxUsesBelow(int used);
+
+  /// No description provided for @adminCouponErrDates.
+  ///
+  /// In en, this message translates to:
+  /// **'The end must not be before the start'**
+  String get adminCouponErrDates;
+
+  /// No description provided for @adminCouponErrMin.
+  ///
+  /// In en, this message translates to:
+  /// **'Use an amount like 100 or 99.50'**
+  String get adminCouponErrMin;
+
+  /// No description provided for @adminSubsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Subscriptions'**
+  String get adminSubsTitle;
+
+  /// No description provided for @adminSubsSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'See who has a plan, and end one early'**
+  String get adminSubsSubtitle;
+
+  /// No description provided for @adminSubsEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No subscriptions here.'**
+  String get adminSubsEmpty;
+
+  /// No description provided for @adminSubPending.
+  ///
+  /// In en, this message translates to:
+  /// **'Awaiting payment'**
+  String get adminSubPending;
+
+  /// No description provided for @adminSubCancelled.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancelled'**
+  String get adminSubCancelled;
+
+  /// No description provided for @adminSubExpired.
+  ///
+  /// In en, this message translates to:
+  /// **'Expired'**
+  String get adminSubExpired;
+
+  /// No description provided for @adminSubUnknownUser.
+  ///
+  /// In en, this message translates to:
+  /// **'Unknown user'**
+  String get adminSubUnknownUser;
+
+  /// No description provided for @adminSubStarted.
+  ///
+  /// In en, this message translates to:
+  /// **'Started {date}'**
+  String adminSubStarted(String date);
+
+  /// No description provided for @adminSubEnds.
+  ///
+  /// In en, this message translates to:
+  /// **'Ends {date}'**
+  String adminSubEnds(String date);
+
+  /// No description provided for @adminSubCancelledOn.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancelled {date}'**
+  String adminSubCancelledOn(String date);
+
+  /// No description provided for @adminSubEndedOn.
+  ///
+  /// In en, this message translates to:
+  /// **'Ended {date}'**
+  String adminSubEndedOn(String date);
+
+  /// No description provided for @adminSubAutoRenew.
+  ///
+  /// In en, this message translates to:
+  /// **'Renews automatically'**
+  String get adminSubAutoRenew;
+
+  /// No description provided for @adminSubWaiting.
+  ///
+  /// In en, this message translates to:
+  /// **'Waiting for the payment to be confirmed'**
+  String get adminSubWaiting;
+
+  /// No description provided for @adminSubEndNow.
+  ///
+  /// In en, this message translates to:
+  /// **'End now'**
+  String get adminSubEndNow;
+
+  /// No description provided for @adminSubEndTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'End this subscription?'**
+  String get adminSubEndTitle;
+
+  /// No description provided for @adminSubEndBody.
+  ///
+  /// In en, this message translates to:
+  /// **'They lose their plan right away and go back to the free plan. This cannot be undone.'**
+  String get adminSubEndBody;
+
+  /// No description provided for @adminSubEndConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'End subscription'**
+  String get adminSubEndConfirm;
+
+  /// No description provided for @adminSubEnded.
+  ///
+  /// In en, this message translates to:
+  /// **'Subscription ended.'**
+  String get adminSubEnded;
+
   /// No description provided for @adminAuditTitle.
   ///
   /// In en, this message translates to:
@@ -2709,6 +3759,636 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Refused by the catalog name rules'**
   String get adminMarketsSkipNameInvalid;
+
+  /// No description provided for @adminProductsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Products'**
+  String get adminProductsTitle;
+
+  /// No description provided for @adminProductsSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Search the catalog and edit product names'**
+  String get adminProductsSubtitle;
+
+  /// No description provided for @adminProductsSearchHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Search by name or code'**
+  String get adminProductsSearchHint;
+
+  /// No description provided for @adminProductsEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No products found.'**
+  String get adminProductsEmpty;
+
+  /// No description provided for @adminProductsHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Tap a product to edit its names.'**
+  String get adminProductsHint;
+
+  /// No description provided for @adminProductEditTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit product'**
+  String get adminProductEditTitle;
+
+  /// No description provided for @adminProductNameEn.
+  ///
+  /// In en, this message translates to:
+  /// **'Name in English'**
+  String get adminProductNameEn;
+
+  /// No description provided for @adminProductNameHi.
+  ///
+  /// In en, this message translates to:
+  /// **'Name in Hindi'**
+  String get adminProductNameHi;
+
+  /// No description provided for @adminProductNameMr.
+  ///
+  /// In en, this message translates to:
+  /// **'Name in Marathi'**
+  String get adminProductNameMr;
+
+  /// No description provided for @adminProductNameOptional.
+  ///
+  /// In en, this message translates to:
+  /// **'Optional. Users of that language see the English name when this is empty.'**
+  String get adminProductNameOptional;
+
+  /// No description provided for @adminProductErrEnglish.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter the English name.'**
+  String get adminProductErrEnglish;
+
+  /// No description provided for @adminProductActive.
+  ///
+  /// In en, this message translates to:
+  /// **'Shown in the app'**
+  String get adminProductActive;
+
+  /// No description provided for @adminProductActiveHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Off hides the product from users; its prices are kept.'**
+  String get adminProductActiveHint;
+
+  /// No description provided for @adminProductSave.
+  ///
+  /// In en, this message translates to:
+  /// **'Save product'**
+  String get adminProductSave;
+
+  /// No description provided for @adminProductNew.
+  ///
+  /// In en, this message translates to:
+  /// **'New product'**
+  String get adminProductNew;
+
+  /// No description provided for @adminVariantsButton.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =0{Variants} =1{Variants (1)} other{Variants ({count})}}'**
+  String adminVariantsButton(int count);
+
+  /// No description provided for @adminVariantsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Variants'**
+  String get adminVariantsTitle;
+
+  /// No description provided for @adminVariantsIntro.
+  ///
+  /// In en, this message translates to:
+  /// **'Grades or forms of this product, like Large or Dry. Tap one to rename it or switch it off.'**
+  String get adminVariantsIntro;
+
+  /// No description provided for @adminVariantsEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'This product has no variants.'**
+  String get adminVariantsEmpty;
+
+  /// No description provided for @adminVariantNew.
+  ///
+  /// In en, this message translates to:
+  /// **'New variant'**
+  String get adminVariantNew;
+
+  /// No description provided for @adminVariantEdit.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit variant'**
+  String get adminVariantEdit;
+
+  /// No description provided for @adminProductCode.
+  ///
+  /// In en, this message translates to:
+  /// **'Code'**
+  String get adminProductCode;
+
+  /// No description provided for @adminProductCodeHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Lowercase letters, digits and hyphens; starts with a letter. For a price feed commodity use its name, like red-onion. It cannot be changed later.'**
+  String get adminProductCodeHint;
+
+  /// No description provided for @adminProductErrCode.
+  ///
+  /// In en, this message translates to:
+  /// **'Use lowercase letters, digits and hyphens, starting with a letter.'**
+  String get adminProductErrCode;
+
+  /// No description provided for @adminProductErrSubCategory.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose a sub-category.'**
+  String get adminProductErrSubCategory;
+
+  /// No description provided for @adminProductErrUnit.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose a unit.'**
+  String get adminProductErrUnit;
+
+  /// No description provided for @adminCategoriesTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Categories'**
+  String get adminCategoriesTitle;
+
+  /// No description provided for @adminCategoriesSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Add and rename categories and sub-categories'**
+  String get adminCategoriesSubtitle;
+
+  /// No description provided for @adminCategoriesIntro.
+  ///
+  /// In en, this message translates to:
+  /// **'Tap a category or sub-category to rename it or switch it off. Products sit under a sub-category.'**
+  String get adminCategoriesIntro;
+
+  /// No description provided for @adminCategoriesEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No categories yet.'**
+  String get adminCategoriesEmpty;
+
+  /// No description provided for @adminCategoryNew.
+  ///
+  /// In en, this message translates to:
+  /// **'New category'**
+  String get adminCategoryNew;
+
+  /// No description provided for @adminCategoryEdit.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit category'**
+  String get adminCategoryEdit;
+
+  /// No description provided for @adminSubCategoryNew.
+  ///
+  /// In en, this message translates to:
+  /// **'New sub-category'**
+  String get adminSubCategoryNew;
+
+  /// No description provided for @adminSubCategoryEdit.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit sub-category'**
+  String get adminSubCategoryEdit;
+
+  /// No description provided for @adminCategoryCodeHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Lowercase letters, digits and hyphens; starts with a letter. It cannot be changed later.'**
+  String get adminCategoryCodeHint;
+
+  /// No description provided for @adminCategoryActiveHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Off hides it from users; what is under it is kept.'**
+  String get adminCategoryActiveHint;
+
+  /// No description provided for @adminCategorySave.
+  ///
+  /// In en, this message translates to:
+  /// **'Save'**
+  String get adminCategorySave;
+
+  /// No description provided for @adminUnitsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Units'**
+  String get adminUnitsTitle;
+
+  /// No description provided for @adminUnitsSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Add and rename units of measure'**
+  String get adminUnitsSubtitle;
+
+  /// No description provided for @adminUnitsIntro.
+  ///
+  /// In en, this message translates to:
+  /// **'Tap a unit to rename it or switch it off. Products are priced in a unit.'**
+  String get adminUnitsIntro;
+
+  /// No description provided for @adminUnitsEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No units yet.'**
+  String get adminUnitsEmpty;
+
+  /// No description provided for @adminUnitNew.
+  ///
+  /// In en, this message translates to:
+  /// **'New unit'**
+  String get adminUnitNew;
+
+  /// No description provided for @adminUnitEdit.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit unit'**
+  String get adminUnitEdit;
+
+  /// No description provided for @adminUnitSymbol.
+  ///
+  /// In en, this message translates to:
+  /// **'Symbol'**
+  String get adminUnitSymbol;
+
+  /// No description provided for @adminUnitErrSymbol.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter a short symbol, up to 16 characters.'**
+  String get adminUnitErrSymbol;
+
+  /// No description provided for @adminUnitDimension.
+  ///
+  /// In en, this message translates to:
+  /// **'What it measures'**
+  String get adminUnitDimension;
+
+  /// No description provided for @adminUnitChooseDimension.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose what it measures'**
+  String get adminUnitChooseDimension;
+
+  /// No description provided for @adminUnitErrDimension.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose what the unit measures.'**
+  String get adminUnitErrDimension;
+
+  /// No description provided for @adminUnitFactor.
+  ///
+  /// In en, this message translates to:
+  /// **'How many base units'**
+  String get adminUnitFactor;
+
+  /// No description provided for @adminUnitFactorIn.
+  ///
+  /// In en, this message translates to:
+  /// **'Amount in {unit}'**
+  String adminUnitFactorIn(String unit);
+
+  /// No description provided for @adminUnitFactorHint.
+  ///
+  /// In en, this message translates to:
+  /// **'How much one of this unit is, for example 100 for a quintal in kg. It cannot be changed later.'**
+  String get adminUnitFactorHint;
+
+  /// No description provided for @adminUnitErrFactor.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter a number above zero, with up to 6 decimals.'**
+  String get adminUnitErrFactor;
+
+  /// No description provided for @adminUnitActiveHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Off stops it being offered for new products; existing prices are kept.'**
+  String get adminUnitActiveHint;
+
+  /// No description provided for @adminUnitDimMass.
+  ///
+  /// In en, this message translates to:
+  /// **'Weight'**
+  String get adminUnitDimMass;
+
+  /// No description provided for @adminUnitDimVolume.
+  ///
+  /// In en, this message translates to:
+  /// **'Volume'**
+  String get adminUnitDimVolume;
+
+  /// No description provided for @adminUnitDimCount.
+  ///
+  /// In en, this message translates to:
+  /// **'Count'**
+  String get adminUnitDimCount;
+
+  /// No description provided for @adminUnitDimLength.
+  ///
+  /// In en, this message translates to:
+  /// **'Length'**
+  String get adminUnitDimLength;
+
+  /// No description provided for @adminUnitDimArea.
+  ///
+  /// In en, this message translates to:
+  /// **'Area'**
+  String get adminUnitDimArea;
+
+  /// No description provided for @adminMandisTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Mandis'**
+  String get adminMandisTitle;
+
+  /// No description provided for @adminMandisSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Search, add, rename and move mandis'**
+  String get adminMandisSubtitle;
+
+  /// No description provided for @adminMandisEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No mandis found.'**
+  String get adminMandisEmpty;
+
+  /// No description provided for @adminMandiNew.
+  ///
+  /// In en, this message translates to:
+  /// **'New mandi'**
+  String get adminMandiNew;
+
+  /// No description provided for @adminMandiEdit.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit mandi'**
+  String get adminMandiEdit;
+
+  /// No description provided for @adminMandiName.
+  ///
+  /// In en, this message translates to:
+  /// **'Name'**
+  String get adminMandiName;
+
+  /// No description provided for @adminMandiErrName.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter the mandi\'s name.'**
+  String get adminMandiErrName;
+
+  /// No description provided for @adminMandiDistrict.
+  ///
+  /// In en, this message translates to:
+  /// **'District'**
+  String get adminMandiDistrict;
+
+  /// No description provided for @adminMandiChooseDistrict.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose a district'**
+  String get adminMandiChooseDistrict;
+
+  /// No description provided for @adminMandiErrDistrict.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose a district.'**
+  String get adminMandiErrDistrict;
+
+  /// No description provided for @adminMandiCodeHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Lowercase letters, digits and hyphens; starts with a letter. For a price feed market use its name, like rajkot. It cannot be changed later.'**
+  String get adminMandiCodeHint;
+
+  /// No description provided for @adminMandiActiveHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Off hides it from users; its prices are kept.'**
+  String get adminMandiActiveHint;
+
+  /// No description provided for @adminStatesTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'States and districts'**
+  String get adminStatesTitle;
+
+  /// No description provided for @adminStatesSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Add and rename states and districts'**
+  String get adminStatesSubtitle;
+
+  /// No description provided for @adminStatesIntro.
+  ///
+  /// In en, this message translates to:
+  /// **'Tap a state or district to rename it or switch it off. Mandis sit in a district.'**
+  String get adminStatesIntro;
+
+  /// No description provided for @adminStatesEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No states yet.'**
+  String get adminStatesEmpty;
+
+  /// No description provided for @adminStateNew.
+  ///
+  /// In en, this message translates to:
+  /// **'New state'**
+  String get adminStateNew;
+
+  /// No description provided for @adminStateEdit.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit state'**
+  String get adminStateEdit;
+
+  /// No description provided for @adminDistrictNew.
+  ///
+  /// In en, this message translates to:
+  /// **'New district'**
+  String get adminDistrictNew;
+
+  /// No description provided for @adminDistrictEdit.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit district'**
+  String get adminDistrictEdit;
+
+  /// No description provided for @adminPlaceErrName.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter a name.'**
+  String get adminPlaceErrName;
+
+  /// No description provided for @adminStateCodeHint.
+  ///
+  /// In en, this message translates to:
+  /// **'2 to 10 letters or digits, like MH. It cannot be changed later.'**
+  String get adminStateCodeHint;
+
+  /// No description provided for @adminStateErrCode.
+  ///
+  /// In en, this message translates to:
+  /// **'Use 2 to 10 letters or digits.'**
+  String get adminStateErrCode;
+
+  /// No description provided for @adminPlaceActiveHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Off hides it from users; what is under it is kept.'**
+  String get adminPlaceActiveHint;
+
+  /// No description provided for @adminSuppliersTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Suppliers and hubs'**
+  String get adminSuppliersTitle;
+
+  /// No description provided for @adminSuppliersSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Search, add and edit suppliers and hubs'**
+  String get adminSuppliersSubtitle;
+
+  /// No description provided for @adminSuppliersEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No suppliers found.'**
+  String get adminSuppliersEmpty;
+
+  /// No description provided for @adminSupplierNew.
+  ///
+  /// In en, this message translates to:
+  /// **'New supplier'**
+  String get adminSupplierNew;
+
+  /// No description provided for @adminSupplierEdit.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit supplier'**
+  String get adminSupplierEdit;
+
+  /// No description provided for @adminSupplierPhone.
+  ///
+  /// In en, this message translates to:
+  /// **'Contact phone'**
+  String get adminSupplierPhone;
+
+  /// No description provided for @adminSupplierPhoneHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Optional. Digits, with + for a country code.'**
+  String get adminSupplierPhoneHint;
+
+  /// No description provided for @adminSupplierErrPhone.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter a valid phone number, or leave it empty.'**
+  String get adminSupplierErrPhone;
+
+  /// No description provided for @adminSupplierActiveHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Off hides it from users.'**
+  String get adminSupplierActiveHint;
+
+  /// No description provided for @adminCommoditiesTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Add commodities'**
+  String get adminCommoditiesTitle;
+
+  /// No description provided for @adminCommoditiesSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Add commodities from the price feed to the catalog'**
+  String get adminCommoditiesSubtitle;
+
+  /// No description provided for @adminCommoditiesIntro.
+  ///
+  /// In en, this message translates to:
+  /// **'Pick the sub-category and unit, then the commodities from the last full pull. Each one is added as a product with its feed name in English, so its prices can be saved at the next pull. Add the Hindi and Marathi names later in the catalog.'**
+  String get adminCommoditiesIntro;
+
+  /// No description provided for @adminCommoditiesNoFeed.
+  ///
+  /// In en, this message translates to:
+  /// **'The commodities in the price feed have not been recorded yet. Run a full pull (Run now with no filters) on a day the feed has data, then come back.'**
+  String get adminCommoditiesNoFeed;
+
+  /// No description provided for @adminCommoditiesSubCategory.
+  ///
+  /// In en, this message translates to:
+  /// **'Sub-category'**
+  String get adminCommoditiesSubCategory;
+
+  /// No description provided for @adminCommoditiesChooseSubCategory.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose a sub-category'**
+  String get adminCommoditiesChooseSubCategory;
+
+  /// No description provided for @adminCommoditiesUnit.
+  ///
+  /// In en, this message translates to:
+  /// **'Unit'**
+  String get adminCommoditiesUnit;
+
+  /// No description provided for @adminCommoditiesChooseUnit.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose a unit'**
+  String get adminCommoditiesChooseUnit;
+
+  /// No description provided for @adminCommoditiesCommodities.
+  ///
+  /// In en, this message translates to:
+  /// **'Commodities'**
+  String get adminCommoditiesCommodities;
+
+  /// No description provided for @adminCommoditiesChoose.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose commodities'**
+  String get adminCommoditiesChoose;
+
+  /// No description provided for @adminCommoditiesAdd.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =0{Add commodities} =1{Add 1 commodity} other{Add {count} commodities}}'**
+  String adminCommoditiesAdd(int count);
+
+  /// No description provided for @adminCommoditiesAdded.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =0{No commodities were added} =1{Added 1 commodity} other{Added {count} commodities}}'**
+  String adminCommoditiesAdded(int count);
+
+  /// No description provided for @adminCommoditiesAddedHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Their prices will be saved from the next pull.'**
+  String get adminCommoditiesAddedHint;
+
+  /// No description provided for @adminCommoditiesSkipNotInFeed.
+  ///
+  /// In en, this message translates to:
+  /// **'Not in the feed list'**
+  String get adminCommoditiesSkipNotInFeed;
 
   /// No description provided for @appVersionTitle.
   ///

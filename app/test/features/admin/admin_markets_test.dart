@@ -199,7 +199,11 @@ void main() {
       await pump(tester);
       expect(find.text('Choose markets'), findsOneWidget);
       // Nothing to add until markets are chosen.
-      expect(tester.widget<MbButton>(find.byType(MbButton)).onPressed, isNull);
+      // (The first button is "Add"; "Add every market" comes after it.)
+      expect(
+        tester.widget<MbButton>(find.byType(MbButton).first).onPressed,
+        isNull,
+      );
 
       await tester.tap(find.text('Choose a state'));
       await tester.pumpAndSettle();
@@ -231,6 +235,37 @@ void main() {
       expect(find.text('Already in the catalog'), findsOneWidget);
       // The list is clear for the next import.
       expect(find.text('Choose markets'), findsOneWidget);
+    });
+
+    testWidgets('add every market asks first, then adds them all', (
+      tester,
+    ) async {
+      when(() => markets.importAllFeedMarkets(sourceId: 's1')).thenAnswer(
+        (_) async => const Ok(
+          ImportAllMarketsResult(
+            statesCreated: 2,
+            marketsCreated: 40,
+            alreadyInCatalog: 5,
+            other: 3,
+          ),
+        ),
+      );
+      await pump(tester);
+
+      final button = find.text('Add every market from the feed');
+      await tester.ensureVisible(button);
+      await tester.pumpAndSettle();
+      await tester.tap(button);
+      await tester.pumpAndSettle();
+
+      expect(find.text('Add every market?'), findsOneWidget);
+      verifyNever(() => markets.importAllFeedMarkets(sourceId: any(named: 'sourceId')));
+
+      await tester.tap(find.text('Add all'));
+      await tester.pumpAndSettle();
+
+      verify(() => markets.importAllFeedMarkets(sourceId: 's1')).called(1);
+      expect(find.text('40 markets and 2 states added'), findsOneWidget);
     });
 
     testWidgets('a refusal from the API is shown as its own message', (

@@ -184,6 +184,44 @@ class _Form extends StatelessWidget {
           ],
         ),
         gap,
+        Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Expanded(
+              child: MbTextField(
+                label: l10n.freightLabel(material?.unit.name ?? ''),
+                keyboardType: const TextInputType.numberWithOptions(
+                  decimal: true,
+                ),
+                inputFormatters: [
+                  FilteringTextInputFormatter.allow(RegExp(r'[0-9.]')),
+                ],
+                onChanged: cubit.freightChanged,
+              ),
+            ),
+            const SizedBox(width: MbSpacing.s3),
+            Expanded(
+              child: MbTextField(
+                label: l10n.handlingLabel,
+                keyboardType: const TextInputType.numberWithOptions(
+                  decimal: true,
+                ),
+                inputFormatters: [
+                  FilteringTextInputFormatter.allow(RegExp(r'[0-9.]')),
+                ],
+                onChanged: cubit.handlingChanged,
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: MbSpacing.s1),
+        Text(
+          l10n.landedOptionalHelper,
+          style: context.mbText.caption.copyWith(
+            color: context.mbColors.inkMuted,
+          ),
+        ),
+        gap,
         ..._result(context),
         const SizedBox(height: MbSpacing.s6),
         _SavedList(state: state),
@@ -244,6 +282,39 @@ class _Form extends StatelessWidget {
           ),
         ),
       ),
+      if (state.landed case final landed?) ...[
+        gap,
+        MbCard(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                l10n.landedCostTitle,
+                style: context.mbText.caption.copyWith(color: c.inkMuted),
+              ),
+              const SizedBox(height: MbSpacing.s1),
+              Text(
+                formatInr(landed.total),
+                style: context.mbText.title.copyWith(color: c.ink),
+              ),
+              const SizedBox(height: MbSpacing.s1),
+              Text(
+                l10n.landedPerUnit(formatInr(landed.perUnit), unit),
+                style: context.mbText.body.copyWith(color: c.ink),
+              ),
+              const SizedBox(height: MbSpacing.s1),
+              Text(
+                l10n.landedBreakdown(
+                  formatInr(landed.goods),
+                  formatInr(landed.freight),
+                  formatInr(landed.handling),
+                ),
+                style: context.mbText.caption.copyWith(color: c.inkMuted),
+              ),
+            ],
+          ),
+        ),
+      ],
       gap,
       MbPriceTable(
         nameHeader: l10n.columnSource,

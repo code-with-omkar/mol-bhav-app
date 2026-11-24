@@ -46,9 +46,11 @@ internal sealed class BillingReadService(IDbConnectionFactory connectionFactory)
         LIMIT 1;
         """;
 
+    // The owner is joined only to name them in the admin list; a subscription whose user is gone still lists.
     private const string AdminSubscriptionsFrom = $"""
         FROM {Subscriptions} s
         JOIN {Plans} p ON p.id = s.plan_id
+        LEFT JOIN identity.users u ON u.id = s.user_id
         """;
 
     private const string AdminSubscriptionsWhere = """
@@ -62,7 +64,9 @@ internal sealed class BillingReadService(IDbConnectionFactory connectionFactory)
         {AdminSubscriptionsWhere};
 
         SELECT s.id, s.user_id, s.plan_id, p.code AS plan_code, s.status,
-               s.started_at_utc, s.expires_at_utc, s.is_auto_renew, s.cancelled_at_utc
+               s.started_at_utc, s.expires_at_utc, s.is_auto_renew, s.cancelled_at_utc,
+               '******' || right(u.phone_number, 4) AS user_phone_masked,
+               NULLIF(u.display_name, '') AS user_name
         {AdminSubscriptionsFrom}
         {AdminSubscriptionsWhere}
         ORDER BY s.started_at_utc DESC
@@ -120,7 +124,8 @@ internal sealed class BillingReadService(IDbConnectionFactory connectionFactory)
         return new PagedResult<AdminSubscriptionResponse>(
             rows.Select(r => new AdminSubscriptionResponse(
                 r.Id, r.UserId, r.PlanId, r.PlanCode, Enum.Parse<SubscriptionStatus>(r.Status),
-                r.StartedAtUtc, r.ExpiresAtUtc, r.IsAutoRenew, r.CancelledAtUtc)).ToArray(),
+                r.StartedAtUtc, r.ExpiresAtUtc, r.IsAutoRenew, r.CancelledAtUtc,
+                r.UserPhoneMasked, r.UserName)).ToArray(),
             filter.Page.Page, filter.Page.PageSize, totalCount);
     }
 
@@ -221,7 +226,12 @@ internal sealed class BillingReadService(IDbConnectionFactory connectionFactory)
         public bool IsAutoRenew { get; init; }
 
         public DateTimeOffset? CancelledAtUtc { get; init; }
+
+        public string? UserPhoneMasked { get; init; }
+
+        public string? UserName { get; init; }
     }
+
     private sealed class AdminCouponRow
     {
         public Guid Id { get; init; }

@@ -17,6 +17,8 @@ abstract interface class AccountRemoteDataSource {
   Future<Map<String, dynamic>> getProfile();
 
   Future<void> updateNotifications(Map<String, dynamic> body);
+
+  Future<void> changePassword(Map<String, dynamic> body);
 }
 
 @LazySingleton(as: AccountRemoteDataSource)
@@ -34,6 +36,10 @@ class DioAccountRemoteDataSource implements AccountRemoteDataSource {
     // Notification preferences are not yet a separate API endpoint.
     // No-op until a dedicated endpoint is added.
   }
+
+  @override
+  Future<void> changePassword(Map<String, dynamic> body) =>
+      _dio.post<void>('/auth/password/change', data: body);
 }
 
 @LazySingleton(as: AccountRepository)
@@ -94,6 +100,17 @@ class AccountRepositoryImpl implements AccountRepository {
     required bool whatsapp,
   }) => runApiCall(
     () => _remote.updateNotifications({'push': push, 'whatsapp': whatsapp}),
+  );
+
+  @override
+  Future<Result<void>> changePassword({
+    String? currentPassword,
+    required String newPassword,
+  }) => runApiCall(
+    () => _remote.changePassword({
+      'currentPassword': ?currentPassword,
+      'newPassword': newPassword,
+    }),
   );
 
   @override

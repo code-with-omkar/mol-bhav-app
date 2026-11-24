@@ -198,8 +198,10 @@ void main() {
 
       // c1 doubled its clicks (40 vs 20); c2 was not delivering before.
       await tester.scrollUntilVisible(find.text('Old Smoke Test'), 200);
-      // (the Home Feed placement holds only c1, so it doubled as well)
-      expect(find.text('▲ +100.0%'), findsNWidgets(2));
+      // (the Home Feed placement holds only c1, so it doubled as well; how many
+      // of those cards are built depends on the scroll position, so this only
+      // asks that the doubling is shown)
+      expect(find.text('▲ +100.0%'), findsWidgets);
       expect(find.text('▲ New'), findsWidgets);
     });
 

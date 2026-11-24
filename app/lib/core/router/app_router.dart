@@ -8,15 +8,40 @@ import '../../features/account/presentation/more_page.dart';
 import '../../features/admin/domain/admin_ingestion.dart';
 import '../../features/admin/presentation/admin_ads_cubit.dart';
 import '../../features/admin/domain/admin_ads.dart';
+import '../../features/admin/domain/admin_campaigns.dart';
+import '../../features/admin/presentation/admin_campaign_form_cubit.dart';
+import '../../features/admin/presentation/admin_campaign_form_page.dart';
+import '../../features/admin/presentation/admin_campaign_list_cubit.dart';
+import '../../features/admin/presentation/admin_campaign_list_page.dart';
 import '../../features/admin/presentation/admin_ads_page.dart';
 import '../../features/admin/presentation/admin_features_cubit.dart';
 import '../../features/admin/presentation/admin_audit_cubit.dart';
+import '../../features/admin/presentation/admin_coupons_cubit.dart';
+import '../../features/admin/presentation/admin_coupons_page.dart';
+import '../../features/admin/presentation/admin_subscriptions_cubit.dart';
+import '../../features/admin/presentation/admin_subscriptions_page.dart';
+import '../../features/admin/presentation/admin_plans_cubit.dart';
+import '../../features/admin/presentation/admin_plans_page.dart';
 import '../../features/admin/presentation/admin_ticket_thread_cubit.dart';
 import '../../features/admin/presentation/admin_ticket_thread_page.dart';
 import '../../features/admin/presentation/admin_tickets_cubit.dart';
 import '../../features/admin/presentation/admin_tickets_page.dart';
 import '../../features/admin/presentation/admin_audit_page.dart';
+import '../../features/admin/presentation/admin_categories_cubit.dart';
+import '../../features/admin/presentation/admin_categories_page.dart';
+import '../../features/admin/presentation/admin_commodities_cubit.dart';
+import '../../features/admin/presentation/admin_commodities_page.dart';
+import '../../features/admin/presentation/admin_mandis_cubit.dart';
+import '../../features/admin/presentation/admin_mandis_page.dart';
 import '../../features/admin/presentation/admin_markets_cubit.dart';
+import '../../features/admin/presentation/admin_suppliers_cubit.dart';
+import '../../features/admin/presentation/admin_suppliers_page.dart';
+import '../../features/admin/presentation/admin_states_cubit.dart';
+import '../../features/admin/presentation/admin_states_page.dart';
+import '../../features/admin/presentation/admin_units_cubit.dart';
+import '../../features/admin/presentation/admin_units_page.dart';
+import '../../features/admin/presentation/admin_products_cubit.dart';
+import '../../features/admin/presentation/admin_products_page.dart';
 import '../../features/admin/presentation/admin_markets_page.dart';
 import '../../features/admin/presentation/admin_version_cubit.dart';
 import '../../features/admin/presentation/admin_version_page.dart';
@@ -81,11 +106,17 @@ import '../../features/support/presentation/my_tickets_page.dart';
 import '../../features/support/presentation/raise_ticket_page.dart';
 import '../../features/support/presentation/support_cubits.dart';
 import '../../features/support/presentation/ticket_thread_page.dart';
+import '../../features/onboarding/presentation/permissions_page.dart';
+import '../../features/account/presentation/change_password_cubit.dart';
+import '../../features/account/presentation/change_password_page.dart';
+import '../../features/suppliers/presentation/suppliers_cubit.dart';
+import '../../features/suppliers/presentation/suppliers_page.dart';
 import '../../features/tools/presentation/cost_estimator_page.dart';
 import '../../features/tools/presentation/reports_page.dart';
 import '../../features/tools/presentation/tools_cubits.dart';
 import '../../features/watchlist/presentation/watchlist_page.dart';
 import '../../features/watchlist/presentation/watchlist_picker.dart';
+import '../permissions/first_run_permissions.dart';
 import '../session/admin_mode.dart';
 import '../session/session_manager.dart';
 import '../storage/saved_credentials_store.dart';
@@ -107,14 +138,23 @@ Widget _screen<C extends StateStreamableSource<Object?>>(
   child: child,
 );
 
-GoRouter createAppRouter(SessionManager session, AdminMode adminMode) {
+GoRouter createAppRouter(
+  SessionManager session,
+  AdminMode adminMode,
+  FirstRunPermissions firstRun,
+) {
   return GoRouter(
     navigatorKey: _rootKey,
     initialLocation: AppRoutes.home,
-    // Switching between the admin and user apps re-runs the guard too.
-    refreshListenable: Listenable.merge([session, adminMode]),
-    redirect: (context, state) => _guard(session, adminMode, state),
+    // Switching between the admin and user apps re-runs the guard too, and so
+    // does finishing the first-launch permissions step.
+    refreshListenable: Listenable.merge([session, adminMode, firstRun]),
+    redirect: (context, state) => _guard(session, adminMode, firstRun, state),
     routes: [
+      GoRoute(
+        path: AppRoutes.permissions,
+        builder: (context, state) => const PermissionsPage(),
+      ),
       // Shared deep link: {DEEP_LINK_BASE}/p/{productId}?mandi={mandiId}.
       // Registered only when a base is configured — an app with no verified
       // domain must not claim to handle the path. It is a pure redirect, so
@@ -335,6 +375,20 @@ GoRouter createAppRouter(SessionManager session, AdminMode adminMode) {
                       child: const CostEstimatorPage(),
                     ),
                   ),
+                  GoRoute(
+                    path: 'password',
+                    builder: (context, state) => BlocProvider(
+                      create: (_) => getIt<ChangePasswordCubit>(),
+                      child: const ChangePasswordPage(),
+                    ),
+                  ),
+                  GoRoute(
+                    path: 'suppliers',
+                    builder: (context, state) => BlocProvider(
+                      create: (_) => getIt<SuppliersCubit>()..load(),
+                      child: const SuppliersPage(),
+                    ),
+                  ),
                   // Admin only: the More entry is hidden for other roles and
                   // every admin endpoint returns 403 to them anyway.
                   GoRoute(
@@ -474,6 +528,41 @@ GoRouter createAppRouter(SessionManager session, AdminMode adminMode) {
                   child: const AdminAdsPage(),
                 ),
                 routes: [
+                  // Before ':id', which would otherwise read "campaigns" as an id.
+                  GoRoute(
+                    path: 'campaigns',
+                    builder: (context, state) => BlocProvider(
+                      create: (_) => getIt<AdminCampaignListCubit>()..load(),
+                      child: const AdminCampaignListPage(),
+                    ),
+                    routes: [
+                      GoRoute(
+                        path: 'new',
+                        builder: (context, state) => BlocProvider(
+                          create: (_) =>
+                              getIt<AdminCampaignFormCubit>()..load(),
+                          child: const AdminCampaignFormPage(),
+                        ),
+                      ),
+                      GoRoute(
+                        path: ':id/edit',
+                        // The list passes the campaign; a bare link has none.
+                        redirect: (context, state) =>
+                            state.extra is AdminCampaign
+                            ? null
+                            : AppRoutes.adminCampaigns,
+                        builder: (context, state) {
+                          final campaign = state.extra! as AdminCampaign;
+                          return BlocProvider(
+                            create: (_) =>
+                                getIt<AdminCampaignFormCubit>()
+                                  ..load(campaign: campaign),
+                            child: AdminCampaignFormPage(campaign: campaign),
+                          );
+                        },
+                      ),
+                    ],
+                  ),
                   GoRoute(
                     path: ':id',
                     builder: (context, state) {
@@ -524,6 +613,27 @@ GoRouter createAppRouter(SessionManager session, AdminMode adminMode) {
                 ),
                 routes: [
                   GoRoute(
+                    path: 'plans',
+                    builder: (context, state) => BlocProvider(
+                      create: (_) => getIt<AdminPlansCubit>()..load(),
+                      child: const AdminPlansPage(),
+                    ),
+                  ),
+                  GoRoute(
+                    path: 'subscriptions',
+                    builder: (context, state) => BlocProvider(
+                      create: (_) => getIt<AdminSubscriptionsCubit>()..load(),
+                      child: const AdminSubscriptionsPage(),
+                    ),
+                  ),
+                  GoRoute(
+                    path: 'coupons',
+                    builder: (context, state) => BlocProvider(
+                      create: (_) => getIt<AdminCouponsCubit>()..load(),
+                      child: const AdminCouponsPage(),
+                    ),
+                  ),
+                  GoRoute(
                     path: 'support',
                     builder: (context, state) => BlocProvider(
                       create: (_) => getIt<AdminTicketsCubit>()..load(),
@@ -555,6 +665,55 @@ GoRouter createAppRouter(SessionManager session, AdminMode adminMode) {
                     builder: (context, state) => BlocProvider(
                       create: (_) => getIt<AdminMarketsCubit>()..load(),
                       child: const AdminMarketsPage(),
+                    ),
+                  ),
+                  GoRoute(
+                    path: 'suppliers',
+                    builder: (context, state) => BlocProvider(
+                      create: (_) => getIt<AdminSuppliersCubit>()..load(),
+                      child: const AdminSuppliersPage(),
+                    ),
+                  ),
+                  GoRoute(
+                    path: 'states',
+                    builder: (context, state) => BlocProvider(
+                      create: (_) => getIt<AdminStatesCubit>()..load(),
+                      child: const AdminStatesPage(),
+                    ),
+                  ),
+                  GoRoute(
+                    path: 'mandis',
+                    builder: (context, state) => BlocProvider(
+                      create: (_) => getIt<AdminMandisCubit>()..load(),
+                      child: const AdminMandisPage(),
+                    ),
+                  ),
+                  GoRoute(
+                    path: 'units',
+                    builder: (context, state) => BlocProvider(
+                      create: (_) => getIt<AdminUnitsCubit>()..load(),
+                      child: const AdminUnitsPage(),
+                    ),
+                  ),
+                  GoRoute(
+                    path: 'categories',
+                    builder: (context, state) => BlocProvider(
+                      create: (_) => getIt<AdminCategoriesCubit>()..load(),
+                      child: const AdminCategoriesPage(),
+                    ),
+                  ),
+                  GoRoute(
+                    path: 'products',
+                    builder: (context, state) => BlocProvider(
+                      create: (_) => getIt<AdminProductsCubit>()..load(),
+                      child: const AdminProductsPage(),
+                    ),
+                  ),
+                  GoRoute(
+                    path: 'commodities',
+                    builder: (context, state) => BlocProvider(
+                      create: (_) => getIt<AdminCommoditiesCubit>()..load(),
+                      child: const AdminCommoditiesPage(),
                     ),
                   ),
                   GoRoute(
@@ -628,9 +787,17 @@ GoRouter createAppRouter(SessionManager session, AdminMode adminMode) {
 String? _guard(
   SessionManager session,
   AdminMode adminMode,
+  FirstRunPermissions firstRun,
   GoRouterState state,
 ) {
   final location = state.matchedLocation;
+  final atPermissions = location == AppRoutes.permissions;
+  // A fresh install (no session yet) is asked for permissions once, before
+  // Login. Someone already signed in never sees the step.
+  if (firstRun.pending && session.status == SessionStatus.signedOut) {
+    return atPermissions ? null : AppRoutes.permissions;
+  }
+  if (atPermissions) return AppRoutes.login;
   final atLogin = location.startsWith(AppRoutes.login);
   final atOnboarding = location.startsWith('/onboarding');
   final atAdmin =

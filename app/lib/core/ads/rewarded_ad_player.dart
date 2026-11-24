@@ -36,7 +36,11 @@ class RewardedAdPlayer {
     required String userId,
     required String customData,
   }) async {
-    if (!AdsConfig.isSupported) return RewardedAdOutcome.noFill;
+    // Video is switched off (see AdsConfig.videoAdsEnabled): behave as "no ad
+    // available", so the unlock flow falls back to the server's no-fill grant.
+    if (!AdsConfig.isSupported || !AdsConfig.videoAdsEnabled) {
+      return RewardedAdOutcome.noFill;
+    }
     await _bootstrap.ensureInitialized();
 
     final loaded = Completer<RewardedAd?>();

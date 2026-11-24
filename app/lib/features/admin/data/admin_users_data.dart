@@ -6,7 +6,8 @@ import '../../../core/network/api_call.dart';
 import '../../../core/network/json.dart';
 import '../domain/admin_users.dart';
 
-/// `GET /admin/users`, `GET /admin/users/{id}`, `PUT /admin/users/{id}/status`.
+/// `GET /admin/users`, `GET /admin/users/{id}`, `PUT /admin/users/{id}/status`,
+/// `POST /admin/users/{id}/password/reset`.
 @LazySingleton(as: AdminUsersRepository)
 class AdminUsersRepositoryImpl implements AdminUsersRepository {
   AdminUsersRepositoryImpl(this._dio);
@@ -49,6 +50,14 @@ class AdminUsersRepositoryImpl implements AdminUsersRepository {
           data: {'action': suspend ? 'Suspend' : 'Reinstate'},
         ),
       );
+
+  @override
+  Future<Result<String>> resetPassword(String userId) => runApiCall(() async {
+    final j = (await _dio.post<Map<String, dynamic>>(
+      '/admin/users/${Uri.encodeComponent(userId)}/password/reset',
+    )).data!;
+    return j.str('temporaryPassword');
+  });
 
   static AdminUser parseUser(Map<String, dynamic> j) => AdminUser(
     id: j.str('id'),

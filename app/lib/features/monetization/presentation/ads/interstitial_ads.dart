@@ -30,7 +30,9 @@ class InterstitialAds {
   bool _loading = false;
 
   bool get _eligible =>
-      AdsConfig.isSupported && _profile.state.data?.isPro == false;
+      AdsConfig.isSupported &&
+      AdsConfig.videoAdsEnabled &&
+      _profile.state.data?.isPro == false;
 
   /// Preloads one ad if none is waiting; cheap to call repeatedly.
   Future<void> warmUp() async {

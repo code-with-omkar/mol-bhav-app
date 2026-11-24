@@ -641,6 +641,162 @@ class AppLocalizationsTa extends AppLocalizations {
   String get cancelAnytime => 'Cancel anytime. Prices include GST.';
 
   @override
+  String freightLabel(String unit) {
+    return 'Freight (₹ per $unit)';
+  }
+
+  @override
+  String get handlingLabel => 'Loading & handling (₹, total)';
+
+  @override
+  String get landedOptionalHelper =>
+      'Optional. Worked out on this phone and not saved with the estimate.';
+
+  @override
+  String get landedCostTitle => 'Landed cost (delivered)';
+
+  @override
+  String landedBreakdown(String goods, String freight, String handling) {
+    return 'Goods $goods + freight $freight + handling $handling';
+  }
+
+  @override
+  String get suppliersTitle => 'Suppliers';
+
+  @override
+  String get suppliersSubtitle =>
+      'Regional suppliers and hubs, with a call button';
+
+  @override
+  String get suppliersSearchHint => 'Search suppliers by name';
+
+  @override
+  String get suppliersEmpty => 'No suppliers found.';
+
+  @override
+  String get supplierCall => 'Call';
+
+  @override
+  String get supplierCallFailed => 'Could not open the phone app.';
+
+  @override
+  String get permissionsTitle => 'Allow a few things';
+
+  @override
+  String get permissionsIntro =>
+      'MolBhav works best with these two permissions. Your phone will ask for each.';
+
+  @override
+  String get permissionsNotificationsTitle => 'Notifications';
+
+  @override
+  String get permissionsNotificationsBody =>
+      'Price alerts and buying opportunities, when they happen.';
+
+  @override
+  String get permissionsLocationTitle => 'Location';
+
+  @override
+  String get permissionsLocationBody =>
+      'Shows the weather for your area. Only an approximate position is used.';
+
+  @override
+  String get permissionsAllow => 'Allow';
+
+  @override
+  String get permissionsNotNow => 'Not now';
+
+  @override
+  String get permissionsChangeLater =>
+      'You can change this any time in your phone\'s settings.';
+
+  @override
+  String get adminMarketsAddAll => 'Add every market from the feed';
+
+  @override
+  String get adminMarketsAddAllHint =>
+      'Or add all states and markets in one go. States the catalog does not have are created.';
+
+  @override
+  String get adminMarketsAddAllTitle => 'Add every market?';
+
+  @override
+  String get adminMarketsAddAllBody =>
+      'Every state and market from the last full pull is added to the catalog, which can be over a thousand markets. What is already there is left alone. This takes a little while.';
+
+  @override
+  String get adminMarketsAddAllConfirm => 'Add all';
+
+  @override
+  String adminMarketsAllDone(int markets, int states) {
+    return '$markets markets and $states states added';
+  }
+
+  @override
+  String adminMarketsAllDetail(int already, int other) {
+    return '$already were already there, $other could not be added (no district or an invalid name).';
+  }
+
+  @override
+  String get copyAction => 'Copy';
+
+  @override
+  String get doneAction => 'Done';
+
+  @override
+  String get adminUserResetPasswordAction => 'Reset password';
+
+  @override
+  String get adminUserResetPasswordTitle => 'Reset this user\'s password?';
+
+  @override
+  String get adminUserResetPasswordBody =>
+      'A new random password is created and the old one stops working. You will see it once. Pass it on to the user and ask them to change it.';
+
+  @override
+  String get adminUserResetPasswordConfirm => 'Reset';
+
+  @override
+  String get adminUserResetPasswordDone => 'New password';
+
+  @override
+  String get adminUserResetPasswordShownOnce =>
+      'Shown only once. Share it with the user in person or by phone.';
+
+  @override
+  String get changePasswordTitle => 'Change password';
+
+  @override
+  String get changePasswordSubtitle => 'Choose a new password for signing in';
+
+  @override
+  String get currentPasswordLabel => 'Current password';
+
+  @override
+  String get currentPasswordRequired => 'Enter your current password.';
+
+  @override
+  String get newPasswordLabel => 'New password';
+
+  @override
+  String get passwordsDontMatch => 'The passwords do not match.';
+
+  @override
+  String get passwordSameAsCurrent =>
+      'Choose a password different from the current one.';
+
+  @override
+  String get changePasswordAction => 'Change password';
+
+  @override
+  String get passwordChanged => 'Password changed. Please sign in again.';
+
+  @override
+  String landedPerUnit(String amount, String unit) {
+    return '$amount per $unit delivered';
+  }
+
+  @override
   String get yourNameLabel => 'Your name';
 
   @override
@@ -1428,6 +1584,434 @@ class AppLocalizationsTa extends AppLocalizations {
   String get adminSupportCloseConfirm => 'Close ticket';
 
   @override
+  String get adminCampaignsTitle => 'Campaigns';
+
+  @override
+  String get adminCampaignsManage => 'Manage campaigns';
+
+  @override
+  String get adminCampaignsNew => 'New campaign';
+
+  @override
+  String get adminCampaignsEmpty => 'No campaigns here.';
+
+  @override
+  String get adminCampaignEditTitle => 'Edit campaign';
+
+  @override
+  String get adminPlacementHomeFeed => 'Home feed';
+
+  @override
+  String get adminPlacementMandiPrices => 'Mandi prices';
+
+  @override
+  String get adminPlacementMarketComparison => 'Market comparison';
+
+  @override
+  String get adminCampaignAdvertiser => 'Advertiser';
+
+  @override
+  String get adminCampaignChooseAdvertiser => 'Choose an advertiser';
+
+  @override
+  String get adminCampaignAddAdvertiser => 'Add an advertiser';
+
+  @override
+  String get adminCampaignName => 'Campaign name';
+
+  @override
+  String get adminCampaignPlacement => 'Where it appears';
+
+  @override
+  String get adminCampaignAdTitle => 'The ad';
+
+  @override
+  String get adminCampaignHeadline => 'Headline';
+
+  @override
+  String get adminCampaignText => 'Text';
+
+  @override
+  String get adminCampaignButton => 'Button label';
+
+  @override
+  String get adminCampaignLink => 'Button link';
+
+  @override
+  String get adminCampaignImage => 'Image link (optional)';
+
+  @override
+  String get adminCampaignWhenTitle => 'When it runs';
+
+  @override
+  String get adminCampaignStarts => 'Starts';
+
+  @override
+  String get adminCampaignEnds => 'Ends';
+
+  @override
+  String get adminCampaignPickDate => 'Pick a date';
+
+  @override
+  String get adminCampaignPriority => 'Priority';
+
+  @override
+  String get adminCampaignPriorityHint =>
+      '0 to 100. When two campaigns fit, the higher number shows first.';
+
+  @override
+  String get adminCampaignCap => 'Daily views limit (optional)';
+
+  @override
+  String get adminCampaignCapHint =>
+      'The most times it is shown in one day, across all users. Leave empty for no limit.';
+
+  @override
+  String get adminCampaignAudienceTitle => 'Who sees it';
+
+  @override
+  String get adminCampaignCategories => 'Categories';
+
+  @override
+  String get adminCampaignChooseCategories => 'Choose categories';
+
+  @override
+  String get adminCampaignStates => 'States (all states when none chosen)';
+
+  @override
+  String get adminCampaignPreview => 'Preview';
+
+  @override
+  String adminCampaignStatusTitle(String status) {
+    return 'Status: $status';
+  }
+
+  @override
+  String get adminCampaignActivate => 'Activate';
+
+  @override
+  String get adminCampaignPause => 'Pause';
+
+  @override
+  String get adminCampaignEnd => 'End campaign';
+
+  @override
+  String get adminCampaignEndTitle => 'End this campaign?';
+
+  @override
+  String get adminCampaignEndBody =>
+      'An ended campaign stops showing for good and cannot be edited or restarted.';
+
+  @override
+  String get adminCampaignEndConfirm => 'End campaign';
+
+  @override
+  String get adminCampaignEndedNote =>
+      'This campaign has ended. It can no longer be changed.';
+
+  @override
+  String get adminCampaignTargetsReset =>
+      'This campaign is targeted in more detail than this form can show. Saving sets its audience to the categories and states chosen here.';
+
+  @override
+  String get adminCampaignSave => 'Save campaign';
+
+  @override
+  String get adminCampaignCreated =>
+      'Campaign created as a draft. Activate it to start showing it.';
+
+  @override
+  String get adminCampaignErrRequired => 'Required';
+
+  @override
+  String get adminCampaignErrLink => 'Use a web address starting with https://';
+
+  @override
+  String get adminCampaignErrDates => 'The end must not be before the start';
+
+  @override
+  String get adminCampaignErrPriority => 'Use a whole number from 0 to 100';
+
+  @override
+  String get adminCampaignErrCap => 'Use a whole number of 1 or more';
+
+  @override
+  String get adminCampaignErrCategories => 'Choose at least one category';
+
+  @override
+  String get adminAdvertiserTitle => 'Add an advertiser';
+
+  @override
+  String get adminAdvertiserName => 'Business name';
+
+  @override
+  String get adminAdvertiserContact => 'Contact name (optional)';
+
+  @override
+  String get adminAdvertiserPhone => 'Contact phone (optional)';
+
+  @override
+  String get adminAdvertiserGst => 'GST number (optional, 15 characters)';
+
+  @override
+  String get adminAdvertiserSave => 'Add';
+
+  @override
+  String get adminPlansTitle => 'Plans';
+
+  @override
+  String get adminPlansSubtitle => 'Prices and on/off for subscription plans';
+
+  @override
+  String get adminPlansIntro =>
+      'Changing a price changes what new subscribers are charged.';
+
+  @override
+  String get adminPlansNew => 'New plan';
+
+  @override
+  String get adminPlansEmpty => 'No plans yet.';
+
+  @override
+  String get adminPlanEditTitle => 'Edit plan';
+
+  @override
+  String get adminPlanCode => 'Plan code';
+
+  @override
+  String get adminPlanCodeHint => 'Cannot be changed once the plan is created.';
+
+  @override
+  String get adminPlanName => 'Name';
+
+  @override
+  String get adminPlanPrice => 'Price (₹)';
+
+  @override
+  String get adminPlanPeriod => 'Billing';
+
+  @override
+  String get adminPlanMonthly => 'Monthly';
+
+  @override
+  String get adminPlanYearly => 'Yearly';
+
+  @override
+  String adminPlanPerMonth(String price) {
+    return '$price / month';
+  }
+
+  @override
+  String adminPlanPerYear(String price) {
+    return '$price / year';
+  }
+
+  @override
+  String get adminPlanActive => 'Available to buy';
+
+  @override
+  String get adminPlanOff => 'Off';
+
+  @override
+  String get adminPlanSave => 'Save plan';
+
+  @override
+  String get adminPlanErrCode => 'Use letters, digits, - or _ (up to 32)';
+
+  @override
+  String get adminPlanErrName => 'Required (up to 100 characters)';
+
+  @override
+  String get adminPlanErrPrice => 'Use a price like 149 or 149.50';
+
+  @override
+  String get adminCouponsTitle => 'Coupons';
+
+  @override
+  String get adminCouponsSubtitle => 'Discount codes for subscriptions';
+
+  @override
+  String get adminCouponsNew => 'New coupon';
+
+  @override
+  String get adminCouponsEmpty => 'No coupons yet.';
+
+  @override
+  String get adminCouponCode => 'Coupon code';
+
+  @override
+  String get adminCouponPercent => 'Percent off';
+
+  @override
+  String get adminCouponFixed => 'Amount off';
+
+  @override
+  String get adminCouponValuePercent => 'Percent off (1 to 100)';
+
+  @override
+  String get adminCouponValueFixed => 'Amount off (₹)';
+
+  @override
+  String get adminCouponPlan => 'Works on';
+
+  @override
+  String get adminCouponAnyPlan => 'Any plan';
+
+  @override
+  String get adminCouponMin => 'Minimum price (₹, optional)';
+
+  @override
+  String get adminCouponMaxUses => 'Use limit (optional)';
+
+  @override
+  String adminCouponMaxUsesNote(int used) {
+    return 'Already used $used times. Leave empty for no limit.';
+  }
+
+  @override
+  String get adminCouponStarts => 'Starts';
+
+  @override
+  String get adminCouponEnds => 'Ends (optional)';
+
+  @override
+  String get adminCouponNoEnd => 'No end date';
+
+  @override
+  String get adminCouponClearEnd => 'Remove end date';
+
+  @override
+  String get adminCouponActive => 'Switched on';
+
+  @override
+  String get adminCouponSave => 'Save coupon';
+
+  @override
+  String get adminCouponOff => 'Off';
+
+  @override
+  String get adminCouponExpired => 'Expired';
+
+  @override
+  String get adminCouponUsedUp => 'Used up';
+
+  @override
+  String adminCouponPercentOff(int percent) {
+    return '$percent% off';
+  }
+
+  @override
+  String adminCouponAmountOff(String amount) {
+    return '$amount off';
+  }
+
+  @override
+  String adminCouponMinNote(String amount) {
+    return 'from $amount';
+  }
+
+  @override
+  String adminCouponFrom(String date) {
+    return 'From $date';
+  }
+
+  @override
+  String adminCouponUsed(int used) {
+    return 'Used $used';
+  }
+
+  @override
+  String adminCouponUsedOf(int used, int max) {
+    return 'Used $used of $max';
+  }
+
+  @override
+  String get adminCouponErrCode => 'Use letters, digits, - or _ (up to 50)';
+
+  @override
+  String get adminCouponErrPercent => 'Use a whole number from 1 to 100';
+
+  @override
+  String get adminCouponErrAmount => 'Use an amount like 50 or 49.50';
+
+  @override
+  String get adminCouponErrMaxUses => 'Use a whole number of 1 or more';
+
+  @override
+  String adminCouponErrMaxUsesBelow(int used) {
+    return 'Use a whole number, not below the $used already used';
+  }
+
+  @override
+  String get adminCouponErrDates => 'The end must not be before the start';
+
+  @override
+  String get adminCouponErrMin => 'Use an amount like 100 or 99.50';
+
+  @override
+  String get adminSubsTitle => 'Subscriptions';
+
+  @override
+  String get adminSubsSubtitle => 'See who has a plan, and end one early';
+
+  @override
+  String get adminSubsEmpty => 'No subscriptions here.';
+
+  @override
+  String get adminSubPending => 'Awaiting payment';
+
+  @override
+  String get adminSubCancelled => 'Cancelled';
+
+  @override
+  String get adminSubExpired => 'Expired';
+
+  @override
+  String get adminSubUnknownUser => 'Unknown user';
+
+  @override
+  String adminSubStarted(String date) {
+    return 'Started $date';
+  }
+
+  @override
+  String adminSubEnds(String date) {
+    return 'Ends $date';
+  }
+
+  @override
+  String adminSubCancelledOn(String date) {
+    return 'Cancelled $date';
+  }
+
+  @override
+  String adminSubEndedOn(String date) {
+    return 'Ended $date';
+  }
+
+  @override
+  String get adminSubAutoRenew => 'Renews automatically';
+
+  @override
+  String get adminSubWaiting => 'Waiting for the payment to be confirmed';
+
+  @override
+  String get adminSubEndNow => 'End now';
+
+  @override
+  String get adminSubEndTitle => 'End this subscription?';
+
+  @override
+  String get adminSubEndBody =>
+      'They lose their plan right away and go back to the free plan. This cannot be undone.';
+
+  @override
+  String get adminSubEndConfirm => 'End subscription';
+
+  @override
+  String get adminSubEnded => 'Subscription ended.';
+
+  @override
   String get adminAuditTitle => 'Activity log';
 
   @override
@@ -1523,6 +2107,376 @@ class AppLocalizationsTa extends AppLocalizations {
 
   @override
   String get adminMarketsSkipNameInvalid => 'Refused by the catalog name rules';
+
+  @override
+  String get adminProductsTitle => 'Products';
+
+  @override
+  String get adminProductsSubtitle =>
+      'Search the catalog and edit product names';
+
+  @override
+  String get adminProductsSearchHint => 'Search by name or code';
+
+  @override
+  String get adminProductsEmpty => 'No products found.';
+
+  @override
+  String get adminProductsHint => 'Tap a product to edit its names.';
+
+  @override
+  String get adminProductEditTitle => 'Edit product';
+
+  @override
+  String get adminProductNameEn => 'Name in English';
+
+  @override
+  String get adminProductNameHi => 'Name in Hindi';
+
+  @override
+  String get adminProductNameMr => 'Name in Marathi';
+
+  @override
+  String get adminProductNameOptional =>
+      'Optional. Users of that language see the English name when this is empty.';
+
+  @override
+  String get adminProductErrEnglish => 'Enter the English name.';
+
+  @override
+  String get adminProductActive => 'Shown in the app';
+
+  @override
+  String get adminProductActiveHint =>
+      'Off hides the product from users; its prices are kept.';
+
+  @override
+  String get adminProductSave => 'Save product';
+
+  @override
+  String get adminProductNew => 'New product';
+
+  @override
+  String adminVariantsButton(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Variants ($count)',
+      one: 'Variants (1)',
+      zero: 'Variants',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get adminVariantsTitle => 'Variants';
+
+  @override
+  String get adminVariantsIntro =>
+      'Grades or forms of this product, like Large or Dry. Tap one to rename it or switch it off.';
+
+  @override
+  String get adminVariantsEmpty => 'This product has no variants.';
+
+  @override
+  String get adminVariantNew => 'New variant';
+
+  @override
+  String get adminVariantEdit => 'Edit variant';
+
+  @override
+  String get adminProductCode => 'Code';
+
+  @override
+  String get adminProductCodeHint =>
+      'Lowercase letters, digits and hyphens; starts with a letter. For a price feed commodity use its name, like red-onion. It cannot be changed later.';
+
+  @override
+  String get adminProductErrCode =>
+      'Use lowercase letters, digits and hyphens, starting with a letter.';
+
+  @override
+  String get adminProductErrSubCategory => 'Choose a sub-category.';
+
+  @override
+  String get adminProductErrUnit => 'Choose a unit.';
+
+  @override
+  String get adminCategoriesTitle => 'Categories';
+
+  @override
+  String get adminCategoriesSubtitle =>
+      'Add and rename categories and sub-categories';
+
+  @override
+  String get adminCategoriesIntro =>
+      'Tap a category or sub-category to rename it or switch it off. Products sit under a sub-category.';
+
+  @override
+  String get adminCategoriesEmpty => 'No categories yet.';
+
+  @override
+  String get adminCategoryNew => 'New category';
+
+  @override
+  String get adminCategoryEdit => 'Edit category';
+
+  @override
+  String get adminSubCategoryNew => 'New sub-category';
+
+  @override
+  String get adminSubCategoryEdit => 'Edit sub-category';
+
+  @override
+  String get adminCategoryCodeHint =>
+      'Lowercase letters, digits and hyphens; starts with a letter. It cannot be changed later.';
+
+  @override
+  String get adminCategoryActiveHint =>
+      'Off hides it from users; what is under it is kept.';
+
+  @override
+  String get adminCategorySave => 'Save';
+
+  @override
+  String get adminUnitsTitle => 'Units';
+
+  @override
+  String get adminUnitsSubtitle => 'Add and rename units of measure';
+
+  @override
+  String get adminUnitsIntro =>
+      'Tap a unit to rename it or switch it off. Products are priced in a unit.';
+
+  @override
+  String get adminUnitsEmpty => 'No units yet.';
+
+  @override
+  String get adminUnitNew => 'New unit';
+
+  @override
+  String get adminUnitEdit => 'Edit unit';
+
+  @override
+  String get adminUnitSymbol => 'Symbol';
+
+  @override
+  String get adminUnitErrSymbol => 'Enter a short symbol, up to 16 characters.';
+
+  @override
+  String get adminUnitDimension => 'What it measures';
+
+  @override
+  String get adminUnitChooseDimension => 'Choose what it measures';
+
+  @override
+  String get adminUnitErrDimension => 'Choose what the unit measures.';
+
+  @override
+  String get adminUnitFactor => 'How many base units';
+
+  @override
+  String adminUnitFactorIn(String unit) {
+    return 'Amount in $unit';
+  }
+
+  @override
+  String get adminUnitFactorHint =>
+      'How much one of this unit is, for example 100 for a quintal in kg. It cannot be changed later.';
+
+  @override
+  String get adminUnitErrFactor =>
+      'Enter a number above zero, with up to 6 decimals.';
+
+  @override
+  String get adminUnitActiveHint =>
+      'Off stops it being offered for new products; existing prices are kept.';
+
+  @override
+  String get adminUnitDimMass => 'Weight';
+
+  @override
+  String get adminUnitDimVolume => 'Volume';
+
+  @override
+  String get adminUnitDimCount => 'Count';
+
+  @override
+  String get adminUnitDimLength => 'Length';
+
+  @override
+  String get adminUnitDimArea => 'Area';
+
+  @override
+  String get adminMandisTitle => 'Mandis';
+
+  @override
+  String get adminMandisSubtitle => 'Search, add, rename and move mandis';
+
+  @override
+  String get adminMandisEmpty => 'No mandis found.';
+
+  @override
+  String get adminMandiNew => 'New mandi';
+
+  @override
+  String get adminMandiEdit => 'Edit mandi';
+
+  @override
+  String get adminMandiName => 'Name';
+
+  @override
+  String get adminMandiErrName => 'Enter the mandi\'s name.';
+
+  @override
+  String get adminMandiDistrict => 'District';
+
+  @override
+  String get adminMandiChooseDistrict => 'Choose a district';
+
+  @override
+  String get adminMandiErrDistrict => 'Choose a district.';
+
+  @override
+  String get adminMandiCodeHint =>
+      'Lowercase letters, digits and hyphens; starts with a letter. For a price feed market use its name, like rajkot. It cannot be changed later.';
+
+  @override
+  String get adminMandiActiveHint =>
+      'Off hides it from users; its prices are kept.';
+
+  @override
+  String get adminStatesTitle => 'States and districts';
+
+  @override
+  String get adminStatesSubtitle => 'Add and rename states and districts';
+
+  @override
+  String get adminStatesIntro =>
+      'Tap a state or district to rename it or switch it off. Mandis sit in a district.';
+
+  @override
+  String get adminStatesEmpty => 'No states yet.';
+
+  @override
+  String get adminStateNew => 'New state';
+
+  @override
+  String get adminStateEdit => 'Edit state';
+
+  @override
+  String get adminDistrictNew => 'New district';
+
+  @override
+  String get adminDistrictEdit => 'Edit district';
+
+  @override
+  String get adminPlaceErrName => 'Enter a name.';
+
+  @override
+  String get adminStateCodeHint =>
+      '2 to 10 letters or digits, like MH. It cannot be changed later.';
+
+  @override
+  String get adminStateErrCode => 'Use 2 to 10 letters or digits.';
+
+  @override
+  String get adminPlaceActiveHint =>
+      'Off hides it from users; what is under it is kept.';
+
+  @override
+  String get adminSuppliersTitle => 'Suppliers and hubs';
+
+  @override
+  String get adminSuppliersSubtitle =>
+      'Search, add and edit suppliers and hubs';
+
+  @override
+  String get adminSuppliersEmpty => 'No suppliers found.';
+
+  @override
+  String get adminSupplierNew => 'New supplier';
+
+  @override
+  String get adminSupplierEdit => 'Edit supplier';
+
+  @override
+  String get adminSupplierPhone => 'Contact phone';
+
+  @override
+  String get adminSupplierPhoneHint =>
+      'Optional. Digits, with + for a country code.';
+
+  @override
+  String get adminSupplierErrPhone =>
+      'Enter a valid phone number, or leave it empty.';
+
+  @override
+  String get adminSupplierActiveHint => 'Off hides it from users.';
+
+  @override
+  String get adminCommoditiesTitle => 'Add commodities';
+
+  @override
+  String get adminCommoditiesSubtitle =>
+      'Add commodities from the price feed to the catalog';
+
+  @override
+  String get adminCommoditiesIntro =>
+      'Pick the sub-category and unit, then the commodities from the last full pull. Each one is added as a product with its feed name in English, so its prices can be saved at the next pull. Add the Hindi and Marathi names later in the catalog.';
+
+  @override
+  String get adminCommoditiesNoFeed =>
+      'The commodities in the price feed have not been recorded yet. Run a full pull (Run now with no filters) on a day the feed has data, then come back.';
+
+  @override
+  String get adminCommoditiesSubCategory => 'Sub-category';
+
+  @override
+  String get adminCommoditiesChooseSubCategory => 'Choose a sub-category';
+
+  @override
+  String get adminCommoditiesUnit => 'Unit';
+
+  @override
+  String get adminCommoditiesChooseUnit => 'Choose a unit';
+
+  @override
+  String get adminCommoditiesCommodities => 'Commodities';
+
+  @override
+  String get adminCommoditiesChoose => 'Choose commodities';
+
+  @override
+  String adminCommoditiesAdd(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Add $count commodities',
+      one: 'Add 1 commodity',
+      zero: 'Add commodities',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String adminCommoditiesAdded(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Added $count commodities',
+      one: 'Added 1 commodity',
+      zero: 'No commodities were added',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get adminCommoditiesAddedHint =>
+      'Their prices will be saved from the next pull.';
+
+  @override
+  String get adminCommoditiesSkipNotInFeed => 'Not in the feed list';
 
   @override
   String get appVersionTitle => 'Please update MolBhav';

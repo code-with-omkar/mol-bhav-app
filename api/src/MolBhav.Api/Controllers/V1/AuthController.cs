@@ -8,6 +8,7 @@ using MolBhav.Api.Contracts;
 using MolBhav.Api.Contracts.Identity;
 using MolBhav.Api.Setup;
 using MolBhav.Application.Features.Identity;
+using MolBhav.Application.Features.Identity.ChangePassword;
 using MolBhav.Application.Features.Identity.GetLoginMethods;
 using MolBhav.Application.Features.Identity.GoogleLogin;
 using MolBhav.Application.Features.Identity.LinkGoogle;
@@ -99,6 +100,20 @@ public sealed class AuthController(ISender sender, TimeProvider timeProvider) : 
             _ => ToProblem(IdentityErrors.InvalidCredentials),
         };
     }
+
+    /// <summary>Changes the signed-in user's password. With an existing password the current one must be sent.</summary>
+    /// <response code="204">Changed.</response>
+    /// <response code="400">The current password is wrong (<c>Password.CurrentIncorrect</c>) or the new one breaks the policy (<c>Password.TooWeak</c>).</response>
+    [HttpPost("password/change")]
+    [Authorize]
+    [EnableRateLimiting(RateLimitPolicies.PasswordLogin)]
+    [Consumes(MediaTypeNames.Application.Json)]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType<ValidationProblemDetails>(StatusCodes.Status400BadRequest, MediaTypeNames.Application.ProblemJson)]
+    public async Task<IActionResult> ChangePassword([FromBody] ChangePasswordRequest request, CancellationToken cancellationToken) =>
+        NoContentOrProblem(await Sender.Send(
+            new ChangePasswordCommand(request.CurrentPassword, request.NewPassword ?? string.Empty),
+            cancellationToken));
 
     /// <summary>"Continue with Google". A linked Google account logs in; a new one needs <c>phoneNumber</c> on a second call.</summary>
     /// <response code="200">Logged in (or registered — <c>isNewUser</c>).</response>

@@ -24,10 +24,14 @@ class AdminMarketsState extends Equatable {
     this.setup = const DataState(),
     this.importing = false,
     this.result,
+    this.allResult,
     this.importFailure,
   });
 
   final DataState<MarketsSetup> setup;
+
+  /// What the last "add every market" did; shown until the next import.
+  final ImportAllMarketsResult? allResult;
 
   /// An import is in flight.
   final bool importing;
@@ -42,16 +46,24 @@ class AdminMarketsState extends Equatable {
     DataState<MarketsSetup>? setup,
     bool? importing,
     ImportMarketsResult? Function()? result,
+    ImportAllMarketsResult? Function()? allResult,
     Failure? Function()? importFailure,
   }) => AdminMarketsState(
     setup: setup ?? this.setup,
     importing: importing ?? this.importing,
     result: result != null ? result() : this.result,
+    allResult: allResult != null ? allResult() : this.allResult,
     importFailure: importFailure != null ? importFailure() : this.importFailure,
   );
 
   @override
-  List<Object?> get props => [setup, importing, result, importFailure];
+  List<Object?> get props => [
+    setup,
+    importing,
+    result,
+    allResult,
+    importFailure,
+  ];
 }
 
 /// Adds markets from the Agmarknet feed list to the catalog.
@@ -111,6 +123,7 @@ class AdminMarketsCubit extends Cubit<AdminMarketsState> {
       state.copyWith(
         importing: true,
         result: () => null,
+        allResult: () => null,
         importFailure: () => null,
       ),
     );
@@ -124,6 +137,30 @@ class AdminMarketsCubit extends Cubit<AdminMarketsState> {
       (failure) =>
           emit(state.copyWith(importing: false, importFailure: () => failure)),
       (result) => emit(state.copyWith(importing: false, result: () => result)),
+    );
+  }
+
+  /// Adds every market in the feed (creating missing states), in one request.
+  Future<void> importAll() async {
+    final setup = state.setup.data;
+    if (setup == null || state.importing) return;
+    emit(
+      state.copyWith(
+        importing: true,
+        result: () => null,
+        allResult: () => null,
+        importFailure: () => null,
+      ),
+    );
+    final outcome = await _markets.importAllFeedMarkets(
+      sourceId: setup.sourceId,
+    );
+    if (isClosed) return;
+    outcome.fold(
+      (failure) =>
+          emit(state.copyWith(importing: false, importFailure: () => failure)),
+      (result) =>
+          emit(state.copyWith(importing: false, allResult: () => result)),
     );
   }
 

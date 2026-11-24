@@ -38,10 +38,18 @@ public sealed class AgmarknetRetryTests
 
         public List<string> Urls { get; } = [];
 
-        protected override Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
+        /// <summary>The first this many requests never answer (a stalled server) until the caller gives up on them.</summary>
+        public int StallFirst { get; init; }
+
+        protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
         {
             Urls.Add(request.RequestUri!.PathAndQuery);
-            return Task.FromResult(script[Math.Min(_next++, script.Length - 1)]());
+            if (Urls.Count <= StallFirst)
+            {
+                await Task.Delay(Timeout.Infinite, cancellationToken);
+            }
+
+            return script[Math.Min(_next++, script.Length - 1)]();
         }
     }
 
@@ -51,7 +59,13 @@ public sealed class AgmarknetRetryTests
     }
 
     private static AgmarknetIngestionSourceAdapter CreateAdapter(
-        ScriptedHandler handler, int pageSize = 500, int maxRetries = 2, int maxDelaySeconds = 0) => new(
+        ScriptedHandler handler,
+        int pageSize = 500,
+        int maxRetries = 2,
+        double maxDelaySeconds = 0,
+        double attemptTimeoutSeconds = 40,
+        double runBudgetSeconds = 240,
+        int breakerMinimumThroughput = 4) => new(
         new StubFactory(handler),
         Options.Create(new AgmarknetOptions
         {
@@ -61,6 +75,9 @@ public sealed class AgmarknetRetryTests
             MaxRetries = maxRetries,
             RetryBaseDelaySeconds = 0,
             MaxRetryDelaySeconds = maxDelaySeconds,
+            AttemptTimeoutSeconds = attemptTimeoutSeconds,
+            RunBudgetSeconds = runBudgetSeconds,
+            BreakerMinimumThroughput = breakerMinimumThroughput,
         }),
         NullLogger<AgmarknetIngestionSourceAdapter>.Instance);
 
@@ -206,13 +223,66 @@ public sealed class AgmarknetRetryTests
         Assert.Contains("offset=1", handler.Urls[2], StringComparison.Ordinal);
     }
 
-    // The client timeout surfaces as a TaskCanceledException that nobody asked for.
-    private static HttpResponseMessage TimedOut() => throw new TaskCanceledException("The request was canceled due to the configured HttpClient.Timeout.");
+    [Fact]
+    public async Task A_stalled_request_is_cut_off_at_the_attempt_limit_and_retried()
+    {
+        var handler = new ScriptedHandler(() => Ok(Page(1))) { StallFirst = 1 };
+
+        var clock = Stopwatch.StartNew();
+        var result = await Run(CreateAdapter(handler, attemptTimeoutSeconds: 0.2));
+
+        Assert.True(result.IsSuccess, result.FailureReason);
+        Assert.Equal(2, handler.Urls.Count);
+        Assert.True(clock.Elapsed < TimeSpan.FromSeconds(10), $"Waited {clock.Elapsed} for one stalled attempt.");
+    }
 
     [Fact]
-    public async Task A_stalled_request_is_retried_and_the_run_succeeds()
+    public async Task Repeated_stalls_fail_as_timed_out_not_as_cancelled()
     {
-        var handler = new ScriptedHandler(TimedOut, () => Ok(Page(1)));
+        var handler = new ScriptedHandler(() => Ok(Page(1))) { StallFirst = int.MaxValue };
+
+        var result = await Run(CreateAdapter(handler, maxRetries: 2, attemptTimeoutSeconds: 0.2));
+
+        Assert.False(result.IsSuccess);
+        Assert.Contains("timed out", result.FailureReason, StringComparison.Ordinal);
+        Assert.DoesNotContain("cancelled", result.FailureReason, StringComparison.OrdinalIgnoreCase);
+        Assert.Equal(3, handler.Urls.Count);
+    }
+
+    [Fact]
+    public async Task A_run_that_outlasts_its_budget_stops_with_a_clear_reason()
+    {
+        var handler = new ScriptedHandler(() => Ok(Page(1))) { StallFirst = int.MaxValue };
+
+        var clock = Stopwatch.StartNew();
+        var result = await Run(CreateAdapter(handler, runBudgetSeconds: 0.3));
+
+        Assert.False(result.IsSuccess);
+        Assert.Contains("too slow", result.FailureReason, StringComparison.Ordinal);
+        Assert.DoesNotContain("cancelled", result.FailureReason, StringComparison.OrdinalIgnoreCase);
+        Assert.True(clock.Elapsed < TimeSpan.FromSeconds(10), $"Ran {clock.Elapsed} past the budget.");
+    }
+
+    [Fact]
+    public async Task A_500_is_retried_once_not_more()
+    {
+        var recovers = new ScriptedHandler(() => Status(HttpStatusCode.InternalServerError), () => Ok(Page(1)));
+        Assert.True((await Run(CreateAdapter(recovers, maxRetries: 3))).IsSuccess);
+        Assert.Equal(2, recovers.Urls.Count);
+
+        var stays = new ScriptedHandler(() => Status(HttpStatusCode.InternalServerError));
+        var result = await Run(CreateAdapter(stays, maxRetries: 3));
+
+        Assert.False(result.IsSuccess);
+        Assert.Contains("500", result.FailureReason, StringComparison.Ordinal);
+        Assert.Equal(2, stays.Urls.Count); // first try + one retry
+    }
+
+    [Fact]
+    public async Task A_gateway_page_served_as_html_is_treated_as_unavailable_and_retried()
+    {
+        var html = new StringContent("<html><body><h1>503 Service Unavailable</h1></body></html>", Encoding.UTF8, "text/html");
+        var handler = new ScriptedHandler(() => new HttpResponseMessage(HttpStatusCode.OK) { Content = html }, () => Ok(Page(1)));
 
         var result = await Run(CreateAdapter(handler));
 
@@ -221,16 +291,15 @@ public sealed class AgmarknetRetryTests
     }
 
     [Fact]
-    public async Task Repeated_timeouts_fail_as_timed_out_not_as_cancelled()
+    public async Task A_server_that_keeps_failing_opens_the_breaker_and_ends_the_run_early()
     {
-        var handler = new ScriptedHandler(TimedOut);
+        var handler = new ScriptedHandler(() => Status(HttpStatusCode.ServiceUnavailable));
 
-        var result = await Run(CreateAdapter(handler, maxRetries: 2));
+        var result = await Run(CreateAdapter(handler, maxRetries: 5, breakerMinimumThroughput: 2));
 
         Assert.False(result.IsSuccess);
-        Assert.Contains("timed out", result.FailureReason, StringComparison.Ordinal);
-        Assert.DoesNotContain("cancelled", result.FailureReason, StringComparison.OrdinalIgnoreCase);
-        Assert.Equal(3, handler.Urls.Count);
+        Assert.Contains("unavailable", result.FailureReason, StringComparison.OrdinalIgnoreCase);
+        Assert.Equal(2, handler.Urls.Count); // stopped at the breaker, not after all six tries
     }
 
     [Fact]
@@ -262,14 +331,27 @@ public sealed class AgmarknetRetryTests
     }
 
     [Fact]
-    public async Task A_huge_retry_after_is_capped_by_the_maximum_delay()
+    public async Task A_huge_retry_after_is_not_waited_out_the_run_stops_for_the_next_schedule()
     {
         var handler = new ScriptedHandler(() => Status(HttpStatusCode.TooManyRequests, TimeSpan.FromHours(1)), () => Ok(Page(1)));
 
         var clock = Stopwatch.StartNew();
-        var result = await Run(CreateAdapter(handler, maxDelaySeconds: 0));
+        var result = await Run(CreateAdapter(handler));
+
+        Assert.False(result.IsSuccess);
+        Assert.Contains("429", result.FailureReason, StringComparison.Ordinal);
+        Assert.Single(handler.Urls);
+        Assert.True(clock.Elapsed < TimeSpan.FromSeconds(10), $"Waited {clock.Elapsed} for a Retry-After of an hour.");
+    }
+
+    [Fact]
+    public async Task A_short_retry_after_is_waited_out()
+    {
+        var handler = new ScriptedHandler(() => Status(HttpStatusCode.TooManyRequests, TimeSpan.FromMilliseconds(50)), () => Ok(Page(1)));
+
+        var result = await Run(CreateAdapter(handler));
 
         Assert.True(result.IsSuccess, result.FailureReason);
-        Assert.True(clock.Elapsed < TimeSpan.FromSeconds(10), $"Waited {clock.Elapsed} despite the cap.");
+        Assert.Equal(2, handler.Urls.Count);
     }
 }

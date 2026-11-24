@@ -384,10 +384,18 @@ public static class DependencyInjection
             .Bind(configuration.GetSection(AgmarknetOptions.SectionName))
             .Validate(o => o.PageSize is >= 1 and <= 1000, "Agmarknet:PageSize must be between 1 and 1000.")
             .Validate(o => o.ThrottleDelayMs is >= 0 and <= 10_000, "Agmarknet:ThrottleDelayMs must be between 0 and 10000.")
-            .Validate(o => o.RequestTimeoutSeconds is >= 5 and <= 300, "Agmarknet:RequestTimeoutSeconds must be between 5 and 300.")
+            .Validate(o => o.ConnectTimeoutSeconds is >= 1 and <= 60, "Agmarknet:ConnectTimeoutSeconds must be between 1 and 60.")
+            .Validate(o => o.AttemptTimeoutSeconds is >= 1 and <= 120, "Agmarknet:AttemptTimeoutSeconds must be between 1 and 120.")
+            .Validate(o => o.RequestTimeoutSeconds >= o.AttemptTimeoutSeconds && o.RequestTimeoutSeconds <= 600, "Agmarknet:RequestTimeoutSeconds must be at least AttemptTimeoutSeconds and at most 600.")
+            .Validate(o => o.RunBudgetSeconds >= o.RequestTimeoutSeconds && o.RunBudgetSeconds <= 3600, "Agmarknet:RunBudgetSeconds must be at least RequestTimeoutSeconds and at most 3600.")
             .Validate(o => o.MaxRetries is >= 0 and <= 10, "Agmarknet:MaxRetries must be between 0 and 10.")
             .Validate(o => o.RetryBaseDelaySeconds is >= 0 and <= 120, "Agmarknet:RetryBaseDelaySeconds must be between 0 and 120.")
             .Validate(o => o.MaxRetryDelaySeconds is >= 0 and <= 600, "Agmarknet:MaxRetryDelaySeconds must be between 0 and 600.")
+            .Validate(o => o.MaxRetryAfterSeconds is >= 0 and <= 3600, "Agmarknet:MaxRetryAfterSeconds must be between 0 and 3600.")
+            .Validate(o => o.BreakerSamplingSeconds is >= 1 and <= 600, "Agmarknet:BreakerSamplingSeconds must be between 1 and 600.")
+            .Validate(o => o.BreakerMinimumThroughput is >= 2 and <= 100, "Agmarknet:BreakerMinimumThroughput must be between 2 and 100.")
+            .Validate(o => o.BreakerFailureRatio is > 0 and <= 1, "Agmarknet:BreakerFailureRatio must be above 0 and at most 1.")
+            .Validate(o => o.BreakerBreakSeconds is >= 1 and <= 600, "Agmarknet:BreakerBreakSeconds must be between 1 and 600.")
             .ValidateOnStart();
 
         services.AddSingleton<IFeedMarketCodes, AgmarknetFeedMarketCodes>();
@@ -396,6 +404,12 @@ public static class DependencyInjection
         {
             client.BaseAddress = new Uri(AgmarknetIngestionSourceAdapter.BaseAddress);
             client.DefaultRequestHeaders.Accept.ParseAdd("application/json");
+        }).ConfigurePrimaryHttpMessageHandler(sp => new SocketsHttpHandler
+        {
+            // A connect that stalls fails fast and is retried by the adapter, instead of burning the whole page timeout.
+            ConnectTimeout = TimeSpan.FromSeconds(sp.GetRequiredService<IOptions<AgmarknetOptions>>().Value.ConnectTimeoutSeconds),
+            // Re-resolve DNS regularly so a long-running API does not keep a dead address.
+            PooledConnectionLifetime = TimeSpan.FromMinutes(5),
         });
 
         services.AddKeyedScoped<IIngestionSourceAdapter, AgmarknetIngestionSourceAdapter>(AgmarknetIngestionSourceAdapter.SourceCode);

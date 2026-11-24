@@ -8,6 +8,7 @@ import '../core/di/injection.dart';
 import '../core/l10n/l10n.dart';
 import '../core/locale/app_language.dart';
 import '../core/locale/locale_cubit.dart';
+import '../core/permissions/first_run_permissions.dart';
 import '../core/router/app_router.dart';
 import '../core/session/session_manager.dart';
 import '../core/session/token_renewal.dart';
@@ -34,6 +35,7 @@ class _MolBhavAppState extends State<MolBhavApp> with WidgetsBindingObserver {
   final GoRouter _router = createAppRouter(
     getIt<SessionManager>(),
     getIt<AdminMode>(),
+    getIt<FirstRunPermissions>(),
   );
   final SubscriptionTierSync _tierSync = SubscriptionTierSync(
     getIt<ProfileCubit>(),

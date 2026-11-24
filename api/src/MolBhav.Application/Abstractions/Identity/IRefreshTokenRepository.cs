@@ -9,4 +9,7 @@ public interface IRefreshTokenRepository : IRepository<RefreshTokenGrant, Guid>
 
     /// <summary>Every still-active (not yet revoked) grant in a rotation family — used to shut the family down on reuse detection.</summary>
     Task<IReadOnlyCollection<RefreshTokenGrant>> GetActiveFamilyAsync(Guid familyId, CancellationToken cancellationToken = default);
+
+    /// <summary>Every still-active grant a user holds, on any device — used to end all their sessions when the password changes.</summary>
+    Task<IReadOnlyCollection<RefreshTokenGrant>> GetActiveForUserAsync(Guid userId, CancellationToken cancellationToken = default);
 }

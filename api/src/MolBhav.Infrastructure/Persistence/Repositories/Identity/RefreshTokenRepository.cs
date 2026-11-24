@@ -17,4 +17,9 @@ internal sealed class RefreshTokenRepository(MolBhavDbContext dbContext)
         await Set
             .Where(t => t.FamilyId == familyId && t.RevokedAtUtc == null)
             .ToListAsync(cancellationToken);
+
+    public async Task<IReadOnlyCollection<RefreshTokenGrant>> GetActiveForUserAsync(Guid userId, CancellationToken cancellationToken = default) =>
+        await Set
+            .Where(t => t.UserId == userId && t.RevokedAtUtc == null)
+            .ToListAsync(cancellationToken);
 }

@@ -297,21 +297,21 @@
       <div class="project-sub">Market Intelligence Platform · API + Flutter App + Admin app</div>
     </div>
   </div>
-  <div class="header-date">Updated: 1 Nov 2026</div>
+  <div class="header-date">Updated: 18 Nov 2026</div>
 </div>
 
 <div class="section"><div class="section-title">Overall Progress</div></div>
 <div class="overview">
   <div class="ov-card">
     <div class="ov-label">API</div>
-    <div class="ov-value c-api">386</div>
+    <div class="ov-value c-api">422</div>
     <div class="ov-sub">unit tests passing · 38 migrations · live Agmarknet pulls working</div>
     <div class="ov-bar"><div class="ov-bar-fill f-api" style="width:100%"></div></div>
   </div>
   <div class="ov-card">
     <div class="ov-label">Flutter app</div>
-    <div class="ov-value c-app">414</div>
-    <div class="ov-sub">tests passing · analyze clean</div>
+    <div class="ov-value c-app">628</div>
+    <div class="ov-sub">tests passing (24 Nov full run: 626 passed, 1 failed; the failing Add markets test was fixed and re-run, plus 1 new test) · analyze clean</div>
     <div class="ov-bar"><div class="ov-bar-fill f-app" style="width:100%"></div></div>
   </div>
   <div class="ov-card">
@@ -322,13 +322,13 @@
   </div>
   <div class="ov-card">
     <div class="ov-label">Needs you</div>
-    <div class="ov-value" style="color:var(--partial)">5</div>
+    <div class="ov-value" style="color:var(--partial)">6</div>
     <div class="ov-sub">items waiting on your action (below)</div>
     <div class="ov-bar"><div class="ov-bar-fill" style="width:50%;background:var(--partial)"></div></div>
   </div>
 </div>
 
-<div class="section"><div class="section-title">Needs your action (1 Nov 2026)</div></div>
+<div class="section"><div class="section-title">Needs your action (18 Nov 2026)</div></div>
 <div class="blockers">
   <div class="blocker-card">
     <div class="blocker-head">
@@ -336,11 +336,13 @@
       <span class="blocker-title">Waiting on you</span>
     </div>
     <div class="blocker-list">
-      <div class="blocker-item"><div class="blocker-dot dot-warn"></div><div><strong>Run a full pull</strong> — Admin → App → Data pull schedules → Run now, no filters. Then check Indore prices and that the filter dropdowns fill.</div></div>
-      <div class="blocker-item"><div class="blocker-dot dot-warn"></div><div><strong>Check on the phone</strong> — Ads (campaign detail, comparison, placements), Users suspend / reinstate, Pull history, App message (note, maintenance), Feature switches.</div></div>
+      <div class="blocker-item"><div class="blocker-dot dot-warn"></div><div><strong>Run a full pull</strong> — Admin → App → Data pull schedules → Run now, no filters. Gov-site timeouts: page timeout is now 120 s, 250 rows a page, 15 s connect timeout (API restarted with them). Then check Indore prices and that the Add commodities / Add markets lists fill.</div></div>
+      <div class="blocker-item"><div class="blocker-dot dot-warn"></div><div><strong>Install the newest build and check on the phone</strong> — the phone's build is older than landed cost and the supplier directory. Check: Ads, Users, Pull history, App message, Feature switches, all catalog and market admin screens, landed cost, More → Suppliers.</div></div>
+      <div class="blocker-item"><div class="blocker-dot dot-warn"></div><div><strong>Run the new tests</strong> — landed cost and supplier directory tests are written but not run (last full run: API 397, app 607, all green).</div></div>
+      <div class="blocker-item"><div class="blocker-dot dot-warn"></div><div><strong>Commit and push</strong> — 103 changed files are uncommitted since 850fcf8. Say the word and Claude lists the files and checks for credentials first.</div></div>
       <div class="blocker-item"><div class="blocker-dot dot-warn"></div><div><strong>Review Hindi + Marathi</strong> — all new admin and notice strings were written by Claude and need a native check.</div></div>
       <div class="blocker-item"><div class="blocker-dot dot-warn"></div><div><strong>Ads not visible</strong> — both accounts are on Pro, which gets no ads by design. Decide whether to switch a test account to Free.</div></div>
-      <div class="blocker-item"><div class="blocker-dot dot-ok"></div><div><strong>Pushed to GitHub</strong> — e8c16a8 on payment-integration (1 Nov). Credential files in docs/ (Google client secrets, WhatsApp Token.txt) are git-ignored and stay local only.</div></div>
+      <div class="blocker-item"><div class="blocker-dot dot-ok"></div><div><strong>Last push</strong> — 850fcf8 on payment-integration, in sync with GitHub. Credential files in docs/ (Google client secrets, WhatsApp Token.txt) are git-ignored and stay local only.</div></div>
     </div>
   </div>
   <div class="blocker-card">
@@ -380,11 +382,19 @@
         <li class="task-item done"><span class="task-icon">✓</span>Ads switch enforced on the server (no sponsored cards or event counting while off)</li>
         <li class="task-item done"><span class="task-icon">✓</span>Minimum app version (public GET, admin PUT) + migration</li>
         <li class="task-item done"><span class="task-icon">✓</span>Add markets from the feed list to the catalog (state, district, mandi)</li>
+        <li class="task-item done"><span class="task-icon">✓</span>Add commodities from the feed list to the catalog (products under a sub-category and unit)</li>
+        <li class="task-item done"><span class="task-icon">✓</span>First-launch permissions step (notifications + location) right after install, before Login; skippable; once only; tests written, not yet run</li>
+        <li class="task-item done"><span class="task-icon">✓</span>Hosting prerequisites in the repo: production compose, env template, Nginx site, CI workflow, checklist (docs/hosting-prerequisites.md); server, domain and secrets still to arrange</li>
+        <li class="task-item done"><span class="task-icon">✓</span>Add markets: "Add every market from the feed" (creates missing states, adds all markets and districts in one go; safe to rerun); API + app; tests pass (22 market-import tests)</li>
+        <li class="task-item done"><span class="task-icon">✓</span>Gov-feed pulls: layered limits (8 s connect, 40 s per attempt, 100 s per page, 4 min per run), jittered retries, one retry for a 500, long Retry-After not waited out, HTML error pages retried, circuit breaker ends a failing run early; 33 Agmarknet tests pass</li>
+        <li class="task-item done"><span class="task-icon">✓</span>Video ads off (rewarded + full-screen); image banners, native and sponsored cards stay; API address molbhav-api.jagtech.in set in hosting files</li>
+        <li class="task-item done"><span class="task-icon">✓</span>Changing or admin-resetting a password ends all of that user's sessions (refresh tokens revoked); the app signs out and asks for the new password; tests written, not yet run</li>
+        <li class="task-item done"><span class="task-icon">✓</span>Password management: POST /auth/password/change (user) and POST /admin/users/{id}/password/reset (admin; not for admins or self)</li>
         <li class="task-item done"><span class="task-icon">✓</span>Admin audit log: admin actions recorded in the same transaction, GET /admin/audit (incl. support replies and status changes)</li>
       </ul>
       <div class="cell-mini-bar">
         <div class="mini-bar"><div class="mini-bar-fill" style="width:100%;background:var(--done)"></div></div>
-        <div class="mini-pct">8 of 8 tracked items done</div>
+        <div class="mini-pct">9 of 9 tracked items done</div>
       </div>
     </div>
     <div class="tl-cell">
@@ -397,16 +407,29 @@
         <li class="task-item done"><span class="task-icon">✓</span>Ads analytics: campaign detail, comparison, placement breakdown</li>
         <li class="task-item done"><span class="task-icon">✓</span>App message editor + banner + maintenance page for users</li>
         <li class="task-item done"><span class="task-icon">✓</span>Feature switches editor; Ads / Reports / Estimator hidden when off</li>
+        <li class="task-item done"><span class="task-icon">✓</span>Change password (More) and admin Reset password (Admin → Users → user; temporary password shown once, audited); API + app, tests written, not yet run</li>
+        <li class="task-item done"><span class="task-icon">✓</span>Supplier directory for users (More → Suppliers): search, paging, Call button; tests written, not yet run</li>
+        <li class="task-item done"><span class="task-icon">✓</span>Cost estimator: landed cost (freight per unit + handling) shown on the phone; tests written, not yet run</li>
         <li class="task-item warn"><span class="task-icon">!</span>Verify all of the above on the phone</li>
         <li class="task-item done"><span class="task-icon">✓</span>Minimum version editor + "Please update" page (admins never blocked)</li>
         <li class="task-item done"><span class="task-icon">✓</span>Add markets screen (state, markets, Select all, result summary)</li>
+        <li class="task-item done"><span class="task-icon">✓</span>Add commodities screen (sub-category, unit, commodities, result summary)</li>
+        <li class="task-item done"><span class="task-icon">✓</span>Suppliers and hubs screen (search, paging, add, edit, phone, show/hide)</li>
+        <li class="task-item done"><span class="task-icon">✓</span>States and districts screen (add, rename, show/hide)</li>
+        <li class="task-item done"><span class="task-icon">✓</span>Mandis screen (search, paging, add, rename, move district, show/hide)</li>
+        <li class="task-item done"><span class="task-icon">✓</span>Product variants (list, add, rename, show/hide, inside the product editor)</li>
+        <li class="task-item done"><span class="task-icon">✓</span>Units screen (add units of measure, rename, show/hide)</li>
+        <li class="task-item done"><span class="task-icon">✓</span>Categories screen (add and rename categories and sub-categories, show/hide)</li>
+        <li class="task-item done"><span class="task-icon">✓</span>Products screen (search, paging, add a product, edit English/Hindi/Marathi names, show/hide)</li>
         <li class="task-item done"><span class="task-icon">✓</span>Activity log screen (App tab): who changed what, newest first</li>
         <li class="task-item done"><span class="task-icon">✓</span>Support tickets screen: queue, thread, reply, status (closing asks first)</li>
-        <li class="task-item pending"><span class="task-icon">○</span>Campaign editing and coupons / plans in the admin app (API exists)</li>
+        <li class="task-item done"><span class="task-icon">✓</span>Campaign management: list, create, edit, activate / pause / end, add advertisers</li>
+        <li class="task-item done"><span class="task-icon">✓</span>Plans and coupons: list, add, edit (rupees typed, paise sent), use limits, on/off</li>
+        <li class="task-item done"><span class="task-icon">✓</span>Subscriptions screen: who has a plan, filter by state, end an active one early (confirmed)</li>
       </ul>
       <div class="cell-mini-bar">
-        <div class="mini-bar"><div class="mini-bar-fill" style="width:80%;background:var(--partial)"></div></div>
-        <div class="mini-pct">8 of 10 tracked items done · phone check pending</div>
+        <div class="mini-bar"><div class="mini-bar-fill" style="width:95%;background:var(--partial)"></div></div>
+        <div class="mini-pct">21 of 22 tracked items done · phone check pending</div>
       </div>
     </div>
   </div>
@@ -426,8 +449,8 @@
       </div>
       <ul class="task-list">
         <li class="task-item done"><span class="task-icon">✓</span>RazorpayPaymentGateway (HMAC-SHA256), dev-mode webhook bypass</li>
-        <li class="task-item pending"><span class="task-icon">○</span>Payment initialisation endpoint testing</li>
-        <li class="task-item pending"><span class="task-icon">○</span>Client-side confirmation flow</li>
+        <li class="task-item done"><span class="task-icon">✓</span>Payment initialisation endpoint (POST subscribe) — built; live-key check pending</li>
+        <li class="task-item done"><span class="task-icon">✓</span>Client-side confirmation flow (verify + 3 retries + webhook fallback) — built; live-key check pending</li>
       </ul>
     </div>
     <div class="tl-cell">
@@ -448,7 +471,7 @@
   <div class="ns-card">
     <div class="ns-num">SUGGESTED 1</div>
     <div class="ns-title">Commit and push after each feature</div>
-    <div class="ns-detail">Last push: e8c16a8 on branch <code style="font-family:monospace;font-size:11px">payment-integration</code> (1 Nov). Claude commits and pushes only when asked, and checks for credential files first.</div>
+    <div class="ns-detail">Last push: 850fcf8 on branch <code style="font-family:monospace;font-size:11px">payment-integration</code>; 103 files changed since. Claude commits and pushes only when asked, and checks for credential files first.</div>
     <div class="ns-tag">safety</div>
   </div>
   <div class="ns-card">
@@ -459,8 +482,8 @@
   </div>
   <div class="ns-card">
     <div class="ns-num">SUGGESTED 3</div>
-    <div class="ns-title">Verify the new admin controls on the phone</div>
-    <div class="ns-detail">Ads switch (now also enforced by the API), minimum app version and app message are built; confirm each one on the phone before release.</div>
+    <div class="ns-title">Install the newest build; verify on the phone</div>
+    <div class="ns-detail">Build and install the APK, then check every admin screen once, landed cost on the estimator, and More → Suppliers. Run the new tests too. Everything on the BRD's initial scope is built; nothing buildable is waiting.</div>
     <div class="ns-tag app">app + api</div>
   </div>
   <div class="ns-card">
@@ -472,13 +495,13 @@
   <div class="ns-card">
     <div class="ns-num">DECIDE</div>
     <div class="ns-title">Angular admin vs Flutter admin</div>
-    <div class="ns-detail">The Flutter admin app now covers Dashboard, Ads, Users and App. Decide whether the Angular admin stays for catalog and market editing only.</div>
+    <div class="ns-detail">The Flutter admin app now also covers catalog and market editing, so the Angular admin may no longer be needed. Decide whether to keep it.</div>
     <div class="ns-tag">decision</div>
   </div>
 </div>
 
 <footer>
-  MolBhav · JagTech · Last updated 1 Nov 2026 · API + App + Admin app · phone verification and full data pull pending
+  MolBhav · JagTech · Last updated 18 Nov 2026 · API + App + Admin app · phone verification and full data pull pending
 </footer>
 
 <script>

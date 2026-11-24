@@ -129,4 +129,7 @@ abstract interface class AdminUsersRepository {
 
   /// Suspends ([suspend] true) or reinstates the account.
   Future<Result<void>> setSuspended(String userId, {required bool suspend});
+
+  /// Gives the user a new random password and returns it (shown once).
+  Future<Result<String>> resetPassword(String userId);
 }

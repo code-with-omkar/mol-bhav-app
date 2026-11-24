@@ -73,6 +73,25 @@ class AdminUserDetailCubit extends Cubit<AdminUserDetailState> {
     );
   }
 
+  /// Resets the user's password; returns the temporary one to show the admin,
+  /// or null when it was refused ([actionFailure] says why).
+  Future<String?> resetPassword(String userId) async {
+    if (state.busy) return null;
+    emit(state.copyWith(busy: true, actionFailure: () => null));
+    final result = await _repository.resetPassword(userId);
+    if (isClosed) return null;
+    return result.fold(
+      (failure) {
+        emit(state.copyWith(busy: false, actionFailure: () => failure));
+        return null;
+      },
+      (password) {
+        emit(state.copyWith(busy: false));
+        return password;
+      },
+    );
+  }
+
   /// The page has shown the failure.
   void failureShown() => emit(state.copyWith(actionFailure: () => null));
 }

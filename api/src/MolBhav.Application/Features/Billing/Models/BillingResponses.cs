@@ -49,7 +49,9 @@ public sealed record AdminSubscriptionResponse(
     DateTimeOffset StartedAtUtc,
     DateTimeOffset ExpiresAtUtc,
     bool IsAutoRenew,
-    DateTimeOffset? CancelledAtUtc);
+    DateTimeOffset? CancelledAtUtc,
+    string? UserPhoneNumberMasked = null,
+    string? UserName = null);
 
 public sealed record AdminCouponResponse(
     Guid Id,

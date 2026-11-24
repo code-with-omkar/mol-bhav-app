@@ -164,6 +164,78 @@ class _FormState extends State<_Form> {
             const SizedBox(height: MbSpacing.s4),
             _ResultCard(result: result),
           ],
+          const SizedBox(height: MbSpacing.s6),
+          Text(l10n.adminMarketsAddAllHint, style: t.caption.copyWith(color: c.inkMuted)),
+          const SizedBox(height: MbSpacing.s2),
+          MbButton(
+            label: l10n.adminMarketsAddAll,
+            variant: MbButtonVariant.secondary,
+            block: true,
+            isLoading: importing,
+            onPressed: importing ? null : () => _confirmAddAll(context),
+          ),
+          if (widget.state.allResult case final all?) ...[
+            const SizedBox(height: MbSpacing.s4),
+            _AllResultCard(result: all),
+          ],
+        ],
+      ),
+    );
+  }
+
+  Future<void> _confirmAddAll(BuildContext context) async {
+    final l10n = context.l10n;
+    final cubit = context.read<AdminMarketsCubit>();
+    final ok = await showDialog<bool>(
+      context: context,
+      builder: (dialog) => AlertDialog(
+        title: Text(l10n.adminMarketsAddAllTitle),
+        content: Text(l10n.adminMarketsAddAllBody),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(dialog).pop(false),
+            child: Text(l10n.cancelAction),
+          ),
+          TextButton(
+            onPressed: () => Navigator.of(dialog).pop(true),
+            child: Text(l10n.adminMarketsAddAllConfirm),
+          ),
+        ],
+      ),
+    );
+    if (ok ?? false) await cubit.importAll();
+  }
+}
+
+/// What "add every market" did: states and markets added, and what was left.
+class _AllResultCard extends StatelessWidget {
+  const _AllResultCard({required this.result});
+
+  final ImportAllMarketsResult result;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = context.l10n;
+    final c = context.mbColors;
+    final t = context.mbText;
+    return MbCard(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            l10n.adminMarketsAllDone(result.marketsCreated, result.statesCreated),
+            style: t.title.copyWith(color: c.ink),
+          ),
+          const SizedBox(height: MbSpacing.s1),
+          Text(
+            l10n.adminMarketsAllDetail(result.alreadyInCatalog, result.other),
+            style: t.caption.copyWith(color: c.inkMuted),
+          ),
+          const SizedBox(height: MbSpacing.s1),
+          Text(
+            l10n.adminMarketsAddedHint,
+            style: t.caption.copyWith(color: c.inkMuted),
+          ),
         ],
       ),
     );

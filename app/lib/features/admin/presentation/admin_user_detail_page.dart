@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 
@@ -201,8 +202,69 @@ class _Content extends StatelessWidget {
                         )
                       : _confirmSuspend(context),
           ),
+          const SizedBox(height: MbSpacing.s3),
+          MbButton(
+            label: l10n.adminUserResetPasswordAction,
+            variant: MbButtonVariant.secondary,
+            block: true,
+            onPressed: busy ? null : () => _confirmReset(context),
+          ),
         ],
       ],
+    );
+  }
+
+  Future<void> _confirmReset(BuildContext context) async {
+    final l10n = context.l10n;
+    final cubit = context.read<AdminUserDetailCubit>();
+    final ok = await showDialog<bool>(
+      context: context,
+      builder: (dialog) => AlertDialog(
+        title: Text(l10n.adminUserResetPasswordTitle),
+        content: Text(l10n.adminUserResetPasswordBody),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(dialog).pop(false),
+            child: Text(l10n.cancelAction),
+          ),
+          TextButton(
+            onPressed: () => Navigator.of(dialog).pop(true),
+            child: Text(l10n.adminUserResetPasswordConfirm),
+          ),
+        ],
+      ),
+    );
+    if (!(ok ?? false)) return;
+    final password = await cubit.resetPassword(userId);
+    if (password == null || !context.mounted) return;
+    await showDialog<void>(
+      context: context,
+      barrierDismissible: false,
+      builder: (dialog) => AlertDialog(
+        title: Text(l10n.adminUserResetPasswordDone),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            SelectableText(
+              password,
+              style: context.mbText.h2.copyWith(color: context.mbColors.ink),
+            ),
+            const SizedBox(height: MbSpacing.s2),
+            Text(l10n.adminUserResetPasswordShownOnce),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Clipboard.setData(ClipboardData(text: password)),
+            child: Text(l10n.copyAction),
+          ),
+          TextButton(
+            onPressed: () => Navigator.of(dialog).pop(),
+            child: Text(l10n.doneAction),
+          ),
+        ],
+      ),
     );
   }
 

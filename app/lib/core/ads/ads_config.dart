@@ -37,6 +37,14 @@ abstract final class AdsConfig {
     defaultValue: 'ca-app-pub-3940256099942544/4411468910',
   );
 
+  /// Video ads (rewarded and full-screen interstitial) are switched off. Image
+  /// ads stay: banners, native cards and our own sponsored cards. Turn video
+  /// back on for a build with `--dart-define=VIDEO_ADS_ENABLED=true`.
+  static const videoAdsEnabled = bool.fromEnvironment(
+    'VIDEO_ADS_ENABLED',
+    defaultValue: false,
+  );
+
   /// The Google Mobile Ads SDK runs on Android and iOS only — not on web.
   static bool get isSupported =>
       !kIsWeb &&

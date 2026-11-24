@@ -26,6 +26,7 @@ import 'package:mol_bhav/core/locale/locale_cubit.dart' as _i243;
 import 'package:mol_bhav/core/locale/locale_repository.dart' as _i98;
 import 'package:mol_bhav/core/notifications/notification_service.dart' as _i552;
 import 'package:mol_bhav/core/payments/razorpay_service.dart' as _i923;
+import 'package:mol_bhav/core/permissions/first_run_permissions.dart' as _i599;
 import 'package:mol_bhav/core/permissions/location_permission_handler.dart'
     as _i351;
 import 'package:mol_bhav/core/session/admin_mode.dart' as _i743;
@@ -41,25 +42,53 @@ import 'package:mol_bhav/features/account/data/account_data.dart' as _i968;
 import 'package:mol_bhav/features/account/domain/account.dart' as _i695;
 import 'package:mol_bhav/features/account/presentation/account_cubits.dart'
     as _i956;
+import 'package:mol_bhav/features/account/presentation/change_password_cubit.dart'
+    as _i85;
 import 'package:mol_bhav/features/account/presentation/profile_cubit.dart'
-    as _i736;
+    as _i737;
 import 'package:mol_bhav/features/admin/data/admin_ads_data.dart' as _i580;
 import 'package:mol_bhav/features/admin/data/admin_audit_data.dart' as _i740;
+import 'package:mol_bhav/features/admin/data/admin_billing_data.dart' as _i1051;
+import 'package:mol_bhav/features/admin/data/admin_campaigns_data.dart'
+    as _i808;
+import 'package:mol_bhav/features/admin/data/admin_categories_data.dart'
+    as _i482;
+import 'package:mol_bhav/features/admin/data/admin_commodities_data.dart'
+    as _i447;
 import 'package:mol_bhav/features/admin/data/admin_dashboard_data.dart'
     as _i648;
 import 'package:mol_bhav/features/admin/data/admin_ingestion_data.dart'
     as _i688;
 import 'package:mol_bhav/features/admin/data/admin_jobs_data.dart' as _i651;
+import 'package:mol_bhav/features/admin/data/admin_mandis_data.dart' as _i576;
 import 'package:mol_bhav/features/admin/data/admin_markets_data.dart' as _i414;
+import 'package:mol_bhav/features/admin/data/admin_products_data.dart' as _i215;
+import 'package:mol_bhav/features/admin/data/admin_states_data.dart' as _i909;
+import 'package:mol_bhav/features/admin/data/admin_subscriptions_data.dart'
+    as _i627;
+import 'package:mol_bhav/features/admin/data/admin_suppliers_data.dart'
+    as _i367;
 import 'package:mol_bhav/features/admin/data/admin_support_data.dart' as _i715;
+import 'package:mol_bhav/features/admin/data/admin_units_data.dart' as _i578;
 import 'package:mol_bhav/features/admin/data/admin_users_data.dart' as _i799;
 import 'package:mol_bhav/features/admin/domain/admin_ads.dart' as _i908;
 import 'package:mol_bhav/features/admin/domain/admin_audit.dart' as _i704;
+import 'package:mol_bhav/features/admin/domain/admin_billing.dart' as _i555;
+import 'package:mol_bhav/features/admin/domain/admin_campaigns.dart' as _i826;
+import 'package:mol_bhav/features/admin/domain/admin_categories.dart' as _i629;
+import 'package:mol_bhav/features/admin/domain/admin_commodities.dart' as _i195;
 import 'package:mol_bhav/features/admin/domain/admin_dashboard.dart' as _i602;
 import 'package:mol_bhav/features/admin/domain/admin_ingestion.dart' as _i919;
 import 'package:mol_bhav/features/admin/domain/admin_jobs.dart' as _i798;
+import 'package:mol_bhav/features/admin/domain/admin_mandis.dart' as _i791;
 import 'package:mol_bhav/features/admin/domain/admin_markets.dart' as _i530;
+import 'package:mol_bhav/features/admin/domain/admin_products.dart' as _i780;
+import 'package:mol_bhav/features/admin/domain/admin_states.dart' as _i590;
+import 'package:mol_bhav/features/admin/domain/admin_subscriptions.dart'
+    as _i570;
+import 'package:mol_bhav/features/admin/domain/admin_suppliers.dart' as _i536;
 import 'package:mol_bhav/features/admin/domain/admin_support.dart' as _i73;
+import 'package:mol_bhav/features/admin/domain/admin_units.dart' as _i283;
 import 'package:mol_bhav/features/admin/domain/admin_users.dart' as _i322;
 import 'package:mol_bhav/features/admin/presentation/admin_ads_cubit.dart'
     as _i1072;
@@ -67,18 +96,42 @@ import 'package:mol_bhav/features/admin/presentation/admin_audit_cubit.dart'
     as _i1019;
 import 'package:mol_bhav/features/admin/presentation/admin_campaign_cubit.dart'
     as _i237;
+import 'package:mol_bhav/features/admin/presentation/admin_campaign_form_cubit.dart'
+    as _i736;
+import 'package:mol_bhav/features/admin/presentation/admin_campaign_list_cubit.dart'
+    as _i32;
+import 'package:mol_bhav/features/admin/presentation/admin_categories_cubit.dart'
+    as _i430;
+import 'package:mol_bhav/features/admin/presentation/admin_commodities_cubit.dart'
+    as _i759;
+import 'package:mol_bhav/features/admin/presentation/admin_coupons_cubit.dart'
+    as _i179;
 import 'package:mol_bhav/features/admin/presentation/admin_dashboard_cubit.dart'
     as _i83;
 import 'package:mol_bhav/features/admin/presentation/admin_features_cubit.dart'
     as _i1012;
+import 'package:mol_bhav/features/admin/presentation/admin_mandis_cubit.dart'
+    as _i88;
 import 'package:mol_bhav/features/admin/presentation/admin_markets_cubit.dart'
     as _i313;
 import 'package:mol_bhav/features/admin/presentation/admin_notice_cubit.dart'
     as _i239;
+import 'package:mol_bhav/features/admin/presentation/admin_plans_cubit.dart'
+    as _i557;
+import 'package:mol_bhav/features/admin/presentation/admin_products_cubit.dart'
+    as _i479;
+import 'package:mol_bhav/features/admin/presentation/admin_states_cubit.dart'
+    as _i538;
+import 'package:mol_bhav/features/admin/presentation/admin_subscriptions_cubit.dart'
+    as _i971;
+import 'package:mol_bhav/features/admin/presentation/admin_suppliers_cubit.dart'
+    as _i105;
 import 'package:mol_bhav/features/admin/presentation/admin_ticket_thread_cubit.dart'
     as _i886;
 import 'package:mol_bhav/features/admin/presentation/admin_tickets_cubit.dart'
     as _i253;
+import 'package:mol_bhav/features/admin/presentation/admin_units_cubit.dart'
+    as _i783;
 import 'package:mol_bhav/features/admin/presentation/admin_user_detail_cubit.dart'
     as _i453;
 import 'package:mol_bhav/features/admin/presentation/admin_users_cubit.dart'
@@ -114,7 +167,7 @@ import 'package:mol_bhav/features/app_version/presentation/app_version_cubit.dar
 import 'package:mol_bhav/features/auth/data/datasources/auth_remote_data_source.dart'
     as _i875;
 import 'package:mol_bhav/features/auth/data/repositories/auth_repository_impl.dart'
-    as _i154;
+    as _i155;
 import 'package:mol_bhav/features/auth/domain/entities/otp_challenge.dart'
     as _i769;
 import 'package:mol_bhav/features/auth/domain/repositories/auth_repository.dart'
@@ -132,7 +185,7 @@ import 'package:mol_bhav/features/auth/presentation/cubit/otp_cubit.dart'
 import 'package:mol_bhav/features/billing/data/billing_data.dart' as _i196;
 import 'package:mol_bhav/features/billing/domain/billing.dart' as _i690;
 import 'package:mol_bhav/features/billing/presentation/cubit/coupon_cubit.dart'
-    as _i627;
+    as _i628;
 import 'package:mol_bhav/features/billing/presentation/cubit/plans_cubit.dart'
     as _i435;
 import 'package:mol_bhav/features/billing/presentation/cubit/subscription_cubit.dart'
@@ -192,6 +245,10 @@ import 'package:mol_bhav/features/promotions/data/promotion_events_tracker.dart'
 import 'package:mol_bhav/features/promotions/data/promotions_data.dart'
     as _i292;
 import 'package:mol_bhav/features/promotions/domain/promotions.dart' as _i249;
+import 'package:mol_bhav/features/suppliers/data/suppliers_data.dart' as _i271;
+import 'package:mol_bhav/features/suppliers/domain/suppliers.dart' as _i154;
+import 'package:mol_bhav/features/suppliers/presentation/suppliers_cubit.dart'
+    as _i958;
 import 'package:mol_bhav/features/support/data/support_data.dart' as _i551;
 import 'package:mol_bhav/features/support/domain/support.dart' as _i339;
 import 'package:mol_bhav/features/support/presentation/support_cubits.dart'
@@ -285,6 +342,12 @@ extension GetItInjectableX on _i174.GetIt {
     gh.lazySingleton<_i969.AdRequestFactory>(
       () => _i969.AdRequestFactory(gh<_i977.AdPersonalisationCubit>()),
     );
+    gh.lazySingleton<_i599.FirstRunPermissions>(
+      () => _i599.FirstRunPermissions(
+        gh<_i460.SharedPreferences>(),
+        gh<_i351.LocationPermissionHandler>(),
+      ),
+    );
     gh.lazySingleton<_i115.SessionManager>(
       () => _i115.SessionManager(
         gh<_i411.TokenStorage>(),
@@ -327,6 +390,9 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i756.ResponseCache>(),
       ),
     );
+    gh.lazySingleton<_i826.AdminCampaignsRepository>(
+      () => _i808.AdminCampaignsRepositoryImpl(gh<_i361.Dio>()),
+    );
     gh.lazySingleton<_i73.AdminSupportRepository>(
       () => _i715.AdminSupportRepositoryImpl(gh<_i361.Dio>()),
     );
@@ -342,6 +408,15 @@ extension GetItInjectableX on _i174.GetIt {
     gh.lazySingleton<_i602.AdminDashboardRepository>(
       () => _i648.AdminDashboardRepositoryImpl(gh<_i361.Dio>()),
     );
+    gh.lazySingleton<_i791.AdminMandisRepository>(
+      () => _i576.AdminMandisRepositoryImpl(gh<_i361.Dio>()),
+    );
+    gh.lazySingleton<_i154.SuppliersRepository>(
+      () => _i271.SuppliersRepositoryImpl(gh<_i361.Dio>()),
+    );
+    gh.lazySingleton<_i555.AdminBillingRepository>(
+      () => _i1051.AdminBillingRepositoryImpl(gh<_i361.Dio>()),
+    );
     gh.lazySingleton<_i875.AuthRemoteDataSource>(
       () => _i875.DioAuthRemoteDataSource(gh<_i361.Dio>()),
     );
@@ -353,6 +428,9 @@ extension GetItInjectableX on _i174.GetIt {
     );
     gh.lazySingleton<_i798.AdminJobsRepository>(
       () => _i651.AdminJobsRepositoryImpl(gh<_i361.Dio>()),
+    );
+    gh.lazySingleton<_i195.AdminCommoditiesRepository>(
+      () => _i447.AdminCommoditiesRepositoryImpl(gh<_i361.Dio>()),
     );
     gh.factory<_i995.GetMandiPrices>(
       () => _i995.GetMandiPrices(gh<_i995.MandiPricesRepository>()),
@@ -381,6 +459,9 @@ extension GetItInjectableX on _i174.GetIt {
     gh.lazySingleton<_i321.WeatherRemoteDataSource>(
       () => weatherModule.weatherRemoteDataSource(gh<_i361.Dio>()),
     );
+    gh.lazySingleton<_i590.AdminStatesRepository>(
+      () => _i909.AdminStatesRepositoryImpl(gh<_i361.Dio>()),
+    );
     gh.lazySingleton<_i17.ReportsRepository>(
       () => _i844.ReportsRepositoryImpl(
         gh<_i361.Dio>(),
@@ -391,7 +472,7 @@ extension GetItInjectableX on _i174.GetIt {
       () => _i292.PromotionsRepositoryImpl(gh<_i361.Dio>()),
     );
     gh.lazySingleton<_i696.AuthRepository>(
-      () => _i154.AuthRepositoryImpl(
+      () => _i155.AuthRepositoryImpl(
         gh<_i875.AuthRemoteDataSource>(),
         gh<_i115.SessionManager>(),
       ),
@@ -411,6 +492,9 @@ extension GetItInjectableX on _i174.GetIt {
     gh.lazySingleton<_i587.WatchlistRemoteDataSource>(
       () => _i587.DioWatchlistRemoteDataSource(gh<_i361.Dio>()),
     );
+    gh.lazySingleton<_i570.AdminSubscriptionsRepository>(
+      () => _i627.AdminSubscriptionsRepositoryImpl(gh<_i361.Dio>()),
+    );
     gh.lazySingleton<_i298.OnboardingRemoteDataSource>(
       () => _i298.DioOnboardingRemoteDataSource(
         gh<_i361.Dio>(),
@@ -422,11 +506,23 @@ extension GetItInjectableX on _i174.GetIt {
     gh.lazySingleton<_i530.AdminMarketsRepository>(
       () => _i414.AdminMarketsRepositoryImpl(gh<_i361.Dio>()),
     );
+    gh.lazySingleton<_i780.AdminProductsRepository>(
+      () => _i215.AdminProductsRepositoryImpl(gh<_i361.Dio>()),
+    );
     gh.lazySingleton<_i339.SupportRepository>(
       () => _i551.SupportRepositoryImpl(
         gh<_i361.Dio>(),
         gh<_i756.ResponseCache>(),
       ),
+    );
+    gh.lazySingleton<_i629.AdminCategoriesRepository>(
+      () => _i482.AdminCategoriesRepositoryImpl(gh<_i361.Dio>()),
+    );
+    gh.factory<_i179.AdminCouponsCubit>(
+      () => _i179.AdminCouponsCubit(gh<_i555.AdminBillingRepository>()),
+    );
+    gh.factory<_i557.AdminPlansCubit>(
+      () => _i557.AdminPlansCubit(gh<_i555.AdminBillingRepository>()),
     );
     gh.lazySingleton<_i693.OpportunitiesRepository>(
       () => _i405.OpportunitiesRepositoryImpl(
@@ -440,11 +536,17 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i540.InstalledVersion>(),
       ),
     );
+    gh.lazySingleton<_i536.AdminSuppliersRepository>(
+      () => _i367.AdminSuppliersRepositoryImpl(gh<_i361.Dio>()),
+    );
     gh.lazySingleton<_i17.EstimatorRepository>(
       () => _i844.EstimatorRepositoryImpl(
         gh<_i361.Dio>(),
         gh<_i756.ResponseCache>(),
       ),
+    );
+    gh.lazySingleton<_i283.AdminUnitsRepository>(
+      () => _i578.AdminUnitsRepositoryImpl(gh<_i361.Dio>()),
     );
     gh.lazySingleton<_i690.BillingRepository>(
       () => _i196.BillingRepositoryImpl(
@@ -461,6 +563,9 @@ extension GetItInjectableX on _i174.GetIt {
     gh.lazySingleton<_i552.NotificationService>(
       () => _i552.NotificationService(gh<_i234.NotificationDeviceDataSource>()),
     );
+    gh.factory<_i538.AdminStatesCubit>(
+      () => _i538.AdminStatesCubit(gh<_i590.AdminStatesRepository>()),
+    );
     gh.factory<_i83.AdminDashboardCubit>(
       () => _i83.AdminDashboardCubit(gh<_i602.AdminDashboardRepository>()),
     );
@@ -476,6 +581,15 @@ extension GetItInjectableX on _i174.GetIt {
     gh.factory<_i383.PullJobCubit>(
       () => _i383.PullJobCubit(gh<_i798.AdminJobsRepository>()),
     );
+    gh.factory<_i88.AdminMandisCubit>(
+      () => _i88.AdminMandisCubit(gh<_i791.AdminMandisRepository>()),
+    );
+    gh.factory<_i479.AdminProductsCubit>(
+      () => _i479.AdminProductsCubit(
+        gh<_i780.AdminProductsRepository>(),
+        gh<_i195.AdminCommoditiesRepository>(),
+      ),
+    );
     gh.lazySingleton<_i238.FeatureSwitchesCubit>(
       () => _i238.FeatureSwitchesCubit(gh<_i92.AppFeaturesRepository>()),
     );
@@ -489,6 +603,9 @@ extension GetItInjectableX on _i174.GetIt {
     );
     gh.lazySingleton<_i324.PriceDataStatusCubit>(
       () => _i324.PriceDataStatusCubit(gh<_i25.PriceDataStatusRepository>()),
+    );
+    gh.factory<_i32.AdminCampaignListCubit>(
+      () => _i32.AdminCampaignListCubit(gh<_i826.AdminCampaignsRepository>()),
     );
     gh.factory<_i1045.GetAlerts>(
       () => _i1045.GetAlerts(gh<_i1045.AlertsRepository>()),
@@ -504,6 +621,9 @@ extension GetItInjectableX on _i174.GetIt {
     );
     gh.factory<_i352.AlertRulesCubit>(
       () => _i352.AlertRulesCubit(gh<_i1045.AlertsRepository>()),
+    );
+    gh.factory<_i958.SuppliersCubit>(
+      () => _i958.SuppliersCubit(gh<_i154.SuppliersRepository>()),
     );
     gh.lazySingleton<_i417.OnboardingRepository>(
       () => _i340.OnboardingRepositoryImpl(
@@ -523,6 +643,9 @@ extension GetItInjectableX on _i174.GetIt {
     gh.factory<_i90.AdminUsersCubit>(
       () => _i90.AdminUsersCubit(gh<_i322.AdminUsersRepository>()),
     );
+    gh.factory<_i430.AdminCategoriesCubit>(
+      () => _i430.AdminCategoriesCubit(gh<_i629.AdminCategoriesRepository>()),
+    );
     gh.factory<_i103.NotificationPrefsCubit>(
       () => _i103.NotificationPrefsCubit(
         gh<_i287.NotificationPrefsRepository>(),
@@ -535,6 +658,9 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i115.SessionManager>(),
       ),
       dispose: (i) => i.dispose(),
+    );
+    gh.factory<_i783.AdminUnitsCubit>(
+      () => _i783.AdminUnitsCubit(gh<_i283.AdminUnitsRepository>()),
     );
     gh.factory<_i297.GetEntitlements>(
       () => _i297.GetEntitlements(gh<_i297.MonetizationRepository>()),
@@ -605,11 +731,28 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i1044.Countdown>(),
       ),
     );
-    gh.factory<_i627.CouponCubit>(
-      () => _i627.CouponCubit(gh<_i690.BillingRepository>()),
+    gh.factory<_i628.CouponCubit>(
+      () => _i628.CouponCubit(gh<_i690.BillingRepository>()),
     );
     gh.factory<_i435.PlansCubit>(
       () => _i435.PlansCubit(gh<_i690.BillingRepository>()),
+    );
+    gh.factory<_i759.AdminCommoditiesCubit>(
+      () => _i759.AdminCommoditiesCubit(
+        gh<_i919.AdminIngestionRepository>(),
+        gh<_i195.AdminCommoditiesRepository>(),
+      ),
+    );
+    gh.factory<_i736.AdminCampaignFormCubit>(
+      () => _i736.AdminCampaignFormCubit(
+        gh<_i826.AdminCampaignsRepository>(),
+        gh<_i919.AdminIngestionRepository>(),
+      ),
+    );
+    gh.factory<_i971.AdminSubscriptionsCubit>(
+      () => _i971.AdminSubscriptionsCubit(
+        gh<_i570.AdminSubscriptionsRepository>(),
+      ),
     );
     gh.lazySingleton<_i887.WatchlistRepository>(
       () => _i587.WatchlistRepositoryImpl(
@@ -669,6 +812,12 @@ extension GetItInjectableX on _i174.GetIt {
     gh.factory<_i695.SignOut>(
       () => _i695.SignOut(gh<_i695.AccountRepository>()),
     );
+    gh.factory<_i105.AdminSuppliersCubit>(
+      () => _i105.AdminSuppliersCubit(
+        gh<_i536.AdminSuppliersRepository>(),
+        gh<_i791.AdminMandisRepository>(),
+      ),
+    );
     gh.factory<_i644.AlertsCubit>(
       () => _i644.AlertsCubit(gh<_i1045.GetAlerts>()),
     );
@@ -718,8 +867,8 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i98.LocaleRepository>(),
       ),
     );
-    gh.lazySingleton<_i736.ProfileCubit>(
-      () => _i736.ProfileCubit(
+    gh.lazySingleton<_i737.ProfileCubit>(
+      () => _i737.ProfileCubit(
         gh<_i695.WatchAccountProfile>(),
         gh<_i695.InvalidateAccountProfile>(),
         gh<_i115.SessionManager>(),
@@ -733,7 +882,7 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i297.GetAdUnlockSession>(),
         gh<_i297.CompleteUnlockWithoutAds>(),
         gh<_i537.RewardedAdPlayer>(),
-        gh<_i736.ProfileCubit>(),
+        gh<_i737.ProfileCubit>(),
       ),
     );
     gh.factory<_i760.HelpSupportCubit>(
@@ -744,7 +893,7 @@ extension GetItInjectableX on _i174.GetIt {
     );
     gh.factory<_i956.MoreCubit>(
       () => _i956.MoreCubit(
-        gh<_i736.ProfileCubit>(),
+        gh<_i737.ProfileCubit>(),
         gh<_i695.SignOut>(),
         gh<_i552.NotificationService>(),
       ),
@@ -766,7 +915,7 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i992.MobileAdsBootstrap>(),
         gh<_i969.AdRequestFactory>(),
         gh<_i1056.InterstitialPacer>(),
-        gh<_i736.ProfileCubit>(),
+        gh<_i737.ProfileCubit>(),
       ),
     );
     gh.factory<_i597.LoginCubit>(
@@ -793,7 +942,7 @@ extension GetItInjectableX on _i174.GetIt {
     gh.factory<_i61.SubscriptionCubit>(
       () => _i61.SubscriptionCubit(
         gh<_i690.BillingRepository>(),
-        gh<_i736.ProfileCubit>(),
+        gh<_i737.ProfileCubit>(),
         gh<_i550.TokenRenewal>(),
       ),
     );
@@ -802,7 +951,7 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i17.ReportsRepository>(),
         gh<_i169.CatalogRepository>(),
         gh<_i995.MandiPricesRepository>(),
-        gh<_i736.ProfileCubit>(),
+        gh<_i737.ProfileCubit>(),
         gh<_i98.LocaleRepository>(),
       ),
     );
@@ -822,13 +971,20 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i1045.GetAlertOptions>(),
         gh<_i1045.GetCurrentPrice>(),
         gh<_i1045.CreateAlert>(),
-        gh<_i736.ProfileCubit>(),
+        gh<_i737.ProfileCubit>(),
       ),
     );
     gh.factory<_i692.WatchlistPickerCubit>(
       () => _i692.WatchlistPickerCubit(
         gh<_i169.CatalogRepository>(),
-        gh<_i736.ProfileCubit>(),
+        gh<_i737.ProfileCubit>(),
+      ),
+    );
+    gh.factory<_i85.ChangePasswordCubit>(
+      () => _i85.ChangePasswordCubit(
+        gh<_i695.AccountRepository>(),
+        gh<_i737.ProfileCubit>(),
+        gh<_i552.NotificationService>(),
       ),
     );
     gh.factory<_i825.CostEstimatorCubit>(
@@ -836,7 +992,7 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i17.EstimatorRepository>(),
         gh<_i169.CatalogRepository>(),
         gh<_i995.MandiPricesRepository>(),
-        gh<_i736.ProfileCubit>(),
+        gh<_i737.ProfileCubit>(),
       ),
     );
     gh.factory<_i333.MarketComparisonCubit>(
@@ -844,12 +1000,12 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i806.GetCommodities>(),
         gh<_i806.GetMarketComparison>(),
         gh<_i169.CatalogRepository>(),
-        gh<_i736.ProfileCubit>(),
+        gh<_i737.ProfileCubit>(),
       ),
     );
     gh.factory<_i197.HomeCubit>(
       () => _i197.HomeCubit(
-        gh<_i736.ProfileCubit>(),
+        gh<_i737.ProfileCubit>(),
         gh<_i312.WatchlistCubit>(),
         gh<_i169.CatalogRepository>(),
         gh<_i693.OpportunitiesRepository>(),

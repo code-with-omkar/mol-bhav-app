@@ -54,6 +54,24 @@ class AdminAppPage extends StatelessWidget {
               },
             ),
             _Entry(
+              title: l10n.adminPlansTitle,
+              subtitle: l10n.adminPlansSubtitle,
+              onTap: () => context.go(AppRoutes.adminAppPlans),
+            ),
+            const SizedBox(height: MbSpacing.s2),
+            _Entry(
+              title: l10n.adminSubsTitle,
+              subtitle: l10n.adminSubsSubtitle,
+              onTap: () => context.go(AppRoutes.adminAppSubscriptions),
+            ),
+            const SizedBox(height: MbSpacing.s2),
+            _Entry(
+              title: l10n.adminCouponsTitle,
+              subtitle: l10n.adminCouponsSubtitle,
+              onTap: () => context.go(AppRoutes.adminAppCoupons),
+            ),
+            const SizedBox(height: MbSpacing.s2),
+            _Entry(
               title: l10n.adminTicketsTitle,
               subtitle: l10n.adminSupportSubtitle,
               onTap: () => context.go(AppRoutes.adminAppSupport),
@@ -69,6 +87,48 @@ class AdminAppPage extends StatelessWidget {
               title: l10n.adminMarketsTitle,
               subtitle: l10n.adminMarketsSubtitle,
               onTap: () => context.go(AppRoutes.adminAppMarkets),
+            ),
+            const SizedBox(height: MbSpacing.s2),
+            _Entry(
+              title: l10n.adminCommoditiesTitle,
+              subtitle: l10n.adminCommoditiesSubtitle,
+              onTap: () => context.go(AppRoutes.adminAppCommodities),
+            ),
+            const SizedBox(height: MbSpacing.s2),
+            _Entry(
+              title: l10n.adminProductsTitle,
+              subtitle: l10n.adminProductsSubtitle,
+              onTap: () => context.go(AppRoutes.adminAppProducts),
+            ),
+            const SizedBox(height: MbSpacing.s2),
+            _Entry(
+              title: l10n.adminCategoriesTitle,
+              subtitle: l10n.adminCategoriesSubtitle,
+              onTap: () => context.go(AppRoutes.adminAppCategories),
+            ),
+            const SizedBox(height: MbSpacing.s2),
+            _Entry(
+              title: l10n.adminUnitsTitle,
+              subtitle: l10n.adminUnitsSubtitle,
+              onTap: () => context.go(AppRoutes.adminAppUnits),
+            ),
+            const SizedBox(height: MbSpacing.s2),
+            _Entry(
+              title: l10n.adminMandisTitle,
+              subtitle: l10n.adminMandisSubtitle,
+              onTap: () => context.go(AppRoutes.adminAppMandis),
+            ),
+            const SizedBox(height: MbSpacing.s2),
+            _Entry(
+              title: l10n.adminStatesTitle,
+              subtitle: l10n.adminStatesSubtitle,
+              onTap: () => context.go(AppRoutes.adminAppStates),
+            ),
+            const SizedBox(height: MbSpacing.s2),
+            _Entry(
+              title: l10n.adminSuppliersTitle,
+              subtitle: l10n.adminSuppliersSubtitle,
+              onTap: () => context.go(AppRoutes.adminAppSuppliers),
             ),
             const SizedBox(height: MbSpacing.s2),
             _Entry(

@@ -642,6 +642,162 @@ class AppLocalizationsMr extends AppLocalizations {
   String get cancelAnytime => 'कधीही रद्द करा. किमतींमध्ये GST समाविष्ट आहे.';
 
   @override
+  String freightLabel(String unit) {
+    return 'वाहतूक (₹ प्रति $unit)';
+  }
+
+  @override
+  String get handlingLabel => 'लोडिंग आणि हाताळणी (₹, एकूण)';
+
+  @override
+  String get landedOptionalHelper =>
+      'ऐच्छिक. हे याच फोनवर मोजले जाते आणि अंदाजासोबत जतन होत नाही.';
+
+  @override
+  String get landedCostTitle => 'पोहोच खर्च (डिलिव्हर्ड)';
+
+  @override
+  String landedBreakdown(String goods, String freight, String handling) {
+    return 'माल $goods + वाहतूक $freight + हाताळणी $handling';
+  }
+
+  @override
+  String get suppliersTitle => 'पुरवठादार';
+
+  @override
+  String get suppliersSubtitle => 'प्रादेशिक पुरवठादार आणि हब, कॉल बटणासह';
+
+  @override
+  String get suppliersSearchHint => 'नावाने पुरवठादार शोधा';
+
+  @override
+  String get suppliersEmpty => 'कोणताही पुरवठादार सापडला नाही.';
+
+  @override
+  String get supplierCall => 'कॉल करा';
+
+  @override
+  String get supplierCallFailed => 'फोन अ‍ॅप उघडता आले नाही.';
+
+  @override
+  String get permissionsTitle => 'काही परवानग्या द्या';
+
+  @override
+  String get permissionsIntro =>
+      'या दोन परवानग्यांसह MolBhav सर्वोत्तम काम करते. तुमचा फोन प्रत्येकासाठी विचारेल.';
+
+  @override
+  String get permissionsNotificationsTitle => 'सूचना';
+
+  @override
+  String get permissionsNotificationsBody =>
+      'भाव अलर्ट आणि खरेदीच्या संधी, त्या येताच.';
+
+  @override
+  String get permissionsLocationTitle => 'स्थान';
+
+  @override
+  String get permissionsLocationBody =>
+      'तुमच्या भागाचे हवामान दाखवण्यासाठी. फक्त अंदाजे स्थान वापरले जाते.';
+
+  @override
+  String get permissionsAllow => 'परवानगी द्या';
+
+  @override
+  String get permissionsNotNow => 'आता नको';
+
+  @override
+  String get permissionsChangeLater =>
+      'तुम्ही हे केव्हाही फोनच्या सेटिंगमध्ये बदलू शकता.';
+
+  @override
+  String get adminMarketsAddAll => 'फीडमधील सर्व बाजार जोडा';
+
+  @override
+  String get adminMarketsAddAllHint =>
+      'किंवा सर्व राज्ये आणि बाजार एकाच वेळी जोडा. कॅटलॉगमध्ये नसलेली राज्ये तयार केली जातात.';
+
+  @override
+  String get adminMarketsAddAllTitle => 'सर्व बाजार जोडायचे?';
+
+  @override
+  String get adminMarketsAddAllBody =>
+      'शेवटच्या संपूर्ण पुलमधील प्रत्येक राज्य आणि बाजार कॅटलॉगमध्ये जोडला जाईल, जे हजारापेक्षा जास्त बाजार असू शकतात. आधीपासून असलेल्यांना हात लावला जात नाही. यास थोडा वेळ लागतो.';
+
+  @override
+  String get adminMarketsAddAllConfirm => 'सर्व जोडा';
+
+  @override
+  String adminMarketsAllDone(int markets, int states) {
+    return '$markets बाजार आणि $states राज्ये जोडली';
+  }
+
+  @override
+  String adminMarketsAllDetail(int already, int other) {
+    return '$already आधीपासून होते, $other जोडता आले नाहीत (जिल्हा नाही किंवा अवैध नाव).';
+  }
+
+  @override
+  String get copyAction => 'कॉपी करा';
+
+  @override
+  String get doneAction => 'ठीक आहे';
+
+  @override
+  String get adminUserResetPasswordAction => 'पासवर्ड रीसेट करा';
+
+  @override
+  String get adminUserResetPasswordTitle =>
+      'या वापरकर्त्याचा पासवर्ड रीसेट करायचा?';
+
+  @override
+  String get adminUserResetPasswordBody =>
+      'एक नवीन रँडम पासवर्ड तयार होईल आणि जुना बंद होईल. तुम्हाला तो फक्त एकदाच दिसेल. तो वापरकर्त्याला द्या आणि बदलण्यास सांगा.';
+
+  @override
+  String get adminUserResetPasswordConfirm => 'रीसेट करा';
+
+  @override
+  String get adminUserResetPasswordDone => 'नवीन पासवर्ड';
+
+  @override
+  String get adminUserResetPasswordShownOnce =>
+      'फक्त एकदाच दिसेल. तो वापरकर्त्याला प्रत्यक्ष किंवा फोनवर सांगा.';
+
+  @override
+  String get changePasswordTitle => 'पासवर्ड बदला';
+
+  @override
+  String get changePasswordSubtitle => 'साइन इनसाठी नवीन पासवर्ड निवडा';
+
+  @override
+  String get currentPasswordLabel => 'सध्याचा पासवर्ड';
+
+  @override
+  String get currentPasswordRequired => 'तुमचा सध्याचा पासवर्ड टाका.';
+
+  @override
+  String get newPasswordLabel => 'नवीन पासवर्ड';
+
+  @override
+  String get passwordsDontMatch => 'पासवर्ड जुळत नाहीत.';
+
+  @override
+  String get passwordSameAsCurrent =>
+      'सध्याच्या पासवर्डपेक्षा वेगळा पासवर्ड निवडा.';
+
+  @override
+  String get changePasswordAction => 'पासवर्ड बदला';
+
+  @override
+  String get passwordChanged => 'पासवर्ड बदलला. कृपया पुन्हा साइन इन करा.';
+
+  @override
+  String landedPerUnit(String amount, String unit) {
+    return '$amount प्रति $unit डिलिव्हर्ड';
+  }
+
+  @override
   String get yourNameLabel => 'तुमचे नाव';
 
   @override
@@ -1427,6 +1583,435 @@ class AppLocalizationsMr extends AppLocalizations {
   String get adminSupportCloseConfirm => 'तिकीट बंद करा';
 
   @override
+  String get adminCampaignsTitle => 'मोहिमा';
+
+  @override
+  String get adminCampaignsManage => 'मोहिमा व्यवस्थापित करा';
+
+  @override
+  String get adminCampaignsNew => 'नवी मोहीम';
+
+  @override
+  String get adminCampaignsEmpty => 'येथे एकही मोहीम नाही.';
+
+  @override
+  String get adminCampaignEditTitle => 'मोहीम बदला';
+
+  @override
+  String get adminPlacementHomeFeed => 'होम फीड';
+
+  @override
+  String get adminPlacementMandiPrices => 'मंडी भाव';
+
+  @override
+  String get adminPlacementMarketComparison => 'बाजार तुलना';
+
+  @override
+  String get adminCampaignAdvertiser => 'जाहिरातदार';
+
+  @override
+  String get adminCampaignChooseAdvertiser => 'जाहिरातदार निवडा';
+
+  @override
+  String get adminCampaignAddAdvertiser => 'जाहिरातदार जोडा';
+
+  @override
+  String get adminCampaignName => 'मोहिमेचे नाव';
+
+  @override
+  String get adminCampaignPlacement => 'कुठे दिसेल';
+
+  @override
+  String get adminCampaignAdTitle => 'जाहिरात';
+
+  @override
+  String get adminCampaignHeadline => 'शीर्षक';
+
+  @override
+  String get adminCampaignText => 'मजकूर';
+
+  @override
+  String get adminCampaignButton => 'बटणाचे नाव';
+
+  @override
+  String get adminCampaignLink => 'बटणाची लिंक';
+
+  @override
+  String get adminCampaignImage => 'इमेज लिंक (ऐच्छिक)';
+
+  @override
+  String get adminCampaignWhenTitle => 'कधी चालेल';
+
+  @override
+  String get adminCampaignStarts => 'सुरू';
+
+  @override
+  String get adminCampaignEnds => 'संपते';
+
+  @override
+  String get adminCampaignPickDate => 'तारीख निवडा';
+
+  @override
+  String get adminCampaignPriority => 'प्राधान्य';
+
+  @override
+  String get adminCampaignPriorityHint =>
+      '0 ते 100. दोन मोहिमा जुळल्यास मोठा आकडा असलेली आधी दिसते.';
+
+  @override
+  String get adminCampaignCap => 'दररोज दिसण्याची मर्यादा (ऐच्छिक)';
+
+  @override
+  String get adminCampaignCapHint =>
+      'एका दिवसात, सर्व वापरकर्त्यांत मिळून, जास्तीत जास्त किती वेळा दिसेल. मर्यादा नको असल्यास रिकामे ठेवा.';
+
+  @override
+  String get adminCampaignAudienceTitle => 'कोणाला दिसेल';
+
+  @override
+  String get adminCampaignCategories => 'श्रेणी';
+
+  @override
+  String get adminCampaignChooseCategories => 'श्रेणी निवडा';
+
+  @override
+  String get adminCampaignStates => 'राज्ये (कोणतेही न निवडल्यास सर्व राज्ये)';
+
+  @override
+  String get adminCampaignPreview => 'पूर्वावलोकन';
+
+  @override
+  String adminCampaignStatusTitle(String status) {
+    return 'स्थिती: $status';
+  }
+
+  @override
+  String get adminCampaignActivate => 'सुरू करा';
+
+  @override
+  String get adminCampaignPause => 'थांबवा';
+
+  @override
+  String get adminCampaignEnd => 'मोहीम संपवा';
+
+  @override
+  String get adminCampaignEndTitle => 'ही मोहीम संपवायची?';
+
+  @override
+  String get adminCampaignEndBody =>
+      'संपलेली मोहीम कायमची दिसायची थांबते आणि ती बदलता किंवा पुन्हा सुरू करता येत नाही.';
+
+  @override
+  String get adminCampaignEndConfirm => 'मोहीम संपवा';
+
+  @override
+  String get adminCampaignEndedNote =>
+      'ही मोहीम संपली आहे. आता ती बदलता येत नाही.';
+
+  @override
+  String get adminCampaignTargetsReset =>
+      'या मोहिमेचे लक्ष्य या फॉर्मपेक्षा अधिक तपशीलवार आहे. जतन केल्यावर तिचे प्रेक्षक येथे निवडलेल्या श्रेणी आणि राज्यांचे होतील.';
+
+  @override
+  String get adminCampaignSave => 'मोहीम जतन करा';
+
+  @override
+  String get adminCampaignCreated =>
+      'मोहीम ड्राफ्ट म्हणून तयार झाली. दिसायला सुरू करण्यासाठी ती सुरू करा.';
+
+  @override
+  String get adminCampaignErrRequired => 'आवश्यक';
+
+  @override
+  String get adminCampaignErrLink => 'https:// ने सुरू होणारा वेब पत्ता लिहा';
+
+  @override
+  String get adminCampaignErrDates => 'शेवटची तारीख सुरुवातीआधी असू शकत नाही';
+
+  @override
+  String get adminCampaignErrPriority => '0 ते 100 मधील पूर्ण संख्या लिहा';
+
+  @override
+  String get adminCampaignErrCap => '1 किंवा त्याहून अधिक पूर्ण संख्या लिहा';
+
+  @override
+  String get adminCampaignErrCategories => 'किमान एक श्रेणी निवडा';
+
+  @override
+  String get adminAdvertiserTitle => 'जाहिरातदार जोडा';
+
+  @override
+  String get adminAdvertiserName => 'व्यवसायाचे नाव';
+
+  @override
+  String get adminAdvertiserContact => 'संपर्काचे नाव (ऐच्छिक)';
+
+  @override
+  String get adminAdvertiserPhone => 'संपर्क फोन (ऐच्छिक)';
+
+  @override
+  String get adminAdvertiserGst => 'GST क्रमांक (ऐच्छिक, 15 अक्षरे)';
+
+  @override
+  String get adminAdvertiserSave => 'जोडा';
+
+  @override
+  String get adminPlansTitle => 'प्लॅन';
+
+  @override
+  String get adminPlansSubtitle => 'सबस्क्रिप्शन प्लॅनची किंमत आणि चालू/बंद';
+
+  @override
+  String get adminPlansIntro =>
+      'किंमत बदलल्यास नवीन ग्राहकांकडून घेतले जाणारे शुल्क बदलते.';
+
+  @override
+  String get adminPlansNew => 'नवीन प्लॅन';
+
+  @override
+  String get adminPlansEmpty => 'अजून कोणताही प्लॅन नाही.';
+
+  @override
+  String get adminPlanEditTitle => 'प्लॅन बदला';
+
+  @override
+  String get adminPlanCode => 'प्लॅन कोड';
+
+  @override
+  String get adminPlanCodeHint => 'प्लॅन तयार झाल्यानंतर बदलता येत नाही.';
+
+  @override
+  String get adminPlanName => 'नाव';
+
+  @override
+  String get adminPlanPrice => 'किंमत (₹)';
+
+  @override
+  String get adminPlanPeriod => 'बिलिंग';
+
+  @override
+  String get adminPlanMonthly => 'मासिक';
+
+  @override
+  String get adminPlanYearly => 'वार्षिक';
+
+  @override
+  String adminPlanPerMonth(String price) {
+    return '$price / महिना';
+  }
+
+  @override
+  String adminPlanPerYear(String price) {
+    return '$price / वर्ष';
+  }
+
+  @override
+  String get adminPlanActive => 'खरेदीसाठी उपलब्ध';
+
+  @override
+  String get adminPlanOff => 'बंद';
+
+  @override
+  String get adminPlanSave => 'प्लॅन जतन करा';
+
+  @override
+  String get adminPlanErrCode => 'अक्षरे, अंक, - किंवा _ वापरा (32 पर्यंत)';
+
+  @override
+  String get adminPlanErrName => 'आवश्यक (100 अक्षरांपर्यंत)';
+
+  @override
+  String get adminPlanErrPrice => '149 किंवा 149.50 सारखी किंमत लिहा';
+
+  @override
+  String get adminCouponsTitle => 'कूपन';
+
+  @override
+  String get adminCouponsSubtitle => 'सबस्क्रिप्शनसाठी सवलत कोड';
+
+  @override
+  String get adminCouponsNew => 'नवीन कूपन';
+
+  @override
+  String get adminCouponsEmpty => 'अजून कोणतेही कूपन नाही.';
+
+  @override
+  String get adminCouponCode => 'कूपन कोड';
+
+  @override
+  String get adminCouponPercent => 'टक्के सवलत';
+
+  @override
+  String get adminCouponFixed => 'रकमेची सवलत';
+
+  @override
+  String get adminCouponValuePercent => 'टक्के सवलत (1 ते 100)';
+
+  @override
+  String get adminCouponValueFixed => 'सवलतीची रक्कम (₹)';
+
+  @override
+  String get adminCouponPlan => 'कशावर चालेल';
+
+  @override
+  String get adminCouponAnyPlan => 'कोणताही प्लॅन';
+
+  @override
+  String get adminCouponMin => 'किमान किंमत (₹, ऐच्छिक)';
+
+  @override
+  String get adminCouponMaxUses => 'वापर मर्यादा (ऐच्छिक)';
+
+  @override
+  String adminCouponMaxUsesNote(int used) {
+    return 'आतापर्यंत $used वेळा वापरले. मर्यादा नको असल्यास रिकामे ठेवा.';
+  }
+
+  @override
+  String get adminCouponStarts => 'सुरू';
+
+  @override
+  String get adminCouponEnds => 'संपते (ऐच्छिक)';
+
+  @override
+  String get adminCouponNoEnd => 'शेवटची तारीख नाही';
+
+  @override
+  String get adminCouponClearEnd => 'शेवटची तारीख काढा';
+
+  @override
+  String get adminCouponActive => 'चालू आहे';
+
+  @override
+  String get adminCouponSave => 'कूपन जतन करा';
+
+  @override
+  String get adminCouponOff => 'बंद';
+
+  @override
+  String get adminCouponExpired => 'कालबाह्य';
+
+  @override
+  String get adminCouponUsedUp => 'पूर्ण वापरले';
+
+  @override
+  String adminCouponPercentOff(int percent) {
+    return '$percent% सवलत';
+  }
+
+  @override
+  String adminCouponAmountOff(String amount) {
+    return '$amount सवलत';
+  }
+
+  @override
+  String adminCouponMinNote(String amount) {
+    return '$amount पासून';
+  }
+
+  @override
+  String adminCouponFrom(String date) {
+    return '$date पासून';
+  }
+
+  @override
+  String adminCouponUsed(int used) {
+    return '$used वेळा वापरले';
+  }
+
+  @override
+  String adminCouponUsedOf(int used, int max) {
+    return '$max पैकी $used वापरले';
+  }
+
+  @override
+  String get adminCouponErrCode => 'अक्षरे, अंक, - किंवा _ वापरा (50 पर्यंत)';
+
+  @override
+  String get adminCouponErrPercent => '1 ते 100 मधील पूर्ण संख्या लिहा';
+
+  @override
+  String get adminCouponErrAmount => '50 किंवा 49.50 सारखी रक्कम लिहा';
+
+  @override
+  String get adminCouponErrMaxUses => '1 किंवा त्याहून अधिक पूर्ण संख्या लिहा';
+
+  @override
+  String adminCouponErrMaxUsesBelow(int used) {
+    return 'पूर्ण संख्या लिहा, आतापर्यंतच्या $used वापरांपेक्षा कमी नाही';
+  }
+
+  @override
+  String get adminCouponErrDates => 'शेवटची तारीख सुरुवातीआधी असू शकत नाही';
+
+  @override
+  String get adminCouponErrMin => '100 किंवा 99.50 सारखी रक्कम लिहा';
+
+  @override
+  String get adminSubsTitle => 'सबस्क्रिप्शन';
+
+  @override
+  String get adminSubsSubtitle =>
+      'कोणाकडे प्लॅन आहे ते पहा, आणि एखादा लवकर संपवा';
+
+  @override
+  String get adminSubsEmpty => 'येथे एकही सबस्क्रिप्शन नाही.';
+
+  @override
+  String get adminSubPending => 'पेमेंटची प्रतीक्षा';
+
+  @override
+  String get adminSubCancelled => 'रद्द';
+
+  @override
+  String get adminSubExpired => 'कालबाह्य';
+
+  @override
+  String get adminSubUnknownUser => 'अज्ञात वापरकर्ता';
+
+  @override
+  String adminSubStarted(String date) {
+    return '$date रोजी सुरू';
+  }
+
+  @override
+  String adminSubEnds(String date) {
+    return '$date रोजी संपते';
+  }
+
+  @override
+  String adminSubCancelledOn(String date) {
+    return '$date रोजी रद्द';
+  }
+
+  @override
+  String adminSubEndedOn(String date) {
+    return '$date रोजी संपले';
+  }
+
+  @override
+  String get adminSubAutoRenew => 'आपोआप नूतनीकरण';
+
+  @override
+  String get adminSubWaiting => 'पेमेंट निश्चित होण्याची प्रतीक्षा';
+
+  @override
+  String get adminSubEndNow => 'आता संपवा';
+
+  @override
+  String get adminSubEndTitle => 'हे सबस्क्रिप्शन संपवायचे?';
+
+  @override
+  String get adminSubEndBody =>
+      'त्यांचा प्लॅन लगेच बंद होतो आणि ते मोफत प्लॅनवर परत जातात. हे परत करता येत नाही.';
+
+  @override
+  String get adminSubEndConfirm => 'सबस्क्रिप्शन संपवा';
+
+  @override
+  String get adminSubEnded => 'सबस्क्रिप्शन संपले.';
+
+  @override
   String get adminAuditTitle => 'क्रियाकलाप नोंद';
 
   @override
@@ -1519,6 +2104,374 @@ class AppLocalizationsMr extends AppLocalizations {
 
   @override
   String get adminMarketsSkipNameInvalid => 'कॅटलॉगच्या नाव नियमांनी नाकारले';
+
+  @override
+  String get adminProductsTitle => 'उत्पादने';
+
+  @override
+  String get adminProductsSubtitle =>
+      'कॅटलॉगमध्ये शोधा आणि उत्पादनांची नावे बदला';
+
+  @override
+  String get adminProductsSearchHint => 'नाव किंवा कोडने शोधा';
+
+  @override
+  String get adminProductsEmpty => 'कोणतेही उत्पादन सापडले नाही.';
+
+  @override
+  String get adminProductsHint => 'नावे बदलण्यासाठी उत्पादनावर टॅप करा.';
+
+  @override
+  String get adminProductEditTitle => 'उत्पादन बदला';
+
+  @override
+  String get adminProductNameEn => 'इंग्रजीतील नाव';
+
+  @override
+  String get adminProductNameHi => 'हिंदीतील नाव';
+
+  @override
+  String get adminProductNameMr => 'मराठीतील नाव';
+
+  @override
+  String get adminProductNameOptional =>
+      'ऐच्छिक. रिकामे असल्यास त्या भाषेचे वापरकर्ते इंग्रजी नाव पाहतात.';
+
+  @override
+  String get adminProductErrEnglish => 'इंग्रजी नाव लिहा.';
+
+  @override
+  String get adminProductActive => 'अ‍ॅपमध्ये दिसावे';
+
+  @override
+  String get adminProductActiveHint =>
+      'बंद केल्यास उत्पादन वापरकर्त्यांपासून लपते; त्याचे भाव राहतात.';
+
+  @override
+  String get adminProductSave => 'उत्पादन जतन करा';
+
+  @override
+  String get adminProductNew => 'नवीन उत्पादन';
+
+  @override
+  String adminVariantsButton(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'प्रकार ($count)',
+      one: 'प्रकार (1)',
+      zero: 'प्रकार',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get adminVariantsTitle => 'प्रकार';
+
+  @override
+  String get adminVariantsIntro =>
+      'या उत्पादनाचे ग्रेड किंवा रूपे, जसे मोठा किंवा सुका. नाव बदलण्यासाठी किंवा बंद करण्यासाठी टॅप करा.';
+
+  @override
+  String get adminVariantsEmpty => 'या उत्पादनाला कोणताही प्रकार नाही.';
+
+  @override
+  String get adminVariantNew => 'नवीन प्रकार';
+
+  @override
+  String get adminVariantEdit => 'प्रकार बदला';
+
+  @override
+  String get adminProductCode => 'कोड';
+
+  @override
+  String get adminProductCodeHint =>
+      'इंग्रजी लहान अक्षरे, अंक आणि हायफन; अक्षराने सुरू व्हावे. प्राइस फीडमधील वस्तूसाठी तिचे नाव ठेवा, जसे red-onion. हे नंतर बदलता येत नाही.';
+
+  @override
+  String get adminProductErrCode =>
+      'इंग्रजी लहान अक्षरे, अंक आणि हायफन वापरा, अक्षराने सुरू करा.';
+
+  @override
+  String get adminProductErrSubCategory => 'उप-श्रेणी निवडा.';
+
+  @override
+  String get adminProductErrUnit => 'एकक निवडा.';
+
+  @override
+  String get adminCategoriesTitle => 'श्रेणी';
+
+  @override
+  String get adminCategoriesSubtitle => 'श्रेणी आणि उप-श्रेणी जोडा व नाव बदला';
+
+  @override
+  String get adminCategoriesIntro =>
+      'नाव बदलण्यासाठी किंवा बंद करण्यासाठी श्रेणी किंवा उप-श्रेणीवर टॅप करा. उत्पादने उप-श्रेणीच्या आत असतात.';
+
+  @override
+  String get adminCategoriesEmpty => 'अजून कोणतीही श्रेणी नाही.';
+
+  @override
+  String get adminCategoryNew => 'नवीन श्रेणी';
+
+  @override
+  String get adminCategoryEdit => 'श्रेणी बदला';
+
+  @override
+  String get adminSubCategoryNew => 'नवीन उप-श्रेणी';
+
+  @override
+  String get adminSubCategoryEdit => 'उप-श्रेणी बदला';
+
+  @override
+  String get adminCategoryCodeHint =>
+      'इंग्रजी लहान अक्षरे, अंक आणि हायफन; अक्षराने सुरू व्हावे. हे नंतर बदलता येत नाही.';
+
+  @override
+  String get adminCategoryActiveHint =>
+      'बंद केल्यास ती वापरकर्त्यांपासून लपते; तिच्या आतले सर्व राहते.';
+
+  @override
+  String get adminCategorySave => 'जतन करा';
+
+  @override
+  String get adminUnitsTitle => 'एकके';
+
+  @override
+  String get adminUnitsSubtitle => 'मापाची एकके जोडा व नाव बदला';
+
+  @override
+  String get adminUnitsIntro =>
+      'नाव बदलण्यासाठी किंवा बंद करण्यासाठी एककावर टॅप करा. उत्पादनांचे भाव एखाद्या एककात असतात.';
+
+  @override
+  String get adminUnitsEmpty => 'अजून कोणतेही एकक नाही.';
+
+  @override
+  String get adminUnitNew => 'नवीन एकक';
+
+  @override
+  String get adminUnitEdit => 'एकक बदला';
+
+  @override
+  String get adminUnitSymbol => 'चिन्ह';
+
+  @override
+  String get adminUnitErrSymbol => 'लहान चिन्ह लिहा, जास्तीत जास्त 16 अक्षरे.';
+
+  @override
+  String get adminUnitDimension => 'ते काय मोजते';
+
+  @override
+  String get adminUnitChooseDimension => 'ते काय मोजते ते निवडा';
+
+  @override
+  String get adminUnitErrDimension => 'एकक काय मोजते ते निवडा.';
+
+  @override
+  String get adminUnitFactor => 'किती मूळ एकके';
+
+  @override
+  String adminUnitFactorIn(String unit) {
+    return '$unit मधील प्रमाण';
+  }
+
+  @override
+  String get adminUnitFactorHint =>
+      'या एककाचे एक किती असते, उदा. क्विंटलसाठी किलोमध्ये 100. हे नंतर बदलता येत नाही.';
+
+  @override
+  String get adminUnitErrFactor =>
+      'शून्यापेक्षा मोठी संख्या लिहा, जास्तीत जास्त 6 दशांश.';
+
+  @override
+  String get adminUnitActiveHint =>
+      'बंद केल्यास नवीन उत्पादनांसाठी दिसत नाही; सध्याचे भाव राहतात.';
+
+  @override
+  String get adminUnitDimMass => 'वजन';
+
+  @override
+  String get adminUnitDimVolume => 'आकारमान';
+
+  @override
+  String get adminUnitDimCount => 'संख्या';
+
+  @override
+  String get adminUnitDimLength => 'लांबी';
+
+  @override
+  String get adminUnitDimArea => 'क्षेत्रफळ';
+
+  @override
+  String get adminMandisTitle => 'मंडया';
+
+  @override
+  String get adminMandisSubtitle =>
+      'मंडया शोधा, जोडा, नाव बदला आणि जिल्हा बदला';
+
+  @override
+  String get adminMandisEmpty => 'कोणतीही मंडी सापडली नाही.';
+
+  @override
+  String get adminMandiNew => 'नवीन मंडी';
+
+  @override
+  String get adminMandiEdit => 'मंडी बदला';
+
+  @override
+  String get adminMandiName => 'नाव';
+
+  @override
+  String get adminMandiErrName => 'मंडीचे नाव लिहा.';
+
+  @override
+  String get adminMandiDistrict => 'जिल्हा';
+
+  @override
+  String get adminMandiChooseDistrict => 'जिल्हा निवडा';
+
+  @override
+  String get adminMandiErrDistrict => 'जिल्हा निवडा.';
+
+  @override
+  String get adminMandiCodeHint =>
+      'इंग्रजी लहान अक्षरे, अंक आणि हायफन; अक्षराने सुरू व्हावे. प्राइस फीडमधील बाजारासाठी त्याचे नाव ठेवा, जसे rajkot. हे नंतर बदलता येत नाही.';
+
+  @override
+  String get adminMandiActiveHint =>
+      'बंद केल्यास ती वापरकर्त्यांपासून लपते; तिचे भाव राहतात.';
+
+  @override
+  String get adminStatesTitle => 'राज्ये आणि जिल्हे';
+
+  @override
+  String get adminStatesSubtitle => 'राज्ये आणि जिल्हे जोडा व नाव बदला';
+
+  @override
+  String get adminStatesIntro =>
+      'नाव बदलण्यासाठी किंवा बंद करण्यासाठी राज्य किंवा जिल्ह्यावर टॅप करा. मंडया जिल्ह्यात असतात.';
+
+  @override
+  String get adminStatesEmpty => 'अजून कोणतेही राज्य नाही.';
+
+  @override
+  String get adminStateNew => 'नवीन राज्य';
+
+  @override
+  String get adminStateEdit => 'राज्य बदला';
+
+  @override
+  String get adminDistrictNew => 'नवीन जिल्हा';
+
+  @override
+  String get adminDistrictEdit => 'जिल्हा बदला';
+
+  @override
+  String get adminPlaceErrName => 'नाव लिहा.';
+
+  @override
+  String get adminStateCodeHint =>
+      '2 ते 10 अक्षरे किंवा अंक, जसे MH. हे नंतर बदलता येत नाही.';
+
+  @override
+  String get adminStateErrCode => '2 ते 10 अक्षरे किंवा अंक वापरा.';
+
+  @override
+  String get adminPlaceActiveHint =>
+      'बंद केल्यास ते वापरकर्त्यांपासून लपते; त्याच्या आतले सर्व राहते.';
+
+  @override
+  String get adminSuppliersTitle => 'पुरवठादार आणि हब';
+
+  @override
+  String get adminSuppliersSubtitle => 'पुरवठादार आणि हब शोधा, जोडा आणि बदला';
+
+  @override
+  String get adminSuppliersEmpty => 'कोणताही पुरवठादार सापडला नाही.';
+
+  @override
+  String get adminSupplierNew => 'नवीन पुरवठादार';
+
+  @override
+  String get adminSupplierEdit => 'पुरवठादार बदला';
+
+  @override
+  String get adminSupplierPhone => 'संपर्क फोन';
+
+  @override
+  String get adminSupplierPhoneHint => 'ऐच्छिक. अंक, देश कोडसाठी + सह.';
+
+  @override
+  String get adminSupplierErrPhone => 'योग्य फोन नंबर लिहा, किंवा रिकामा सोडा.';
+
+  @override
+  String get adminSupplierActiveHint =>
+      'बंद केल्यास तो वापरकर्त्यांपासून लपतो.';
+
+  @override
+  String get adminCommoditiesTitle => 'वस्तू जोडा';
+
+  @override
+  String get adminCommoditiesSubtitle =>
+      'प्राइस फीडमधील वस्तू कॅटलॉगमध्ये जोडा';
+
+  @override
+  String get adminCommoditiesIntro =>
+      'उप-श्रेणी आणि एकक निवडा, मग मागील पूर्ण पुलमधून वस्तू निवडा. प्रत्येक वस्तू फीडच्या इंग्रजी नावासह उत्पादन म्हणून जोडली जाते, म्हणजे पुढच्या पुलमध्ये तिचे भाव सेव्ह करता येतील. हिंदी आणि मराठी नावे नंतर कॅटलॉगमध्ये जोडा.';
+
+  @override
+  String get adminCommoditiesNoFeed =>
+      'प्राइस फीडमधील वस्तू अजून नोंदवल्या गेल्या नाहीत. फीडमध्ये डेटा असलेल्या दिवशी पूर्ण पुल (फिल्टरशिवाय आता चालवा) चालवा, मग परत या.';
+
+  @override
+  String get adminCommoditiesSubCategory => 'उप-श्रेणी';
+
+  @override
+  String get adminCommoditiesChooseSubCategory => 'उप-श्रेणी निवडा';
+
+  @override
+  String get adminCommoditiesUnit => 'एकक';
+
+  @override
+  String get adminCommoditiesChooseUnit => 'एकक निवडा';
+
+  @override
+  String get adminCommoditiesCommodities => 'वस्तू';
+
+  @override
+  String get adminCommoditiesChoose => 'वस्तू निवडा';
+
+  @override
+  String adminCommoditiesAdd(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count वस्तू जोडा',
+      one: '1 वस्तू जोडा',
+      zero: 'वस्तू जोडा',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String adminCommoditiesAdded(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count वस्तू जोडल्या',
+      one: '1 वस्तू जोडली',
+      zero: 'कोणतीही वस्तू जोडली नाही',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get adminCommoditiesAddedHint =>
+      'त्यांचे भाव पुढच्या पुलपासून सेव्ह होतील.';
+
+  @override
+  String get adminCommoditiesSkipNotInFeed => 'फीड यादीत नाही';
 
   @override
   String get appVersionTitle => 'कृपया MolBhav अपडेट करा';
