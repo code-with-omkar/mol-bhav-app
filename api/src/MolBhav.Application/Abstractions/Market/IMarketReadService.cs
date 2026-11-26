@@ -11,7 +11,7 @@ public interface IMarketReadService
     /// <summary>Null when the state does not exist or is inactive.</summary>
     Task<IReadOnlyList<DistrictResponse>?> GetDistrictsAsync(Guid stateId, CancellationToken cancellationToken = default);
 
-    Task<PagedResult<MandiResponse>> GetMandisAsync(Guid? districtId, string? search, PageRequest page, CancellationToken cancellationToken = default);
+    Task<PagedResult<MandiResponse>> GetMandisAsync(Guid? districtId, string? search, PageRequest page, CancellationToken cancellationToken = default, Guid? stateId = null);
 
     Task<PagedResult<SupplierResponse>> GetSuppliersAsync(Guid? districtId, string? search, PageRequest page, CancellationToken cancellationToken = default);
 

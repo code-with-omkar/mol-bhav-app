@@ -37,7 +37,7 @@ internal static class FeedMarketImporter
                 continue;
             }
 
-            var code = MarketCode.Create(marketCodes.CodeFor(feed.Name));
+            var code = MarketCode.Create(marketCodes.CodeFor(feed.Name, state.Name));
             if (code.IsFailure)
             {
                 skipped.Add(new SkippedFeedMarket(feed.Name, FeedMarketSkipReason.CodeInvalid));
@@ -57,7 +57,7 @@ internal static class FeedMarketImporter
                 continue;
             }
 
-            var districtName = feed.District.Trim();
+            var districtName = marketCodes.DistrictNameFor(state.Name, feed.District);
             var district = state.Districts.FirstOrDefault(d => string.Equals(d.Name, districtName, StringComparison.OrdinalIgnoreCase));
             if (district is null)
             {

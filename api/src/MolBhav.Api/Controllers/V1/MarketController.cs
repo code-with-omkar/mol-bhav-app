@@ -43,8 +43,9 @@ public sealed class MarketController(ISender sender) : ApiControllerBase(sender)
         [FromQuery] string? search,
         CancellationToken cancellationToken,
         [FromQuery] int page = 1,
-        [FromQuery] int pageSize = PageRequest.DefaultPageSize) =>
-        PagedEnvelope(await Sender.Send(new GetMandisQuery(districtId, search, page, pageSize), cancellationToken));
+        [FromQuery] int pageSize = PageRequest.DefaultPageSize,
+        [FromQuery] Guid? stateId = null) =>
+        PagedEnvelope(await Sender.Send(new GetMandisQuery(districtId, search, page, pageSize, stateId), cancellationToken));
 
     /// <summary>Construction regional suppliers/hubs (BRD §12), optionally narrowed to a district and/or a name search.</summary>
     [HttpGet("suppliers")]

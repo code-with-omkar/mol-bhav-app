@@ -28,7 +28,9 @@ public sealed class ImportFeedMarketsTests
         _states.GetByNameAsync(Arg.Any<string>(), Arg.Any<CancellationToken>()).Returns(_state);
         _mandis.CodeExistsAsync(Arg.Any<MarketCode>(), Arg.Any<CancellationToken>()).Returns(false);
         // The same slug rule ingestion uses, without the config map.
-        _codes.CodeFor(Arg.Any<string>()).Returns(call => call.Arg<string>().ToLowerInvariant().Replace(' ', '-'));
+        _codes.CodeFor(Arg.Any<string>(), Arg.Any<string>()).Returns(call => call.ArgAt<string>(0).ToLowerInvariant().Replace(' ', '-'));
+        _codes.StateNameFor(Arg.Any<string>()).Returns(call => call.Arg<string>().Trim());
+        _codes.DistrictNameFor(Arg.Any<string>(), Arg.Any<string>()).Returns(call => call.ArgAt<string>(1).Trim());
         _handler = new ImportFeedMarketsCommandHandler(_sources, _feedOptions, _states, _mandis, _codes);
         WithFeed(
             new FeedMarket("Rajkot", "Gujarat", "Rajkot"),
@@ -96,7 +98,7 @@ public sealed class ImportFeedMarketsTests
     public async Task Two_names_that_resolve_to_one_code_add_only_the_first()
     {
         WithFeed(new FeedMarket("Bhuj", "Gujarat", "Kachchh"), new FeedMarket("bhuj", "Gujarat", "Kutch"));
-        _codes.CodeFor(Arg.Any<string>()).Returns("bhuj");
+        _codes.CodeFor(Arg.Any<string>(), Arg.Any<string>()).Returns("bhuj");
 
         var result = await Import("Bhuj", "bhuj");
 
@@ -108,7 +110,7 @@ public sealed class ImportFeedMarketsTests
     public async Task A_name_that_cannot_be_a_code_is_skipped()
     {
         WithFeed(new FeedMarket("123 Mandi", "Gujarat", "Rajkot"));
-        _codes.CodeFor("123 Mandi").Returns("123-mandi");
+        _codes.CodeFor("123 Mandi", Arg.Any<string>()).Returns("123-mandi");
 
         var result = await Import("123 Mandi");
 

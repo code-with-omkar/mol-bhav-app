@@ -49,7 +49,7 @@ public sealed class IngestionRecordWriterSkipTests
     private IngestionRecordWriter CreateWriter()
     {
         _records.When(r => r.Add(Arg.Any<PriceRecord>())).Do(call => _stored.Add(call.Arg<PriceRecord>()));
-        return new(_errors, _records, _products, _categories, _mandis, Substitute.For<ISupplierRepository>(), new FixedTimeProvider(Now));
+        return new(_errors, _records, _products, _categories, _mandis, Substitute.For<ISupplierRepository>(), Substitute.For<IUnitOfMeasureRepository>(), new FixedTimeProvider(Now));
     }
 
     private static IngestedPriceRecord Row(string product, string location, string? variant = null, decimal modal = 2000m) =>

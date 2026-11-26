@@ -38,7 +38,7 @@ public interface IMarketOpportunityReadService
         CancellationToken cancellationToken = default);
 }
 
-public sealed record OpportunityWatcher(Guid UserId, Guid ProductId, Guid? VariantId, Guid HomeDistrictId);
+public sealed record OpportunityWatcher(Guid UserId, Guid ProductId, Guid? VariantId, Guid HomeDistrictId, string UnitCode = "quintal");
 
 public sealed record OpportunityPrice(
     Guid ProductId,

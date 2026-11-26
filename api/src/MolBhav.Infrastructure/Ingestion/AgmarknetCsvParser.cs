@@ -70,7 +70,8 @@ internal sealed class AgmarknetCsvParser(IOptions<AgmarknetOptions> options) : I
                 arrivalDate: Columns.Get(fields, columns.Date),
                 fallbackDate: null,
                 opts,
-                out var reason);
+                out var reason,
+                state: Columns.Get(fields, columns.State));
 
             if (record is null)
             {
@@ -103,6 +104,8 @@ internal sealed class AgmarknetCsvParser(IOptions<AgmarknetOptions> options) : I
 
         public int Market { get; private init; } = -1;
 
+        public int State { get; private init; } = -1;
+
         public int MinPrice { get; private init; } = -1;
 
         public int MaxPrice { get; private init; } = -1;
@@ -128,6 +131,7 @@ internal sealed class AgmarknetCsvParser(IOptions<AgmarknetOptions> options) : I
                 Commodity = Find(k => k == "commodity" || k == "commodityname"),
                 Variety = Find(k => k == "variety"),
                 Market = Find(k => k == "market" || k == "marketname" || k == "mandi" || k == "apmc"),
+                State = Find(k => k is "state" or "statename"),
                 MinPrice = Find(k => k.StartsWith("minprice", StringComparison.Ordinal) || k.StartsWith("minimumprice", StringComparison.Ordinal)),
                 MaxPrice = Find(k => k.StartsWith("maxprice", StringComparison.Ordinal) || k.StartsWith("maximumprice", StringComparison.Ordinal)),
                 ModalPrice = Find(k => k.StartsWith("modalprice", StringComparison.Ordinal)),

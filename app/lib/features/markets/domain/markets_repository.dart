@@ -6,12 +6,20 @@ import 'markets_entities.dart';
 abstract interface class MarketsRepository {
   Future<Result<List<Commodity>>> getCommodities();
 
-  /// Cached comparison first, then the live one. [marketIds] `null` lets
-  /// the API choose the user's default markets.
+  /// Cached comparison first, then the live one, for the markets of [stateId]
+  /// (`null`: the cheapest across all states). [marketIds] `null` selects
+  /// every market returned.
   Stream<Result<MarketComparison>> watchComparison(
     String commodityId, {
+    String? stateId,
     List<String>? marketIds,
   });
+
+  /// The state a market is in, when it has a price for the product.
+  Future<Result<String?>> getMarketStateName(
+    String commodityId,
+    String marketId,
+  );
 
   Future<Result<PriceTrend>> getTrend(
     String commodityId,
@@ -39,8 +47,16 @@ class GetMarketComparison {
 
   Stream<Result<MarketComparison>> call(
     String commodityId, {
+    String? stateId,
     List<String>? marketIds,
-  }) => _repository.watchComparison(commodityId, marketIds: marketIds);
+  }) => _repository.watchComparison(
+    commodityId,
+    stateId: stateId,
+    marketIds: marketIds,
+  );
+
+  Future<Result<String?>> stateOf(String commodityId, String marketId) =>
+      _repository.getMarketStateName(commodityId, marketId);
 }
 
 @injectable

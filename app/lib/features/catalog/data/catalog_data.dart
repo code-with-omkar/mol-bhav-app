@@ -18,7 +18,9 @@ class CatalogRepositoryImpl implements CatalogRepository {
   final Dio _dio;
   final ResponseCache _cache;
 
+  /// The API caps a page at 100; a category holds more products than that.
   static const _pageSize = 100;
+  static const _maxPages = 10;
 
   @override
   Future<Result<List<CatalogCategory>>> getCategories() => runCachedApiCall(
@@ -39,15 +41,25 @@ class CatalogRepositoryImpl implements CatalogRepository {
     String search = '',
   }) {
     final term = search.trim();
-    Future<List<dynamic>> fetch() async =>
-        (await _dio.get<List<dynamic>>(
-          '/catalog/categories/${Uri.encodeComponent(categoryCode)}/products',
-          queryParameters: {
-            'search': ?(term.isEmpty ? null : term),
-            'pageSize': _pageSize,
-          },
-        )).data ??
-        [];
+    Future<List<dynamic>> fetch() async {
+      final rows = <dynamic>[];
+      for (var page = 1; page <= _maxPages; page++) {
+        final batch =
+            (await _dio.get<List<dynamic>>(
+              '/catalog/categories/${Uri.encodeComponent(categoryCode)}/products',
+              queryParameters: {
+                'search': ?(term.isEmpty ? null : term),
+                'page': page,
+                'pageSize': _pageSize,
+              },
+            )).data ??
+            const [];
+        rows.addAll(batch);
+        if (batch.length < _pageSize) break;
+      }
+      return rows;
+    }
+
     List<CatalogProduct> parse(Object json) =>
         parseList(json as List<dynamic>, _product);
 
@@ -55,7 +67,7 @@ class CatalogRepositoryImpl implements CatalogRepository {
     return term.isEmpty
         ? runCachedApiCall(
             cache: _cache,
-            key: 'catalog.products.$categoryCode',
+            key: 'catalog.products.v2.$categoryCode',
             ttl: referenceDataTtl,
             fetch: fetch,
             parse: parse,

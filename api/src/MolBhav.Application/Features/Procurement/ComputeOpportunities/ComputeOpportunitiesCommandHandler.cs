@@ -25,6 +25,9 @@ internal sealed class ComputeOpportunitiesCommandHandler(
     private const int MaxCandidates = 50;
     private const int MaxOpportunities = 10;
 
+    /// <summary>A price older than this says nothing about what the goods cost today.</summary>
+    private const int MaxPriceAgeDays = 30;
+
     public async Task<Result<IReadOnlyList<ProcurementOpportunityResponse>>> Handle(
         ComputeOpportunitiesCommand request, CancellationToken cancellationToken)
     {
@@ -35,7 +38,10 @@ internal sealed class ComputeOpportunitiesCommandHandler(
         }
 
         var candidates = await pricingReadService.GetLatestPricesAsync(
-            new LatestPriceFilter(requirement.ProductId, null, requirement.TargetDistrictId, new PageRequest(1, MaxCandidates)),
+            new LatestPriceFilter(
+                requirement.ProductId, null, requirement.TargetDistrictId, new PageRequest(1, MaxCandidates),
+                SinceDate: DateOnly.FromDateTime(timeProvider.GetUtcNow().UtcDateTime).AddDays(-MaxPriceAgeDays),
+                CheapestFirst: true),
             cancellationToken);
 
         if (candidates.Items.Count == 0)

@@ -26,6 +26,7 @@ internal sealed class IngestionRecordWriter(
     IProcurementCategoryRepository categories,
     IMandiRepository mandis,
     ISupplierRepository suppliers,
+    IUnitOfMeasureRepository units,
     TimeProvider timeProvider)
 {
     /// <summary>
@@ -142,6 +143,9 @@ internal sealed class IngestionRecordWriter(
         public Dictionary<string, Mandi?> Mandis { get; } = new(StringComparer.Ordinal);
 
         public Dictionary<string, Supplier?> Suppliers { get; } = new(StringComparer.Ordinal);
+
+        /// <summary>Price multiplier from a source's quoted unit to a product unit; null when they cannot be converted.</summary>
+        public Dictionary<(string Quoted, Guid Unit), decimal?> UnitFactors { get; } = [];
 
         /// <summary>The source's live records for the batch's days, or null for a small batch (looked up per row).</summary>
         public Dictionary<RecordKey, PriceRecord>? Existing { get; set; }
@@ -281,8 +285,28 @@ internal sealed class IngestionRecordWriter(
             supplierId = supplier.Id;
         }
 
-        // Ingestion always records at the product's default unit — cross-unit source feeds are out of scope
-        // (same simplification ProcurementRequirement makes; see its doc comment).
+        // Ingestion always records at the product's default unit; a source quoting another unit is converted first.
+        if (!string.IsNullOrWhiteSpace(raw.QuotedUnitCode))
+        {
+            var factor = await PriceFactorAsync(raw.QuotedUnitCode, product.DefaultUnitId, lookups, cancellationToken);
+            if (factor is not { } multiplier)
+            {
+                return Error.Validation(
+                    "Ingestion.UnitMismatch",
+                    $"Prices per {raw.QuotedUnitCode} cannot be converted to the unit of product '{raw.ProductCode}'.");
+            }
+
+            if (multiplier != 1m)
+            {
+                raw = raw with
+                {
+                    MinPrice = Convert(raw.MinPrice, multiplier),
+                    MaxPrice = Convert(raw.MaxPrice, multiplier),
+                    ModalPrice = Convert(raw.ModalPrice, multiplier)!.Value,
+                };
+            }
+        }
+
         // Not yet saved, so the database cannot see an earlier row from this same fetch — check in memory first.
         // (e.g. Agmarknet lists FAQ and non-FAQ grades of one variety; both map to the same record.)
         var key = new RecordKey(product.Id, variantId, product.DefaultUnitId, raw.LocationKind, mandiId, supplierId, raw.RecordDate);
@@ -329,6 +353,43 @@ internal sealed class IngestionRecordWriter(
         existing?.Void();
         records.Add(created.Value);
         return RowOutcome.Stored;
+    }
+
+    private static decimal? Convert(decimal? price, decimal multiplier) =>
+        price is { } value ? decimal.Round(value * multiplier, 4) : null;
+
+    /// <summary>
+    /// What a price per <paramref name="quotedCode"/> is multiplied by to become a price per the product's unit: a price
+    /// per quintal becomes a price per kg at 1/100.
+    /// </summary>
+    private async Task<decimal?> PriceFactorAsync(string quotedCode, Guid productUnitId, Lookups lookups, CancellationToken cancellationToken)
+    {
+        if (lookups.UnitFactors.TryGetValue((quotedCode, productUnitId), out var known))
+        {
+            return known;
+        }
+
+        decimal? factor = null;
+        var code = CatalogCode.Create(quotedCode);
+        var quotedId = code.IsSuccess ? await units.GetIdByCodeAsync(code.Value, cancellationToken) : null;
+        if (quotedId == productUnitId)
+        {
+            factor = 1m;
+        }
+        else if (quotedId is { } id)
+        {
+            var quoted = await units.GetByIdAsync(id, cancellationToken);
+            var target = await units.GetByIdAsync(productUnitId, cancellationToken);
+            if (quoted is not null && target is not null)
+            {
+                // Quantity factor target→quoted: one kg is 1/100 of a quintal, so its price is too.
+                var ratio = target.ConversionFactorTo(quoted);
+                factor = ratio.IsSuccess ? ratio.Value : null;
+            }
+        }
+
+        lookups.UnitFactors[(quotedCode, productUnitId)] = factor;
+        return factor;
     }
 }
 

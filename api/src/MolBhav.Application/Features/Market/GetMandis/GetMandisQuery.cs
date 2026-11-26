@@ -5,4 +5,4 @@ using MolBhav.Application.Features.Market.Models;
 namespace MolBhav.Application.Features.Market.GetMandis;
 
 /// <summary>Mandis, optionally narrowed to a district and/or a name search.</summary>
-public sealed record GetMandisQuery(Guid? DistrictId, string? Search, int Page, int PageSize) : IQuery<PagedResult<MandiResponse>>;
+public sealed record GetMandisQuery(Guid? DistrictId, string? Search, int Page, int PageSize, Guid? StateId = null) : IQuery<PagedResult<MandiResponse>>;

@@ -80,6 +80,7 @@
   "arrivals": "आवक {quantity}",
   "bestMarket": "सबसे अच्छा बाज़ार · {market}",
   "lowerThanYourMarket": "{market} (आपका बाज़ार) से {amount} कम",
+  "comparisonAllStates": "सभी राज्य: 100 सबसे सस्ते",
   "comparisonEmpty": "इन बाज़ारों के भाव अभी उपलब्ध नहीं हैं।",
   "browseByMandi": "मंडी के अनुसार देखें",
   "browseByCommodity": "वस्तु के अनुसार देखें",

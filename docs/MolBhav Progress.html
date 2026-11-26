@@ -304,13 +304,13 @@
 <div class="overview">
   <div class="ov-card">
     <div class="ov-label">API</div>
-    <div class="ov-value c-api">434</div>
+    <div class="ov-value c-api">447</div>
     <div class="ov-sub">unit tests passing · 38 migrations · live Agmarknet pulls working</div>
     <div class="ov-bar"><div class="ov-bar-fill f-api" style="width:100%"></div></div>
   </div>
   <div class="ov-card">
     <div class="ov-label">Flutter app</div>
-    <div class="ov-value c-app">632</div>
+    <div class="ov-value c-app">635</div>
     <div class="ov-sub">tests passing (26 Nov full run, all passed) · analyze clean</div>
     <div class="ov-bar"><div class="ov-bar-fill f-app" style="width:100%"></div></div>
   </div>
@@ -341,9 +341,10 @@
       <div class="blocker-item"><div class="blocker-dot dot-warn"></div><div><strong>Hosting decisions</strong> — API address is molbhav-api.jagtech.in (set in the hosting files). Still to arrange: the VPS, Cloudflare DNS and certificate, production keys, and whether the Angular admin stays. See docs/hosting-prerequisites.md.</div></div>
       <div class="blocker-item"><div class="blocker-dot dot-warn"></div><div><strong>Review Hindi + Marathi</strong> — all new admin and notice strings were written by Claude and need a native check.</div></div>
       <div class="blocker-item"><div class="blocker-dot dot-ok"></div><div><strong>Full pull done (24 Nov)</strong> — 12,323 prices saved for 24 Nov across many states after adding 220 commodities (1,310 mandis were already added). 81 rows failed on bad source data (invalid prices, duplicates). Pull time is about 5 minutes; the gov server answers in about 1 second a page, so the time is our processing.</div></div>
-      <div class="blocker-item"><div class="blocker-dot dot-ok"></div><div><strong>One year of price history loaded (26 Nov)</strong> — 3.66 million prices, every day from 25 Nov 2025 to 25 Nov 2026; no duplicates. Database about 1.2 GB. Price screens answer in under 0.1 s once warm (first comparison after a restart can take about 2 s).</div></div>
-      <div class="blocker-item"><div class="blocker-dot dot-ok"></div><div><strong>Tests (26 Nov)</strong> — API 434 passing; app 632 passing.</div></div>
-      <div class="blocker-item"><div class="blocker-dot dot-ok"></div><div><strong>Last push</strong> — forgot password and password saving pushed to payment-integration on 26 Nov (login after reset confirmed on the phone). Credential files in docs/ (Google client secrets, WhatsApp Token.txt) are git-ignored and stay local only.</div></div>
+      <div class="blocker-item"><div class="blocker-dot dot-ok"></div><div><strong>One year of price history loaded (26 Nov)</strong> — 63.8 lakh prices, every day from 25 Nov 2025 to 25 Nov 2026, no duplicates; 2,501 missing markets added (3,811 in all) and duplicate states and districts merged, so skipped feed rows fell from about 40% to under 1%. Database about 1.8 GB.</div></div>
+      <div class="blocker-item"><div class="blocker-dot dot-ok"></div><div><strong>Units by group (26 Nov)</strong> — vegetables, fruits, flowers, spices, dry fruits, oils and fish are priced per kg; grains, pulses, oilseeds and other produce per quintal. New feed prices are converted automatically. Cock and goat are hidden until their unit is confirmed. Construction is removed for now (saved copy kept).</div></div>
+      <div class="blocker-item"><div class="blocker-dot dot-ok"></div><div><strong>Tests (26 Nov)</strong> — API 447 passing; app 635 passing.</div></div>
+      <div class="blocker-item"><div class="blocker-dot dot-ok"></div><div><strong>Last push</strong> — pushed to payment-integration on 26 Nov: forgot password, then missing markets, state-wise market selection, units by group and the removal of Construction. Credential files in docs/ (Google client secrets, WhatsApp Token.txt) are git-ignored and stay local only.</div></div>
     </div>
   </div>
   <div class="blocker-card">
@@ -479,8 +480,8 @@
   </div>
   <div class="ns-card">
     <div class="ns-num">SUGGESTED 2</div>
-    <div class="ns-title">Fewer skipped feed rows</div>
-    <div class="ns-detail">One year of history is the agreed scope and is loaded. About half of feed rows are skipped because the market or commodity is not in the catalog; find and add the missing ones.</div>
+    <div class="ns-title">Check units and markets on the phone</div>
+    <div class="ns-detail">Check per kg and per quintal prices, the state selector on price comparison, Create alert (state, then market), the cost estimator, and that Suppliers is hidden. Have the new Hindi and Marathi group names reviewed.</div>
     <div class="ns-tag">data</div>
   </div>
   <div class="ns-card">

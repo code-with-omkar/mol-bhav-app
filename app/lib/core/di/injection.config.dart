@@ -623,6 +623,9 @@ extension GetItInjectableX on _i174.GetIt {
     gh.factory<_i1045.GetAlertOptions>(
       () => _i1045.GetAlertOptions(gh<_i1045.AlertsRepository>()),
     );
+    gh.factory<_i1045.GetAlertMarkets>(
+      () => _i1045.GetAlertMarkets(gh<_i1045.AlertsRepository>()),
+    );
     gh.factory<_i1045.GetCurrentPrice>(
       () => _i1045.GetCurrentPrice(gh<_i1045.AlertsRepository>()),
     );
@@ -965,6 +968,15 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i98.LocaleRepository>(),
       ),
     );
+    gh.factory<_i333.MarketComparisonCubit>(
+      () => _i333.MarketComparisonCubit(
+        gh<_i806.GetCommodities>(),
+        gh<_i806.GetMarketComparison>(),
+        gh<_i169.CatalogRepository>(),
+        gh<_i737.ProfileCubit>(),
+        gh<_i995.GetMandiPrices>(),
+      ),
+    );
     gh.lazySingleton<_i312.WatchlistCubit>(
       () => _i312.WatchlistCubit(
         gh<_i887.WatchWatchlist>(),
@@ -975,14 +987,6 @@ extension GetItInjectableX on _i174.GetIt {
     );
     gh.factory<_i333.PriceTrendsCubit>(
       () => _i333.PriceTrendsCubit(gh<_i806.GetPriceTrend>()),
-    );
-    gh.factory<_i644.CreateAlertCubit>(
-      () => _i644.CreateAlertCubit(
-        gh<_i1045.GetAlertOptions>(),
-        gh<_i1045.GetCurrentPrice>(),
-        gh<_i1045.CreateAlert>(),
-        gh<_i737.ProfileCubit>(),
-      ),
     );
     gh.factory<_i692.WatchlistPickerCubit>(
       () => _i692.WatchlistPickerCubit(
@@ -1005,11 +1009,12 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i737.ProfileCubit>(),
       ),
     );
-    gh.factory<_i333.MarketComparisonCubit>(
-      () => _i333.MarketComparisonCubit(
-        gh<_i806.GetCommodities>(),
-        gh<_i806.GetMarketComparison>(),
-        gh<_i169.CatalogRepository>(),
+    gh.factory<_i644.CreateAlertCubit>(
+      () => _i644.CreateAlertCubit(
+        gh<_i1045.GetAlertOptions>(),
+        gh<_i1045.GetAlertMarkets>(),
+        gh<_i1045.GetCurrentPrice>(),
+        gh<_i1045.CreateAlert>(),
         gh<_i737.ProfileCubit>(),
       ),
     );

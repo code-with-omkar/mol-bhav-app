@@ -4,6 +4,7 @@ import 'package:injectable/injectable.dart';
 import '../../../core/cache/cached_api_call.dart';
 import '../../../core/cache/response_cache.dart';
 import '../../../core/error/result.dart';
+import '../../../core/network/api_call.dart';
 import '../../../core/network/json.dart';
 import '../../opportunities/domain/opportunities.dart';
 import '../domain/markets_entities.dart';
@@ -22,7 +23,12 @@ abstract interface class MarketsRemoteDataSource {
 
   Future<List<dynamic>> getProductsForCategory(String categoryCode);
 
-  Future<List<dynamic>> getLatestPrices(String productId);
+  /// Prices of the last 30 days: every market of [stateId], or without one the
+  /// cheapest 100 of the country.
+  Future<List<dynamic>> getLatestPrices(String productId, {String? stateId});
+
+  /// The latest price of a product at one mandi (an empty list when none).
+  Future<List<dynamic>> getMarketPrice(String productId, String locationId);
 
   Future<List<dynamic>> getPriceHistory(
     String productId,
@@ -43,21 +49,62 @@ class DioMarketsRemoteDataSource implements MarketsRemoteDataSource {
       (await _dio.get<List<dynamic>>('/catalog/categories')).data ?? [];
 
   @override
-  Future<List<dynamic>> getProductsForCategory(String categoryCode) async =>
-      (await _dio.get<List<dynamic>>(
-        '/catalog/categories/${Uri.encodeComponent(categoryCode)}/products',
-        queryParameters: {'pageSize': 50},
-      )).data ??
-      [];
+  Future<List<dynamic>> getProductsForCategory(String categoryCode) async {
+    final rows = <dynamic>[];
+    for (var page = 1; page <= _maxPages; page++) {
+      final batch =
+          (await _dio.get<List<dynamic>>(
+            '/catalog/categories/${Uri.encodeComponent(categoryCode)}/products',
+            queryParameters: {'page': page, 'pageSize': _pageSize},
+          )).data ??
+          const [];
+      rows.addAll(batch);
+      if (batch.length < _pageSize) break;
+    }
+    return rows;
+  }
+
+  /// The API caps a page at 100; no state comes near this many pages.
+  static const _pageSize = 100;
+  static const _maxPages = 10;
+  static const _maxPriceAgeDays = 30;
 
   @override
-  Future<List<dynamic>> getLatestPrices(String productId) async =>
+  Future<List<dynamic>> getLatestPrices(
+    String productId, {
+    String? stateId,
+  }) async {
+    final rows = <dynamic>[];
+    for (var page = 1; page <= _maxPages; page++) {
+      final batch =
+          (await _dio.get<List<dynamic>>(
+            '/pricing/latest',
+            queryParameters: {
+              'productId': productId,
+              'stateId': ?stateId,
+              'maxAgeDays': _maxPriceAgeDays,
+              if (stateId == null) 'cheapestFirst': true,
+              'page': page,
+              'pageSize': _pageSize,
+            },
+          )).data ??
+          const [];
+      rows.addAll(batch);
+      if (stateId == null || batch.length < _pageSize) break;
+    }
+    return rows;
+  }
+
+  @override
+  Future<List<dynamic>> getMarketPrice(
+    String productId,
+    String locationId,
+  ) async =>
       (await _dio.get<List<dynamic>>(
         '/pricing/latest',
-        queryParameters: {'productId': productId, 'pageSize': 50},
+        queryParameters: {'productId': productId, 'locationId': locationId},
       )).data ??
       [];
-
   @override
   Future<List<dynamic>> getPriceHistory(
     String productId,
@@ -89,7 +136,7 @@ class MarketsRepositoryImpl implements MarketsRepository {
   @override
   Future<Result<List<Commodity>>> getCommodities() => runCachedApiCall(
     cache: _cache,
-    key: 'markets.commodities.v2',
+    key: 'markets.commodities.v3',
     ttl: referenceDataTtl,
     fetch: () async {
       final categories = await _remote.getCategories();
@@ -123,15 +170,20 @@ class MarketsRepositoryImpl implements MarketsRepository {
   @override
   Stream<Result<MarketComparison>> watchComparison(
     String commodityId, {
+    String? stateId,
     List<String>? marketIds,
   }) => watchCachedApiCall(
     cache: _cache,
-    key: 'markets.comparison.$commodityId',
-    fetch: () => _remote.getLatestPrices(commodityId),
+    key: 'markets.comparison.v2.$commodityId.${stateId ?? 'all'}',
+    fetch: () => _remote.getLatestPrices(commodityId, stateId: stateId),
     parse: (json) {
-      final rows = (json as List<dynamic>)
-          .map((e) => e as Map<String, dynamic>)
-          .toList();
+      // Cheapest first, whatever order the pages arrived in.
+      final rows =
+          (json as List<dynamic>).map((e) => e as Map<String, dynamic>).toList()
+            ..sort(
+              (a, b) =>
+                  (a['modalPrice'] as num).compareTo(b['modalPrice'] as num),
+            );
       final allIds = rows.map((r) => r['locationId'] as String).toList();
       final best = rows.isEmpty
           ? null
@@ -147,7 +199,7 @@ class MarketsRepositoryImpl implements MarketsRepository {
         availableMarkets: [
           for (final r in rows)
             MarketRef(id: r.str('locationId'), name: r.str('locationName')),
-        ],
+        ]..sort((a, b) => a.name.compareTo(b.name)),
         selectedMarketIds: marketIds ?? allIds,
         rows: [
           for (final r in rows)
@@ -167,11 +219,22 @@ class MarketsRepositoryImpl implements MarketsRepository {
         homeMarketId: null,
         source: source,
         updatedAt: rows.isNotEmpty
-            ? _parseDate(rows.first['recordDate'] as String)
+            ? rows
+                  .map((r) => _parseDate(r['recordDate'] as String))
+                  .reduce((a, b) => a.isAfter(b) ? a : b)
             : DateTime.now(),
       );
     },
   );
+
+  @override
+  Future<Result<String?>> getMarketStateName(
+    String commodityId,
+    String marketId,
+  ) => runApiCall(() async {
+    final rows = await _remote.getMarketPrice(commodityId, marketId);
+    return (rows.firstOrNull as Map<String, dynamic>?)?.strOrNull('stateName');
+  });
 
   @override
   Future<Result<PriceTrend>> getTrend(
@@ -192,7 +255,7 @@ class MarketsRepositoryImpl implements MarketsRepository {
       final (points, commodities, latest) = await (
         _remote.getPriceHistory(commodityId, marketId, _fmt(from), _fmt(to)),
         getCommodities(),
-        _remote.getLatestPrices(commodityId),
+        _remote.getMarketPrice(commodityId, marketId),
       ).wait;
       final row = [for (final r in latest) r as Map<String, dynamic>]
           .where((r) => r.strOrNull('locationId') == marketId)

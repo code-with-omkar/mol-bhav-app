@@ -13,5 +13,6 @@ internal sealed class GetMandisQueryHandler(IMarketReadService readService) : IQ
             request.DistrictId,
             string.IsNullOrWhiteSpace(request.Search) ? null : request.Search.Trim(),
             new PageRequest(request.Page, request.PageSize),
-            cancellationToken));
+            cancellationToken,
+            request.StateId));
 }

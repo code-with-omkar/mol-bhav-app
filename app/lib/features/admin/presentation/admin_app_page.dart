@@ -12,6 +12,7 @@ import '../../../core/utils/data_state.dart';
 import '../../../shared/widgets/mb_app_bar.dart';
 import '../../../shared/widgets/mb_icon.dart';
 import '../../../shared/widgets/mb_layout.dart';
+import '../../catalog/presentation/when_category.dart';
 import '../domain/admin_dashboard.dart';
 import 'admin_dashboard_cubit.dart';
 import 'admin_feeds_card.dart';
@@ -124,11 +125,16 @@ class AdminAppPage extends StatelessWidget {
               subtitle: l10n.adminStatesSubtitle,
               onTap: () => context.go(AppRoutes.adminAppStates),
             ),
-            const SizedBox(height: MbSpacing.s2),
-            _Entry(
-              title: l10n.adminSuppliersTitle,
-              subtitle: l10n.adminSuppliersSubtitle,
-              onTap: () => context.go(AppRoutes.adminAppSuppliers),
+            WhenCategory(
+              code: 'construction',
+              child: Padding(
+                padding: const EdgeInsets.only(top: MbSpacing.s2),
+                child: _Entry(
+                  title: l10n.adminSuppliersTitle,
+                  subtitle: l10n.adminSuppliersSubtitle,
+                  onTap: () => context.go(AppRoutes.adminAppSuppliers),
+                ),
+              ),
             ),
             const SizedBox(height: MbSpacing.s2),
             _Entry(

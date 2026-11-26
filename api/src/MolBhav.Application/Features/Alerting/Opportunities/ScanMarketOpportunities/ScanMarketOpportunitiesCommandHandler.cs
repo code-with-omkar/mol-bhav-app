@@ -123,7 +123,8 @@ internal sealed partial class ScanMarketOpportunitiesCommandHandler(
 
             foreach (var other in group.Where(p => p.DistrictId != watcher.HomeDistrictId))
             {
-                var landed = LandedCost.PerUnit(other.ModalPrice, components, settings.ReferenceQuantity);
+                var quantity = OpportunityQuantities.For(settings.ReferenceQuantity, watcher.UnitCode);
+                var landed = LandedCost.PerUnit(other.ModalPrice, components, quantity);
                 var saving = home.ModalPrice - landed;
                 if (saving > bestSaving)
                 {

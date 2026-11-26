@@ -40,7 +40,9 @@ public sealed class FeedCatalogAutoAddTests
         _sources.GetByIdAsync(_source.Id, Arg.Any<CancellationToken>()).Returns(_source);
         _feedOptions.GetByPriceSourceIdAsync(_source.Id, Arg.Any<CancellationToken>())
             .Returns(SourceFeedOptions.Create(_source.Id, _names.Commodities, _names.Markets, Now).Value);
-        _codes.CodeFor(Arg.Any<string>()).Returns(call => call.Arg<string>().ToLowerInvariant());
+        _codes.CodeFor(Arg.Any<string>(), Arg.Any<string>()).Returns(call => call.ArgAt<string>(0).ToLowerInvariant());
+        _codes.StateNameFor(Arg.Any<string>()).Returns(call => call.Arg<string>().Trim());
+        _codes.DistrictNameFor(Arg.Any<string>(), Arg.Any<string>()).Returns(call => call.ArgAt<string>(1).Trim());
         _codes.ProductCodeFor(Arg.Any<string>()).Returns(call => call.Arg<string>().ToLowerInvariant());
         _categories.GetSubCategoryIdByCodeAsync(Arg.Any<CatalogCode>(), Arg.Any<CancellationToken>()).Returns(_subCategory);
         _categories.SubCategoryExistsAsync(_subCategory, Arg.Any<CancellationToken>()).Returns(true);

@@ -30,13 +30,15 @@ var connection = Environment.GetEnvironmentVariable("MB_CS") ?? throw new Invali
 await using var db = NpgsqlDataSource.Create(connection);
 using var http = new HttpClient { Timeout = TimeSpan.FromSeconds(90) };
 
-var (marketMap, commodityMap) = ReadCodeMaps(settingsFile);
+var (marketMap, commodityMap, stateMap, districtMap) = ReadCodeMaps(settingsFile);
 var sourceId = (Guid)(await Scalar("select id from pricing.price_sources where code = 'agmarknet'")
     ?? throw new InvalidOperationException("The agmarknet price source does not exist."));
 
-var products = new Dictionary<string, (Guid Id, Guid Unit)>(StringComparer.Ordinal);
-await foreach (var r in Query("select code, id, default_unit_id from catalog.products where is_active"))
-    products[r.GetString(0)] = (r.GetGuid(1), r.GetGuid(2));
+var products = new Dictionary<string, (Guid Id, Guid Unit, decimal Factor)>(StringComparer.Ordinal);
+// The feed quotes rupees per quintal; each price is stored per the product's own unit (per kg: a hundredth).
+await foreach (var r in Query(
+    "select p.code, p.id, p.default_unit_id, u.to_base_factor / q.to_base_factor from catalog.products p join catalog.units_of_measure u on u.id = p.default_unit_id join catalog.units_of_measure q on q.code = 'quintal' and q.dimension = u.dimension where p.is_active"))
+    products[r.GetString(0)] = (r.GetGuid(1), r.GetGuid(2), r.GetDecimal(3));
 var variants = new Dictionary<(Guid, string), Guid>();
 await foreach (var r in Query("select product_id, code, id from catalog.product_variants where is_active"))
     variants[(r.GetGuid(0), r.GetString(1))] = r.GetGuid(2);
@@ -66,7 +68,7 @@ if (Environment.GetEnvironmentVariable("MB_COLLECT") == "1")
         {
             foreach (var row in await FetchDay(day))
             {
-                var code = Mapped(Slug(row.Market), marketMap);
+                var code = MarketCodeFor(row);
                 if (code.Length > 0 && !mandis.ContainsKey(code) && row.State.Length > 0 && row.District.Length > 0) found.TryAdd(code, row);
                 if (!products.ContainsKey(Mapped(Slug(row.Commodity), commodityMap))) unknownProducts[row.Commodity] = unknownProducts.GetValueOrDefault(row.Commodity) + 1;
             }
@@ -185,9 +187,9 @@ async Task<Counts> Store(DateOnly day, List<Row> rows)
 
     var seen = new HashSet<(Guid, Guid?, Guid, Guid)>();
     var pending = new List<(Guid Product, Guid? Variant, Guid Unit, Guid Mandi, decimal? Min, decimal? Max, decimal Modal)>();
-    var unknownVariety = new List<(Row Row, Guid Product, Guid Unit, Guid Mandi)>();
+    var unknownVariety = new List<(Row Row, Guid Product, Guid Unit, decimal Factor, Guid Mandi)>();
 
-    void Add(Row row, Guid product, Guid? variant, Guid unit, Guid mandi, bool fallback)
+    void Add(Row row, Guid product, Guid? variant, Guid unit, decimal factor, Guid mandi, bool fallback)
     {
         var modal = Number(row.Modal);
         var min = Positive(Number(row.Min));
@@ -196,7 +198,8 @@ async Task<Counts> Store(DateOnly day, List<Row> rows)
         var identity = (product, variant, unit, mandi);
         if (!seen.Add(identity)) { if (!fallback) duplicate++; return; }
         if (stored.Contains(identity)) { existing++; return; }
-        pending.Add((product, variant, unit, mandi, min, max, modal.Value));
+        decimal? Convert(decimal? price) => price is { } p ? decimal.Round(p * factor, 4) : null;
+        pending.Add((product, variant, unit, mandi, Convert(min), Convert(max), Convert(modal)!.Value));
     }
 
     foreach (var row in rows)
@@ -204,7 +207,7 @@ async Task<Counts> Store(DateOnly day, List<Row> rows)
         // The feed is filtered by date; a row with any other date is not trusted into this day.
         if (!DateOnly.TryParseExact(row.Date, ["dd/MM/yyyy", "d/M/yyyy"], CultureInfo.InvariantCulture, DateTimeStyles.None, out var rowDate) || rowDate != day) { invalid++; continue; }
         var productCode = Mapped(Slug(row.Commodity), commodityMap);
-        var mandiCode = Mapped(Slug(row.Market), marketMap);
+        var mandiCode = MarketCodeFor(row);
         if (!products.TryGetValue(productCode, out var product)) { unknown++; continue; }
         if (!mandis.TryGetValue(mandiCode, out var mandi) && !TryOlderName(row, out mandi))
         {
@@ -215,15 +218,15 @@ async Task<Counts> Store(DateOnly day, List<Row> rows)
 
         var variety = row.Variety.Trim();
         if (variety.Length == 0 || variety.ToLowerInvariant() is "faq" or "unclassified" or "other" or "-")
-            Add(row, product.Id, null, product.Unit, mandi, false);
+            Add(row, product.Id, null, product.Unit, product.Factor, mandi, false);
         else if (variants.TryGetValue((product.Id, Slug(variety)), out var variantId))
-            Add(row, product.Id, variantId, product.Unit, mandi, false);
+            Add(row, product.Id, variantId, product.Unit, product.Factor, mandi, false);
         else
-            unknownVariety.Add((row, product.Id, product.Unit, mandi));
+            unknownVariety.Add((row, product.Id, product.Unit, product.Factor, mandi));
     }
 
     // As in the daily pull: a variety the catalog does not track becomes the product's general price, after real ones.
-    foreach (var (row, product, unit, mandi) in unknownVariety) Add(row, product, null, unit, mandi, true);
+    foreach (var (row, product, unit, factor, mandi) in unknownVariety) Add(row, product, null, unit, factor, mandi, true);
 
     if (pending.Count > 0)
     {
@@ -256,9 +259,20 @@ async Task<Counts> Store(DateOnly day, List<Row> rows)
     return new Counts(inserted, existing, unknown, invalid, duplicate);
 }
 
+// As in the API: a "State/slug" map entry applies to that state only.
+string MarketCodeFor(Row row)
+{
+    var slug = Slug(row.Market);
+    return marketMap.TryGetValue($"{Mapped(row.State.Trim(), stateMap)}/{slug}", out var inState) ? inState : Mapped(slug, marketMap);
+}
+
 bool TryOlderName(Row row, out Guid mandi)
 {
-    var key = (row.State.Trim().ToLowerInvariant(), row.District.Trim().ToLowerInvariant(), NameKey(row.Market));
+    // The same state and district spellings as the API's market import are accepted.
+    var state = Mapped(row.State.Trim(), stateMap);
+    var district = Mapped($"{state}/{row.District.Trim()}", districtMap);
+    if (district.Contains('/')) district = row.District.Trim();
+    var key = (state.ToLowerInvariant(), district.ToLowerInvariant(), NameKey(row.Market));
     var found = sameName.TryGetValue(key, out var id) ? id : null;
     mandi = found ?? Guid.Empty;
     return found is not null;
@@ -297,7 +311,7 @@ static string NameKey(string name) =>
 
 static string Mapped(string code, Dictionary<string, string> map) => map.TryGetValue(code, out var mapped) ? mapped : code;
 
-static (Dictionary<string, string> Markets, Dictionary<string, string> Commodities) ReadCodeMaps(string path)
+static (Dictionary<string, string> Markets, Dictionary<string, string> Commodities, Dictionary<string, string> States, Dictionary<string, string> Districts) ReadCodeMaps(string path)
 {
     using var settings = JsonDocument.Parse(File.ReadAllText(path), new JsonDocumentOptions { CommentHandling = JsonCommentHandling.Skip, AllowTrailingCommas = true });
     var feed = settings.RootElement.GetProperty("Agmarknet");
@@ -307,7 +321,7 @@ static (Dictionary<string, string> Markets, Dictionary<string, string> Commoditi
             ? map.EnumerateObject().ToDictionary(p => p.Name, p => p.Value.GetString() ?? p.Name, StringComparer.OrdinalIgnoreCase)
             : new(StringComparer.OrdinalIgnoreCase);
 
-    return (Read("MarketCodeMap"), Read("CommodityCodeMap"));
+    return (Read("MarketCodeMap"), Read("CommodityCodeMap"), Read("StateNameMap"), Read("DistrictNameMap"));
 }
 
 internal sealed record Row(string Commodity, string Variety, string Market, string Min, string Max, string Modal, string Date, string State, string District);

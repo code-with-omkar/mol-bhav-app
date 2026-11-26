@@ -12,6 +12,9 @@ namespace MolBhav.Infrastructure.Ingestion;
 /// </summary>
 internal static partial class AgmarknetRowMapper
 {
+    /// <summary>Agmarknet quotes every price in rupees per quintal.</summary>
+    public const string QuotedUnit = "quintal";
+
     /// <summary>Generic Agmarknet variety labels that mean "no specific variety".</summary>
     private static readonly HashSet<string> GenericVarieties = new(StringComparer.OrdinalIgnoreCase) { "faq", "unclassified", "other", "-" };
 
@@ -36,7 +39,8 @@ internal static partial class AgmarknetRowMapper
         string? arrivalDate,
         DateOnly? fallbackDate,
         AgmarknetOptions options,
-        out string? failureReason)
+        out string? failureReason,
+        string? state = null)
     {
         ArgumentNullException.ThrowIfNull(options);
         failureReason = null;
@@ -48,7 +52,7 @@ internal static partial class AgmarknetRowMapper
             return null;
         }
 
-        var locationCode = ToMarketCode(market, options);
+        var locationCode = ToMarketCode(market, options, state);
         if (locationCode.Length == 0)
         {
             failureReason = "Market is missing.";
@@ -91,15 +95,30 @@ internal static partial class AgmarknetRowMapper
             MaxPrice: ParsePositiveOrNull(maxPrice),
             ModalPrice: modal,
             ArrivalQuantity: ParsePositiveOrNull(arrivalQuantity),
-            RecordDate: recordDate);
+            RecordDate: recordDate,
+            QuotedUnitCode: QuotedUnit);
     }
 
     /// <summary>
     /// The mandi code a feed market name resolves to: its slug, unless the admin-configured market map says otherwise.
     /// A mandi added to the catalog for a feed market must use exactly this code for its prices to land.
+    /// A <c>"State/slug"</c> entry in the market map applies to that state only and wins over a plain <c>"slug"</c> one.
     /// </summary>
-    public static string ToMarketCode(string? market, AgmarknetOptions options) =>
-        Remap(ToCode(market), options.MarketCodeMap);
+    public static string ToMarketCode(string? market, AgmarknetOptions options, string? state = null)
+    {
+        var code = ToCode(market);
+        if (code.Length > 0 && !string.IsNullOrWhiteSpace(state))
+        {
+            var name = state.Trim();
+            var catalogState = options.StateNameMap.TryGetValue(name, out var mappedState) ? mappedState : name;
+            if (options.MarketCodeMap.TryGetValue($"{catalogState}/{code}", out var inState) && !string.IsNullOrWhiteSpace(inState))
+            {
+                return inState.Trim();
+            }
+        }
+
+        return Remap(code, options.MarketCodeMap);
+    }
 
     /// <summary>
     /// The product code a feed commodity name resolves to: its slug, unless the admin-configured commodity map says

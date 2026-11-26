@@ -59,7 +59,7 @@ public sealed class IngestionRecordWriterBatchTests
     }
 
     private IngestionRecordWriter CreateWriter() =>
-        new(_errors, _records, _products, _categories, _mandis, Substitute.For<ISupplierRepository>(), new FixedTimeProvider(Now));
+        new(_errors, _records, _products, _categories, _mandis, Substitute.For<ISupplierRepository>(), Substitute.For<IUnitOfMeasureRepository>(), new FixedTimeProvider(Now));
 
     private static IngestedPriceRecord Row(string location, decimal modal = 2000m) =>
         new("onion", null, LocationKind.Mandi, location, null, null, modal, null, Day);

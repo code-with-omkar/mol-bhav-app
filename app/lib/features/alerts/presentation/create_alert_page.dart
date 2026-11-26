@@ -18,6 +18,7 @@ import '../../../shared/widgets/mb_icons.dart';
 import '../../../shared/widgets/mb_layout.dart';
 import '../../../shared/widgets/mb_panels.dart';
 import '../../../shared/widgets/mb_price.dart';
+import '../../../shared/widgets/mb_search_select_field.dart';
 import '../../../shared/widgets/mb_select_field.dart';
 import '../../../shared/widgets/mb_state_views.dart';
 import '../../../shared/widgets/mb_text_field.dart';
@@ -116,8 +117,20 @@ class _Form extends StatelessWidget {
         ),
         gap,
         MbSelectField<String>(
+          label: l10n.stateLabel,
+          icon: MbIcons.market,
+          value: state.stateId,
+          onChanged: cubit.selectState,
+          items: [
+            for (final s in options.states)
+              MbSelectItem(value: s.id, label: s.name),
+          ],
+        ),
+        gap,
+        MbSearchSelectField<String>(
           label: l10n.marketLabel,
           icon: MbIcons.market,
+          searchHint: l10n.searchMarketsHint,
           value: state.marketId,
           onChanged: cubit.selectMarket,
           items: [
@@ -125,23 +138,7 @@ class _Form extends StatelessWidget {
               MbSelectItem(value: m.id, label: m.name),
           ],
         ),
-        if (state.canWidenStates) ...[
-          const SizedBox(height: MbSpacing.s2),
-          MbGroup(
-            children: [
-              MbListItem(
-                icon: MbIcons.market,
-                title: l10n.showAllStates,
-                subtitle: state.homeStateName,
-                trailing: MbToggle(
-                  value: state.allStates,
-                  onChanged: cubit.toggleAllStates,
-                  semanticLabel: l10n.showAllStates,
-                ),
-              ),
-            ],
-          ),
-        ],
+        if (state.loadingMarkets) const LinearProgressIndicator(minHeight: 2),
         gap,
         Text(l10n.notifyWhen, style: t.fieldLabel.copyWith(color: c.ink)),
         const SizedBox(height: MbSpacing.s2),

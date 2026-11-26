@@ -39,8 +39,10 @@ internal sealed class MarketOpportunityReadService(IDbConnectionFactory connecti
     // Profile state/district are stored as the picker's keys (state code, district name); older rows may hold the
     // state name — resolved the same way as the profile read.
     private const string WatchersSql = $"""
-        SELECT w.user_id, w.product_id, w.variant_id, d.id AS home_district_id
+        SELECT w.user_id, w.product_id, w.variant_id, d.id AS home_district_id, mu.code AS unit_code
         FROM {Watchlist} w
+        JOIN {Products} wp ON wp.id = w.product_id
+        JOIN {Units} mu ON mu.id = wp.default_unit_id
         JOIN {UserConfiguration.QualifiedTableName} u ON u.id = w.user_id
         JOIN LATERAL (
             SELECT st.id
@@ -134,7 +136,7 @@ internal sealed class MarketOpportunityReadService(IDbConnectionFactory connecti
     {
         await using var connection = await connectionFactory.OpenConnectionAsync(cancellationToken);
         var rows = await connection.QueryAsync<WatcherRow>(Command(WatchersSql, null, cancellationToken));
-        return rows.Select(r => new OpportunityWatcher(r.UserId, r.ProductId, r.VariantId, r.HomeDistrictId)).ToArray();
+        return rows.Select(r => new OpportunityWatcher(r.UserId, r.ProductId, r.VariantId, r.HomeDistrictId, r.UnitCode)).ToArray();
     }
 
     public async Task<IReadOnlyList<OpportunityPrice>> GetLatestPricesAsync(
@@ -275,6 +277,8 @@ internal sealed class MarketOpportunityReadService(IDbConnectionFactory connecti
         public Guid? VariantId { get; init; }
 
         public Guid HomeDistrictId { get; init; }
+
+        public string UnitCode { get; init; } = string.Empty;
     }
 
     private sealed class PriceRow

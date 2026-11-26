@@ -49,7 +49,7 @@ internal sealed class ImportAllFeedMarketsCommandHandler(
 
         var byState = options.Markets
             .Where(m => !string.IsNullOrWhiteSpace(m.State))
-            .GroupBy(m => m.State.Trim(), StringComparer.OrdinalIgnoreCase);
+            .GroupBy(m => marketCodes.StateNameFor(m.State), StringComparer.OrdinalIgnoreCase);
 
         foreach (var group in byState)
         {

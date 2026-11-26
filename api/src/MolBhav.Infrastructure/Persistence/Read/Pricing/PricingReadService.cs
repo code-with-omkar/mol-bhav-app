@@ -49,10 +49,13 @@ internal sealed class PricingReadService(IDbConnectionFactory connectionFactory)
                        x.unit_id, x.arrival_quantity, x.record_date, x.price_source_id
                 FROM {PriceRecords} x
                 WHERE x.mandi_id = loc.id AND x.product_id = @ProductId AND NOT x.is_voided
+                  AND (@SinceDate::date IS NULL OR x.record_date >= @SinceDate::date)
                 ORDER BY x.record_date DESC
                 LIMIT 1
             ) r
-            WHERE @LocationKind::text IS NULL OR @LocationKind::text = 'Mandi'
+            WHERE (@LocationKind::text IS NULL OR @LocationKind::text = 'Mandi')
+              AND (@LocationId::uuid IS NULL OR loc.id = @LocationId::uuid)
+              AND (@StateId::uuid IS NULL OR loc.district_id IN (SELECT sd.id FROM {Districts} sd WHERE sd.state_id = @StateId::uuid))
             UNION ALL
             SELECT r.*
             FROM {Suppliers} loc
@@ -61,11 +64,21 @@ internal sealed class PricingReadService(IDbConnectionFactory connectionFactory)
                        x.unit_id, x.arrival_quantity, x.record_date, x.price_source_id
                 FROM {PriceRecords} x
                 WHERE x.supplier_id = loc.id AND x.product_id = @ProductId AND NOT x.is_voided
+                  AND (@SinceDate::date IS NULL OR x.record_date >= @SinceDate::date)
                 ORDER BY x.record_date DESC
                 LIMIT 1
             ) r
-            WHERE @LocationKind::text IS NULL OR @LocationKind::text = 'Supplier'
+            WHERE (@LocationKind::text IS NULL OR @LocationKind::text = 'Supplier')
+              AND (@LocationId::uuid IS NULL OR loc.id = @LocationId::uuid)
+              AND (@StateId::uuid IS NULL OR loc.district_id IN (SELECT sd.id FROM {Districts} sd WHERE sd.state_id = @StateId::uuid))
         )
+        """;
+
+    // The feed carries typing mistakes such as Rs 0.01 a quintal, which would always win a comparison. When comparing
+    // recent prices (or ranking by price), a price under a tenth of the middle one is left out.
+    private const string PlausiblePrice = """
+        ((@SinceDate::date IS NULL AND NOT @CheapestFirst)
+          OR r.modal_price >= (SELECT percentile_cont(0.5) WITHIN GROUP (ORDER BY l.modal_price) FROM latest l) * 0.1)
         """;
 
     private static readonly string LatestPricesSql = $"""
@@ -73,7 +86,8 @@ internal sealed class PricingReadService(IDbConnectionFactory connectionFactory)
         SELECT count(*)
         FROM latest r
         {LocationJoins}
-        WHERE (@DistrictId::uuid IS NULL OR d.id = @DistrictId::uuid);
+        WHERE (@DistrictId::uuid IS NULL OR d.id = @DistrictId::uuid)
+          AND {PlausiblePrice};
 
         {LatestRecordsCte}
         SELECT
@@ -91,7 +105,8 @@ internal sealed class PricingReadService(IDbConnectionFactory connectionFactory)
         JOIN {Units} u ON u.id = r.unit_id
         JOIN {PriceSources} src ON src.id = r.price_source_id
         WHERE (@DistrictId::uuid IS NULL OR d.id = @DistrictId::uuid)
-        ORDER BY st.name, d.name, location_name
+          AND {PlausiblePrice}
+        ORDER BY CASE WHEN @CheapestFirst THEN r.modal_price END, st.name, d.name, location_name
         LIMIT @Limit OFFSET @Offset;
         """;
 
@@ -207,6 +222,10 @@ internal sealed class PricingReadService(IDbConnectionFactory connectionFactory)
         args.Add("ProductId", filter.ProductId);
         args.Add("LocationKind", filter.LocationKind?.ToString());
         args.Add("DistrictId", filter.DistrictId);
+        args.Add("StateId", filter.StateId);
+        args.Add("LocationId", filter.LocationId);
+        args.Add("SinceDate", filter.SinceDate);
+        args.Add("CheapestFirst", filter.CheapestFirst);
         args.Add("Limit", filter.Page.PageSize);
         args.Add("Offset", filter.Page.Offset);
 

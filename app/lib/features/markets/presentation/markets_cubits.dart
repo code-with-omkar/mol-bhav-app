@@ -10,6 +10,7 @@ import '../../../core/utils/data_state.dart';
 import '../../../core/utils/statuses.dart';
 import '../../account/presentation/profile_cubit.dart';
 import '../../catalog/domain/catalog.dart';
+import '../domain/mandi_prices.dart';
 import '../domain/markets_entities.dart';
 import '../domain/markets_repository.dart';
 
@@ -24,7 +25,14 @@ class MarketComparisonState extends Equatable {
     this.comparison,
     this.refreshing = false,
     this.highlightMarketId,
+    this.states = const [],
+    this.stateId,
   });
+
+  final List<LocationOption> states;
+
+  /// The state being compared; `null` is the cheapest across all states.
+  final String? stateId;
 
   final LoadStatus status;
   final Failure? failure;
@@ -66,6 +74,9 @@ class MarketComparisonState extends Equatable {
     MarketComparison? comparison,
     bool? refreshing,
     String? highlightMarketId,
+    List<LocationOption>? states,
+    ValueGetter<String?>? stateId,
+    bool clearComparison = false,
   }) => MarketComparisonState(
     status: status ?? this.status,
     failure: failure,
@@ -73,7 +84,9 @@ class MarketComparisonState extends Equatable {
     categories: categories ?? this.categories,
     categoryCode: categoryCode != null ? categoryCode() : this.categoryCode,
     commodityId: commodityId ?? this.commodityId,
-    comparison: comparison ?? this.comparison,
+    comparison: clearComparison ? null : comparison ?? this.comparison,
+    states: states ?? this.states,
+    stateId: stateId != null ? stateId() : this.stateId,
     refreshing: refreshing ?? false,
     highlightMarketId: highlightMarketId ?? this.highlightMarketId,
   );
@@ -89,6 +102,8 @@ class MarketComparisonState extends Equatable {
     comparison,
     refreshing,
     highlightMarketId,
+    states,
+    stateId,
   ];
 }
 
@@ -99,6 +114,7 @@ class MarketComparisonCubit extends Cubit<MarketComparisonState> {
     this._getComparison,
     this._catalog,
     this._profile,
+    this._locations,
   ) : super(const MarketComparisonState()) {
     // The Markets tab stays alive between visits: follow profile category
     // changes instead of showing the categories it was first opened with.
@@ -109,6 +125,7 @@ class MarketComparisonCubit extends Cubit<MarketComparisonState> {
   final GetMarketComparison _getComparison;
   final CatalogRepository _catalog;
   final ProfileCubit _profile;
+  final GetMandiPrices _locations;
   late final StreamSubscription<Object?> _profileSub;
 
   /// The profile's categories the chips were last built from.
@@ -221,7 +238,52 @@ class MarketComparisonCubit extends Cubit<MarketComparisonState> {
         commodityId: initial.id,
       ),
     );
+    await _chooseState(initial.id, highlightMarketId);
+    if (isClosed) return;
     await _compare(initial.id, null);
+  }
+
+  /// Opens on the state of a linked market, else keeps the state already
+  /// chosen, else the user's own state.
+  Future<void> _chooseState(String commodityId, String? marketId) async {
+    var states = state.states;
+    final first = states.isEmpty;
+    if (first) {
+      final result = await _locations.states();
+      if (isClosed) return;
+      states = result.fold((_) => const <LocationOption>[], (list) => list);
+    }
+    String? linked;
+    if (marketId != null) {
+      final result = await _getComparison.stateOf(commodityId, marketId);
+      if (isClosed) return;
+      linked = result.fold((_) => null, (name) => name);
+    }
+    final profile = _profile.state.data;
+    final chosen =
+        states.where((s) => s.name == linked).firstOrNull?.id ??
+        (first
+            ? states.where((s) => s.id == profile?.stateId).firstOrNull?.id ??
+                  states
+                      .where((s) => s.name == profile?.stateName)
+                      .firstOrNull
+                      ?.id
+            : state.stateId);
+    emit(state.copyWith(states: states, stateId: () => chosen));
+  }
+
+  /// `null` compares the cheapest markets of all states.
+  Future<void> selectState(String? stateId) async {
+    final id = state.commodityId;
+    if (id == null || stateId == state.stateId) return;
+    emit(
+      state.copyWith(
+        status: LoadStatus.loading,
+        stateId: () => stateId,
+        clearComparison: true,
+      ),
+    );
+    await _compare(id, null);
   }
 
   /// `null` selects every category. Moves to that category's first product
@@ -271,10 +333,16 @@ class MarketComparisonCubit extends Cubit<MarketComparisonState> {
   /// Shows the cached comparison at once and keeps [MarketComparisonState.refreshing]
   /// on until the live one arrives.
   Future<void> _compare(String commodityId, List<String>? marketIds) async {
+    final stateId = state.stateId;
     await for (final next in revalidate(
-      _getComparison(commodityId, marketIds: marketIds),
+      _getComparison(commodityId, stateId: stateId, marketIds: marketIds),
     )) {
-      if (isClosed || state.commodityId != commodityId) return;
+      // A newer choice of product or state wins over a slow earlier one.
+      if (isClosed ||
+          state.commodityId != commodityId ||
+          state.stateId != stateId) {
+        return;
+      }
       final comparison = next.data;
       if (next.status == LoadStatus.failure && comparison == null) {
         emit(state.copyWith(status: LoadStatus.failure, failure: next.failure));

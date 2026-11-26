@@ -252,7 +252,7 @@ internal sealed partial class AgmarknetIngestionSourceAdapter(
         // API rows that cannot be mapped are skipped (the request is already filtered to one date); uploads report them.
         AgmarknetRowMapper.Map(
             raw.Commodity, raw.Variety, raw.Market, raw.MinPrice, raw.MaxPrice, raw.ModalPrice, raw.ArrivalQty,
-            raw.ArrivalDate, fallbackDate, opts, out _);
+            raw.ArrivalDate, fallbackDate, opts, out _, raw.State);
 
     // -----------------------------------------------------------------------
     // HTTP with timeouts, retries and a circuit breaker

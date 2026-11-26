@@ -41,7 +41,7 @@ internal sealed class ImportFeedMarketsCommandHandler(
                 $"No markets are saved for '{stateName}'. Run a full pull so the feed's markets are recorded, then try again.");
         }
 
-        var state = await states.GetByNameAsync(stateName, cancellationToken);
+        var state = await states.GetByNameAsync(marketCodes.StateNameFor(stateName), cancellationToken);
         if (state is null)
         {
             return Error.Validation(

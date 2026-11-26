@@ -58,6 +58,8 @@ public sealed record IngestionFetchResult
 /// One normalized row from an external feed, keyed by the same immutable codes the admin portal uses
 /// (<c>CatalogCode</c>/<c>MarketCode</c> — "ingestion adapters map source location names onto it") — resolved to
 /// internal ids by the command handler, one row at a time, so a single unmapped code fails only that row.
+/// <c>QuotedUnitCode</c> is the unit the source quotes its prices per (the Agmarknet feed: quintal); the writer
+/// converts them into the product's unit. Null means the figures are already per the product's unit.
 /// </summary>
 public sealed record IngestedPriceRecord(
     string ProductCode,
@@ -68,4 +70,5 @@ public sealed record IngestedPriceRecord(
     decimal? MaxPrice,
     decimal ModalPrice,
     decimal? ArrivalQuantity,
-    DateOnly RecordDate);
+    DateOnly RecordDate,
+    string? QuotedUnitCode = null);

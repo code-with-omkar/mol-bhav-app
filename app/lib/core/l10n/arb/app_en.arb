@@ -109,6 +109,7 @@
   "arrivals": "Arrivals {quantity}",
   "bestMarket": "Best Market · {market}",
   "lowerThanYourMarket": "{amount} lower than {market} (your market)",
+  "comparisonAllStates": "All states: 100 cheapest",
   "comparisonEmpty": "No prices for these markets yet.",
   "browseByMandi": "Browse by mandi",
   "browseByCommodity": "Browse by commodity",

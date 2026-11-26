@@ -22,7 +22,19 @@ public interface IPricingReadService
     Task<PagedResult<AdminPriceRecordResponse>> GetAdminPriceRecordsAsync(AdminPriceRecordFilter filter, CancellationToken cancellationToken = default);
 }
 
-public sealed record LatestPriceFilter(Guid ProductId, LocationKind? LocationKind, Guid? DistrictId, PageRequest Page);
+/// <param name="StateId">Only markets and suppliers of this state.</param>
+/// <param name="LocationId">Only this one market or supplier.</param>
+/// <param name="SinceDate">Ignore a location whose newest price is older than this.</param>
+/// <param name="CheapestFirst">Order by price instead of by place, so the first page holds the cheapest.</param>
+public sealed record LatestPriceFilter(
+    Guid ProductId,
+    LocationKind? LocationKind,
+    Guid? DistrictId,
+    PageRequest Page,
+    Guid? StateId = null,
+    Guid? LocationId = null,
+    DateOnly? SinceDate = null,
+    bool CheapestFirst = false);
 
 public sealed record LatestByLocationFilter(
     LocationKind LocationKind,

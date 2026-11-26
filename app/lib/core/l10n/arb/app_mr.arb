@@ -80,6 +80,7 @@
   "arrivals": "आवक {quantity}",
   "bestMarket": "सर्वोत्तम बाजार · {market}",
   "lowerThanYourMarket": "{market} (तुमचा बाजार) पेक्षा {amount} कमी",
+  "comparisonAllStates": "सर्व राज्ये: 100 सर्वात स्वस्त",
   "comparisonEmpty": "या बाजारांचे भाव अद्याप उपलब्ध नाहीत.",
   "browseByMandi": "मंडीनुसार पहा",
   "browseByCommodity": "वस्तूनुसार पहा",

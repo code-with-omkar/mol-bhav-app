@@ -66,7 +66,7 @@ public sealed class AgmarknetOptions
     public bool AutoAddCommodities { get; set; } = true;
 
     /// <summary>Sub-category code new commodities are filed under.</summary>
-    public string AutoAddSubCategoryCode { get; set; } = "vegetables";
+    public string AutoAddSubCategoryCode { get; set; } = "other-produce";
 
     /// <summary>Unit code new commodities are priced in (the feed quotes rupees per quintal).</summary>
     public string AutoAddUnitCode { get; set; } = "quintal";
@@ -76,6 +76,12 @@ public sealed class AgmarknetOptions
 
     /// <summary>Slugged Agmarknet <c>commodity</c> → our product code (e.g. <c>"soyabean": "soybean"</c>). Keys are case-insensitive.</summary>
     public Dictionary<string, string> CommodityCodeMap { get; set; } = new(StringComparer.OrdinalIgnoreCase);
+
+    /// <summary>Feed state name → catalog state name, where the feed spells it differently (e.g. <c>"Keralam": "Kerala"</c>), so no second state is created.</summary>
+    public Dictionary<string, string> StateNameMap { get; set; } = new(StringComparer.OrdinalIgnoreCase);
+
+    /// <summary><c>"Catalog state/Feed district"</c> → catalog district name (e.g. <c>"Kerala/Palakad": "Palakkad"</c>).</summary>
+    public Dictionary<string, string> DistrictNameMap { get; set; } = new(StringComparer.OrdinalIgnoreCase);
 
     /// <summary>Development only (startup fails elsewhere): serve <see cref="MockDataPath"/> instead of calling data.gov.in.</summary>
     public bool UseMockData { get; set; }

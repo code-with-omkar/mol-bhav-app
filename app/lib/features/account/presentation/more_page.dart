@@ -5,6 +5,7 @@ import 'package:share_plus/share_plus.dart';
 
 import '../../../core/ads/ad_personalisation.dart';
 import '../../../core/di/injection.dart';
+import '../../catalog/presentation/when_category.dart';
 import '../../../core/l10n/l10n.dart';
 import '../../../core/locale/locale_cubit.dart';
 import '../../../core/settings/home_weather_animation_cubit.dart';
@@ -128,11 +129,14 @@ class _Content extends StatelessWidget {
                 onTap: () => context.go(AppRoutes.costEstimator),
               ),
             // Regional suppliers and hubs with a Call button (BRD §12).
-            MbListItem(
-              icon: MbIcons.market,
-              title: l10n.suppliersTitle,
-              subtitle: l10n.suppliersSubtitle,
-              onTap: () => context.go(AppRoutes.suppliers),
+            WhenCategory(
+              code: 'construction',
+              child: MbListItem(
+                icon: MbIcons.market,
+                title: l10n.suppliersTitle,
+                subtitle: l10n.suppliersSubtitle,
+                onTap: () => context.go(AppRoutes.suppliers),
+              ),
             ),
           ],
         ),

@@ -40,6 +40,7 @@ public sealed class ImportIngestionFileCommandHandlerTests
             _categories,
             Substitute.For<IMandiRepository>(),
             Substitute.For<ISupplierRepository>(),
+            Substitute.For<MolBhav.Application.Abstractions.Catalog.IUnitOfMeasureRepository>(),
             time);
         return new ImportIngestionFileCommandHandler(_jobs, _sources, _parser, writer, time);
     }

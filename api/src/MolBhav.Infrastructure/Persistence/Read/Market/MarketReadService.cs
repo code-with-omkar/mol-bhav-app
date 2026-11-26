@@ -37,6 +37,7 @@ internal sealed class MarketReadService(IDbConnectionFactory connectionFactory) 
     private const string MandiListWhere = $"""
         WHERE m.is_active AND d.is_active AND s.is_active
           AND (@DistrictId::uuid IS NULL OR m.district_id = @DistrictId::uuid)
+          AND (@StateId::uuid IS NULL OR d.state_id = @StateId::uuid)
           AND (@Pattern::text IS NULL OR m.code ILIKE @Pattern::text OR m.name ILIKE @Pattern::text)
         """;
 
@@ -154,12 +155,14 @@ internal sealed class MarketReadService(IDbConnectionFactory connectionFactory) 
         Guid? districtId,
         string? search,
         PageRequest page,
-        CancellationToken cancellationToken = default)
+        CancellationToken cancellationToken = default,
+        Guid? stateId = null)
     {
         ArgumentNullException.ThrowIfNull(page);
 
         var args = new DynamicParameters();
         args.Add("DistrictId", districtId);
+        args.Add("StateId", stateId);
         args.Add("Pattern", ContainsPattern(search));
         args.Add("Limit", page.PageSize);
         args.Add("Offset", page.Offset);

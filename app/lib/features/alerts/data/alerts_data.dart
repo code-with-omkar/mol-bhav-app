@@ -20,13 +20,18 @@ import '../domain/alerts.dart';
 ///
 /// The Create Alert form's reference data comes from elsewhere:
 /// - products from the cached `CatalogRepository`, for the user's categories
-/// - markets from `GET /market/mandis`
+/// - states from `GET /market/states` and one state's markets from
+///   `GET /market/mandis?stateId=`
 abstract interface class AlertsRemoteDataSource {
   Future<List<dynamic>> getAlerts(int page, int pageSize);
 
-  Future<List<dynamic>> getMandis();
+  Future<List<dynamic>> getStates();
 
-  Future<List<dynamic>> getLatestPrices(String productId);
+  /// Every market of one state.
+  Future<List<dynamic>> getMandis(String stateId);
+
+  /// The latest price of a product at one mandi (an empty list when none).
+  Future<List<dynamic>> getLatestPrices(String productId, String mandiId);
 
   Future<void> create(Map<String, dynamic> body);
 
@@ -43,9 +48,9 @@ class DioAlertsRemoteDataSource implements AlertsRemoteDataSource {
 
   final Dio _dio;
 
-  /// The API caps a page at 100, so the mandi master is walked page by page.
+  /// The API caps a page at 100, so a state's markets are walked page by page.
   static const _pageSize = 100;
-  static const _maxMandiPages = 10;
+  static const _maxMandiPages = 15;
 
   @override
   Future<List<dynamic>> getAlerts(int page, int pageSize) async =>
@@ -56,13 +61,21 @@ class DioAlertsRemoteDataSource implements AlertsRemoteDataSource {
       [];
 
   @override
-  Future<List<dynamic>> getMandis() async {
+  Future<List<dynamic>> getStates() async =>
+      (await _dio.get<List<dynamic>>('/market/states')).data ?? [];
+
+  @override
+  Future<List<dynamic>> getMandis(String stateId) async {
     final mandis = <dynamic>[];
     for (var page = 1; page <= _maxMandiPages; page++) {
       final rows =
           (await _dio.get<List<dynamic>>(
             '/market/mandis',
-            queryParameters: {'page': page, 'pageSize': _pageSize},
+            queryParameters: {
+              'stateId': stateId,
+              'page': page,
+              'pageSize': _pageSize,
+            },
           )).data ??
           const [];
       mandis.addAll(rows);
@@ -72,10 +85,13 @@ class DioAlertsRemoteDataSource implements AlertsRemoteDataSource {
   }
 
   @override
-  Future<List<dynamic>> getLatestPrices(String productId) async =>
+  Future<List<dynamic>> getLatestPrices(
+    String productId,
+    String mandiId,
+  ) async =>
       (await _dio.get<List<dynamic>>(
         '/pricing/latest',
-        queryParameters: {'productId': productId, 'pageSize': _pageSize},
+        queryParameters: {'productId': productId, 'locationId': mandiId},
       )).data ??
       [];
 
@@ -113,7 +129,8 @@ class AlertsRepositoryImpl implements AlertsRepository {
   /// `{alerts: [...], opportunities: [...]}` — v2 added opportunities.
   static const alertsKey = 'alerts.list.v2';
   static const rulesKey = 'alerts.rules';
-  static const mandisKey = 'alerts.mandis.v1';
+  static const statesKey = 'alerts.states.v1';
+  static String mandisKey(String stateId) => 'alerts.mandis.v2.$stateId';
 
   /// One cached page for every filter: the filters are applied on the device.
   @override
@@ -151,8 +168,8 @@ class AlertsRepositoryImpl implements AlertsRepository {
       );
 
   /// Every catalog product tagged with the category it was fetched under, plus
-  /// the mandi master. `CreateAlertCubit` narrows the products to the user's
-  /// own categories; the catalog reads are cached reference data.
+  /// the states. `CreateAlertCubit` narrows the products to the user's own
+  /// categories and loads the markets of one state at a time.
   @override
   Future<Result<AlertOptions>> getOptions() async {
     final categories = await _catalog.getCategories();
@@ -165,29 +182,27 @@ class AlertsRepositoryImpl implements AlertsRepository {
   Future<Result<AlertOptions>> _options(
     List<CatalogCategory> categories,
   ) async {
-    final (products, mandis) = await (
+    final (products, states) = await (
       Future.wait([
         for (final category in categories) _catalog.getProducts(category.code),
       ]),
-      // Mandi master changes rarely: a day-old copy opens the form at once.
-      runCachedApiCall<List<AlertMarket>>(
+      runCachedApiCall<List<AlertState>>(
         cache: _cache,
-        key: mandisKey,
+        key: statesKey,
         ttl: referenceDataTtl,
-        fetch: _remote.getMandis,
+        fetch: _remote.getStates,
         parse: (json) => [
-          for (final m in json as List<dynamic>)
-            AlertMarket(
-              id: (m as Map<String, dynamic>).str('id'),
-              name: m.str('name'),
-              stateName: m.strOrNull('stateName') ?? '',
+          for (final s in json as List<dynamic>)
+            AlertState(
+              id: (s as Map<String, dynamic>).str('id'),
+              name: s.str('name'),
             ),
         ],
       ),
     ).wait;
-    return switch (mandis) {
+    return switch (states) {
       Err(:final failure) => Err(failure),
-      Ok(value: final markets) => Ok(
+      Ok(value: final list) => Ok(
         AlertOptions(
           products: [
             for (final (i, page) in products.indexed)
@@ -202,11 +217,29 @@ class AlertsRepositoryImpl implements AlertsRepository {
                   unit: product.defaultUnit.symbol,
                 ),
           ],
-          markets: markets,
+          states: list,
         ),
       ),
     };
   }
+
+  /// A state's markets change rarely: a day-old copy opens the form at once.
+  @override
+  Future<Result<List<AlertMarket>>> getMarkets(String stateId) =>
+      runCachedApiCall<List<AlertMarket>>(
+        cache: _cache,
+        key: mandisKey(stateId),
+        ttl: referenceDataTtl,
+        fetch: () => _remote.getMandis(stateId),
+        parse: (json) => [
+          for (final m in json as List<dynamic>)
+            AlertMarket(
+              id: (m as Map<String, dynamic>).str('id'),
+              name: m.str('name'),
+              stateName: m.strOrNull('stateName') ?? '',
+            ),
+        ],
+      );
 
   @override
   Future<Result<CurrentPrice>> getCurrentPrice(
@@ -214,11 +247,11 @@ class AlertsRepositoryImpl implements AlertsRepository {
     String marketId,
   ) => runApiCall(() async {
     final rows = [
-      for (final r in await _remote.getLatestPrices(commodityId))
+      for (final r in await _remote.getLatestPrices(commodityId, marketId))
         r as Map<String, dynamic>,
     ];
-    // `/pricing/latest` returns one row per location; the hint is about the
-    // mandi the rule will watch, so anything else would mislead.
+    // The hint is about the mandi the rule will watch, so anything else would
+    // mislead.
     final row = rows
         .where((r) => r.strOrNull('locationId') == marketId)
         .firstOrNull;
@@ -229,9 +262,9 @@ class AlertsRepositoryImpl implements AlertsRepository {
       marketName: row.str('locationName'),
       price: row.number('modalPrice'),
       unit: row.str('unitSymbol'),
+      stateName: row.strOrNull('stateName'),
     );
   });
-
   @override
   Future<Result<void>> create(NewAlert alert) => _thenDropRules(
     () => _remote.create({

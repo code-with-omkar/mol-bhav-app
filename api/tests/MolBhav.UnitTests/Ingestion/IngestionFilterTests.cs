@@ -86,6 +86,7 @@ public sealed class IngestionFilterTests
             Substitute.For<IProcurementCategoryRepository>(),
             Substitute.For<IMandiRepository>(),
             Substitute.For<ISupplierRepository>(),
+            Substitute.For<MolBhav.Application.Abstractions.Catalog.IUnitOfMeasureRepository>(),
             time);
         return new RunIngestionJobCommandHandler(
             _jobs, _sources, _feedOptions, _adapter, writer, Substitute.For<MolBhav.Application.Features.Ingestion.Common.IFeedCatalogAutoAdd>(), time,

@@ -283,6 +283,9 @@ class AppLocalizationsTa extends AppLocalizations {
   }
 
   @override
+  String get comparisonAllStates => 'All states: 100 cheapest';
+
+  @override
   String get comparisonEmpty => 'No prices for these markets yet.';
 
   @override

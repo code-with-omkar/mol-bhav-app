@@ -18,7 +18,10 @@ namespace MolBhav.Api.Controllers.V1;
 [Route("api/v{version:apiVersion}/pricing")]
 public sealed class PricingController(ISender sender) : ApiControllerBase(sender)
 {
-    /// <summary>Comparison matrix: latest non-voided price per mandi/supplier for a product.</summary>
+    /// <summary>
+    /// Comparison matrix: latest non-voided price per mandi/supplier for a product, optionally for one state or one
+    /// location, no older than <c>maxAgeDays</c>, and cheapest first.
+    /// </summary>
     [HttpGet("latest")]
     [ProducesResponseType<ApiResponse<IReadOnlyList<LatestPriceResponse>>>(StatusCodes.Status200OK)]
     [ProducesResponseType<ValidationProblemDetails>(StatusCodes.Status400BadRequest, MediaTypeNames.Application.ProblemJson)]
@@ -28,8 +31,15 @@ public sealed class PricingController(ISender sender) : ApiControllerBase(sender
         [FromQuery] Guid? districtId,
         CancellationToken cancellationToken,
         [FromQuery] int page = 1,
-        [FromQuery] int pageSize = PageRequest.DefaultPageSize) =>
-        PagedEnvelope(await Sender.Send(new GetLatestPricesQuery(productId, locationKind, districtId, page, pageSize), cancellationToken));
+        [FromQuery] int pageSize = PageRequest.DefaultPageSize,
+        [FromQuery] Guid? stateId = null,
+        [FromQuery] Guid? locationId = null,
+        [FromQuery] int? maxAgeDays = null,
+        [FromQuery] bool cheapestFirst = false) =>
+        PagedEnvelope(await Sender.Send(
+            new GetLatestPricesQuery(
+                productId, locationKind, districtId, page, pageSize, stateId, locationId, maxAgeDays, cheapestFirst),
+            cancellationToken));
 
     /// <summary>Browse by mandi: latest non-voided price per product/variant at one location (last 30 days).</summary>
     [HttpGet("latest-by-location")]

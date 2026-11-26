@@ -284,6 +284,9 @@ class AppLocalizationsMr extends AppLocalizations {
   }
 
   @override
+  String get comparisonAllStates => 'सर्व राज्ये: 100 सर्वात स्वस्त';
+
+  @override
   String get comparisonEmpty => 'या बाजारांचे भाव अद्याप उपलब्ध नाहीत.';
 
   @override

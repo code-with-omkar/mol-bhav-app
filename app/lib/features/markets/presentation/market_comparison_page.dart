@@ -129,6 +129,18 @@ class _Content extends StatelessWidget {
               ],
             ),
             gap,
+            MbSelectField<String>(
+              icon: MbIcons.market,
+              label: l10n.stateLabel,
+              value: state.stateId ?? '',
+              onChanged: (id) => cubit.selectState(id.isEmpty ? null : id),
+              items: [
+                MbSelectItem(value: '', label: l10n.comparisonAllStates),
+                for (final s in state.states)
+                  MbSelectItem(value: s.id, label: s.name),
+              ],
+            ),
+            gap,
             MarketPicker(
               markets: comparison.availableMarkets,
               selected: comparison.selectedMarketIds.toSet(),

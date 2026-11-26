@@ -143,17 +143,27 @@ class AlertMarket extends Equatable {
   List<Object?> get props => [id, name, stateName];
 }
 
-/// Reference data for the Create Alert form.
+class AlertState extends Equatable {
+  const AlertState({required this.id, required this.name});
+
+  final String id;
+  final String name;
+
+  @override
+  List<Object?> get props => [id, name];
+}
+
+/// Reference data for the Create Alert form. Markets are loaded per state.
 class AlertOptions extends Equatable {
   const AlertOptions({
     required this.products,
-    required this.markets,
+    required this.states,
     this.whatsappNumber,
     this.whatsappLanguage,
   });
 
   final List<AlertProduct> products;
-  final List<AlertMarket> markets;
+  final List<AlertState> states;
 
   /// Where WhatsApp alerts go; null hides the subtitle on the toggle.
   final String? whatsappNumber;
@@ -164,7 +174,7 @@ class AlertOptions extends Equatable {
   @override
   List<Object?> get props => [
     products,
-    markets,
+    states,
     whatsappNumber,
     whatsappLanguage,
   ];
@@ -176,14 +186,18 @@ class CurrentPrice extends Equatable {
     required this.marketName,
     required this.price,
     required this.unit,
+    this.stateName,
   });
 
   final String marketName;
   final num price;
   final String unit;
 
+  /// The market's state, used to open the form on a market passed in.
+  final String? stateName;
+
   @override
-  List<Object?> get props => [marketName, price, unit];
+  List<Object?> get props => [marketName, price, unit, stateName];
 }
 
 class AlertRule extends Equatable {
@@ -254,6 +268,8 @@ abstract interface class AlertsRepository {
 
   Future<Result<AlertOptions>> getOptions();
 
+  Future<Result<List<AlertMarket>>> getMarkets(String stateId);
+
   Future<Result<CurrentPrice>> getCurrentPrice(
     String commodityId,
     String marketId,
@@ -287,6 +303,16 @@ class GetAlertOptions {
   final AlertsRepository _repository;
 
   Future<Result<AlertOptions>> call() => _repository.getOptions();
+}
+
+@injectable
+class GetAlertMarkets {
+  const GetAlertMarkets(this._repository);
+
+  final AlertsRepository _repository;
+
+  Future<Result<List<AlertMarket>>> call(String stateId) =>
+      _repository.getMarkets(stateId);
 }
 
 @injectable

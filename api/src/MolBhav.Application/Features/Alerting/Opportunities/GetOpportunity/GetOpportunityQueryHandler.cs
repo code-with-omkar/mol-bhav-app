@@ -37,6 +37,7 @@ internal sealed class GetOpportunityQueryHandler(
         var rows = await readService.GetMarketPricesAsync(
             opportunity.Product.Id, opportunity.VariantId, since, cancellationToken);
         var components = await costComponents.GetActiveAsync(cancellationToken);
+        var quantity = OpportunityQuantities.For(settings.ReferenceQuantity, opportunity.Product.DefaultUnit.Code);
 
         // The home district is the district of the opportunity's home market.
         var homeDistrictId = rows.FirstOrDefault(r => r.LocationId == opportunity.Home.LocationId)?.DistrictId;
@@ -51,13 +52,13 @@ internal sealed class GetOpportunityQueryHandler(
                     r.Name,
                     r.DistrictName,
                     r.ModalPrice,
-                    isHome ? r.ModalPrice : LandedCost.PerUnit(r.ModalPrice, components, settings.ReferenceQuantity),
+                    isHome ? r.ModalPrice : LandedCost.PerUnit(r.ModalPrice, components, quantity),
                     isHome,
                     r.RecordDate);
             })
             .OrderBy(m => m.LandedPrice)
             .ToArray();
 
-        return new MarketOpportunityDetailResponse(opportunity, markets, settings.ReferenceQuantity);
+        return new MarketOpportunityDetailResponse(opportunity, markets, quantity);
     }
 }

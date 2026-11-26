@@ -26,7 +26,9 @@ public sealed class ImportAllFeedMarketsTests
         _states.GetByNameAsync(Arg.Any<string>(), Arg.Any<CancellationToken>()).Returns((State?)null);
         _states.CodeExistsAsync(Arg.Any<string>(), Arg.Any<CancellationToken>()).Returns(false);
         _mandis.CodeExistsAsync(Arg.Any<MarketCode>(), Arg.Any<CancellationToken>()).Returns(false);
-        _codes.CodeFor(Arg.Any<string>()).Returns(call => call.Arg<string>().ToLowerInvariant().Replace(' ', '-'));
+        _codes.CodeFor(Arg.Any<string>(), Arg.Any<string>()).Returns(call => call.ArgAt<string>(0).ToLowerInvariant().Replace(' ', '-'));
+        _codes.StateNameFor(Arg.Any<string>()).Returns(call => call.Arg<string>().Trim());
+        _codes.DistrictNameFor(Arg.Any<string>(), Arg.Any<string>()).Returns(call => call.ArgAt<string>(1).Trim());
         _handler = new ImportAllFeedMarketsCommandHandler(_sources, _feedOptions, _states, _mandis, _codes);
     }
 
@@ -64,6 +66,23 @@ public sealed class ImportAllFeedMarketsTests
         Assert.Equal(0, result.Value.StatesCreated);
         Assert.Equal(1, result.Value.MarketsCreated);
         _states.DidNotReceive().Add(Arg.Any<State>());
+    }
+
+    [Fact]
+    public async Task Another_spelling_of_a_state_or_district_uses_the_catalog_one()
+    {
+        var kerala = State.Create("Kerala", "KL").Value;
+        var palakkad = kerala.AddDistrict("Palakkad").Value;
+        _states.GetByNameAsync("Kerala", Arg.Any<CancellationToken>()).Returns(kerala);
+        _codes.StateNameFor("Keralam").Returns("Kerala");
+        _codes.DistrictNameFor("Kerala", "Palakad").Returns("Palakkad");
+        WithFeed(new FeedMarket("Koduvayoor", "Keralam", "Palakad"));
+
+        var result = await _handler.Handle(new ImportAllFeedMarketsCommand(_source.Id), CancellationToken.None);
+
+        Assert.Equal(0, result.Value.StatesCreated);
+        Assert.Single(kerala.Districts);
+        _mandis.Received(1).Add(Arg.Is<Mandi>(m => m.DistrictId == palakkad.Id));
     }
 
     [Fact]

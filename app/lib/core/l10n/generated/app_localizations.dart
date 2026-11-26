@@ -588,6 +588,12 @@ abstract class AppLocalizations {
   /// **'{amount} lower than {market} (your market)'**
   String lowerThanYourMarket(String amount, String market);
 
+  /// No description provided for @comparisonAllStates.
+  ///
+  /// In en, this message translates to:
+  /// **'All states: 100 cheapest'**
+  String get comparisonAllStates;
+
   /// No description provided for @comparisonEmpty.
   ///
   /// In en, this message translates to:
