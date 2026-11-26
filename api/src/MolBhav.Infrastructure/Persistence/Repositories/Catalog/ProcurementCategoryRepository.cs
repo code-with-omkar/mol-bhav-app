@@ -26,6 +26,13 @@ internal sealed class ProcurementCategoryRepository(MolBhavDbContext dbContext)
             .Select(c => (Guid?)c.Id)
             .SingleOrDefaultAsync(cancellationToken);
 
+    public Task<Guid?> GetSubCategoryIdByCodeAsync(CatalogCode code, CancellationToken cancellationToken = default) =>
+        DbContext.Set<SubCategory>().AsNoTracking()
+            .Where(s => s.Code == code)
+            .OrderBy(s => s.Id)
+            .Select(s => (Guid?)s.Id)
+            .FirstOrDefaultAsync(cancellationToken);
+
     public async Task<IReadOnlySet<Guid>> GetSubCategoryIdsAsync(Guid categoryId, CancellationToken cancellationToken = default)
     {
         var ids = await DbContext.Set<SubCategory>().AsNoTracking()

@@ -399,6 +399,7 @@ public static class DependencyInjection
             .ValidateOnStart();
 
         services.AddSingleton<IFeedMarketCodes, AgmarknetFeedMarketCodes>();
+        services.AddSingleton<IFeedAutoAddSettings, AgmarknetAutoAddSettings>();
 
         services.AddHttpClient(AgmarknetIngestionSourceAdapter.HttpClientName, client =>
         {

@@ -88,6 +88,17 @@ internal sealed class ImportFeedProductsCommandHandler(
                 continue;
             }
 
+            if (request.Hidden)
+            {
+                // Added by a pull on its own: users see it only after an admin has filed it and switched it on.
+                var hidden = product.Value.Update(request.SubCategoryId, request.DefaultUnitId, 0, isActive: false, null, [english.Value]);
+                if (hidden.IsFailure)
+                {
+                    skipped.Add(new SkippedFeedCommodity(feedName, FeedCommoditySkipReason.NameInvalid));
+                    continue;
+                }
+            }
+
             products.Add(product.Value);
             codesAdded.Add(code.Value.Value);
             created++;

@@ -23,6 +23,7 @@ internal sealed partial class RunIngestionJobCommandHandler(
     ISourceFeedOptionsRepository feedOptions,
     IIngestionSourceAdapter adapter,
     IngestionRecordWriter writer,
+    IFeedCatalogAutoAdd catalogAutoAdd,
     TimeProvider timeProvider,
     ILogger<RunIngestionJobCommandHandler> logger) : ICommandHandler<RunIngestionJobCommand, CreatedResponse>
 {
@@ -81,6 +82,9 @@ internal sealed partial class RunIngestionJobCommandHandler(
             {
                 feedOptions.Add(created.Value);
             }
+
+            // Markets and commodities seen for the first time join the catalog before the prices are matched to it.
+            await catalogAutoAdd.AddNewAsync(source.Id, names, cancellationToken);
         }
 
         var counts = await writer.WriteAsync(

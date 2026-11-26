@@ -654,7 +654,7 @@ class AppLocalizationsHi extends AppLocalizations {
       'वैकल्पिक। यह इसी फ़ोन पर निकाला जाता है और अनुमान के साथ सहेजा नहीं जाता।';
 
   @override
-  String get landedCostTitle => 'पहुँच लागत (डिलीवर्ड)';
+  String get landedCostTitle => 'डिलीवरी सहित कुल लागत';
 
   @override
   String landedBreakdown(String goods, String freight, String handling) {
@@ -722,7 +722,7 @@ class AppLocalizationsHi extends AppLocalizations {
 
   @override
   String get adminMarketsAddAllBody =>
-      'पिछली पूरी पुल के हर राज्य और बाज़ार को कैटलॉग में जोड़ा जाएगा, जो हज़ार से ज़्यादा बाज़ार हो सकते हैं। जो पहले से हैं उन्हें छुआ नहीं जाएगा। इसमें थोड़ा समय लगता है।';
+      'पिछले पूरे डेटा अपडेट के हर राज्य और बाज़ार को कैटलॉग में जोड़ा जाएगा, जो हज़ार से ज़्यादा बाज़ार हो सकते हैं। जो पहले से हैं उन्हें छुआ नहीं जाएगा। इसमें थोड़ा समय लगता है।';
 
   @override
   String get adminMarketsAddAllConfirm => 'सभी जोड़ें';
@@ -741,7 +741,7 @@ class AppLocalizationsHi extends AppLocalizations {
   String get copyAction => 'कॉपी करें';
 
   @override
-  String get doneAction => 'ठीक है';
+  String get doneAction => 'हो गया';
 
   @override
   String get adminUserResetPasswordAction => 'पासवर्ड रीसेट करें';
@@ -794,7 +794,7 @@ class AppLocalizationsHi extends AppLocalizations {
 
   @override
   String landedPerUnit(String amount, String unit) {
-    return '$amount प्रति $unit डिलीवर्ड';
+    return 'डिलीवरी सहित $amount प्रति $unit';
   }
 
   @override
@@ -1530,7 +1530,7 @@ class AppLocalizationsHi extends AppLocalizations {
   String get promotionSponsored => 'प्रायोजित';
 
   @override
-  String get adminSchedulesTitle => 'डेटा पुल शेड्यूल';
+  String get adminSchedulesTitle => 'डेटा अपडेट शेड्यूल';
 
   @override
   String get adminSchedulesSubtitle => 'सरकारी भाव अपने आप कब लाए जाएँ';
@@ -1952,7 +1952,7 @@ class AppLocalizationsHi extends AppLocalizations {
 
   @override
   String get adminSubsSubtitle =>
-      'देखें किसके पास प्लान है, और किसी को पहले खत्म करें';
+      'देखें किसके पास प्लान है, और ज़रूरत हो तो किसी का प्लान समय से पहले बंद करें';
 
   @override
   String get adminSubsEmpty => 'यहाँ कोई सब्सक्रिप्शन नहीं है।';
@@ -2037,14 +2037,14 @@ class AppLocalizationsHi extends AppLocalizations {
 
   @override
   String get adminMarketsIntro =>
-      'पिछले पूरे पुल से एक राज्य और उसके बाज़ार चुनें। हर बाज़ार अपने ज़िले के साथ कैटलॉग में जुड़ता है, ताकि अगले पुल में उसके भाव सहेजे जा सकें। भाव केवल कैटलॉग में पहले से मौजूद उत्पादों के दिखते हैं।';
+      'पिछले पूरे डेटा अपडेट से एक राज्य और उसके बाज़ार चुनें। हर बाज़ार अपने ज़िले के साथ कैटलॉग में जुड़ता है, ताकि अगले डेटा अपडेट में उसके भाव सहेजे जा सकें। भाव केवल कैटलॉग में पहले से मौजूद उत्पादों के दिखते हैं।';
 
   @override
   String get adminMarketsNoFeed =>
-      'प्राइस फ़ीड के बाज़ार अभी दर्ज नहीं हुए हैं। जिस दिन फ़ीड में डेटा हो उस दिन पूरा पुल (बिना फ़िल्टर के अभी चलाएँ) चलाएँ, फिर लौटें।';
+      'प्राइस फ़ीड के बाज़ार अभी दर्ज नहीं हुए हैं। जिस दिन फ़ीड में डेटा हो उस दिन पूरा डेटा अपडेट (बिना फ़िल्टर के अभी चलाएँ) चलाएँ, फिर लौटें।';
 
   @override
-  String get adminMarketsOpenSchedules => 'डेटा पुल खोलें';
+  String get adminMarketsOpenSchedules => 'डेटा अपडेट खोलें';
 
   @override
   String get adminMarketsState => 'राज्य';
@@ -2083,7 +2083,8 @@ class AppLocalizationsHi extends AppLocalizations {
   }
 
   @override
-  String get adminMarketsAddedHint => 'उनके भाव अगले पुल से सहेजे जाएँगे।';
+  String get adminMarketsAddedHint =>
+      'उनके भाव अगले डेटा अपडेट से सहेजे जाएँगे।';
 
   @override
   String get adminMarketsNotAdded => 'नहीं जुड़े';
@@ -2100,7 +2101,7 @@ class AppLocalizationsHi extends AppLocalizations {
 
   @override
   String get adminMarketsSkipDistrictUnknown =>
-      'फ़ीड ने ज़िला नहीं दिया। पूरा पुल दोबारा चलाएँ।';
+      'फ़ीड ने ज़िला नहीं दिया। पूरा डेटा अपडेट दोबारा चलाएँ।';
 
   @override
   String get adminMarketsSkipNameInvalid => 'कैटलॉग के नाम नियमों से अस्वीकृत';
@@ -2383,20 +2384,19 @@ class AppLocalizationsHi extends AppLocalizations {
       'बंद करने पर यह उपयोगकर्ताओं से छिप जाता है; इसके अंदर का सब बना रहता है।';
 
   @override
-  String get adminSuppliersTitle => 'आपूर्तिकर्ता और हब';
+  String get adminSuppliersTitle => 'सप्लायर और हब';
 
   @override
-  String get adminSuppliersSubtitle =>
-      'आपूर्तिकर्ता और हब खोजें, जोड़ें और बदलें';
+  String get adminSuppliersSubtitle => 'सप्लायर और हब खोजें, जोड़ें और बदलें';
 
   @override
-  String get adminSuppliersEmpty => 'कोई आपूर्तिकर्ता नहीं मिला।';
+  String get adminSuppliersEmpty => 'कोई सप्लायर नहीं मिला।';
 
   @override
-  String get adminSupplierNew => 'नया आपूर्तिकर्ता';
+  String get adminSupplierNew => 'नया सप्लायर';
 
   @override
-  String get adminSupplierEdit => 'आपूर्तिकर्ता बदलें';
+  String get adminSupplierEdit => 'सप्लायर बदलें';
 
   @override
   String get adminSupplierPhone => 'संपर्क फ़ोन';
@@ -2421,11 +2421,11 @@ class AppLocalizationsHi extends AppLocalizations {
 
   @override
   String get adminCommoditiesIntro =>
-      'उप-श्रेणी और इकाई चुनें, फिर पिछले पूरे पुल से वस्तुएँ चुनें। हर वस्तु फ़ीड के अंग्रेज़ी नाम के साथ उत्पाद बनकर जुड़ती है, ताकि अगले पुल में उसके भाव सहेजे जा सकें। हिंदी और मराठी नाम बाद में कैटलॉग में जोड़ें।';
+      'उप-श्रेणी और इकाई चुनें, फिर पिछले पूरे डेटा अपडेट से वस्तुएँ चुनें। हर वस्तु फ़ीड के अंग्रेज़ी नाम के साथ उत्पाद बनकर जुड़ती है, ताकि अगले डेटा अपडेट में उसके भाव सहेजे जा सकें। हिंदी और मराठी नाम बाद में कैटलॉग में जोड़ें।';
 
   @override
   String get adminCommoditiesNoFeed =>
-      'प्राइस फ़ीड की वस्तुएँ अभी दर्ज नहीं हुई हैं। फ़ीड में डेटा वाले दिन पूरा पुल (बिना फ़िल्टर के अभी चलाएँ) चलाएँ, फिर लौटें।';
+      'प्राइस फ़ीड की वस्तुएँ अभी दर्ज नहीं हुई हैं। फ़ीड में डेटा वाले दिन पूरा डेटा अपडेट (बिना फ़िल्टर के अभी चलाएँ) चलाएँ, फिर लौटें।';
 
   @override
   String get adminCommoditiesSubCategory => 'उप-श्रेणी';
@@ -2470,7 +2470,8 @@ class AppLocalizationsHi extends AppLocalizations {
   }
 
   @override
-  String get adminCommoditiesAddedHint => 'उनके भाव अगले पुल से सहेजे जाएँगे।';
+  String get adminCommoditiesAddedHint =>
+      'उनके भाव अगले डेटा अपडेट से सहेजे जाएँगे।';
 
   @override
   String get adminCommoditiesSkipNotInFeed => 'फ़ीड सूची में नहीं है';
@@ -2608,7 +2609,7 @@ class AppLocalizationsHi extends AppLocalizations {
       'उपयोगकर्ताओं के लिए संदेश लिखें, या इसे बंद करें।';
 
   @override
-  String get adminHistoryTitle => 'पुल इतिहास';
+  String get adminHistoryTitle => 'डेटा अपडेट इतिहास';
 
   @override
   String get adminHistorySubtitle => 'हाल के रन और जो पंक्तियाँ विफल रहीं';
@@ -2626,7 +2627,7 @@ class AppLocalizationsHi extends AppLocalizations {
   String get adminTriggerUpload => 'अपलोड';
 
   @override
-  String get adminJobTitle => 'पुल रन';
+  String get adminJobTitle => 'डेटा अपडेट रन';
 
   @override
   String get adminJobErrorsTitle => 'विफल पंक्तियाँ';
@@ -2858,7 +2859,7 @@ class AppLocalizationsHi extends AppLocalizations {
   String get adminFeedsLastUpdated => 'आख़िरी अपडेट';
 
   @override
-  String get adminFeedsLastAttempt => 'आख़िरी पुल';
+  String get adminFeedsLastAttempt => 'आख़िरी डेटा अपडेट';
 
   @override
   String get adminSupportTitle => 'सहायता';
@@ -2997,7 +2998,7 @@ class AppLocalizationsHi extends AppLocalizations {
 
   @override
   String get filterOptionsEmpty =>
-      'पहली पूरी पुल के बाद सूचियाँ भर जाती हैं। इसके लिए सब कुछ \"सभी\" रखकर अभी चलाएँ।';
+      'पहले पूरे डेटा अपडेट के बाद सूचियाँ भर जाती हैं। इसके लिए सब कुछ \"सभी\" रखकर अभी चलाएँ।';
 
   @override
   String get filterOptionsError =>

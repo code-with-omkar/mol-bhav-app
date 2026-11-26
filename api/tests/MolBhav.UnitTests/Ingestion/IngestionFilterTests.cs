@@ -88,7 +88,8 @@ public sealed class IngestionFilterTests
             Substitute.For<ISupplierRepository>(),
             time);
         return new RunIngestionJobCommandHandler(
-            _jobs, _sources, _feedOptions, _adapter, writer, time, Microsoft.Extensions.Logging.Abstractions.NullLogger<RunIngestionJobCommandHandler>.Instance);
+            _jobs, _sources, _feedOptions, _adapter, writer, Substitute.For<MolBhav.Application.Features.Ingestion.Common.IFeedCatalogAutoAdd>(), time,
+            Microsoft.Extensions.Logging.Abstractions.NullLogger<RunIngestionJobCommandHandler>.Instance);
     }
 
     [Fact]

@@ -33,6 +33,7 @@ public static class DependencyInjection
         services.AddScoped<IEntitlementService, EntitlementService>();
         services.AddScoped<Features.Promotions.Admin.CampaignInputResolver>();
         services.AddScoped<Features.Ingestion.Common.IngestionRecordWriter>();
+        services.AddScoped<Features.Ingestion.Common.IFeedCatalogAutoAdd, Features.Ingestion.Common.FeedCatalogAutoAdd>();
 
         return services;
     }

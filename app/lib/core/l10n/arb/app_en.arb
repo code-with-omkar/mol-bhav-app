@@ -407,7 +407,7 @@
   "suppliersEmpty": "No suppliers found.",
   "supplierCall": "Call",
   "supplierCallFailed": "Could not open the phone app.",
-  "permissionsTitle": "Allow a few things",
+  "permissionsTitle": "Allow permissions",
   "permissionsIntro": "MolBhav works best with these two permissions. Your phone will ask for each.",
   "permissionsNotificationsTitle": "Notifications",
   "permissionsNotificationsBody": "Price alerts and buying opportunities, when they happen.",

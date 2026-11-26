@@ -12,7 +12,8 @@ public sealed record ImportFeedProductsCommand(
     Guid PriceSourceId,
     Guid SubCategoryId,
     Guid DefaultUnitId,
-    IReadOnlyList<string>? Commodities) : ICommand<ImportFeedProductsResponse>, IAuditedCommand
+    IReadOnlyList<string>? Commodities,
+    bool Hidden = false) : ICommand<ImportFeedProductsResponse>, IAuditedCommand
 {
     string IAuditedCommand.AuditAction => "Catalog.ImportFeed";
 

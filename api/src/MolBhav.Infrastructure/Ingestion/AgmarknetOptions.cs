@@ -59,6 +59,18 @@ public sealed class AgmarknetOptions
     /// <summary>How long the breaker stays open (it only matters within a run; each run starts closed).</summary>
     public double BreakerBreakSeconds { get; set; } = 45;
 
+    /// <summary>A full pull adds feed markets the catalog lacks (with districts and states) before matching prices.</summary>
+    public bool AutoAddMarkets { get; set; } = true;
+
+    /// <summary>A full pull adds feed commodities the catalog lacks as hidden products, for an admin to review.</summary>
+    public bool AutoAddCommodities { get; set; } = true;
+
+    /// <summary>Sub-category code new commodities are filed under.</summary>
+    public string AutoAddSubCategoryCode { get; set; } = "vegetables";
+
+    /// <summary>Unit code new commodities are priced in (the feed quotes rupees per quintal).</summary>
+    public string AutoAddUnitCode { get; set; } = "quintal";
+
     /// <summary>Slugged Agmarknet <c>market</c> → our mandi code, for mandis whose code differs (e.g. <c>"pune": "apmc-pune"</c>). Keys are case-insensitive.</summary>
     public Dictionary<string, string> MarketCodeMap { get; set; } = new(StringComparer.OrdinalIgnoreCase);
 

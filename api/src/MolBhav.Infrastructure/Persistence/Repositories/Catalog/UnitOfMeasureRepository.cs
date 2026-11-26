@@ -15,4 +15,9 @@ internal sealed class UnitOfMeasureRepository(MolBhavDbContext dbContext)
 
     public Task<bool> ExistsAsync(Guid id, CancellationToken cancellationToken = default) =>
         Set.AnyAsync(u => u.Id == id, cancellationToken);
+
+    public Task<Guid?> GetIdByCodeAsync(CatalogCode code, CancellationToken cancellationToken = default) =>
+        Set.Where(u => u.Code == code)
+            .Select(u => (Guid?)u.Id)
+            .FirstOrDefaultAsync(cancellationToken);
 }

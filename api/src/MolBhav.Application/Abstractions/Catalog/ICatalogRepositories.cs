@@ -16,6 +16,9 @@ public interface IProcurementCategoryRepository : IRepository<ProcurementCategor
 
     /// <summary>Every sub-category id (active or not) under the category — ingestion uses it to reject products from another category.</summary>
     Task<IReadOnlySet<Guid>> GetSubCategoryIdsAsync(Guid categoryId, CancellationToken cancellationToken = default);
+
+    /// <summary>Id of the sub-category with this code (the first, should two categories share it); null when unknown.</summary>
+    Task<Guid?> GetSubCategoryIdByCodeAsync(CatalogCode code, CancellationToken cancellationToken = default);
 }
 
 /// <summary><see cref="IRepository{TAggregate,TId}.GetByIdAsync"/> loads the product with all its variants and translations.</summary>
@@ -32,4 +35,7 @@ public interface IUnitOfMeasureRepository : IRepository<UnitOfMeasure, Guid>
     Task<bool> CodeExistsAsync(CatalogCode code, CancellationToken cancellationToken = default);
 
     Task<bool> ExistsAsync(Guid id, CancellationToken cancellationToken = default);
+
+    /// <summary>Id of the unit with this code; null when unknown.</summary>
+    Task<Guid?> GetIdByCodeAsync(CatalogCode code, CancellationToken cancellationToken = default);
 }

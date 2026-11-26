@@ -680,7 +680,7 @@ class AppLocalizationsTe extends AppLocalizations {
   String get supplierCallFailed => 'Could not open the phone app.';
 
   @override
-  String get permissionsTitle => 'Allow a few things';
+  String get permissionsTitle => 'Allow permissions';
 
   @override
   String get permissionsIntro =>

@@ -1273,7 +1273,7 @@ abstract class AppLocalizations {
   /// No description provided for @permissionsTitle.
   ///
   /// In en, this message translates to:
-  /// **'Allow a few things'**
+  /// **'Allow permissions'**
   String get permissionsTitle;
 
   /// No description provided for @permissionsIntro.
