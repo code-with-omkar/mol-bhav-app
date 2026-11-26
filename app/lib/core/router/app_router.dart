@@ -106,6 +106,8 @@ import '../../features/support/presentation/my_tickets_page.dart';
 import '../../features/support/presentation/raise_ticket_page.dart';
 import '../../features/support/presentation/support_cubits.dart';
 import '../../features/support/presentation/ticket_thread_page.dart';
+import '../../features/auth/presentation/cubit/forgot_password_cubit.dart';
+import '../../features/auth/presentation/pages/forgot_password_page.dart';
 import '../../features/onboarding/presentation/permissions_page.dart';
 import '../../features/account/presentation/change_password_cubit.dart';
 import '../../features/account/presentation/change_password_page.dart';
@@ -195,6 +197,13 @@ GoRouter createAppRouter(
           child: LoginPage(sessionExpired: session.consumeExpiredNotice()),
         ),
         routes: [
+          GoRoute(
+            path: 'forgot',
+            builder: (context, state) => BlocProvider(
+              create: (_) => getIt<ForgotPasswordCubit>(),
+              child: const ForgotPasswordPage(),
+            ),
+          ),
           GoRoute(
             path: 'verify',
             redirect: (context, state) =>

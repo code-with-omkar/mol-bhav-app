@@ -9,4 +9,4 @@ public sealed record GetLoginMethodsQuery : IQuery<LoginMethodsResponse>;
 /// <param name="Password">Mobile number + password.</param>
 /// <param name="Google">"Continue with Google".</param>
 /// <param name="GoogleClientId">Google OAuth web client id for the app's Google Sign-In; null when Google is off.</param>
-public sealed record LoginMethodsResponse(bool Otp, bool Password, bool Google, string? GoogleClientId);
+public sealed record LoginMethodsResponse(bool Otp, bool Password, bool Google, string? GoogleClientId, bool PasswordReset = false);

@@ -443,6 +443,23 @@
       }
     }
   },
+  "forgotPasswordAction": "Forgot password?",
+  "forgotPasswordTitle": "Forgot password",
+  "forgotPasswordIntro": "Enter your mobile number. If it has an account, we will send a code to it on WhatsApp.",
+  "forgotPasswordSent": "If {number} has an account, a code is on its way. Enter it and choose a new password.",
+  "@forgotPasswordSent": {
+    "placeholders": {
+      "number": {
+        "type": "String"
+      }
+    }
+  },
+  "forgotPasswordSendCode": "Send code",
+  "forgotPasswordCode": "Code",
+  "forgotPasswordCodeRequired": "Enter the code.",
+  "forgotPasswordReset": "Set new password",
+  "forgotPasswordResend": "Send the code again",
+  "forgotPasswordChangeNumber": "Use a different number",
   "copyAction": "Copy",
   "doneAction": "Done",
   "adminUserResetPasswordAction": "Reset password",

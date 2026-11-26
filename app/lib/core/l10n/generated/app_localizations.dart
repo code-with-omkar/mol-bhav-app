@@ -1366,6 +1366,66 @@ abstract class AppLocalizations {
   /// **'{already} were already there, {other} could not be added (no district or an invalid name).'**
   String adminMarketsAllDetail(int already, int other);
 
+  /// No description provided for @forgotPasswordAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Forgot password?'**
+  String get forgotPasswordAction;
+
+  /// No description provided for @forgotPasswordTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Forgot password'**
+  String get forgotPasswordTitle;
+
+  /// No description provided for @forgotPasswordIntro.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter your mobile number. If it has an account, we will send a code to it on WhatsApp.'**
+  String get forgotPasswordIntro;
+
+  /// No description provided for @forgotPasswordSent.
+  ///
+  /// In en, this message translates to:
+  /// **'If {number} has an account, a code is on its way. Enter it and choose a new password.'**
+  String forgotPasswordSent(String number);
+
+  /// No description provided for @forgotPasswordSendCode.
+  ///
+  /// In en, this message translates to:
+  /// **'Send code'**
+  String get forgotPasswordSendCode;
+
+  /// No description provided for @forgotPasswordCode.
+  ///
+  /// In en, this message translates to:
+  /// **'Code'**
+  String get forgotPasswordCode;
+
+  /// No description provided for @forgotPasswordCodeRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter the code.'**
+  String get forgotPasswordCodeRequired;
+
+  /// No description provided for @forgotPasswordReset.
+  ///
+  /// In en, this message translates to:
+  /// **'Set new password'**
+  String get forgotPasswordReset;
+
+  /// No description provided for @forgotPasswordResend.
+  ///
+  /// In en, this message translates to:
+  /// **'Send the code again'**
+  String get forgotPasswordResend;
+
+  /// No description provided for @forgotPasswordChangeNumber.
+  ///
+  /// In en, this message translates to:
+  /// **'Use a different number'**
+  String get forgotPasswordChangeNumber;
+
   /// No description provided for @copyAction.
   ///
   /// In en, this message translates to:

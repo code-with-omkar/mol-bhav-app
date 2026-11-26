@@ -335,7 +335,10 @@ class _SignInOptionsState extends State<_SignInOptions> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        if (showOtp) const _MobileCard() else const _PasswordCard(),
+        if (showOtp)
+          const _MobileCard()
+        else
+          _PasswordCard(canReset: methods.passwordReset),
         if (canSwitch) ...[
           const SizedBox(height: MbSpacing.s2),
           TextButton(
@@ -351,7 +354,10 @@ class _SignInOptionsState extends State<_SignInOptions> {
 }
 
 class _PasswordCard extends StatefulWidget {
-  const _PasswordCard();
+  const _PasswordCard({required this.canReset});
+
+  /// Offer "Forgot password?" under the password.
+  final bool canReset;
 
   @override
   State<_PasswordCard> createState() => _PasswordCardState();
@@ -450,7 +456,12 @@ class _PasswordCardState extends State<_PasswordCard> {
                   prefix: '+91',
                   hint: '',
                   keyboardType: TextInputType.phone,
-                  autofillHints: const [AutofillHints.telephoneNumberNational],
+                  // "username" first, so password managers pair this field
+                  // with the password and offer to save the login.
+                  autofillHints: const [
+                    AutofillHints.username,
+                    AutofillHints.telephoneNumberNational,
+                  ],
                   inputFormatters: const [MobileNumberFormatter()],
                   textInputAction: TextInputAction.next,
                   error: state.showInvalidNumber
@@ -510,6 +521,14 @@ class _PasswordCardState extends State<_PasswordCard> {
                     onSubmitted: (_) => submit(),
                   ),
                 ],
+                if (!register && widget.canReset)
+                  Align(
+                    alignment: Alignment.centerRight,
+                    child: TextButton(
+                      onPressed: () => context.go(AppRoutes.forgotPassword),
+                      child: Text(l10n.forgotPasswordAction),
+                    ),
+                  ),
                 if (state.canSavePassword)
                   Padding(
                     padding: const EdgeInsets.only(top: MbSpacing.s2),

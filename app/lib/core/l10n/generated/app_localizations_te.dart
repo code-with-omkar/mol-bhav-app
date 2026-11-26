@@ -738,6 +738,39 @@ class AppLocalizationsTe extends AppLocalizations {
   }
 
   @override
+  String get forgotPasswordAction => 'Forgot password?';
+
+  @override
+  String get forgotPasswordTitle => 'Forgot password';
+
+  @override
+  String get forgotPasswordIntro =>
+      'Enter your mobile number. If it has an account, we will send a code to it on WhatsApp.';
+
+  @override
+  String forgotPasswordSent(String number) {
+    return 'If $number has an account, a code is on its way. Enter it and choose a new password.';
+  }
+
+  @override
+  String get forgotPasswordSendCode => 'Send code';
+
+  @override
+  String get forgotPasswordCode => 'Code';
+
+  @override
+  String get forgotPasswordCodeRequired => 'Enter the code.';
+
+  @override
+  String get forgotPasswordReset => 'Set new password';
+
+  @override
+  String get forgotPasswordResend => 'Send the code again';
+
+  @override
+  String get forgotPasswordChangeNumber => 'Use a different number';
+
+  @override
   String get copyAction => 'Copy';
 
   @override

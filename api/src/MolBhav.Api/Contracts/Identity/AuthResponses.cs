@@ -26,7 +26,7 @@ public sealed record LoginResponse(SessionResponse Session, bool IsNewUser, bool
 /// <param name="Password">Mobile number + password (login and "create account").</param>
 /// <param name="Google">"Continue with Google".</param>
 /// <param name="GoogleClientId">OAuth web client id to pass to Google Sign-In as the server client id; null when off.</param>
-public sealed record LoginMethodsDto(bool Otp, bool Password, bool Google, string? GoogleClientId);
+public sealed record LoginMethodsDto(bool Otp, bool Password, bool Google, string? GoogleClientId, bool PasswordReset);
 
 /// <param name="Email">The linked Google account's email (shown on the profile).</param>
 public sealed record LinkedGoogleDto(string? Email);

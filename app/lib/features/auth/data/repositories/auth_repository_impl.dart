@@ -29,6 +29,7 @@ class AuthRepositoryImpl implements AuthRepository {
         password: response.password,
         google: response.google,
         googleClientId: response.googleClientId,
+        passwordReset: response.passwordReset,
       );
     });
   }

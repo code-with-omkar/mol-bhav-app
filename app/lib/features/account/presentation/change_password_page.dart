@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../core/l10n/l10n.dart';
@@ -56,6 +57,8 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
       newPassword: _new.text,
     );
     if (failure == null) {
+      // Lets the phone's password manager offer to update the saved password.
+      TextInput.finishAutofillContext();
       // The cubit has signed out, so the router is already taking the user to
       // Login (and this page may be gone); the root messenger still shows it.
       messenger.showSnackBar(SnackBar(content: Text(l10n.passwordChanged)));
@@ -73,48 +76,55 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
     final cubit = context.read<ChangePasswordCubit>();
     return Scaffold(
       appBar: MbAppBar(title: l10n.changePasswordTitle),
-      body: ListView(
-        padding: MbSpacing.screenPadding,
-        children: [
-          if (cubit.hasPassword) ...[
+      body: AutofillGroup(
+        // Saving is asked for only after the server accepts the change.
+        onDisposeAction: AutofillContextAction.cancel,
+        child: ListView(
+          padding: MbSpacing.screenPadding,
+          children: [
+            if (cubit.hasPassword) ...[
+              MbTextField(
+                controller: _current,
+                label: l10n.currentPasswordLabel,
+                obscureText: true,
+                autofillHints: const [AutofillHints.password],
+                error: _currentMissing ? l10n.currentPasswordRequired : null,
+              ),
+              const SizedBox(height: 14),
+            ],
             MbTextField(
-              controller: _current,
-              label: l10n.currentPasswordLabel,
+              controller: _new,
+              label: l10n.newPasswordLabel,
               obscureText: true,
-              error: _currentMissing ? l10n.currentPasswordRequired : null,
+              autofillHints: const [AutofillHints.newPassword],
+              helper: l10n.passwordTooWeak,
+              error: _problems.contains(NewPasswordProblem.tooWeak)
+                  ? l10n.passwordTooWeak
+                  : _problems.contains(NewPasswordProblem.sameAsCurrent)
+                  ? l10n.passwordSameAsCurrent
+                  : null,
             ),
             const SizedBox(height: 14),
-          ],
-          MbTextField(
-            controller: _new,
-            label: l10n.newPasswordLabel,
-            obscureText: true,
-            helper: l10n.passwordTooWeak,
-            error: _problems.contains(NewPasswordProblem.tooWeak)
-                ? l10n.passwordTooWeak
-                : _problems.contains(NewPasswordProblem.sameAsCurrent)
-                ? l10n.passwordSameAsCurrent
-                : null,
-          ),
-          const SizedBox(height: 14),
-          MbTextField(
-            controller: _confirm,
-            label: l10n.confirmPasswordLabel,
-            obscureText: true,
-            error: _problems.contains(NewPasswordProblem.mismatch)
-                ? l10n.passwordsDontMatch
-                : null,
-          ),
-          const SizedBox(height: MbSpacing.s4),
-          BlocBuilder<ChangePasswordCubit, bool>(
-            builder: (context, submitting) => MbButton(
-              label: l10n.changePasswordAction,
-              block: true,
-              isLoading: submitting,
-              onPressed: submitting ? null : _submit,
+            MbTextField(
+              controller: _confirm,
+              label: l10n.confirmPasswordLabel,
+              obscureText: true,
+              autofillHints: const [AutofillHints.newPassword],
+              error: _problems.contains(NewPasswordProblem.mismatch)
+                  ? l10n.passwordsDontMatch
+                  : null,
             ),
-          ),
-        ],
+            const SizedBox(height: MbSpacing.s4),
+            BlocBuilder<ChangePasswordCubit, bool>(
+              builder: (context, submitting) => MbButton(
+                label: l10n.changePasswordAction,
+                block: true,
+                isLoading: submitting,
+                onPressed: submitting ? null : _submit,
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

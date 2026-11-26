@@ -297,21 +297,21 @@
       <div class="project-sub">Market Intelligence Platform · API + Flutter App + Admin app</div>
     </div>
   </div>
-  <div class="header-date">Updated: 24 Nov 2026</div>
+  <div class="header-date">Updated: 26 Nov 2026</div>
 </div>
 
 <div class="section"><div class="section-title">Overall Progress</div></div>
 <div class="overview">
   <div class="ov-card">
     <div class="ov-label">API</div>
-    <div class="ov-value c-api">422</div>
+    <div class="ov-value c-api">434</div>
     <div class="ov-sub">unit tests passing · 38 migrations · live Agmarknet pulls working</div>
     <div class="ov-bar"><div class="ov-bar-fill f-api" style="width:100%"></div></div>
   </div>
   <div class="ov-card">
     <div class="ov-label">Flutter app</div>
-    <div class="ov-value c-app">628</div>
-    <div class="ov-sub">tests passing (24 Nov full run: 626 passed, 1 failed; the failing Add markets test was fixed and re-run, plus 1 new test) · analyze clean</div>
+    <div class="ov-value c-app">632</div>
+    <div class="ov-sub">tests passing (26 Nov full run, all passed) · analyze clean</div>
     <div class="ov-bar"><div class="ov-bar-fill f-app" style="width:100%"></div></div>
   </div>
   <div class="ov-card">
@@ -328,7 +328,7 @@
   </div>
 </div>
 
-<div class="section"><div class="section-title">Needs your action (24 Nov 2026)</div></div>
+<div class="section"><div class="section-title">Needs your action (26 Nov 2026)</div></div>
 <div class="blockers">
   <div class="blocker-card">
     <div class="blocker-head">
@@ -341,8 +341,9 @@
       <div class="blocker-item"><div class="blocker-dot dot-warn"></div><div><strong>Hosting decisions</strong> — API address is molbhav-api.jagtech.in (set in the hosting files). Still to arrange: the VPS, Cloudflare DNS and certificate, production keys, and whether the Angular admin stays. See docs/hosting-prerequisites.md.</div></div>
       <div class="blocker-item"><div class="blocker-dot dot-warn"></div><div><strong>Review Hindi + Marathi</strong> — all new admin and notice strings were written by Claude and need a native check.</div></div>
       <div class="blocker-item"><div class="blocker-dot dot-ok"></div><div><strong>Full pull done (24 Nov)</strong> — 12,323 prices saved for 24 Nov across many states after adding 220 commodities (1,310 mandis were already added). 81 rows failed on bad source data (invalid prices, duplicates). Pull time is about 5 minutes; the gov server answers in about 1 second a page, so the time is our processing.</div></div>
-      <div class="blocker-item"><div class="blocker-dot dot-ok"></div><div><strong>Tests</strong> — API 422 passing; app 628 (full run 626 passed, 1 failed; that one was fixed and re-run, plus 1 new).</div></div>
-      <div class="blocker-item"><div class="blocker-dot dot-ok"></div><div><strong>Last push</strong> — 18054f7 on payment-integration, in sync with GitHub. Credential files in docs/ (Google client secrets, WhatsApp Token.txt) are git-ignored and stay local only.</div></div>
+      <div class="blocker-item"><div class="blocker-dot dot-ok"></div><div><strong>One year of price history loaded (26 Nov)</strong> — 3.66 million prices, every day from 25 Nov 2025 to 25 Nov 2026; no duplicates. Database about 1.2 GB. Price screens answer in under 0.1 s once warm (first comparison after a restart can take about 2 s).</div></div>
+      <div class="blocker-item"><div class="blocker-dot dot-ok"></div><div><strong>Tests (26 Nov)</strong> — API 434 passing; app 632 passing.</div></div>
+      <div class="blocker-item"><div class="blocker-dot dot-ok"></div><div><strong>Last push</strong> — forgot password and password saving pushed to payment-integration on 26 Nov (login after reset confirmed on the phone). Credential files in docs/ (Google client secrets, WhatsApp Token.txt) are git-ignored and stay local only.</div></div>
     </div>
   </div>
   <div class="blocker-card">
@@ -410,6 +411,8 @@
         <li class="task-item done"><span class="task-icon">✓</span>Change password (More) and admin Reset password (Admin → Users → user; temporary password shown once, audited); API + app, tests written, not yet run</li>
         <li class="task-item done"><span class="task-icon">✓</span>Supplier directory for users (More → Suppliers): search, paging, Call button; tests written, not yet run</li>
         <li class="task-item done"><span class="task-icon">✓</span>Cost estimator: landed cost (freight per unit + handling) shown on the phone; tests written, not yet run</li>
+        <li class="task-item done"><span class="task-icon">✓</span>Forgot password (code, then new password; all sessions signed out) and phone password manager support on Login, Change password and Reset; API tests (434) and app auth/account tests (70) pass</li>
+        <li class="task-item warn"><span class="task-icon">!</span>Forgot password over WhatsApp: waits for an approved Authentication template (development prints the code in the API window)</li>
         <li class="task-item warn"><span class="task-icon">!</span>Verify all of the above on the phone</li>
         <li class="task-item done"><span class="task-icon">✓</span>Minimum version editor + "Please update" page (admins never blocked)</li>
         <li class="task-item done"><span class="task-icon">✓</span>Add markets screen (state, markets, Select all, result summary)</li>
@@ -471,19 +474,19 @@
   <div class="ns-card">
     <div class="ns-num">SUGGESTED 1</div>
     <div class="ns-title">Commit and push after each feature</div>
-    <div class="ns-detail">Last push: 18054f7 on branch <code style="font-family:monospace;font-size:11px">payment-integration</code> (24 Nov). Claude commits and pushes only when asked, and checks for credential files first.</div>
+    <div class="ns-detail">Last push: 26 Nov on branch <code style="font-family:monospace;font-size:11px">payment-integration</code>. Claude commits and pushes only when asked, and checks for credential files first.</div>
     <div class="ns-tag">safety</div>
   </div>
   <div class="ns-card">
     <div class="ns-num">SUGGESTED 2</div>
-    <div class="ns-title">Full data pull + more states</div>
-    <div class="ns-detail">Run the full pull and check Indore. The catalog has mandis only for Maharashtra (8) and Madhya Pradesh (1); feed rows for other states are skipped until their mandis are added.</div>
+    <div class="ns-title">Fewer skipped feed rows</div>
+    <div class="ns-detail">One year of history is the agreed scope and is loaded. About half of feed rows are skipped because the market or commodity is not in the catalog; find and add the missing ones.</div>
     <div class="ns-tag">data</div>
   </div>
   <div class="ns-card">
     <div class="ns-num">SUGGESTED 3</div>
     <div class="ns-title">Install the newest build; verify on the phone</div>
-    <div class="ns-detail">Build and install the APK, then check every admin screen once, landed cost on the estimator, and More → Suppliers. Run the new tests too. Everything on the BRD's initial scope is built; nothing buildable is waiting.</div>
+    <div class="ns-detail">The 26 Nov APK is installed. Check forgot password (the code shows in the API window), password saving, price trends over a year, every admin screen, landed cost and More → Suppliers.</div>
     <div class="ns-tag app">app + api</div>
   </div>
   <div class="ns-card">
@@ -501,7 +504,7 @@
 </div>
 
 <footer>
-  MolBhav · JagTech · Last updated 24 Nov 2026 · API + App + Admin app · phone verification and full data pull pending
+  MolBhav · JagTech · Last updated 26 Nov 2026 · API + App + Admin app · phone verification pending
 </footer>
 
 <script>

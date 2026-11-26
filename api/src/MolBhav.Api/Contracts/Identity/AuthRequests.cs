@@ -21,6 +21,14 @@ public sealed record GoogleLoginRequest(string? IdToken, string? PhoneNumber);
 /// <param name="IdToken">Google ID token from Google Sign-In on the device.</param>
 public sealed record GoogleLinkRequest(string? IdToken);
 
+/// <param name="PhoneNumber">The account's mobile number.</param>
+public sealed record ForgotPasswordRequest(string? PhoneNumber);
+
+/// <param name="PhoneNumber">The account's mobile number.</param>
+/// <param name="Code">The code sent to that number.</param>
+/// <param name="NewPassword">8–128 chars, a letter and a digit.</param>
+public sealed record ResetForgottenPasswordRequest(string? PhoneNumber, string? Code, string? NewPassword);
+
 /// <param name="CurrentPassword">Required when the account already has a password; omit it to set a first password.</param>
 /// <param name="NewPassword">8–128 chars, a letter and a digit.</param>
 public sealed record ChangePasswordRequest(string? CurrentPassword, string? NewPassword);

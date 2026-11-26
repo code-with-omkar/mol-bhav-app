@@ -8,6 +8,7 @@ class LoginMethods extends Equatable {
     required this.password,
     this.google = false,
     this.googleClientId,
+    this.passwordReset = false,
   });
 
   /// Used when the server cannot be asked; password login needs no SMS.
@@ -22,8 +23,17 @@ class LoginMethods extends Equatable {
   /// OAuth web client id for Google Sign-In (public, not a secret).
   final String? googleClientId;
 
+  /// "Forgot password" is offered (the server can send a reset code).
+  final bool passwordReset;
+
   bool get showGoogle => google && (googleClientId?.isNotEmpty ?? false);
 
   @override
-  List<Object?> get props => [otp, password, google, googleClientId];
+  List<Object?> get props => [
+    otp,
+    password,
+    google,
+    googleClientId,
+    passwordReset,
+  ];
 }

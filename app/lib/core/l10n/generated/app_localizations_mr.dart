@@ -738,6 +738,39 @@ class AppLocalizationsMr extends AppLocalizations {
   }
 
   @override
+  String get forgotPasswordAction => 'पासवर्ड विसरलात?';
+
+  @override
+  String get forgotPasswordTitle => 'पासवर्ड विसरलात';
+
+  @override
+  String get forgotPasswordIntro =>
+      'तुमचा मोबाइल नंबर टाका. या नंबरचे खाते असल्यास आम्ही WhatsApp वर कोड पाठवू.';
+
+  @override
+  String forgotPasswordSent(String number) {
+    return '$number या नंबरचे खाते असल्यास कोड पाठवला जात आहे. कोड टाका आणि नवीन पासवर्ड निवडा.';
+  }
+
+  @override
+  String get forgotPasswordSendCode => 'कोड पाठवा';
+
+  @override
+  String get forgotPasswordCode => 'कोड';
+
+  @override
+  String get forgotPasswordCodeRequired => 'कोड टाका.';
+
+  @override
+  String get forgotPasswordReset => 'नवीन पासवर्ड सेट करा';
+
+  @override
+  String get forgotPasswordResend => 'कोड पुन्हा पाठवा';
+
+  @override
+  String get forgotPasswordChangeNumber => 'दुसरा नंबर टाका';
+
+  @override
   String get copyAction => 'कॉपी करा';
 
   @override

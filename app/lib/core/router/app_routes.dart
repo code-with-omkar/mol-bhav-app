@@ -51,6 +51,9 @@ abstract final class AppRoutes {
   static const suppliers = '/more/suppliers';
   static const changePassword = '/more/password';
 
+  /// Forgot password, reached from Login without a session.
+  static const forgotPassword = '/login/forgot';
+
   /// One-time permissions step on the first launch after install.
   static const permissions = '/welcome';
   static const adminSchedules = '/more/admin/schedules';

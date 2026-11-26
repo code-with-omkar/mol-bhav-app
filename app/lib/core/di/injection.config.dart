@@ -41,7 +41,7 @@ import 'package:mol_bhav/core/utils/countdown.dart' as _i1044;
 import 'package:mol_bhav/features/account/data/account_data.dart' as _i968;
 import 'package:mol_bhav/features/account/domain/account.dart' as _i695;
 import 'package:mol_bhav/features/account/presentation/account_cubits.dart'
-    as _i956;
+    as _i957;
 import 'package:mol_bhav/features/account/presentation/change_password_cubit.dart'
     as _i85;
 import 'package:mol_bhav/features/account/presentation/profile_cubit.dart'
@@ -166,10 +166,12 @@ import 'package:mol_bhav/features/app_version/presentation/app_version_cubit.dar
     as _i990;
 import 'package:mol_bhav/features/auth/data/datasources/auth_remote_data_source.dart'
     as _i875;
+import 'package:mol_bhav/features/auth/data/password_reset_data.dart' as _i757;
 import 'package:mol_bhav/features/auth/data/repositories/auth_repository_impl.dart'
     as _i155;
 import 'package:mol_bhav/features/auth/domain/entities/otp_challenge.dart'
     as _i769;
+import 'package:mol_bhav/features/auth/domain/password_reset.dart' as _i955;
 import 'package:mol_bhav/features/auth/domain/repositories/auth_repository.dart'
     as _i696;
 import 'package:mol_bhav/features/auth/domain/usecases/password_auth.dart'
@@ -178,6 +180,8 @@ import 'package:mol_bhav/features/auth/domain/usecases/request_otp.dart'
     as _i970;
 import 'package:mol_bhav/features/auth/domain/usecases/verify_otp.dart'
     as _i446;
+import 'package:mol_bhav/features/auth/presentation/cubit/forgot_password_cubit.dart'
+    as _i148;
 import 'package:mol_bhav/features/auth/presentation/cubit/login_cubit.dart'
     as _i597;
 import 'package:mol_bhav/features/auth/presentation/cubit/otp_cubit.dart'
@@ -241,7 +245,7 @@ import 'package:mol_bhav/features/price_status/domain/price_data_status.dart'
 import 'package:mol_bhav/features/price_status/presentation/price_data_status_cubit.dart'
     as _i324;
 import 'package:mol_bhav/features/promotions/data/promotion_events_tracker.dart'
-    as _i955;
+    as _i956;
 import 'package:mol_bhav/features/promotions/data/promotions_data.dart'
     as _i292;
 import 'package:mol_bhav/features/promotions/domain/promotions.dart' as _i249;
@@ -420,6 +424,9 @@ extension GetItInjectableX on _i174.GetIt {
     gh.lazySingleton<_i875.AuthRemoteDataSource>(
       () => _i875.DioAuthRemoteDataSource(gh<_i361.Dio>()),
     );
+    gh.lazySingleton<_i955.PasswordResetRepository>(
+      () => _i757.PasswordResetRepositoryImpl(gh<_i361.Dio>()),
+    );
     gh.lazySingleton<_i234.NotificationPrefsRemoteDataSource>(
       () => _i234.DioNotificationPrefsRemoteDataSource(gh<_i361.Dio>()),
     );
@@ -517,6 +524,9 @@ extension GetItInjectableX on _i174.GetIt {
     );
     gh.lazySingleton<_i629.AdminCategoriesRepository>(
       () => _i482.AdminCategoriesRepositoryImpl(gh<_i361.Dio>()),
+    );
+    gh.factory<_i148.ForgotPasswordCubit>(
+      () => _i148.ForgotPasswordCubit(gh<_i955.PasswordResetRepository>()),
     );
     gh.factory<_i179.AdminCouponsCubit>(
       () => _i179.AdminCouponsCubit(gh<_i555.AdminBillingRepository>()),
@@ -652,8 +662,8 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i552.NotificationService>(),
       ),
     );
-    gh.lazySingleton<_i955.PromotionEventsTracker>(
-      () => _i955.PromotionEventsTracker(
+    gh.lazySingleton<_i956.PromotionEventsTracker>(
+      () => _i956.PromotionEventsTracker(
         gh<_i249.PromotionsRepository>(),
         gh<_i115.SessionManager>(),
       ),
@@ -891,8 +901,8 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i339.GetSupportContact>(),
       ),
     );
-    gh.factory<_i956.MoreCubit>(
-      () => _i956.MoreCubit(
+    gh.factory<_i957.MoreCubit>(
+      () => _i957.MoreCubit(
         gh<_i737.ProfileCubit>(),
         gh<_i695.SignOut>(),
         gh<_i552.NotificationService>(),

@@ -572,6 +572,34 @@ public static class DependencyInjection
         services.AddHttpClient(GoogleIdTokenVerifier.HttpClientName, client => client.Timeout = TimeSpan.FromSeconds(10));
         services.AddSingleton<IGoogleIdTokenVerifier, GoogleIdTokenVerifier>();
 
+        // "Forgot password" has its own switch and channel, independent of SMS code login below.
+        services.Configure<PasswordResetOptions>(configuration.GetSection(PasswordResetOptions.SectionName));
+        var passwordReset = configuration.GetSection(PasswordResetOptions.SectionName).Get<PasswordResetOptions>() ?? new PasswordResetOptions();
+        if (!passwordReset.Enabled)
+        {
+            services.AddSingleton<IPasswordResetCodeSender, DisabledPasswordResetSender>();
+        }
+        else if (string.Equals(passwordReset.Channel, "Log", StringComparison.OrdinalIgnoreCase))
+        {
+            // Fail closed: this sender writes live codes to the log.
+            if (!environment.IsDevelopment())
+            {
+                throw new InvalidOperationException($"{PasswordResetOptions.SectionName}:Channel 'Log' is allowed only in Development.");
+            }
+
+            services.AddSingleton<IPasswordResetCodeSender, LoggingPasswordResetSender>();
+        }
+        else if (string.Equals(passwordReset.Channel, "WhatsApp", StringComparison.OrdinalIgnoreCase)
+            && configuration.GetSection(WhatsAppOptions.SectionName).Get<WhatsAppOptions>() is { IsConfigured: true })
+        {
+            services.AddSingleton<IPasswordResetCodeSender, WhatsAppPasswordResetSender>();
+        }
+        else
+        {
+            throw new InvalidOperationException(
+                $"{PasswordResetOptions.SectionName}:Channel must be 'WhatsApp' (with {WhatsAppOptions.SectionName} configured) or, in Development, 'Log'.");
+        }
+
         var loginMethods = configuration.GetSection(LoginMethodsOptions.SectionName).Get<LoginMethodsOptions>() ?? new LoginMethodsOptions();
         if (!loginMethods.Otp)
         {

@@ -17,6 +17,8 @@ using MolBhav.Application.Features.Identity.PasswordLogin;
 using MolBhav.Application.Features.Identity.RefreshToken;
 using MolBhav.Application.Features.Identity.RegisterWithPassword;
 using MolBhav.Application.Features.Identity.RequestOtp;
+using MolBhav.Application.Features.Identity.RequestPasswordReset;
+using MolBhav.Application.Features.Identity.ResetPassword;
 using MolBhav.Application.Features.Identity.UnlinkGoogle;
 using MolBhav.Application.Features.Identity.VerifyOtp;
 using MolBhav.Domain.Identity;
@@ -41,7 +43,7 @@ public sealed class AuthController(ISender sender, TimeProvider timeProvider) : 
         var result = await Sender.Send(new GetLoginMethodsQuery(), cancellationToken);
 
         return result.IsSuccess
-            ? Ok(ApiResponse.Ok(new LoginMethodsDto(result.Value.Otp, result.Value.Password, result.Value.Google, result.Value.GoogleClientId)))
+            ? Ok(ApiResponse.Ok(new LoginMethodsDto(result.Value.Otp, result.Value.Password, result.Value.Google, result.Value.GoogleClientId, result.Value.PasswordReset)))
             : ToProblem(result.Error);
     }
 
@@ -99,6 +101,51 @@ public sealed class AuthController(ISender sender, TimeProvider timeProvider) : 
             PasswordLoginOutcome.LockedOut => ToProblem(IdentityErrors.LockedOut(login.LockedUntilUtc, timeProvider.GetUtcNow())),
             _ => ToProblem(IdentityErrors.InvalidCredentials),
         };
+    }
+
+    /// <summary>Forgot password, step one: sends a code to the number. The answer does not say whether an account exists.</summary>
+    /// <response code="200">If the number has an account, a code is on its way; valid until <c>expiresAtUtc</c>.</response>
+    /// <response code="403">Password reset is off (<c>Auth.MethodDisabled</c>).</response>
+    /// <response code="422">A code was asked for less than a minute ago (<c>Otp.ResendTooSoon</c>).</response>
+    [HttpPost("password/forgot")]
+    [AllowAnonymous]
+    [EnableRateLimiting(RateLimitPolicies.Otp)]
+    [Consumes(MediaTypeNames.Application.Json)]
+    [ProducesResponseType<ApiResponse<OtpSentResponse>>(StatusCodes.Status200OK)]
+    [ProducesResponseType<ValidationProblemDetails>(StatusCodes.Status400BadRequest, MediaTypeNames.Application.ProblemJson)]
+    public async Task<IActionResult> ForgotPassword([FromBody] ForgotPasswordRequest request, CancellationToken cancellationToken)
+    {
+        var result = await Sender.Send(new RequestPasswordResetCommand(request.PhoneNumber ?? string.Empty), cancellationToken);
+
+        return result.IsSuccess
+            ? Ok(ApiResponse.Ok(new OtpSentResponse(result.Value.ExpiresAtUtc, result.Value.ResendCooldownSeconds)))
+            : ToProblem(result.Error);
+    }
+
+    /// <summary>Forgot password, step two: sets a new password with the code. All the account's sessions end.</summary>
+    /// <response code="204">Password changed; sign in with it.</response>
+    /// <response code="400">Wrong code (<c>Otp.Incorrect</c>), none requested, or the password breaks the policy.</response>
+    /// <response code="422">Code expired, already used, or too many wrong attempts — ask for a new one.</response>
+    [HttpPost("password/reset")]
+    [AllowAnonymous]
+    [EnableRateLimiting(RateLimitPolicies.OtpVerify)]
+    [Consumes(MediaTypeNames.Application.Json)]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType<ValidationProblemDetails>(StatusCodes.Status400BadRequest, MediaTypeNames.Application.ProblemJson)]
+    [ProducesResponseType<ProblemDetails>(StatusCodes.Status422UnprocessableEntity, MediaTypeNames.Application.ProblemJson)]
+    public async Task<IActionResult> ResetForgottenPassword([FromBody] ResetForgottenPasswordRequest request, CancellationToken cancellationToken)
+    {
+        var result = await Sender.Send(
+            new ResetPasswordCommand(request.PhoneNumber ?? string.Empty, request.Code ?? string.Empty, request.NewPassword ?? string.Empty),
+            cancellationToken);
+        if (result.IsFailure)
+        {
+            return ToProblem(result.Error);
+        }
+
+        return result.Value.Outcome == OtpVerificationOutcome.Verified
+            ? NoContent()
+            : ToProblem(IdentityErrors.ForOtpOutcome(result.Value.Outcome));
     }
 
     /// <summary>Changes the signed-in user's password. With an existing password the current one must be sent.</summary>

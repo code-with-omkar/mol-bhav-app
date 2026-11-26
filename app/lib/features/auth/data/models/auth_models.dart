@@ -48,6 +48,7 @@ class LoginMethodsResponse {
     required this.password,
     this.google = false,
     this.googleClientId,
+    this.passwordReset = false,
   });
 
   factory LoginMethodsResponse.fromJson(Map<String, dynamic> json) {
@@ -56,6 +57,7 @@ class LoginMethodsResponse {
       password: json['password'] as bool? ?? false,
       google: json['google'] as bool? ?? false,
       googleClientId: json['googleClientId'] as String?,
+      passwordReset: json['passwordReset'] as bool? ?? false,
     );
   }
 
@@ -63,4 +65,5 @@ class LoginMethodsResponse {
   final bool password;
   final bool google;
   final String? googleClientId;
+  final bool passwordReset;
 }
