@@ -48,6 +48,10 @@ internal sealed class PriceRecordConfiguration : IEntityTypeConfiguration<PriceR
         builder.HasIndex(r => new { r.SupplierId, r.RecordDate })
             .IsDescending(false, true)
             .HasFilter("supplier_id IS NOT NULL AND NOT is_voided");
+        // Comparison matrix: the newest price of one product at each mandi, one probe per mandi however long the history.
+        builder.HasIndex(r => new { r.MandiId, r.ProductId, r.RecordDate })
+            .IsDescending(false, false, true)
+            .HasFilter("mandi_id IS NOT NULL AND NOT is_voided");
         builder.HasIndex(r => r.PriceSourceId);
         builder.HasIndex(r => r.VariantId);
 

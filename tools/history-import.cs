@@ -41,8 +41,17 @@ var variants = new Dictionary<(Guid, string), Guid>();
 await foreach (var r in Query("select product_id, code, id from catalog.product_variants where is_active"))
     variants[(r.GetGuid(0), r.GetString(1))] = r.GetGuid(2);
 var mandis = new Dictionary<string, Guid>(StringComparer.Ordinal);
-await foreach (var r in Query("select code, id from market.mandis where is_active"))
+// Older years spell many markets differently ("Pune APMC" for "APMC Pune"). Such a row is matched when exactly one
+// catalog mandi in the same state and district has the same name once the generic words are ignored.
+var sameName = new Dictionary<(string State, string District, string Name), Guid?>();
+await foreach (var r in Query(
+    "select m.code, m.id, m.name, d.name, s.name from market.mandis m join market.districts d on d.id = m.district_id join market.states s on s.id = d.state_id where m.is_active"))
+{
     mandis[r.GetString(0)] = r.GetGuid(1);
+    var name = (r.GetString(4).ToLowerInvariant(), r.GetString(3).ToLowerInvariant(), NameKey(r.GetString(2)));
+    if (name.Item3.Length > 0) sameName[name] = sameName.ContainsKey(name) ? null : r.GetGuid(1);
+}
+
 Console.WriteLine($"catalog: {products.Count} products, {variants.Count} variants, {mandis.Count} mandis");
 
 // MB_COLLECT=1 loads no prices: it samples every 15th day for markets the catalog lacks and adds their names to the
@@ -197,7 +206,7 @@ async Task<Counts> Store(DateOnly day, List<Row> rows)
         var productCode = Mapped(Slug(row.Commodity), commodityMap);
         var mandiCode = Mapped(Slug(row.Market), marketMap);
         if (!products.TryGetValue(productCode, out var product)) { unknown++; continue; }
-        if (!mandis.TryGetValue(mandiCode, out var mandi))
+        if (!mandis.TryGetValue(mandiCode, out var mandi) && !TryOlderName(row, out mandi))
         {
             unknown++;
             unknownMarkets[row.Market] = unknownMarkets.GetValueOrDefault(row.Market) + 1;
@@ -247,6 +256,14 @@ async Task<Counts> Store(DateOnly day, List<Row> rows)
     return new Counts(inserted, existing, unknown, invalid, duplicate);
 }
 
+bool TryOlderName(Row row, out Guid mandi)
+{
+    var key = (row.State.Trim().ToLowerInvariant(), row.District.Trim().ToLowerInvariant(), NameKey(row.Market));
+    var found = sameName.TryGetValue(key, out var id) ? id : null;
+    mandi = found ?? Guid.Empty;
+    return found is not null;
+}
+
 async Task<object?> Scalar(string sql)
 {
     await using var command = db.CreateCommand(sql);
@@ -273,6 +290,10 @@ static decimal? Positive(decimal? value) => value > 0 ? value : null;
 static string Escape(string value) => JsonEncodedText.Encode(value).ToString();
 
 static string Slug(string value) => Regex.Replace(value.Trim().ToLowerInvariant(), "[^a-z0-9]+", "-").Trim('-');
+
+// Only the generic words are ignored; anything else, such as "(Grain)" or "(F&V)", keeps two market yards apart.
+static string NameKey(string name) =>
+    Regex.Replace(Regex.Replace(name.ToLowerInvariant(), @"\b(apmc|market|mandi|smy|pmy)\b", " "), "[^a-z0-9]+", "");
 
 static string Mapped(string code, Dictionary<string, string> map) => map.TryGetValue(code, out var mapped) ? mapped : code;
 

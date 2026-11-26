@@ -2531,6 +2531,11 @@ namespace MolBhav.Infrastructure.Persistence.Migrations
                         .HasDatabaseName("ix_price_records_supplier_id_record_date")
                         .HasFilter("supplier_id IS NOT NULL AND NOT is_voided");
 
+                    b.HasIndex("MandiId", "ProductId", "RecordDate")
+                        .IsDescending(false, false, true)
+                        .HasDatabaseName("ix_price_records_mandi_id_product_id_record_date")
+                        .HasFilter("mandi_id IS NOT NULL AND NOT is_voided");
+
                     b.HasIndex("ProductId", "LocationKind", "RecordDate")
                         .HasDatabaseName("ix_price_records_product_id_location_kind_record_date");
 

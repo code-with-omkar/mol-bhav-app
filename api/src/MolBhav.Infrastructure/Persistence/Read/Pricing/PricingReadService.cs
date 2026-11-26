@@ -38,15 +38,33 @@ internal sealed class PricingReadService(IDbConnectionFactory connectionFactory)
 
     // A WITH clause only scopes the single statement that follows it, so the CTE is repeated for both the
     // count and the data query rather than shared across the semicolon-separated Dapper batch.
+    // One index probe per location (newest row first), so the cost follows the number of locations and not the years of
+    // history: ix_price_records_mandi_id_product_id_record_date for mandis, the supplier index for suppliers.
     private const string LatestRecordsCte = $"""
         WITH latest AS (
-            SELECT DISTINCT ON (COALESCE(r.mandi_id, r.supplier_id))
-                r.mandi_id, r.supplier_id, r.min_price, r.max_price, r.modal_price,
-                r.unit_id, r.arrival_quantity, r.record_date, r.price_source_id
-            FROM {PriceRecords} r
-            WHERE r.product_id = @ProductId AND NOT r.is_voided
-              AND (@LocationKind::text IS NULL OR r.location_kind = @LocationKind::text)
-            ORDER BY COALESCE(r.mandi_id, r.supplier_id), r.record_date DESC
+            SELECT r.*
+            FROM {Mandis} loc
+            CROSS JOIN LATERAL (
+                SELECT x.mandi_id, x.supplier_id, x.min_price, x.max_price, x.modal_price,
+                       x.unit_id, x.arrival_quantity, x.record_date, x.price_source_id
+                FROM {PriceRecords} x
+                WHERE x.mandi_id = loc.id AND x.product_id = @ProductId AND NOT x.is_voided
+                ORDER BY x.record_date DESC
+                LIMIT 1
+            ) r
+            WHERE @LocationKind::text IS NULL OR @LocationKind::text = 'Mandi'
+            UNION ALL
+            SELECT r.*
+            FROM {Suppliers} loc
+            CROSS JOIN LATERAL (
+                SELECT x.mandi_id, x.supplier_id, x.min_price, x.max_price, x.modal_price,
+                       x.unit_id, x.arrival_quantity, x.record_date, x.price_source_id
+                FROM {PriceRecords} x
+                WHERE x.supplier_id = loc.id AND x.product_id = @ProductId AND NOT x.is_voided
+                ORDER BY x.record_date DESC
+                LIMIT 1
+            ) r
+            WHERE @LocationKind::text IS NULL OR @LocationKind::text = 'Supplier'
         )
         """;
 
