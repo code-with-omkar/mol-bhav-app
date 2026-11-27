@@ -680,7 +680,7 @@ class AppLocalizationsMr extends AppLocalizations {
   String get supplierCall => 'कॉल करा';
 
   @override
-  String get supplierCallFailed => 'फोन अ‍ॅप उघडता आले नाही.';
+  String get supplierCallFailed => 'फोन ॲप उघडता आले नाही.';
 
   @override
   String get permissionsTitle => 'काही परवानग्या द्या';
@@ -804,7 +804,7 @@ class AppLocalizationsMr extends AppLocalizations {
   String get changePasswordTitle => 'पासवर्ड बदला';
 
   @override
-  String get changePasswordSubtitle => 'साइन इनसाठी नवीन पासवर्ड निवडा';
+  String get changePasswordSubtitle => 'लॉग इनसाठी नवीन पासवर्ड निवडा';
 
   @override
   String get currentPasswordLabel => 'सध्याचा पासवर्ड';
@@ -826,7 +826,7 @@ class AppLocalizationsMr extends AppLocalizations {
   String get changePasswordAction => 'पासवर्ड बदला';
 
   @override
-  String get passwordChanged => 'पासवर्ड बदलला. कृपया पुन्हा साइन इन करा.';
+  String get passwordChanged => 'पासवर्ड बदलला. कृपया पुन्हा लॉग इन करा.';
 
   @override
   String landedPerUnit(String amount, String unit) {
@@ -893,14 +893,14 @@ class AppLocalizationsMr extends AppLocalizations {
   String get estimateSavedLabel => 'जतन केले';
 
   @override
-  String get unitLockedHelper => 'किमती याच एककात आहेत.';
+  String get unitLockedHelper => 'भाव याच एककात आहेत.';
 
   @override
   String get anyDistrict => 'कोणताही जिल्हा';
 
   @override
   String get estimateNoPrices =>
-      'येथे या मालाच्या अलीकडील किमती नाहीत. दुसरा जिल्हा किंवा माल निवडा.';
+      'येथे या मालाचे अलीकडील भाव नाहीत. दुसरा जिल्हा किंवा माल निवडा.';
 
   @override
   String estimateSavingsVsAverage(String amount, String average) {
@@ -926,13 +926,13 @@ class AppLocalizationsMr extends AppLocalizations {
   String get reportWeeklySummaryPdf => 'साप्ताहिक सारांश (PDF)';
 
   @override
-  String get reportPriceHistoryCsv => 'किंमत इतिहास (CSV)';
+  String get reportPriceHistoryCsv => 'भाव इतिहास (CSV)';
 
   @override
   String get reportWeeklySummary => 'साप्ताहिक सारांश';
 
   @override
-  String get reportPriceHistory => 'किंमत इतिहास';
+  String get reportPriceHistory => 'भाव इतिहास';
 
   @override
   String get reportPeriodLabel => 'कालावधी';
@@ -962,7 +962,7 @@ class AppLocalizationsMr extends AppLocalizations {
 
   @override
   String get reportNeedsPro =>
-      'किंमत इतिहास निर्यातीसाठी MolBhav Pro आवश्यक आहे.';
+      'भाव इतिहास निर्यातीसाठी MolBhav Pro आवश्यक आहे.';
 
   @override
   String get yourReports => 'तुमचे अहवाल';
@@ -974,31 +974,31 @@ class AppLocalizationsMr extends AppLocalizations {
   String get allMandis => 'सर्व मंड्या';
 
   @override
-  String get csvProNote => 'एका उत्पादनाच्या रोजच्या किमती, Excel साठी तयार.';
+  String get csvProNote => 'एका उत्पादनाचे रोजचे भाव, Excel साठी तयार.';
 
   @override
   String fileSavedNoViewer(String name) {
-    return '$name जतन केले, पण ते उघडणारे कोणतेही अ‍ॅप नाही.';
+    return '$name जतन केले, पण ते उघडणारे कोणतेही ॲप नाही.';
   }
 
   @override
   String alertRose(String product, String percent) {
-    return '$product $percent% वाढले';
+    return '$product: $percent% वाढ';
   }
 
   @override
   String alertDropped(String product, String percent) {
-    return '$product $percent% घसरले';
+    return '$product: $percent% घट';
   }
 
   @override
   String alertRoseIn(String product, String percent, String market) {
-    return '$market मध्ये $product $percent% वाढले';
+    return '$market मध्ये $product: $percent% वाढ';
   }
 
   @override
   String alertDroppedIn(String product, String percent, String market) {
-    return '$market मध्ये $product $percent% घसरले';
+    return '$market मध्ये $product: $percent% घट';
   }
 
   @override
@@ -1048,7 +1048,7 @@ class AppLocalizationsMr extends AppLocalizations {
   String get contactEmail => 'आम्हाला ईमेल करा';
 
   @override
-  String get cannotOpenLink => 'हे उघडू शकणारे कोणतेही अॅप या डिव्हाइसवर नाही.';
+  String get cannotOpenLink => 'हे उघडू शकणारे कोणतेही ॲप या डिव्हाइसवर नाही.';
 
   @override
   String get supportWhatsAppPrefill => 'नमस्कार MolBhav, मला यात मदत हवी आहे:';
@@ -1060,7 +1060,7 @@ class AppLocalizationsMr extends AppLocalizations {
   String get supportEmailIntro => 'कृपया तुम्हाला कशात मदत हवी आहे ते सांगा:';
 
   @override
-  String get appVersionLabel => 'अॅप आवृत्ती';
+  String get appVersionLabel => 'ॲप आवृत्ती';
 
   @override
   String get accountLabel => 'खाते';
@@ -1173,7 +1173,7 @@ class AppLocalizationsMr extends AppLocalizations {
 
   @override
   String shareRange(String min, String max) {
-    return 'श्रेणी: $min – $max';
+    return 'दर मर्यादा: $min – $max';
   }
 
   @override
@@ -1182,7 +1182,7 @@ class AppLocalizationsMr extends AppLocalizations {
   }
 
   @override
-  String get shareImageSaved => 'भाव कार्ड तुमच्या डाउनलोडमध्ये सेव्ह झाले.';
+  String get shareImageSaved => 'भाव कार्ड तुमच्या डाउनलोडमध्ये जतन झाले.';
 
   @override
   String get fromLink => 'शेअर केलेले';
@@ -1254,7 +1254,7 @@ class AppLocalizationsMr extends AppLocalizations {
   String get alertRulesCancel => 'रद्द करा';
 
   @override
-  String get alertRulesSave => 'सेव्ह करा';
+  String get alertRulesSave => 'जतन करा';
 
   @override
   String get changeNumberAction => 'नंबर बदला';
@@ -1273,10 +1273,10 @@ class AppLocalizationsMr extends AppLocalizations {
   }
 
   @override
-  String get notificationSettingsTitle => 'नोटिफिकेशन सेटिंग';
+  String get notificationSettingsTitle => 'सूचना सेटिंग';
 
   @override
-  String get pushNotificationsLabel => 'पुश नोटिफिकेशन';
+  String get pushNotificationsLabel => 'पुश सूचना';
 
   @override
   String get alertPushLabel => 'भाव अलर्ट पुश';
@@ -1285,13 +1285,13 @@ class AppLocalizationsMr extends AppLocalizations {
   String get priceUpdatePushLabel => 'रोजचे भाव अपडेट पुश';
 
   @override
-  String get whatsappNotificationsLabel => 'WhatsApp नोटिफिकेशन';
+  String get whatsappNotificationsLabel => 'WhatsApp सूचना';
 
   @override
   String get alertWhatsappLabel => 'WhatsApp वर भाव अलर्ट';
 
   @override
-  String get notificationSettingsAction => 'नोटिफिकेशन सेटिंग';
+  String get notificationSettingsAction => 'सूचना सेटिंग';
 
   @override
   String get monthlyBilling => 'मासिक';
@@ -1357,7 +1357,7 @@ class AppLocalizationsMr extends AppLocalizations {
 
   @override
   String couponApplied(String amount) {
-    return 'कूपन लागू झाला! तुमची $amount बचत';
+    return 'कूपन लागू झाले! तुमची $amount बचत';
   }
 
   @override
@@ -1385,7 +1385,7 @@ class AppLocalizationsMr extends AppLocalizations {
   String get paymentFailed => 'पेमेंट अयशस्वी';
 
   @override
-  String get paymentsMobileOnly => 'पेमेंट मोबाइल अॅपमध्ये उपलब्ध आहे';
+  String get paymentsMobileOnly => 'पेमेंट मोबाइल ॲपमध्ये उपलब्ध आहे';
 
   @override
   String get paymentActivationPending =>
@@ -1613,7 +1613,7 @@ class AppLocalizationsMr extends AppLocalizations {
 
   @override
   String get adminSupportCloseBody =>
-      'बंद तिकीट अंतिम असते: कोणीही त्यावर उत्तर देऊ शकत नाही किंवा ते पुन्हा उघडू शकत नाही. वापरकर्ता पुन्हा लिहू शकत असेल तर ते निराकरण झालेले म्हणून चिन्हांकित करा.';
+      'बंद तिकीट अंतिम असते: कोणीही त्यावर उत्तर देऊ शकत नाही किंवा ते पुन्हा उघडू शकत नाही. वापरकर्ता पुन्हा लिहू शकत असेल तर ते सोडवलेले म्हणून चिन्हांकित करा.';
 
   @override
   String get adminSupportCloseConfirm => 'तिकीट बंद करा';
@@ -1679,10 +1679,10 @@ class AppLocalizationsMr extends AppLocalizations {
   String get adminCampaignWhenTitle => 'कधी चालेल';
 
   @override
-  String get adminCampaignStarts => 'सुरू';
+  String get adminCampaignStarts => 'सुरुवात';
 
   @override
-  String get adminCampaignEnds => 'संपते';
+  String get adminCampaignEnds => 'समाप्ती';
 
   @override
   String get adminCampaignPickDate => 'तारीख निवडा';
@@ -1904,10 +1904,10 @@ class AppLocalizationsMr extends AppLocalizations {
   }
 
   @override
-  String get adminCouponStarts => 'सुरू';
+  String get adminCouponStarts => 'सुरुवात';
 
   @override
-  String get adminCouponEnds => 'संपते (ऐच्छिक)';
+  String get adminCouponEnds => 'समाप्ती (ऐच्छिक)';
 
   @override
   String get adminCouponNoEnd => 'शेवटची तारीख नाही';
@@ -2051,11 +2051,11 @@ class AppLocalizationsMr extends AppLocalizations {
   String get adminAuditTitle => 'क्रियाकलाप नोंद';
 
   @override
-  String get adminAuditSubtitle => 'अ‍ॅडमिन अ‍ॅपमध्ये कोणी काय आणि कधी बदलले';
+  String get adminAuditSubtitle => 'ॲडमिन ॲपमध्ये कोणी काय आणि कधी बदलले';
 
   @override
   String get adminAuditEmpty =>
-      'अजून काहीही नोंदवलेले नाही. अ‍ॅडमिनचे बदल येथे दिसतील.';
+      'अजून काहीही नोंदवलेले नाही. ॲडमिनचे बदल येथे दिसतील.';
 
   @override
   String adminAuditBy(String actor) {
@@ -2177,7 +2177,7 @@ class AppLocalizationsMr extends AppLocalizations {
   String get adminProductErrEnglish => 'इंग्रजी नाव लिहा.';
 
   @override
-  String get adminProductActive => 'अ‍ॅपमध्ये दिसावे';
+  String get adminProductActive => 'ॲपमध्ये दिसावे';
 
   @override
   String get adminProductActiveHint =>
@@ -2340,11 +2340,11 @@ class AppLocalizationsMr extends AppLocalizations {
   String get adminUnitDimArea => 'क्षेत्रफळ';
 
   @override
-  String get adminMandisTitle => 'मंडया';
+  String get adminMandisTitle => 'मंड्या';
 
   @override
   String get adminMandisSubtitle =>
-      'मंडया शोधा, जोडा, नाव बदला आणि जिल्हा बदला';
+      'मंड्या शोधा, जोडा, नाव बदला आणि जिल्हा बदला';
 
   @override
   String get adminMandisEmpty => 'कोणतीही मंडी सापडली नाही.';
@@ -2386,7 +2386,7 @@ class AppLocalizationsMr extends AppLocalizations {
 
   @override
   String get adminStatesIntro =>
-      'नाव बदलण्यासाठी किंवा बंद करण्यासाठी राज्य किंवा जिल्ह्यावर टॅप करा. मंडया जिल्ह्यात असतात.';
+      'नाव बदलण्यासाठी किंवा बंद करण्यासाठी राज्य किंवा जिल्ह्यावर टॅप करा. मंड्या जिल्ह्यात असतात.';
 
   @override
   String get adminStatesEmpty => 'अजून कोणतेही राज्य नाही.';
@@ -2454,7 +2454,7 @@ class AppLocalizationsMr extends AppLocalizations {
 
   @override
   String get adminCommoditiesIntro =>
-      'उप-श्रेणी आणि एकक निवडा, मग मागील पूर्ण पुलमधून वस्तू निवडा. प्रत्येक वस्तू फीडच्या इंग्रजी नावासह उत्पादन म्हणून जोडली जाते, म्हणजे पुढच्या पुलमध्ये तिचे भाव सेव्ह करता येतील. हिंदी आणि मराठी नावे नंतर कॅटलॉगमध्ये जोडा.';
+      'उप-श्रेणी आणि एकक निवडा, मग मागील पूर्ण पुलमधून वस्तू निवडा. प्रत्येक वस्तू फीडच्या इंग्रजी नावासह उत्पादन म्हणून जोडली जाते, म्हणजे पुढच्या पुलमध्ये तिचे भाव जतन करता येतील. हिंदी आणि मराठी नावे नंतर कॅटलॉगमध्ये जोडा.';
 
   @override
   String get adminCommoditiesNoFeed =>
@@ -2504,7 +2504,7 @@ class AppLocalizationsMr extends AppLocalizations {
 
   @override
   String get adminCommoditiesAddedHint =>
-      'त्यांचे भाव पुढच्या पुलपासून सेव्ह होतील.';
+      'त्यांचे भाव पुढच्या पुलपासून जतन होतील.';
 
   @override
   String get adminCommoditiesSkipNotInFeed => 'फीड यादीत नाही';
@@ -2514,7 +2514,7 @@ class AppLocalizationsMr extends AppLocalizations {
 
   @override
   String get appVersionBody =>
-      'अ‍ॅपची ही आवृत्ती आता समर्थित नाही. MolBhav वापरणे सुरू ठेवण्यासाठी अपडेट करा.';
+      'ॲपची ही आवृत्ती आता समर्थित नाही. MolBhav वापरणे सुरू ठेवण्यासाठी अपडेट करा.';
 
   @override
   String appVersionYours(String installed, String minimum) {
@@ -2525,7 +2525,7 @@ class AppLocalizationsMr extends AppLocalizations {
   String get appVersionUpdate => 'आता अपडेट करा';
 
   @override
-  String get adminVersionTitle => 'किमान अ‍ॅप आवृत्ती';
+  String get adminVersionTitle => 'किमान ॲप आवृत्ती';
 
   @override
   String get adminVersionSubtitle =>
@@ -2533,11 +2533,11 @@ class AppLocalizationsMr extends AppLocalizations {
 
   @override
   String get adminVersionIntro =>
-      'यापेक्षा जुन्या बिल्डमध्ये अ‍ॅपऐवजी अपडेट पेज दिसते. प्रत्येक बिल्डला परवानगी देण्यासाठी आवृत्ती रिकामी ठेवा. अ‍ॅडमिन कधीही ब्लॉक होत नाहीत, त्यामुळे चूक नेहमी सुधारता येते.';
+      'यापेक्षा जुन्या बिल्डमध्ये ॲपऐवजी अपडेट पेज दिसते. प्रत्येक बिल्डला परवानगी देण्यासाठी आवृत्ती रिकामी ठेवा. ॲडमिन कधीही ब्लॉक होत नाहीत, त्यामुळे चूक नेहमी सुधारता येते.';
 
   @override
   String adminVersionThisApp(String version) {
-    return 'हे अ‍ॅप आवृत्ती $version आहे.';
+    return 'हे ॲप आवृत्ती $version आहे.';
   }
 
   @override
@@ -2557,12 +2557,11 @@ class AppLocalizationsMr extends AppLocalizations {
   String get adminFeaturesTitle => 'फीचर स्विच';
 
   @override
-  String get adminFeaturesSubtitle =>
-      'सर्वांसाठी अ‍ॅपचे भाग चालू किंवा बंद करा';
+  String get adminFeaturesSubtitle => 'सर्वांसाठी ॲपचे भाग चालू किंवा बंद करा';
 
   @override
   String get adminFeaturesIntro =>
-      'सर्व काही आपोआप चालू असते. तुम्ही बंद केलेला भाग सुमारे दहा मिनिटांत, किंवा अ‍ॅप पुन्हा उघडल्यावर, सर्व वापरकर्त्यांसाठी गायब होतो.';
+      'सर्व काही आपोआप चालू असते. तुम्ही बंद केलेला भाग सुमारे दहा मिनिटांत, किंवा ॲप पुन्हा उघडल्यावर, सर्व वापरकर्त्यांसाठी गायब होतो.';
 
   @override
   String get adminFeatureAds => 'जाहिराती';
@@ -2593,7 +2592,7 @@ class AppLocalizationsMr extends AppLocalizations {
   String get appNoticeCheckAgain => 'पुन्हा तपासा';
 
   @override
-  String get adminNoticeTitle => 'अ‍ॅप संदेश';
+  String get adminNoticeTitle => 'ॲप संदेश';
 
   @override
   String get adminNoticeSubtitle =>
@@ -2601,7 +2600,7 @@ class AppLocalizationsMr extends AppLocalizations {
 
   @override
   String get adminNoticeIntro =>
-      'अ‍ॅपच्या प्रत्येक वापरकर्त्याला दिसणारा एक संदेश. गरज संपली की तो बंद करा; मजकूर जतन राहतो.';
+      'ॲपच्या प्रत्येक वापरकर्त्याला दिसणारा एक संदेश. गरज संपली की तो बंद करा; मजकूर जतन राहतो.';
 
   @override
   String get adminNoticeShow => 'वापरकर्त्यांना दाखवा';
@@ -2620,7 +2619,7 @@ class AppLocalizationsMr extends AppLocalizations {
 
   @override
   String get adminNoticeMaintenanceHint =>
-      'देखभाल चालू असताना अ‍ॅपच्या जागी \"लवकरच परत\" पेज दिसते, तुम्ही ते बंद करेपर्यंत. अ‍ॅडमिन अ‍ॅप सुरू राहते.';
+      'देखभाल चालू असताना ॲपच्या जागी \"लवकरच परत\" पेज दिसते, तुम्ही ते बंद करेपर्यंत. ॲडमिन ॲप सुरू राहते.';
 
   @override
   String get adminNoticeMessage => 'संदेश';
@@ -2651,7 +2650,7 @@ class AppLocalizationsMr extends AppLocalizations {
   String get adminHistoryEmpty => 'अद्याप कोणताही रन नाही.';
 
   @override
-  String get adminTriggerScheduled => 'वेळापत्रक';
+  String get adminTriggerScheduled => 'नियोजित';
 
   @override
   String get adminTriggerManual => 'मॅन्युअल';
@@ -2743,7 +2742,7 @@ class AppLocalizationsMr extends AppLocalizations {
 
   @override
   String get adminUserSuspendBody =>
-      'तुम्ही पुन्हा सुरू करेपर्यंत त्यांना साइन इन करता येणार नाही आणि सत्र नूतनीकरण करता येणार नाही.';
+      'तुम्ही पुन्हा सुरू करेपर्यंत त्यांना लॉग इन करता येणार नाही आणि सत्र नूतनीकरण करता येणार नाही.';
 
   @override
   String get adminUserSuspendConfirm => 'निलंबित करा';
@@ -2802,7 +2801,7 @@ class AppLocalizationsMr extends AppLocalizations {
   }
 
   @override
-  String get adminAdsDailyImpressions => 'रोजचे इंप्रेशन';
+  String get adminAdsDailyImpressions => 'रोजचे इम्प्रेशन';
 
   @override
   String get adminAdsDailyClickRate => 'रोजचा क्लिक दर';
@@ -2954,14 +2953,14 @@ class AppLocalizationsMr extends AppLocalizations {
   String get jobStatusSucceeded => 'यशस्वी';
 
   @override
-  String get jobStatusPartial => 'अंशतः सेव्ह';
+  String get jobStatusPartial => 'अंशतः जतन';
 
   @override
   String get jobStatusFailed => 'अयशस्वी';
 
   @override
   String jobCounts(String saved, String failed) {
-    return '$saved सेव्ह, $failed अयशस्वी';
+    return '$saved जतन, $failed अयशस्वी';
   }
 
   @override
@@ -2971,7 +2970,7 @@ class AppLocalizationsMr extends AppLocalizations {
   String get editScheduleAction => 'वेळापत्रक बदला';
 
   @override
-  String get saveScheduleAction => 'वेळापत्रक सेव्ह करा';
+  String get saveScheduleAction => 'वेळापत्रक जतन करा';
 
   @override
   String get scheduleFrequencyLabel => 'किती वेळा';
@@ -3042,7 +3041,7 @@ class AppLocalizationsMr extends AppLocalizations {
       'फिल्टर फक्त याच वेळेसाठी आहे. वेळापत्रकानुसार होणारे रन नेहमी सर्व काही आणतात.';
 
   @override
-  String get scheduleSaved => 'वेळापत्रक सेव्ह झाले.';
+  String get scheduleSaved => 'वेळापत्रक जतन झाले.';
 
   @override
   String get runCompleted => 'चालवणे पूर्ण झाले. कार्डवर मागील वेळ पहा.';
@@ -3286,14 +3285,14 @@ class AppLocalizationsMr extends AppLocalizations {
 
   @override
   String get googleAccountExists =>
-      'या मोबाइल नंबरचे खाते आधीच आहे. पासवर्डने लॉग इन करा, नंतर More मध्ये Google जोडा.';
+      'या मोबाइल नंबरचे खाते आधीच आहे. पासवर्डने लॉग इन करा, नंतर अधिक मध्ये Google जोडा.';
 
   @override
   String get googleSignInFailed =>
-      'Google ने साइन-इन झाले नाही. पुन्हा प्रयत्न करा.';
+      'Google ने लॉग इन झाले नाही. पुन्हा प्रयत्न करा.';
 
   @override
-  String get googleSignInTitle => 'Google साइन-इन';
+  String get googleSignInTitle => 'Google लॉग इन';
 
   @override
   String get googleLinked => 'जोडलेले';
@@ -3304,14 +3303,13 @@ class AppLocalizationsMr extends AppLocalizations {
   }
 
   @override
-  String get googleUnlinkAction => 'काढा';
+  String get googleUnlinkAction => 'जोडणी काढा';
 
   @override
   String get googleLinkAction => 'Google खाते जोडा';
 
   @override
-  String get googleLinkHint =>
-      'पुढच्या वेळी पासवर्डऐवजी Google ने साइन-इन करा.';
+  String get googleLinkHint => 'पुढच्या वेळी पासवर्डऐवजी Google ने लॉग इन करा.';
 
   @override
   String get googleLinkedElsewhere =>
@@ -3319,7 +3317,7 @@ class AppLocalizationsMr extends AppLocalizations {
 
   @override
   String get googleLastSignInMethod =>
-      'Google काढण्यापूर्वी पासवर्ड सेट करा — साइन-इनचा हाच एक मार्ग आहे.';
+      'Google काढण्यापूर्वी पासवर्ड सेट करा — लॉग इनचा हाच एक मार्ग आहे.';
 
   @override
   String get weatherHomePrompt => 'तुमच्या भागाचे हवामान पाहण्यासाठी टॅप करा';
@@ -3329,7 +3327,7 @@ class AppLocalizationsMr extends AppLocalizations {
 
   @override
   String get notificationPrefsSaveFailed =>
-      'तुमची नोटिफिकेशन सेटिंग सेव्ह झाली नाही. कृपया पुन्हा प्रयत्न करा.';
+      'तुमची सूचना सेटिंग जतन झाली नाही. कृपया पुन्हा प्रयत्न करा.';
 
   @override
   String opportunityTitle(String product, String percent, String market) {
@@ -3386,7 +3384,7 @@ class AppLocalizationsMr extends AppLocalizations {
   String get selectAllAction => 'सर्व निवडा';
 
   @override
-  String get clearSelectionAction => 'काढा';
+  String get clearSelectionAction => 'निवड काढा';
 
   @override
   String get applyAction => 'लागू करा';

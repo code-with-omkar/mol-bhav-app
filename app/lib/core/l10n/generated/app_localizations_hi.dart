@@ -804,7 +804,7 @@ class AppLocalizationsHi extends AppLocalizations {
   String get changePasswordTitle => 'पासवर्ड बदलें';
 
   @override
-  String get changePasswordSubtitle => 'साइन इन के लिए नया पासवर्ड चुनें';
+  String get changePasswordSubtitle => 'लॉग इन के लिए नया पासवर्ड चुनें';
 
   @override
   String get currentPasswordLabel => 'मौजूदा पासवर्ड';
@@ -826,7 +826,7 @@ class AppLocalizationsHi extends AppLocalizations {
 
   @override
   String get passwordChanged =>
-      'पासवर्ड बदल दिया गया। कृपया दोबारा साइन इन करें।';
+      'पासवर्ड बदल दिया गया। कृपया दोबारा लॉग इन करें।';
 
   @override
   String landedPerUnit(String amount, String unit) {
@@ -984,22 +984,22 @@ class AppLocalizationsHi extends AppLocalizations {
 
   @override
   String alertRose(String product, String percent) {
-    return '$product $percent% बढ़ा';
+    return '$product: $percent% बढ़त';
   }
 
   @override
   String alertDropped(String product, String percent) {
-    return '$product $percent% गिरा';
+    return '$product: $percent% गिरावट';
   }
 
   @override
   String alertRoseIn(String product, String percent, String market) {
-    return '$market में $product $percent% बढ़ा';
+    return '$market में $product: $percent% बढ़त';
   }
 
   @override
   String alertDroppedIn(String product, String percent, String market) {
-    return '$market में $product $percent% गिरा';
+    return '$market में $product: $percent% गिरावट';
   }
 
   @override
@@ -3289,7 +3289,7 @@ class AppLocalizationsHi extends AppLocalizations {
 
   @override
   String get googleAccountExists =>
-      'इस मोबाइल नंबर का खाता पहले से है। पासवर्ड से लॉग इन करें, फिर More में Google जोड़ें।';
+      'इस मोबाइल नंबर का खाता पहले से है। पासवर्ड से लॉग इन करें, फिर और में Google जोड़ें।';
 
   @override
   String get googleSignInFailed =>
@@ -3389,7 +3389,7 @@ class AppLocalizationsHi extends AppLocalizations {
   String get selectAllAction => 'सभी चुनें';
 
   @override
-  String get clearSelectionAction => 'हटाएँ';
+  String get clearSelectionAction => 'चयन हटाएँ';
 
   @override
   String get applyAction => 'लागू करें';
