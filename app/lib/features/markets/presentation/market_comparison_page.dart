@@ -39,7 +39,7 @@ class MarketComparisonPage extends StatelessWidget {
       (c) => c.state.commodityId,
     );
     final watched = context.select<WatchlistCubit, bool>(
-      (c) => commodityId != null && c.state.itemFor(commodityId) != null,
+      (c) => commodityId != null && c.state.isWatched(commodityId),
     );
     return Scaffold(
       appBar: MbAppBar(

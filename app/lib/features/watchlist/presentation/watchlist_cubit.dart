@@ -13,9 +13,13 @@ class WatchlistState extends Equatable {
     this.data = const DataState(),
     this.category,
     this.query = '',
+    this.adding = const {},
   });
 
   final DataState<Watchlist> data;
+
+  /// Items being added: their star is filled at once, before the server answers.
+  final Set<String> adding;
 
   /// Selected category code; `null` = All.
   final String? category;
@@ -42,18 +46,28 @@ class WatchlistState extends Equatable {
       .where((i) => i.commodityId == productId && i.variantId == variantId)
       .firstOrNull;
 
+  /// Whether the star should show as filled.
+  bool isWatched(String productId, {String? variantId}) =>
+      adding.contains(keyOf(productId, variantId)) ||
+      itemFor(productId, variantId: variantId) != null;
+
+  static String keyOf(String productId, String? variantId) =>
+      '$productId|${variantId ?? ''}';
+
   WatchlistState copyWith({
     DataState<Watchlist>? data,
     String? Function()? category,
     String? query,
+    Set<String>? adding,
   }) => WatchlistState(
     data: data ?? this.data,
     category: category != null ? category() : this.category,
     query: query ?? this.query,
+    adding: adding ?? this.adding,
   );
 
   @override
-  List<Object?> get props => [data, category, query];
+  List<Object?> get props => [data, category, query, adding];
 }
 
 /// The watchlist shared by the Watchlist tab, the Home preview and every
@@ -91,6 +105,8 @@ class WatchlistCubit extends Cubit<WatchlistState> {
 
   /// Fails with [AlreadyWatchedFailure] for a duplicate.
   Future<Result<void>> add(String productId, {String? variantId}) async {
+    final key = WatchlistState.keyOf(productId, variantId);
+    emit(state.copyWith(adding: {...state.adding, key}));
     final result = await _add(productId, variantId: variantId);
     final changed = switch (result) {
       Ok() => true,
@@ -98,7 +114,9 @@ class WatchlistCubit extends Cubit<WatchlistState> {
       Err(failure: AlreadyWatchedFailure()) => true,
       Err() => false,
     };
-    if (changed) await load();
+    if (changed && !isClosed) await load();
+    // After a failure this empties the star again.
+    if (!isClosed) emit(state.copyWith(adding: {...state.adding}..remove(key)));
     return result;
   }
 

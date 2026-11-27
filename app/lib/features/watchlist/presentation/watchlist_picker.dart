@@ -253,8 +253,10 @@ class _VariantSheet extends StatelessWidget {
     final c = context.mbColors;
 
     Widget row(String title, String? variantId) {
-      final watched =
-          watchlist.state.itemFor(product.id, variantId: variantId) != null;
+      final watched = watchlist.state.isWatched(
+        product.id,
+        variantId: variantId,
+      );
       return MbListItem(
         title: title,
         showChevron: false,

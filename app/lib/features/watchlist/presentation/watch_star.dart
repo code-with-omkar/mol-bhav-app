@@ -21,6 +21,10 @@ Future<void> toggleWatch(
   String? variantId,
 }) async {
   final cubit = context.read<WatchlistCubit>();
+  // A second tap while the first is still being saved does nothing.
+  if (cubit.state.adding.contains(WatchlistState.keyOf(productId, variantId))) {
+    return;
+  }
   final removing = cubit.state.itemFor(productId, variantId: variantId);
   var result = await cubit.toggle(productId, variantId: variantId);
   if (!context.mounted) return;
@@ -77,7 +81,7 @@ class WatchStarButton extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = context.l10n;
     final watched = context.select<WatchlistCubit, bool>(
-      (c) => c.state.itemFor(productId, variantId: variantId) != null,
+      (c) => c.state.isWatched(productId, variantId: variantId),
     );
     return MbIconButton(
       icon: MbIcons.watchlist,

@@ -44,8 +44,33 @@ internal sealed class WatchlistReadService(IDbConnectionFactory connectionFactor
         {SubCategoryName}
         {UnitName}
         {VariantName}
+        -- The newest day with a price and the day before it, each found by one step in the
+        -- (product, location kind, date) index: a product can have millions of prices.
         LEFT JOIN LATERAL (
-            SELECT r.modal_price, pu.symbol AS unit_symbol, r.record_date,
+            SELECT max(q.record_date) AS record_date
+            FROM (VALUES ('Mandi'), ('Supplier')) k(kind)
+            CROSS JOIN LATERAL (
+                SELECT x.record_date
+                FROM {PriceRecords} x
+                WHERE x.product_id = p.id AND x.location_kind = k.kind AND NOT x.is_voided
+                ORDER BY x.record_date DESC
+                LIMIT 1
+            ) q
+        ) newest ON TRUE
+        LEFT JOIN LATERAL (
+            SELECT max(q.record_date) AS record_date
+            FROM (VALUES ('Mandi'), ('Supplier')) k(kind)
+            CROSS JOIN LATERAL (
+                SELECT x.record_date
+                FROM {PriceRecords} x
+                WHERE x.product_id = p.id AND x.location_kind = k.kind AND NOT x.is_voided
+                  AND x.record_date < newest.record_date
+                ORDER BY x.record_date DESC
+                LIMIT 1
+            ) q
+        ) before ON TRUE
+        LEFT JOIN LATERAL (
+            SELECT r.modal_price, pu.symbol AS unit_symbol,
                    CASE WHEN prev_r.modal_price IS NOT NULL AND prev_r.modal_price > 0
                         THEN ROUND(CAST((r.modal_price - prev_r.modal_price) / prev_r.modal_price * 100 AS numeric), 2)
                         END AS percent_change
@@ -54,12 +79,13 @@ internal sealed class WatchlistReadService(IDbConnectionFactory connectionFactor
             LEFT JOIN LATERAL (
                 SELECT r2.modal_price
                 FROM {PriceRecords} r2
-                WHERE r2.product_id = p.id AND NOT r2.is_voided AND r2.record_date < r.record_date
-                ORDER BY r2.record_date DESC
+                WHERE r2.product_id = p.id AND r2.location_kind IN ('Mandi', 'Supplier') AND NOT r2.is_voided
+                  AND r2.record_date = before.record_date
                 LIMIT 1
             ) prev_r ON TRUE
-            WHERE r.product_id = p.id AND NOT r.is_voided
-            ORDER BY r.record_date DESC, r.created_at_utc DESC
+            WHERE r.product_id = p.id AND r.location_kind IN ('Mandi', 'Supplier') AND NOT r.is_voided
+              AND r.record_date = newest.record_date
+            ORDER BY r.created_at_utc DESC
             LIMIT 1
         ) lp ON TRUE
         WHERE w.user_id = @UserId

@@ -57,7 +57,7 @@ class PriceTrendsPage extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = context.l10n;
     final watched = context.select<WatchlistCubit, bool>(
-      (c) => c.state.itemFor(commodityId) != null,
+      (c) => c.state.isWatched(commodityId),
     );
     // Nothing to share until the range has loaded at least one price.
     final canShare = context.select<PriceTrendsCubit, bool>(
