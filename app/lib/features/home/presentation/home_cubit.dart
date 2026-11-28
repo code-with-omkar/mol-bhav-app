@@ -189,21 +189,31 @@ class HomeCubit extends Cubit<DataState<HomeDashboard>> {
     );
   }
 
-  /// Recent opportunities for products still on the watchlist: the newest
-  /// one per product, biggest saving first, at most [maxTopOpportunities].
+  /// Recent opportunities for products still on the watchlist, with a price
+  /// downloaded in the last few days: the newest one per product, biggest
+  /// saving first, at most [maxTopOpportunities].
   @visibleForTesting
   static List<TopOpportunity> topOpportunities(
     List<MarketOpportunity> opportunities,
     List<WatchlistItem> watchlist, {
     DateTime? now,
   }) {
-    final cutoff = (now ?? DateTime.now()).subtract(_opportunityShelfLife);
+    final today = now ?? DateTime.now();
+    final cutoff = today.subtract(_opportunityShelfLife);
+    // Price dates are whole days, so compare them with a day.
+    final oldestPrice = DateTime(
+      today.year,
+      today.month,
+      today.day,
+    ).subtract(_opportunityShelfLife);
     final newestFirst = [...opportunities]
       ..sort((a, b) => b.detectedAt.compareTo(a.detectedAt));
     final seen = <String>{};
     final picked = <(MarketOpportunity, WatchlistItem)>[];
     for (final o in newestFirst) {
       if (o.detectedAt.isBefore(cutoff) || !seen.add(o.productId)) continue;
+      // No price, or one too old to buy at: leave it out.
+      if (o.bestPrice <= 0 || o.priceDate.isBefore(oldestPrice)) continue;
       final watched = watchlist
           .where((w) => w.commodityId == o.productId)
           .firstOrNull;

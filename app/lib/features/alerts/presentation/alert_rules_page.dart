@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../shared/widgets/mb_filterable_list.dart';
 import '../../../core/l10n/l10n.dart';
 import '../../../core/router/app_routes.dart';
 import '../../../core/theme/app_theme.dart';
@@ -59,12 +60,40 @@ class _RulesList extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ListView.separated(
+    final l10n = context.l10n;
+    return ListView(
       // Extra bottom space keeps the last rule clear of "Create alert".
       padding: MbSpacing.screenPadding.add(const EdgeInsets.only(bottom: 72)),
-      itemCount: rules.length,
-      separatorBuilder: (_, _) => const SizedBox(height: MbSpacing.s3),
-      itemBuilder: (context, i) => _RuleTile(rule: rules[i], cubit: cubit),
+      children: [
+        MbFilterableList<AlertRule>(
+          items: rules,
+          searchText: (r) => '${r.productName} ${r.locationName ?? ''}',
+          searchHint: l10n.searchProductsHint,
+          sorts: [
+            MbSort(
+              l10n.sortNewest,
+              (a, b) => b.createdAtUtc.compareTo(a.createdAtUtc),
+            ),
+            MbSort(
+              l10n.sortName,
+              (a, b) => a.productName.compareTo(b.productName),
+            ),
+          ],
+          filters: [
+            MbFilter(l10n.alertRuleActiveLabel, (r) => r.isActive),
+            MbFilter(l10n.alertRuleInactiveLabel, (r) => !r.isActive),
+          ],
+          builder: (_, visible) => Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              for (final rule in visible) ...[
+                _RuleTile(rule: rule, cubit: cubit),
+                const SizedBox(height: MbSpacing.s3),
+              ],
+            ],
+          ),
+        ),
+      ],
     );
   }
 }

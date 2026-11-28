@@ -11,6 +11,8 @@ void main() {
     String productId, {
     num savings = 12,
     Duration age = const Duration(hours: 1),
+    Duration priceAge = Duration.zero,
+    num bestPrice = 1700,
   }) => MarketOpportunity(
     id: id,
     productId: productId,
@@ -23,11 +25,11 @@ void main() {
     bestId: 'best',
     bestName: 'Nashik APMC',
     bestDistrict: 'Nashik',
-    bestPrice: 1700,
+    bestPrice: bestPrice,
     landedPrice: 1760,
     savingsPercent: savings,
     savingsPerUnit: 240,
-    priceDate: now,
+    priceDate: now.subtract(priceAge),
     detectedAt: now.subtract(age),
     isRead: false,
   );
@@ -44,6 +46,19 @@ void main() {
     trend: const [],
   );
 
+  test('leaves out an opportunity with no price or only an old one', () {
+    final top = HomeCubit.topOpportunities(
+      [
+        opportunity('old', 'p1', priceAge: const Duration(days: 5)),
+        opportunity('none', 'p2', bestPrice: 0),
+        opportunity('good', 'p3', priceAge: const Duration(days: 2)),
+      ],
+      [watched('p1'), watched('p2'), watched('p3')],
+      now: now,
+    );
+
+    expect(top.map((t) => t.opportunityId), ['good']);
+  });
   test('keeps at most five, biggest saving first', () {
     final opportunities = [
       for (var i = 1; i <= 7; i++) opportunity('o$i', 'p$i', savings: 10 + i),

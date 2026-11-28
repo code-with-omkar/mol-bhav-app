@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+import '../../../shared/widgets/mb_search_select_field.dart';
 import '../../../core/l10n/l10n.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/theme/mb_dimens.dart';
@@ -102,12 +103,10 @@ class _Form extends StatelessWidget {
           ),
           gap,
         ],
-        MbSelectField<String>(
+        MbSearchSelectField<String>(
           label: l10n.materialLabel,
           icon: categoryIcon(state.categoryCode ?? ''),
-          hint: state.materials.isLoading
-              ? l10n.loading
-              : l10n.selectPlaceholder,
+          searchHint: l10n.searchProductsHint,
           value: state.materialId,
           error: state.materials.status == LoadStatus.failure
               ? l10n.errorServer

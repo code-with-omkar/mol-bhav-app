@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../shared/widgets/mb_search_select_field.dart';
+import '../../../shared/widgets/mb_filterable_list.dart';
 import '../../../core/l10n/l10n.dart';
 import '../../../core/router/app_routes.dart';
 import '../../../core/share/deep_link_config.dart';
@@ -79,19 +81,19 @@ class _Content extends StatelessWidget {
     return ListView(
       padding: MbSpacing.screenPadding,
       children: [
-        MbSelectField<String>(
+        MbSearchSelectField<String>(
           label: l10n.stateLabel,
           icon: MbIcons.market,
-          hint: l10n.selectPlaceholder,
+          searchHint: l10n.searchItemsHint,
           value: state.stateId,
           onChanged: cubit.selectState,
           items: _items(state.states.data),
         ),
         gap,
-        MbSelectField<String>(
+        MbSearchSelectField<String>(
           label: l10n.districtLabel,
           icon: MbIcons.market,
-          hint: l10n.selectPlaceholder,
+          searchHint: l10n.searchItemsHint,
           value: state.districtId,
           error: state.districts.status == LoadStatus.failure
               ? l10n.districtsLoadError
@@ -102,10 +104,10 @@ class _Content extends StatelessWidget {
           items: _items(state.districts.data),
         ),
         gap,
-        MbSelectField<String>(
+        MbSearchSelectField<String>(
           label: l10n.mandiLabel,
           icon: MbIcons.market,
-          hint: l10n.selectPlaceholder,
+          searchHint: l10n.searchItemsHint,
           value: state.mandiId,
           helper: mandis != null && mandis.isEmpty ? l10n.mandisEmpty : null,
           onChanged: state.mandis.status == LoadStatus.ready
@@ -149,58 +151,85 @@ class _Prices extends StatelessWidget {
         message: l10n.mandiPricesEmpty,
       ),
       // One native card per 8 rows, between groups — never inside one.
-      LoadStatus.ready => Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: interleaveAds(
-          every: 8,
-          group: (rows) => MbGroup(children: rows),
-          // The first slot can carry a sponsor; the rest stay AdMob.
-          ad: (i) => i == 0
-              ? const AdSlot(placement: PromotionPlacement.mandiPrices)
-              : const NativeAdSlot(),
-          spacing: const SizedBox(height: MbSpacing.s3),
-          rows: [
-            for (final p in prices.data!)
-              Row(
-                children: [
-                  Expanded(
-                    child: MbPriceRow(
-                      name: p.variantName == null
-                          ? p.productName
-                          : '${p.productName} · ${p.variantName}',
-                      meta:
-                          '${l10n.priceDate(formatDayMonth(p.recordDate, locale))}'
-                          ' · ${p.source}',
-                      price: formatInr(p.modalPrice),
-                      unit: p.unitSymbol,
-                      onShare: () => sharePriceCard(
-                        context,
-                        PriceShareData(
-                          productName: p.productName,
-                          variantName: p.variantName,
-                          mandiName: state.mandiName ?? '',
-                          minPrice: p.minPrice,
-                          maxPrice: p.maxPrice,
-                          modalPrice: p.modalPrice,
-                          unitSymbol: p.unitSymbol,
-                          recordDate: p.recordDate,
-                          source: p.source,
-                          link: DeepLinkConfig.productLink(
-                            p.productId,
-                            mandiId: state.mandiId,
+      LoadStatus.ready => MbFilterableList<MandiPrice>(
+        items: prices.data!,
+        searchText: (p) => '${p.productName} ${p.variantName ?? ''}',
+        searchHint: l10n.searchProductsHint,
+        sorts: [
+          MbSort(
+            l10n.sortName,
+            (a, b) => a.productName.compareTo(b.productName),
+          ),
+          MbSort(
+            l10n.sortPriceLow,
+            (a, b) => a.modalPrice.compareTo(b.modalPrice),
+          ),
+          MbSort(
+            l10n.sortPriceHigh,
+            (a, b) => b.modalPrice.compareTo(a.modalPrice),
+          ),
+          MbSort(
+            l10n.sortNewest,
+            (a, b) => b.recordDate.compareTo(a.recordDate),
+          ),
+        ],
+        filters: [
+          MbFilter(l10n.filterPerKg, (p) => p.unitSymbol == 'kg'),
+          MbFilter(l10n.filterPerQuintal, (p) => p.unitSymbol == 'q'),
+        ],
+        builder: (context, visible) => Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: interleaveAds(
+            every: 8,
+            group: (rows) => MbGroup(children: rows),
+            // The first slot can carry a sponsor; the rest stay AdMob.
+            ad: (i) => i == 0
+                ? const AdSlot(placement: PromotionPlacement.mandiPrices)
+                : const NativeAdSlot(),
+            spacing: const SizedBox(height: MbSpacing.s3),
+            rows: [
+              for (final p in visible)
+                Row(
+                  children: [
+                    Expanded(
+                      child: MbPriceRow(
+                        name: p.variantName == null
+                            ? p.productName
+                            : '${p.productName} · ${p.variantName}',
+                        meta:
+                            '${l10n.priceDate(formatDayMonth(p.recordDate, locale))}'
+                            ' · ${p.source}',
+                        price: formatInr(p.modalPrice),
+                        unit: p.unitSymbol,
+                        onShare: () => sharePriceCard(
+                          context,
+                          PriceShareData(
+                            productName: p.productName,
+                            variantName: p.variantName,
+                            mandiName: state.mandiName ?? '',
+                            minPrice: p.minPrice,
+                            maxPrice: p.maxPrice,
+                            modalPrice: p.modalPrice,
+                            unitSymbol: p.unitSymbol,
+                            recordDate: p.recordDate,
+                            source: p.source,
+                            link: DeepLinkConfig.productLink(
+                              p.productId,
+                              mandiId: state.mandiId,
+                            ),
                           ),
                         ),
+                        shareLabel: l10n.sharePrice,
                       ),
-                      shareLabel: l10n.sharePrice,
                     ),
-                  ),
-                  WatchStarButton(
-                    productId: p.productId,
-                    variantId: p.variantId,
-                  ),
-                ],
-              ),
-          ],
+                    WatchStarButton(
+                      productId: p.productId,
+                      variantId: p.variantId,
+                    ),
+                  ],
+                ),
+            ],
+          ),
         ),
       ),
       _ => const Padding(

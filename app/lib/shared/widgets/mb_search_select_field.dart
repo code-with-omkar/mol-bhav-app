@@ -18,6 +18,8 @@ class MbSearchSelectField<T> extends StatelessWidget {
     required this.searchHint,
     this.label,
     this.icon,
+    this.helper,
+    this.error,
   });
 
   final List<MbSelectItem<T>> items;
@@ -26,6 +28,8 @@ class MbSearchSelectField<T> extends StatelessWidget {
   final String searchHint;
   final String? label;
   final MbIcons? icon;
+  final String? helper;
+  final String? error;
 
   @override
   Widget build(BuildContext context) {
@@ -37,6 +41,8 @@ class MbSearchSelectField<T> extends StatelessWidget {
       label: label,
       child: MbFieldFrame(
         label: label,
+        helper: helper,
+        error: error,
         onTap: onChanged == null || items.isEmpty ? null : () => _open(context),
         child: Row(
           children: [

@@ -34,8 +34,9 @@ internal sealed class GetOpportunityQueryHandler(
         }
 
         var since = IngestionDates.TodayIst(timeProvider.GetUtcNow()).AddDays(-Math.Max(1, settings.FreshnessDays));
-        var rows = await readService.GetMarketPricesAsync(
-            opportunity.Product.Id, opportunity.VariantId, since, cancellationToken);
+        var rows = PlausiblePrices.Of(
+            await readService.GetMarketPricesAsync(opportunity.Product.Id, opportunity.VariantId, since, cancellationToken),
+            r => r.ModalPrice);
         var components = await costComponents.GetActiveAsync(cancellationToken);
         var quantity = OpportunityQuantities.For(settings.ReferenceQuantity, opportunity.Product.DefaultUnit.Code);
 

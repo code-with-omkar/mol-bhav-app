@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../shared/widgets/mb_filterable_list.dart';
 import '../../../core/l10n/l10n.dart';
 import '../../../core/router/app_routes.dart';
 import '../../../core/theme/app_theme.dart';
@@ -127,11 +128,51 @@ class _WatchlistPageState extends State<WatchlistPage> {
                       ),
                     )
                   else
-                    MbGroup(
-                      children: [
-                        for (final item in items) _SwipeRow(item: item),
+                    // The app bar searches; here the order and quick filters.
+                    MbFilterableList<WatchlistItem>(
+                      items: items,
+                      sorts: [
+                        MbSort(l10n.sortAdded, null),
+                        MbSort(
+                          l10n.sortName,
+                          (a, b) => a.name.compareTo(b.name),
+                        ),
+                        MbSort(
+                          l10n.sortPriceLow,
+                          (a, b) => a.price.compareTo(b.price),
+                        ),
+                        MbSort(
+                          l10n.sortPriceHigh,
+                          (a, b) => b.price.compareTo(a.price),
+                        ),
+                        MbSort(
+                          l10n.sortRise,
+                          (a, b) => (b.percent ?? 0).compareTo(a.percent ?? 0),
+                        ),
+                        MbSort(
+                          l10n.sortFall,
+                          (a, b) => (a.percent ?? 0).compareTo(b.percent ?? 0),
+                        ),
                       ],
+                      filters: [
+                        MbFilter(l10n.priceUp, (i) => (i.percent ?? 0) > 0),
+                        MbFilter(l10n.priceDown, (i) => (i.percent ?? 0) < 0),
+                      ],
+                      builder: (_, visible) => MbGroup(
+                        children: [
+                          for (final item in visible) _SwipeRow(item: item),
+                        ],
+                      ),
                     ),
+                  if (items.isNotEmpty) ...[
+                    const SizedBox(height: MbSpacing.s2),
+                    Text(
+                      l10n.watchlistPriceNote,
+                      style: context.mbText.caption.copyWith(
+                        color: context.mbColors.inkMuted,
+                      ),
+                    ),
+                  ],
                   if (data.updatedAt != null) ...[
                     const SizedBox(height: 14),
                     MbSourceNote(updated: context.updatedAt(data.updatedAt!)),

@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:injectable/injectable.dart';
 
+import '../../../shared/widgets/mb_filterable_list.dart';
 import '../../../core/l10n/l10n.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/theme/mb_dimens.dart';
@@ -184,22 +185,34 @@ class WatchlistPickerPage extends StatelessWidget {
       ];
     }
     final code = state.categoryCode ?? '';
+    final groups = {for (final p in products) p.subCategoryName}..remove('');
     return [
-      MbGroup(
-        children: [
-          for (final p in products)
-            MbListItem(
-              leading: MbThumb(
-                icon: categoryIcon(code),
-                tone: categoryTint(code),
-              ),
-              title: p.name,
-              subtitle: p.subCategoryName.isEmpty ? null : p.subCategoryName,
-              showChevron: false,
-              trailing: WatchStarButton(productId: p.id),
-              onTap: () => _choose(context, p),
-            ),
+      MbFilterableList<CatalogProduct>(
+        // The box above searches; here the order and the product groups.
+        items: products,
+        sorts: [
+          MbSort(l10n.sortName, (a, b) => a.name.compareTo(b.name)),
+          MbSort(l10n.sortNameReverse, (a, b) => b.name.compareTo(a.name)),
         ],
+        filters: [
+          for (final g in groups) MbFilter(g, (p) => p.subCategoryName == g),
+        ],
+        builder: (_, visible) => MbGroup(
+          children: [
+            for (final p in visible)
+              MbListItem(
+                leading: MbThumb(
+                  icon: categoryIcon(code),
+                  tone: categoryTint(code),
+                ),
+                title: p.name,
+                subtitle: p.subCategoryName.isEmpty ? null : p.subCategoryName,
+                showChevron: false,
+                trailing: WatchStarButton(productId: p.id),
+                onTap: () => _choose(context, p),
+              ),
+          ],
+        ),
       ),
     ];
   }

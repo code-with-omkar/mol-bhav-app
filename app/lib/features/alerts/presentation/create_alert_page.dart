@@ -103,7 +103,8 @@ class _Form extends StatelessWidget {
     return ListView(
       padding: MbSpacing.screenPadding,
       children: [
-        MbSelectField<String>(
+        MbSearchSelectField<String>(
+          searchHint: l10n.searchProductsHint,
           label: l10n.productLabel,
           icon: product == null
               ? MbIcons.others
@@ -116,7 +117,8 @@ class _Form extends StatelessWidget {
           ],
         ),
         gap,
-        MbSelectField<String>(
+        MbSearchSelectField<String>(
+          searchHint: l10n.searchItemsHint,
           label: l10n.stateLabel,
           icon: MbIcons.market,
           value: state.stateId,

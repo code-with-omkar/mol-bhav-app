@@ -118,11 +118,21 @@ internal sealed class MarketOpportunityReadService(IDbConnectionFactory connecti
         {VariantName}
         """;
 
+    // Only opportunities whose cheaper price is still on record (not voided or removed) and believable: a saving of
+    // more than nine tenths comes from a typing mistake in the feed.
+    private const string StillPriced = $"""
+        x.best_price >= x.home_price * 0.1
+        AND EXISTS (
+            SELECT 1 FROM {PriceRecords} r
+            WHERE r.product_id = x.product_id AND r.record_date = x.price_date AND NOT r.is_voided
+              AND (r.mandi_id = x.best_mandi_id OR r.supplier_id = x.best_supplier_id))
+        """;
+
     private static readonly string OpportunitiesSql = $"""
-        SELECT count(*) FROM {Opportunities} x WHERE x.user_id = @UserId;
+        SELECT count(*) FROM {Opportunities} x WHERE x.user_id = @UserId AND {StillPriced};
 
         {OpportunitySelect}
-        WHERE x.user_id = @UserId
+        WHERE x.user_id = @UserId AND {StillPriced}
         ORDER BY x.detected_at_utc DESC
         LIMIT @Limit OFFSET @Offset;
         """;

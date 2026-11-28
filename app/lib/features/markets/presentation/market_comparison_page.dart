@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../shared/widgets/mb_search_select_field.dart';
+import '../../../shared/widgets/mb_filterable_list.dart';
 import '../../../core/l10n/l10n.dart';
 import '../../../core/router/app_routes.dart';
 import '../../../core/share/deep_link_config.dart';
@@ -118,9 +120,9 @@ class _Content extends StatelessWidget {
               ),
               gap,
             ],
-            MbSelectField<String>(
+            MbSearchSelectField<String>(
               icon: categoryIcon(state.commodity?.categoryCode ?? ''),
-              hint: l10n.commodityLabel,
+              searchHint: l10n.searchProductsHint,
               value: state.commodityId,
               onChanged: cubit.selectCommodity,
               items: [
@@ -129,8 +131,9 @@ class _Content extends StatelessWidget {
               ],
             ),
             gap,
-            MbSelectField<String>(
+            MbSearchSelectField<String>(
               icon: MbIcons.market,
+              searchHint: l10n.searchItemsHint,
               label: l10n.stateLabel,
               value: state.stateId ?? '',
               onChanged: (id) => cubit.selectState(id.isEmpty ? null : id),
@@ -150,63 +153,66 @@ class _Content extends StatelessWidget {
             if (comparison.rows.isEmpty)
               MbEmptyView(message: l10n.comparisonEmpty)
             else
-              _CollapsibleTable(
-                nameHeader: l10n.columnMarket,
-                priceHeader: l10n.columnPricePer(comparison.unit),
-                changeHeader: l10n.columnChange,
-                // Always visible when collapsed: the best and the user's own
-                // market, and the one a shared link pointed at.
-                pinned: {
-                  ?comparison.bestMarketId,
-                  ?comparison.homeMarketId,
-                  ?state.highlightMarketId,
-                },
-                rows: [
-                  for (final row in comparison.rows)
-                    (
-                      row.marketId,
-                      MbPriceRow(
-                        name: row.marketName,
-                        meta: row.arrivals == null
-                            ? null
-                            : l10n.arrivals(row.arrivals!),
-                        price: formatInr(row.price),
-                        change: row.change,
-                        changeCurrency: false,
-                        best: row.marketId == comparison.bestMarketId,
-                        badge: row.marketId == state.highlightMarketId
-                            ? MbBadge(
-                                label: l10n.fromLink,
-                                tone: MbBadgeTone.opportunity,
-                              )
-                            : null,
-                        onShare: () => sharePriceCard(
-                          context,
-                          PriceShareData(
-                            productName: state.commodity?.name ?? '',
-                            mandiName: row.marketName,
-                            minPrice: row.minPrice,
-                            maxPrice: row.maxPrice,
-                            modalPrice: row.price,
-                            unitSymbol: comparison.unit,
-                            recordDate: row.recordDate,
-                            source: row.source,
-                            link: DeepLinkConfig.productLink(
+              _FilterableMarkets(
+                rows: comparison.rows,
+                builder: (visible) => _CollapsibleTable(
+                  nameHeader: l10n.columnMarket,
+                  priceHeader: l10n.columnPricePer(comparison.unit),
+                  changeHeader: l10n.columnChange,
+                  // Always visible when collapsed: the best and the user's own
+                  // market, and the one a shared link pointed at.
+                  pinned: {
+                    ?comparison.bestMarketId,
+                    ?comparison.homeMarketId,
+                    ?state.highlightMarketId,
+                  },
+                  rows: [
+                    for (final row in visible)
+                      (
+                        row.marketId,
+                        MbPriceRow(
+                          name: row.marketName,
+                          meta: row.arrivals == null
+                              ? null
+                              : l10n.arrivals(row.arrivals!),
+                          price: formatInr(row.price),
+                          change: row.change,
+                          changeCurrency: false,
+                          best: row.marketId == comparison.bestMarketId,
+                          badge: row.marketId == state.highlightMarketId
+                              ? MbBadge(
+                                  label: l10n.fromLink,
+                                  tone: MbBadgeTone.opportunity,
+                                )
+                              : null,
+                          onShare: () => sharePriceCard(
+                            context,
+                            PriceShareData(
+                              productName: state.commodity?.name ?? '',
+                              mandiName: row.marketName,
+                              minPrice: row.minPrice,
+                              maxPrice: row.maxPrice,
+                              modalPrice: row.price,
+                              unitSymbol: comparison.unit,
+                              recordDate: row.recordDate,
+                              source: row.source,
+                              link: DeepLinkConfig.productLink(
+                                comparison.commodityId,
+                                mandiId: row.marketId,
+                              ),
+                            ),
+                          ),
+                          shareLabel: l10n.sharePrice,
+                          onTap: () => context.go(
+                            AppRoutes.trendsFor(
                               comparison.commodityId,
-                              mandiId: row.marketId,
+                              row.marketId,
                             ),
                           ),
                         ),
-                        shareLabel: l10n.sharePrice,
-                        onTap: () => context.go(
-                          AppRoutes.trendsFor(
-                            comparison.commodityId,
-                            row.marketId,
-                          ),
-                        ),
                       ),
-                    ),
-                ],
+                  ],
+                ),
               ),
             if (best != null) ...[
               gap,
@@ -234,6 +240,40 @@ class _Content extends StatelessWidget {
         ),
         if (state.refreshing) const LinearProgressIndicator(minHeight: 2),
       ],
+    );
+  }
+}
+
+/// Search, sort and filter over the markets of a comparison.
+class _FilterableMarkets extends StatelessWidget {
+  const _FilterableMarkets({required this.rows, required this.builder});
+
+  final List<MarketPrice> rows;
+  final Widget Function(List<MarketPrice> visible) builder;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = context.l10n;
+    final latest = rows
+        .map((r) => r.recordDate)
+        .reduce((a, b) => a.isAfter(b) ? a : b);
+    final prices = [for (final r in rows) r.price]..sort();
+    final middle = prices[prices.length ~/ 2];
+    return MbFilterableList<MarketPrice>(
+      items: rows,
+      searchText: (r) => r.marketName,
+      searchHint: l10n.searchMarketsHint,
+      sorts: [
+        MbSort(l10n.sortPriceLow, (a, b) => a.price.compareTo(b.price)),
+        MbSort(l10n.sortPriceHigh, (a, b) => b.price.compareTo(a.price)),
+        MbSort(l10n.sortName, (a, b) => a.marketName.compareTo(b.marketName)),
+        MbSort(l10n.sortNewest, (a, b) => b.recordDate.compareTo(a.recordDate)),
+      ],
+      filters: [
+        MbFilter(l10n.filterLatestDay, (r) => r.recordDate == latest),
+        MbFilter(l10n.filterBelowMiddle, (r) => r.price < middle),
+      ],
+      builder: (_, visible) => builder(visible),
     );
   }
 }

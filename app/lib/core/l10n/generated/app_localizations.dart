@@ -522,6 +522,12 @@ abstract class AppLocalizations {
   /// **'No new opportunities right now.'**
   String get homeNoOpportunity;
 
+  /// No description provided for @watchlistPriceNote.
+  ///
+  /// In en, this message translates to:
+  /// **'Middle price of the markets in your state (all markets where your state has none).'**
+  String get watchlistPriceNote;
+
   /// No description provided for @watchlistEmpty.
   ///
   /// In en, this message translates to:
@@ -766,6 +772,96 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Add item'**
   String get addItem;
+
+  /// No description provided for @sortLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Sort'**
+  String get sortLabel;
+
+  /// No description provided for @sortPriceLow.
+  ///
+  /// In en, this message translates to:
+  /// **'Price: low to high'**
+  String get sortPriceLow;
+
+  /// No description provided for @sortPriceHigh.
+  ///
+  /// In en, this message translates to:
+  /// **'Price: high to low'**
+  String get sortPriceHigh;
+
+  /// No description provided for @sortName.
+  ///
+  /// In en, this message translates to:
+  /// **'Name: A to Z'**
+  String get sortName;
+
+  /// No description provided for @sortNewest.
+  ///
+  /// In en, this message translates to:
+  /// **'Newest first'**
+  String get sortNewest;
+
+  /// No description provided for @sortOldest.
+  ///
+  /// In en, this message translates to:
+  /// **'Oldest first'**
+  String get sortOldest;
+
+  /// No description provided for @sortAdded.
+  ///
+  /// In en, this message translates to:
+  /// **'Recently added'**
+  String get sortAdded;
+
+  /// No description provided for @sortRise.
+  ///
+  /// In en, this message translates to:
+  /// **'Biggest rise'**
+  String get sortRise;
+
+  /// No description provided for @sortFall.
+  ///
+  /// In en, this message translates to:
+  /// **'Biggest fall'**
+  String get sortFall;
+
+  /// No description provided for @filterLatestDay.
+  ///
+  /// In en, this message translates to:
+  /// **'Latest day only'**
+  String get filterLatestDay;
+
+  /// No description provided for @filterBelowMiddle.
+  ///
+  /// In en, this message translates to:
+  /// **'Below middle price'**
+  String get filterBelowMiddle;
+
+  /// No description provided for @filterPerKg.
+  ///
+  /// In en, this message translates to:
+  /// **'Per kg'**
+  String get filterPerKg;
+
+  /// No description provided for @filterPerQuintal.
+  ///
+  /// In en, this message translates to:
+  /// **'Per quintal'**
+  String get filterPerQuintal;
+
+  /// No description provided for @searchItemsHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Search'**
+  String get searchItemsHint;
+
+  /// No description provided for @sortNameReverse.
+  ///
+  /// In en, this message translates to:
+  /// **'Name: Z to A'**
+  String get sortNameReverse;
 
   /// No description provided for @filterAll.
   ///

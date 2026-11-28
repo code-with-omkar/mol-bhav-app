@@ -110,8 +110,9 @@ internal sealed partial class ScanMarketOpportunitiesCommandHandler(
         (Guid? VariantId, OpportunityPrice Home, OpportunityPrice Best, decimal Landed)? best = null;
         decimal bestSaving = decimal.MinValue;
 
-        foreach (var group in relevant.GroupBy(p => p.VariantId))
+        foreach (var variantGroup in relevant.GroupBy(p => p.VariantId))
         {
+            var group = PlausiblePrices.Of(variantGroup, p => p.ModalPrice);
             var home = group
                 .Where(p => p.DistrictId == watcher.HomeDistrictId)
                 .OrderBy(p => p.ModalPrice)
@@ -129,7 +130,7 @@ internal sealed partial class ScanMarketOpportunitiesCommandHandler(
                 if (saving > bestSaving)
                 {
                     bestSaving = saving;
-                    best = (group.Key, home, other, landed);
+                    best = (variantGroup.Key, home, other, landed);
                 }
             }
         }

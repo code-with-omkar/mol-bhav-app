@@ -242,6 +242,10 @@ class AppLocalizationsTe extends AppLocalizations {
   String get homeNoOpportunity => 'No new opportunities right now.';
 
   @override
+  String get watchlistPriceNote =>
+      'Middle price of the markets in your state (all markets where your state has none).';
+
+  @override
   String get watchlistEmpty => 'Your watchlist is empty.';
 
   @override
@@ -386,6 +390,51 @@ class AppLocalizationsTe extends AppLocalizations {
 
   @override
   String get addItem => 'Add item';
+
+  @override
+  String get sortLabel => 'Sort';
+
+  @override
+  String get sortPriceLow => 'Price: low to high';
+
+  @override
+  String get sortPriceHigh => 'Price: high to low';
+
+  @override
+  String get sortName => 'Name: A to Z';
+
+  @override
+  String get sortNewest => 'Newest first';
+
+  @override
+  String get sortOldest => 'Oldest first';
+
+  @override
+  String get sortAdded => 'Recently added';
+
+  @override
+  String get sortRise => 'Biggest rise';
+
+  @override
+  String get sortFall => 'Biggest fall';
+
+  @override
+  String get filterLatestDay => 'Latest day only';
+
+  @override
+  String get filterBelowMiddle => 'Below middle price';
+
+  @override
+  String get filterPerKg => 'Per kg';
+
+  @override
+  String get filterPerQuintal => 'Per quintal';
+
+  @override
+  String get searchItemsHint => 'Search';
+
+  @override
+  String get sortNameReverse => 'Name: Z to A';
 
   @override
   String get filterAll => 'All';

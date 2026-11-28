@@ -4,12 +4,14 @@ using MolBhav.Application.Abstractions.Watchlist;
 using MolBhav.Application.Features.Catalog.Models;
 using MolBhav.Application.Features.Watchlist.Models;
 using MolBhav.Infrastructure.Persistence.Configurations.Catalog;
+using MolBhav.Infrastructure.Persistence.Configurations.Identity;
+using MolBhav.Infrastructure.Persistence.Configurations.Market;
 using MolBhav.Infrastructure.Persistence.Configurations.Pricing;
 using MolBhav.Infrastructure.Persistence.Configurations.Watchlist;
 
 namespace MolBhav.Infrastructure.Persistence.Read.Watchlist;
 
-/// <summary>Reuses catalog's language-fallback lateral-join pattern to name each watched product/variant, enriched with the latest price per product.</summary>
+/// <summary>Reuses catalog's language-fallback lateral-join pattern to name each watched product/variant, with its recent price.</summary>
 internal sealed class WatchlistReadService(IDbConnectionFactory connectionFactory) : IWatchlistReadService
 {
     private const string WatchlistItems = Schemas.Watchlist + "." + WatchlistItemConfiguration.TableName;
@@ -22,19 +24,46 @@ internal sealed class WatchlistReadService(IDbConnectionFactory connectionFactor
     private const string Units = Schemas.Catalog + "." + UnitOfMeasureConfiguration.TableName;
     private const string UnitTranslations = Schemas.Catalog + "." + UnitOfMeasureConfiguration.TranslationsTableName;
     private const string PriceRecords = Schemas.Pricing + "." + PriceRecordConfiguration.TableName;
+    private const string Users = UserConfiguration.QualifiedTableName;
+    private const string States = Schemas.Market + "." + StateConfiguration.TableName;
+    private const string Districts = Schemas.Market + "." + DistrictConfiguration.TableName;
+    private const string Mandis = Schemas.Market + "." + MandiConfiguration.TableName;
 
     private static readonly string ProductName = NameLateral(ProductTranslations, "product_id", "p", "pn");
     private static readonly string SubCategoryName = NameLateral(SubCategoryTranslations, "sub_category_id", "s", "sn");
     private static readonly string UnitName = NameLateral(UnitTranslations, "unit_id", "u", "un");
     private static readonly string VariantName = NameLateral(VariantTranslations, "variant_id", "v", "vn");
 
+    /// <summary>
+    /// The price shown for a watched item is the middle (median) market price in the user's own state on the newest
+    /// day that has one, compared with the middle price of the day before that has one. Where the state has no price
+    /// for the item, or the user has no state, all markets are used. One market's record would be arbitrary.
+    /// </summary>
     private static readonly string WatchlistSql = $"""
+        WITH home AS (
+            SELECT st.id
+            FROM {Users} me
+            JOIN {States} st ON upper(st.code) = upper(me.state) OR lower(st.name) = lower(me.state)
+            WHERE me.id = @UserId AND st.is_active
+            ORDER BY (upper(st.code) = upper(me.state)) DESC
+            LIMIT 1
+        ),
+        home_mandis AS (
+            SELECT m.id
+            FROM {Mandis} m
+            JOIN {Districts} d ON d.id = m.district_id
+            WHERE d.state_id = (SELECT id FROM home) AND m.is_active
+        )
         SELECT w.id, w.variant_id, w.created_at_utc,
                p.id AS product_id, p.code AS product_code, pn.name AS product_name,
                p.sub_category_id, sn.name AS sub_category_name,
                u.id AS unit_id, u.code AS unit_code, u.symbol AS unit_symbol, un.name AS unit_name,
                p.image_key, vn.name AS variant_name,
-               lp.modal_price AS latest_price, lp.unit_symbol AS price_unit_symbol, lp.percent_change
+               ROUND(price.today, 2) AS latest_price,
+               CASE WHEN price.today IS NOT NULL THEN u.symbol END AS price_unit_symbol,
+               CASE WHEN price.previous > 0
+                    THEN ROUND((price.today - price.previous) / price.previous * 100, 2)
+               END AS percent_change
         FROM {WatchlistItems} w
         JOIN {Products} p ON p.id = w.product_id
         JOIN {SubCategories} s ON s.id = p.sub_category_id
@@ -44,8 +73,34 @@ internal sealed class WatchlistReadService(IDbConnectionFactory connectionFactor
         {SubCategoryName}
         {UnitName}
         {VariantName}
-        -- The newest day with a price and the day before it, each found by one step in the
-        -- (product, location kind, date) index: a product can have millions of prices.
+        -- In the home state: one step per market in the (market, product, date) index.
+        LEFT JOIN LATERAL (
+            SELECT max(q.record_date) AS record_date
+            FROM home_mandis hm
+            CROSS JOIN LATERAL (
+                SELECT x.record_date
+                FROM {PriceRecords} x
+                WHERE x.mandi_id = hm.id AND x.product_id = p.id AND NOT x.is_voided
+                  AND (w.variant_id IS NULL OR x.variant_id = w.variant_id)
+                ORDER BY x.record_date DESC
+                LIMIT 1
+            ) q
+        ) local_newest ON TRUE
+        LEFT JOIN LATERAL (
+            SELECT max(q.record_date) AS record_date
+            FROM home_mandis hm
+            CROSS JOIN LATERAL (
+                SELECT x.record_date
+                FROM {PriceRecords} x
+                WHERE x.mandi_id = hm.id AND x.product_id = p.id AND NOT x.is_voided
+                  AND (w.variant_id IS NULL OR x.variant_id = w.variant_id)
+                  AND x.record_date < local_newest.record_date
+                ORDER BY x.record_date DESC
+                LIMIT 1
+            ) q
+        ) local_before ON TRUE
+        -- Everywhere: only when the home state has nothing. One step per location kind in the
+        -- (product, location kind, date) index.
         LEFT JOIN LATERAL (
             SELECT max(q.record_date) AS record_date
             FROM (VALUES ('Mandi'), ('Supplier')) k(kind)
@@ -53,10 +108,12 @@ internal sealed class WatchlistReadService(IDbConnectionFactory connectionFactor
                 SELECT x.record_date
                 FROM {PriceRecords} x
                 WHERE x.product_id = p.id AND x.location_kind = k.kind AND NOT x.is_voided
+                  AND (w.variant_id IS NULL OR x.variant_id = w.variant_id)
                 ORDER BY x.record_date DESC
                 LIMIT 1
             ) q
-        ) newest ON TRUE
+            WHERE local_newest.record_date IS NULL
+        ) all_newest ON TRUE
         LEFT JOIN LATERAL (
             SELECT max(q.record_date) AS record_date
             FROM (VALUES ('Mandi'), ('Supplier')) k(kind)
@@ -64,34 +121,46 @@ internal sealed class WatchlistReadService(IDbConnectionFactory connectionFactor
                 SELECT x.record_date
                 FROM {PriceRecords} x
                 WHERE x.product_id = p.id AND x.location_kind = k.kind AND NOT x.is_voided
-                  AND x.record_date < newest.record_date
+                  AND (w.variant_id IS NULL OR x.variant_id = w.variant_id)
+                  AND x.record_date < all_newest.record_date
                 ORDER BY x.record_date DESC
                 LIMIT 1
             ) q
-        ) before ON TRUE
+        ) all_before ON TRUE
         LEFT JOIN LATERAL (
-            SELECT r.modal_price, pu.symbol AS unit_symbol,
-                   CASE WHEN prev_r.modal_price IS NOT NULL AND prev_r.modal_price > 0
-                        THEN ROUND(CAST((r.modal_price - prev_r.modal_price) / prev_r.modal_price * 100 AS numeric), 2)
-                        END AS percent_change
-            FROM {PriceRecords} r
-            JOIN {Units} pu ON pu.id = r.unit_id
-            LEFT JOIN LATERAL (
-                SELECT r2.modal_price
-                FROM {PriceRecords} r2
-                WHERE r2.product_id = p.id AND r2.location_kind IN ('Mandi', 'Supplier') AND NOT r2.is_voided
-                  AND r2.record_date = before.record_date
-                LIMIT 1
-            ) prev_r ON TRUE
-            WHERE r.product_id = p.id AND r.location_kind IN ('Mandi', 'Supplier') AND NOT r.is_voided
-              AND r.record_date = newest.record_date
-            ORDER BY r.created_at_utc DESC
-            LIMIT 1
-        ) lp ON TRUE
+            SELECT CASE WHEN local_newest.record_date IS NOT NULL THEN
+                       (SELECT {Median("x")}
+                        FROM home_mandis hm
+                        JOIN {PriceRecords} x ON x.mandi_id = hm.id AND x.product_id = p.id
+                            AND x.record_date = local_newest.record_date AND NOT x.is_voided
+                        WHERE w.variant_id IS NULL OR x.variant_id = w.variant_id)
+                   ELSE
+                       (SELECT {Median("x")}
+                        FROM {PriceRecords} x
+                        WHERE x.product_id = p.id AND x.location_kind IN ('Mandi', 'Supplier')
+                          AND x.record_date = all_newest.record_date AND NOT x.is_voided
+                          AND (w.variant_id IS NULL OR x.variant_id = w.variant_id))
+                   END AS today,
+                   CASE WHEN local_newest.record_date IS NOT NULL THEN
+                       (SELECT {Median("x")}
+                        FROM home_mandis hm
+                        JOIN {PriceRecords} x ON x.mandi_id = hm.id AND x.product_id = p.id
+                            AND x.record_date = local_before.record_date AND NOT x.is_voided
+                        WHERE w.variant_id IS NULL OR x.variant_id = w.variant_id)
+                   ELSE
+                       (SELECT {Median("x")}
+                        FROM {PriceRecords} x
+                        WHERE x.product_id = p.id AND x.location_kind IN ('Mandi', 'Supplier')
+                          AND x.record_date = all_before.record_date AND NOT x.is_voided
+                          AND (w.variant_id IS NULL OR x.variant_id = w.variant_id))
+                   END AS previous
+        ) price ON TRUE
         WHERE w.user_id = @UserId
         ORDER BY w.created_at_utc DESC;
         """;
 
+    private static string Median(string alias) =>
+        $"CAST(percentile_cont(0.5) WITHIN GROUP (ORDER BY {alias}.modal_price) AS numeric)";
     public async Task<IReadOnlyList<WatchlistItemResponse>> GetWatchlistAsync(
         Guid userId,
         LanguagePreference language,

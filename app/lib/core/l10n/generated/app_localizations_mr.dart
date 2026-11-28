@@ -243,6 +243,10 @@ class AppLocalizationsMr extends AppLocalizations {
   String get homeNoOpportunity => 'सध्या कोणतीही नवीन संधी नाही.';
 
   @override
+  String get watchlistPriceNote =>
+      'तुमच्या राज्यातील बाजारांचा मधला भाव (राज्यात भाव नसल्यास सर्व बाजारांचा).';
+
+  @override
   String get watchlistEmpty => 'तुमची वॉचलिस्ट रिकामी आहे.';
 
   @override
@@ -387,6 +391,51 @@ class AppLocalizationsMr extends AppLocalizations {
 
   @override
   String get addItem => 'आयटम जोडा';
+
+  @override
+  String get sortLabel => 'क्रम';
+
+  @override
+  String get sortPriceLow => 'भाव: कमी ते जास्त';
+
+  @override
+  String get sortPriceHigh => 'भाव: जास्त ते कमी';
+
+  @override
+  String get sortName => 'नाव: क्रमाने';
+
+  @override
+  String get sortNewest => 'नवीन आधी';
+
+  @override
+  String get sortOldest => 'जुने आधी';
+
+  @override
+  String get sortAdded => 'नुकतेच जोडलेले';
+
+  @override
+  String get sortRise => 'सर्वात जास्त वाढ';
+
+  @override
+  String get sortFall => 'सर्वात जास्त घट';
+
+  @override
+  String get filterLatestDay => 'फक्त ताजा दिवस';
+
+  @override
+  String get filterBelowMiddle => 'मधल्या भावापेक्षा कमी';
+
+  @override
+  String get filterPerKg => 'प्रति किलो';
+
+  @override
+  String get filterPerQuintal => 'प्रति क्विंटल';
+
+  @override
+  String get searchItemsHint => 'शोधा';
+
+  @override
+  String get sortNameReverse => 'नाव: उलट क्रमाने';
 
   @override
   String get filterAll => 'सर्व';

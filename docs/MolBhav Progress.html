@@ -304,13 +304,13 @@
 <div class="overview">
   <div class="ov-card">
     <div class="ov-label">API</div>
-    <div class="ov-value c-api">447</div>
+    <div class="ov-value c-api">450</div>
     <div class="ov-sub">unit tests passing · 38 migrations · live Agmarknet pulls working</div>
     <div class="ov-bar"><div class="ov-bar-fill f-api" style="width:100%"></div></div>
   </div>
   <div class="ov-card">
     <div class="ov-label">Flutter app</div>
-    <div class="ov-value c-app">637</div>
+    <div class="ov-value c-app">642</div>
     <div class="ov-sub">tests passing (26 Nov full run, all passed) · analyze clean</div>
     <div class="ov-bar"><div class="ov-bar-fill f-app" style="width:100%"></div></div>
   </div>
@@ -342,10 +342,12 @@
       <div class="blocker-item"><div class="blocker-dot dot-warn"></div><div><strong>Review Hindi + Marathi</strong> — all new admin and notice strings were written by Claude and need a native check.</div></div>
       <div class="blocker-item"><div class="blocker-dot dot-ok"></div><div><strong>Full pull done (24 Nov)</strong> — 12,323 prices saved for 24 Nov across many states after adding 220 commodities (1,310 mandis were already added). 81 rows failed on bad source data (invalid prices, duplicates). Pull time is about 5 minutes; the gov server answers in about 1 second a page, so the time is our processing.</div></div>
       <div class="blocker-item"><div class="blocker-dot dot-ok"></div><div><strong>One year of price history loaded (26 Nov)</strong> — 63.8 lakh prices, every day from 25 Nov 2025 to 25 Nov 2026, no duplicates; 2,501 missing markets added (3,811 in all) and duplicate states and districts merged, so skipped feed rows fell from about 40% to under 1%. Database about 1.8 GB.</div></div>
+      <div class="blocker-item"><div class="blocker-dot dot-ok"></div><div><strong>Lists and prices (28 Nov)</strong> — search, sort and filter on market and item lists; the watchlist shows the middle price in the user's state; opportunities need a current, believable price.</div></div>
+      <div class="blocker-item"><div class="blocker-dot dot-warn"></div><div><strong>Wrong feed prices</strong> — about 22,000 stored prices are over ten times too low or too high and still show in trends and reports. Phone check of the latest build is pending.</div></div>
       <div class="blocker-item"><div class="blocker-dot dot-ok"></div><div><strong>Watchlist speed (27 Nov)</strong> — the latest-price query took minutes on a year of prices; now 0.1 s, and the star fills as soon as it is tapped. Open: the watchlist price comes from one arbitrary market.</div></div>
       <div class="blocker-item"><div class="blocker-dot dot-ok"></div><div><strong>Hindi and Marathi (27 Nov)</strong> — screen text fixes applied and names added for 218 products (all 230 visible products translated). The names are drafts awaiting a native check: docs/translations/product-names-review.csv.</div></div>
       <div class="blocker-item"><div class="blocker-dot dot-ok"></div><div><strong>Units by group (26 Nov)</strong> — vegetables, fruits, flowers, spices, dry fruits, oils and fish are priced per kg; grains, pulses, oilseeds and other produce per quintal. New feed prices are converted automatically. Cock and goat are hidden until their unit is confirmed. Construction is removed for now (saved copy kept).</div></div>
-      <div class="blocker-item"><div class="blocker-dot dot-ok"></div><div><strong>Tests (26 Nov)</strong> — API 447 passing; app 637 passing.</div></div>
+      <div class="blocker-item"><div class="blocker-dot dot-ok"></div><div><strong>Tests (26 Nov)</strong> — API 450 passing; app 642 passing.</div></div>
       <div class="blocker-item"><div class="blocker-dot dot-ok"></div><div><strong>Last push</strong> — pushed to payment-integration on 26 Nov: forgot password, then missing markets, state-wise market selection, units by group and the removal of Construction. Credential files in docs/ (Google client secrets, WhatsApp Token.txt) are git-ignored and stay local only.</div></div>
     </div>
   </div>

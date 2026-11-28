@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../shared/widgets/mb_filterable_list.dart';
 import '../../../core/l10n/l10n.dart';
 import '../../../core/router/app_routes.dart';
 import '../../../core/theme/mb_dimens.dart';
@@ -104,10 +105,43 @@ class AlertsPage extends StatelessWidget {
                         : l10n.alertsEmpty,
                   )
                 else
-                  for (final alert in alerts) ...[
-                    _AlertTile(alert: alert),
-                    const SizedBox(height: MbSpacing.s3),
-                  ],
+                  MbFilterableList<AlertItem>(
+                    items: alerts,
+                    searchText: (a) =>
+                        '${a.productName} ${a.locationName ?? ''}',
+                    searchHint: l10n.searchProductsHint,
+                    sorts: [
+                      MbSort(
+                        l10n.sortNewest,
+                        (a, b) => b.createdAt.compareTo(a.createdAt),
+                      ),
+                      MbSort(
+                        l10n.sortOldest,
+                        (a, b) => a.createdAt.compareTo(b.createdAt),
+                      ),
+                      MbSort(
+                        l10n.sortRise,
+                        (a, b) => b.percentChange.compareTo(a.percentChange),
+                      ),
+                      MbSort(
+                        l10n.sortFall,
+                        (a, b) => a.percentChange.compareTo(b.percentChange),
+                      ),
+                    ],
+                    filters: [
+                      MbFilter(l10n.priceUp, (a) => a.percentChange > 0),
+                      MbFilter(l10n.priceDown, (a) => a.percentChange < 0),
+                    ],
+                    builder: (_, visible) => Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        for (final alert in visible) ...[
+                          _AlertTile(alert: alert),
+                          const SizedBox(height: MbSpacing.s3),
+                        ],
+                      ],
+                    ),
+                  ),
                 // Keeps the last card clear of the "Create alert" button.
                 const SizedBox(height: 72),
               ],
